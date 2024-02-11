@@ -42,7 +42,7 @@ aid in implementation, this project provides:
 
 ### Contracts
 
-The contract abstraction let you write type-safe contract interactions that can
+The contract abstraction lets you write type-safe contract interactions that can
 be implemented in multiple web3 libraries and even multiple persistence layers.
 The API is meant to be easy to both read and write.
 
@@ -54,7 +54,7 @@ The API is meant to be easy to both read and write.
   `ReadContract` that has a signer attached to it and can be used to submit
   transactions.
 - **[`CachedReadContract`](./src/contract/types/CachedContract.ts):** An
-  extended `ReadContract` that will cache reads and even queries based on
+  extended `ReadContract` that will cache reads and event queries based on
   arguments with a few additional methods for interacting with the cache.
 - **[`CachedReadWriteContract`](./src/contract/types/CachedContract.ts):** An
   extended `CachedReadContract` that has a signer attached to it and can be used
