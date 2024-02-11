@@ -6,6 +6,7 @@
     "build:packages": "turbo run build --filter=./packages/*",
     "dev": "turbo dev",
     "lint": "turbo lint",
+    "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
