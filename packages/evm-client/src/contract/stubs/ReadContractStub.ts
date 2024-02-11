@@ -1,5 +1,5 @@
-import { Abi } from "abitype";
-import { SinonStub, stub } from "sinon";
+import { Abi } from 'abitype';
+import { SinonStub, stub } from 'sinon';
 import {
   ContractDecodeFunctionDataArgs,
   ContractEncodeFunctionDataArgs,
@@ -10,14 +10,14 @@ import {
   ContractWriteArgs,
   ContractWriteOptions,
   ReadContract,
-} from "src/contract/types/Contract";
-import { Event, EventName } from "src/contract/types/Event";
+} from 'src/contract/types/Contract';
+import { Event, EventName } from 'src/contract/types/Event';
 import {
   DecodedFunctionData,
   FunctionArgs,
   FunctionName,
   FunctionReturn,
-} from "src/contract/types/Function";
+} from 'src/contract/types/Function';
 
 /**
  * A mock implementation of a `ReadContract` designed to facilitate unit
@@ -36,7 +36,7 @@ export class ReadContractStub<TAbi extends Abi = Abi>
   implements ReadContract<TAbi>
 {
   abi;
-  address = "0x0000000000000000000000000000000000000000" as const;
+  address = '0x0000000000000000000000000000000000000000' as const;
 
   // Maps to store stubs for different contract methods based on their name.
   protected readStubMap = new Map<
@@ -48,8 +48,8 @@ export class ReadContractStub<TAbi extends Abi = Abi>
     EventsStub<TAbi, EventName<TAbi>>
   >();
   protected simulateWriteStubMap = new Map<
-    FunctionName<TAbi, "nonpayable" | "payable">,
-    SimulateWriteStub<TAbi, FunctionName<TAbi, "nonpayable" | "payable">>
+    FunctionName<TAbi, 'nonpayable' | 'payable'>,
+    SimulateWriteStub<TAbi, FunctionName<TAbi, 'nonpayable' | 'payable'>>
   >();
 
   constructor(abi: TAbi = [] as any) {
@@ -77,7 +77,7 @@ export class ReadContractStub<TAbi extends Abi = Abi>
    * is not previously stubbed using `stubWrite`, an error will be thrown.
    */
   async simulateWrite<
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+    TFunctionName extends FunctionName<TAbi, 'nonpayable' | 'payable'>,
   >(
     ...[functionName, args, options]: ContractWriteArgs<TAbi, TFunctionName>
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
@@ -145,7 +145,7 @@ export class ReadContractStub<TAbi extends Abi = Abi>
    * arguments/options.*
    */
   stubSimulateWrite<
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+    TFunctionName extends FunctionName<TAbi, 'nonpayable' | 'payable'>,
   >(
     functionName: TFunctionName,
     value: FunctionReturn<TAbi, TFunctionName>,
@@ -194,7 +194,7 @@ export class ReadContractStub<TAbi extends Abi = Abi>
    * Useful for assertions in testing, such as checking call counts.
    */
   getSimulateWriteStub<
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+    TFunctionName extends FunctionName<TAbi, 'nonpayable' | 'payable'>,
   >(
     functionName: TFunctionName,
   ): SimulateWriteStub<TAbi, TFunctionName> | undefined {
@@ -221,7 +221,7 @@ export class ReadContractStub<TAbi extends Abi = Abi>
   >(
     ...args: ContractDecodeFunctionDataArgs
   ): DecodedFunctionData<TAbi, TFunctionName> {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 
   // TODO:
@@ -230,7 +230,7 @@ export class ReadContractStub<TAbi extends Abi = Abi>
   >(
     ...args: ContractEncodeFunctionDataArgs<TAbi, TFunctionName>
   ): `0x${string}` {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 }
 
@@ -262,7 +262,7 @@ type EventsStub<
  */
 type SimulateWriteStub<
   TAbi extends Abi,
-  TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  TFunctionName extends FunctionName<TAbi, 'nonpayable' | 'payable'>,
 > = SinonStub<
   [
     args?: FunctionArgs<TAbi, TFunctionName> | undefined,

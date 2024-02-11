@@ -6,8 +6,8 @@ import {
   AbiParametersToPrimitiveTypes,
   AbiParameterToPrimitiveType,
   AbiStateMutability,
-} from "abitype";
-import { EmptyObject, Prettify } from "src/base/types";
+} from 'abitype';
+import { EmptyObject, Prettify } from 'src/base/types';
 
 // https://docs.soliditylang.org/en/latest/abi-spec.html#json
 
@@ -23,7 +23,7 @@ export type NamedAbiParameter = AbiParameter & { name: string };
 export type AbiEntryName<
   TAbi extends Abi,
   TItemType extends AbiItemType = AbiItemType,
-> = Extract<TAbi[number], { type: TItemType; name?: string }>["name"];
+> = Extract<TAbi[number], { type: TItemType; name?: string }>['name'];
 
 /**
  * Get the ABI entry for a specific type, name, and state mutability.
@@ -161,8 +161,8 @@ type NamedParametersToObject<
     // For every parameter name, excluding empty names, add a key to the object
     // for the parameter name
     [TName in Exclude<
-      TParameters[number]["name"],
-      ""
+      TParameters[number]['name'],
+      ''
     >]: AbiParameterToPrimitiveType<
       Extract<TParameters[number], { name: TName }>,
       TParameterKind
@@ -174,7 +174,7 @@ type NamedParametersToObject<
         // For every key on the parameters type, if it's value is a parameter
         // and the parameter's name is empty (""), then add a key for the index
         [K in keyof TParameters as TParameters[K] extends NamedAbiParameter
-          ? TParameters[K]["name"] extends ""
+          ? TParameters[K]['name'] extends ''
             ? // Exclude `number` to ensure only the specific index keys are
               // included and not `number` itself
               Exclude<K, number>
@@ -186,12 +186,12 @@ type NamedParametersToObject<
     : // If the parameters are not in a Tuple, then we can't use the index as a
       // key, so we have to use `number` as the key for any parameters that have
       // empty names ("") in arrays
-      Extract<TParameters[number], { name: "" }> extends never
+      Extract<TParameters[number], { name: '' }> extends never
       ? unknown // <- No parameters with empty names
       : {
           [index: number]: AbiParameterToPrimitiveType<
-            Extract<TParameters[number], { name: "" }>,
-            "inputs"
+            Extract<TParameters[number], { name: '' }>,
+            'inputs'
           >;
         })
 >;

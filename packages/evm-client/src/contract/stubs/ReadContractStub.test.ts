@@ -1,55 +1,55 @@
-import { IERC20 } from "src/base/testing/IERC20";
-import { ALICE, BOB, NANCY } from "src/base/testing/accounts";
-import { ReadContractStub } from "src/contract/stubs/ReadContractStub";
-import { Event } from "src/contract/types/Event";
-import { expect, test } from "vitest";
+import { IERC20 } from 'src/base/testing/IERC20';
+import { ALICE, BOB, NANCY } from 'src/base/testing/accounts';
+import { ReadContractStub } from 'src/contract/stubs/ReadContractStub';
+import { Event } from 'src/contract/types/Event';
+import { expect, test } from 'vitest';
 
 const ERC20ABI = IERC20.abi;
 
-test("It stubs the read function", async () => {
+test('It stubs the read function', async () => {
   const contract = new ReadContractStub(IERC20.abi);
 
-  expect(contract.read("balanceOf", NANCY)).rejects.toThrowError();
+  expect(contract.read('balanceOf', NANCY)).rejects.toThrowError();
 
   // Stub bob and alice's balances first
   const bobValue = 10n;
   contract.stubRead({
-    functionName: "balanceOf",
+    functionName: 'balanceOf',
     args: BOB,
     value: bobValue,
   });
 
   const aliceValue = 20n;
   contract.stubRead({
-    functionName: "balanceOf",
+    functionName: 'balanceOf',
     args: ALICE,
     value: aliceValue,
   });
 
   // Now try and read them based on their args
-  const bobResult = await contract.read("balanceOf", BOB);
-  const aliceResult = await contract.read("balanceOf", ALICE);
+  const bobResult = await contract.read('balanceOf', BOB);
+  const aliceResult = await contract.read('balanceOf', ALICE);
   expect(bobResult).toBe(bobValue);
   expect(aliceResult).toBe(aliceValue);
 
   // Now stub w/out any args and see if we get the default value back
   const defaultValue = 30n;
   contract.stubRead({
-    functionName: "balanceOf",
+    functionName: 'balanceOf',
     value: defaultValue,
   });
-  const defaultResult = await contract.read("balanceOf", NANCY);
+  const defaultResult = await contract.read('balanceOf', NANCY);
   expect(defaultResult).toBe(defaultValue);
 
-  const stub = contract.getReadStub("balanceOf");
+  const stub = contract.getReadStub('balanceOf');
   expect(stub?.callCount).toBe(3);
 });
 
-test("It stubs the simulateWrite function", async () => {
+test('It stubs the simulateWrite function', async () => {
   const contract = new ReadContractStub(ERC20ABI);
 
   expect(
-    contract.simulateWrite("transferFrom", {
+    contract.simulateWrite('transferFrom', {
       _from: ALICE,
       _to: BOB,
       _value: 100n,
@@ -57,9 +57,9 @@ test("It stubs the simulateWrite function", async () => {
   ).rejects.toThrowError();
 
   const stubbedResult = true;
-  contract.stubSimulateWrite("transferFrom", stubbedResult);
+  contract.stubSimulateWrite('transferFrom', stubbedResult);
 
-  const result = await contract.simulateWrite("transferFrom", {
+  const result = await contract.simulateWrite('transferFrom', {
     _from: ALICE,
     _to: BOB,
     _value: 100n,
@@ -67,33 +67,33 @@ test("It stubs the simulateWrite function", async () => {
 
   expect(result).toStrictEqual(stubbedResult);
 
-  const stub = contract.getSimulateWriteStub("transferFrom");
+  const stub = contract.getSimulateWriteStub('transferFrom');
   expect(stub?.callCount).toBe(1);
 });
 
-test("It stubs the getEvents function", async () => {
+test('It stubs the getEvents function', async () => {
   const contract = new ReadContractStub(ERC20ABI);
 
-  expect(contract.getEvents("Transfer")).rejects.toThrowError();
+  expect(contract.getEvents('Transfer')).rejects.toThrowError();
 
-  const stubbedEvents: Event<typeof ERC20ABI, "Transfer">[] = [
+  const stubbedEvents: Event<typeof ERC20ABI, 'Transfer'>[] = [
     {
-      eventName: "Transfer",
+      eventName: 'Transfer',
       args: {
         to: ALICE,
         from: BOB,
         value: 100n,
       },
       blockNumber: 1n,
-      data: "0x123abc",
-      transactionHash: "0x123abc",
+      data: '0x123abc',
+      transactionHash: '0x123abc',
     },
   ];
-  contract.stubEvents("Transfer", stubbedEvents);
+  contract.stubEvents('Transfer', stubbedEvents);
 
-  const events = await contract.getEvents("Transfer");
+  const events = await contract.getEvents('Transfer');
   expect(events).toBe(stubbedEvents);
 
-  const stub = contract.getEventsStub("Transfer");
+  const stub = contract.getEventsStub('Transfer');
   expect(stub?.callCount).toBe(1);
 });

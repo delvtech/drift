@@ -1,10 +1,10 @@
-import { Abi, AbiItemType, AbiParameter, AbiParameterKind } from "abitype";
+import { Abi, AbiItemType, AbiParameter, AbiParameterKind } from 'abitype';
 import {
   AbiArrayType,
   AbiEntryName,
   AbiFriendlyType,
-} from "src/contract/types/AbiEntry";
-import { getAbiEntry } from "src/contract/utils/getAbiEntry";
+} from 'src/contract/types/AbiEntry';
+import { getAbiEntry } from 'src/contract/utils/getAbiEntry';
 
 /**
  * Converts an {@linkcode AbiFriendlyType} into an array of input or output
@@ -82,7 +82,7 @@ export function friendlyToArray<
   }
 
   const valueObject: Record<string, unknown> =
-    !!value && typeof value === "object" ? value : {};
+    !!value && typeof value === 'object' ? value : {};
 
   const array: unknown[] = [];
   parameters.forEach(({ name }, i) => {

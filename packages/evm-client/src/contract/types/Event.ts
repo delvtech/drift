@@ -1,16 +1,16 @@
-import { Abi } from "abitype";
-import { EmptyObject } from "src/base/types";
+import { Abi } from 'abitype';
+import { EmptyObject } from 'src/base/types';
 import {
   AbiEntry,
   AbiFriendlyType,
   AbiParametersToObject,
   NamedAbiParameter,
-} from "src/contract/types/AbiEntry";
+} from 'src/contract/types/AbiEntry';
 
 /**
  * Get a union of event names from an abi
  */
-export type EventName<TAbi extends Abi> = AbiEntry<TAbi, "event">["name"];
+export type EventName<TAbi extends Abi> = AbiEntry<TAbi, 'event'>['name'];
 
 /**
  * Get a union of named input parameters for an event from an abi
@@ -19,7 +19,7 @@ type NamedEventInput<
   TAbi extends Abi,
   TEventName extends EventName<TAbi>,
 > = Extract<
-  AbiEntry<TAbi, "event", TEventName>["inputs"][number],
+  AbiEntry<TAbi, 'event', TEventName>['inputs'][number],
   NamedAbiParameter
 >;
 
@@ -34,7 +34,7 @@ type NamedEventInput<
 export type EventArgs<
   TAbi extends Abi,
   TEventName extends EventName<TAbi>,
-> = AbiFriendlyType<TAbi, "event", TEventName, "inputs">;
+> = AbiFriendlyType<TAbi, 'event', TEventName, 'inputs'>;
 
 /**
  * Get a union of indexed input objects for an event from an abi
@@ -51,12 +51,12 @@ type IndexedEventInput<
 export type EventFilter<TAbi extends Abi, TEventName extends EventName<TAbi>> =
   AbiParametersToObject<
     IndexedEventInput<TAbi, TEventName>[],
-    "inputs"
+    'inputs'
   > extends infer TParamObject
     ? TParamObject extends EmptyObject
       ? undefined
       : Partial<
-          AbiParametersToObject<IndexedEventInput<TAbi, TEventName>[], "inputs">
+          AbiParametersToObject<IndexedEventInput<TAbi, TEventName>[], 'inputs'>
         >
     : never;
 

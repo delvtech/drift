@@ -15,7 +15,7 @@ type CachedErc20Contract = CachedReadWriteContract<typeof erc20Abi>;
 async function approve(
   contract: CachedErc20Contract,
   spender: `0x${string}`,
-  amount: bigint
+  amount: bigint,
 ) {
   const hash = await contract.write('approve', { spender, amount });
 
