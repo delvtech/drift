@@ -1,10 +1,10 @@
-import { Abi } from "abitype";
+import { Abi } from 'abitype';
 import {
   CreateCachedReadContractOptions,
   createCachedReadContract,
-} from "src/contract/factories/createCachedReadContract";
-import { CachedReadWriteContract } from "src/contract/types/CachedContract";
-import { ReadWriteContract } from "src/contract/types/Contract";
+} from 'src/contract/factories/createCachedReadContract';
+import { CachedReadWriteContract } from 'src/contract/types/CachedContract';
+import { ReadWriteContract } from 'src/contract/types/Contract';
 
 export interface CreateCachedReadWriteContractOptions<TAbi extends Abi = Abi>
   extends CreateCachedReadContractOptions<TAbi> {
@@ -35,5 +35,5 @@ export function createCachedReadWriteContract<TAbi extends Abi = Abi>({
 function isCached(
   contract: ReadWriteContract | CachedReadWriteContract,
 ): contract is CachedReadWriteContract {
-  return "clearCache" in contract;
+  return 'clearCache' in contract;
 }

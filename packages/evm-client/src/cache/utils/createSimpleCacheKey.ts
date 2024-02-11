@@ -31,7 +31,7 @@ export function createSimpleCacheKey(rawKey: DefinedValue): SimpleCacheKey {
           // undefined or null values in arrays are left as is
           value === undefined || value === null
             ? value
-            : createSimpleCacheKey(value)
+            : createSimpleCacheKey(value),
         );
       }
 

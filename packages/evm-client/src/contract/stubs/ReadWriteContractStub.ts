@@ -1,13 +1,13 @@
-import { Abi } from "abitype";
-import { SinonStub, stub } from "sinon";
-import { BOB } from "src/base/testing/accounts";
-import { ReadContractStub } from "src/contract/stubs/ReadContractStub";
+import { Abi } from 'abitype';
+import { SinonStub, stub } from 'sinon';
+import { BOB } from 'src/base/testing/accounts';
+import { ReadContractStub } from 'src/contract/stubs/ReadContractStub';
 import {
   ContractWriteArgs,
   ContractWriteOptions,
   ReadWriteContract,
-} from "src/contract/types/Contract";
-import { FunctionArgs, FunctionName } from "src/contract/types/Function";
+} from 'src/contract/types/Contract';
+import { FunctionArgs, FunctionName } from 'src/contract/types/Function';
 
 /**
  * A mock implementation of a writable Ethereum contract designed for unit
@@ -30,8 +30,8 @@ export class ReadWriteContractStub<TAbi extends Abi = Abi>
   implements ReadWriteContract<TAbi>
 {
   protected writeStubMap = new Map<
-    FunctionName<TAbi, "nonpayable" | "payable">,
-    WriteStub<TAbi, FunctionName<TAbi, "nonpayable" | "payable">>
+    FunctionName<TAbi, 'nonpayable' | 'payable'>,
+    WriteStub<TAbi, FunctionName<TAbi, 'nonpayable' | 'payable'>>
   >();
 
   getSignerAddress = stub().resolves(BOB);
@@ -42,7 +42,7 @@ export class ReadWriteContractStub<TAbi extends Abi = Abi>
    * will be thrown.
    */
   async write<
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+    TFunctionName extends FunctionName<TAbi, 'nonpayable' | 'payable'>,
   >(
     ...[functionName, args, options]: ContractWriteArgs<TAbi, TFunctionName>
   ): Promise<`0x${string}`> {
@@ -63,7 +63,7 @@ export class ReadWriteContractStub<TAbi extends Abi = Abi>
    * *Note: The stub doesn't account for dynamic values based on provided
    * arguments/options.*
    */
-  stubWrite<TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">>(
+  stubWrite<TFunctionName extends FunctionName<TAbi, 'nonpayable' | 'payable'>>(
     functionName: TFunctionName,
     value: `0x${string}`,
   ): void {
@@ -80,7 +80,7 @@ export class ReadWriteContractStub<TAbi extends Abi = Abi>
    * Useful for assertions in testing, such as checking call counts.
    */
   getWriteStub<
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+    TFunctionName extends FunctionName<TAbi, 'nonpayable' | 'payable'>,
   >(functionName: TFunctionName): WriteStub<TAbi, TFunctionName> | undefined {
     return this.writeStubMap.get(functionName) as WriteStub<
       TAbi,
@@ -95,7 +95,7 @@ export class ReadWriteContractStub<TAbi extends Abi = Abi>
  */
 type WriteStub<
   TAbi extends Abi,
-  TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  TFunctionName extends FunctionName<TAbi, 'nonpayable' | 'payable'>,
 > = SinonStub<
   [args?: FunctionArgs<TAbi, TFunctionName>, options?: ContractWriteOptions],
   `0x${string}`

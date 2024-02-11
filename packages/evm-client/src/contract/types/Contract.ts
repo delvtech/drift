@@ -1,12 +1,12 @@
-import { Abi } from "abitype";
-import { Event, EventFilter, EventName } from "src/contract/types/Event";
+import { Abi } from 'abitype';
+import { Event, EventFilter, EventName } from 'src/contract/types/Event';
 import {
   DecodedFunctionData,
   FunctionArgs,
   FunctionName,
   FunctionReturn,
-} from "src/contract/types/Function";
-import { BlockTag } from "src/network/types/Block";
+} from 'src/contract/types/Function';
+import { BlockTag } from 'src/network/types/Block';
 
 // https://ethereum.github.io/execution-apis/api-documentation/
 
@@ -21,7 +21,7 @@ export interface ReadContract<TAbi extends Abi = Abi> {
   /**
    * Reads a specified function from the contract.
    */
-  read<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
+  read<TFunctionName extends FunctionName<TAbi, 'pure' | 'view'>>(
     ...args: ContractReadArgs<TAbi, TFunctionName>
   ): Promise<FunctionReturn<TAbi, TFunctionName>>;
 
@@ -29,7 +29,7 @@ export interface ReadContract<TAbi extends Abi = Abi> {
    * Simulates a write operation on a specified function of the contract.
    */
   simulateWrite<
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+    TFunctionName extends FunctionName<TAbi, 'nonpayable' | 'payable'>,
   >(
     ...args: ContractWriteArgs<TAbi, TFunctionName>
   ): Promise<FunctionReturn<TAbi, TFunctionName>>;
@@ -74,7 +74,7 @@ export interface ReadWriteContract<TAbi extends Abi = Abi>
    * Writes to a specified function on the contract.
    * @returns The transaction hash of the submitted transaction.
    */
-  write<TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">>(
+  write<TFunctionName extends FunctionName<TAbi, 'nonpayable' | 'payable'>>(
     ...args: ContractWriteArgs<TAbi, TFunctionName>
   ): Promise<`0x${string}`>;
 }
@@ -166,7 +166,7 @@ export interface ContractWriteOptions {
 
 export type ContractWriteArgs<
   TAbi extends Abi,
-  TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  TFunctionName extends FunctionName<TAbi, 'nonpayable' | 'payable'>,
 > =
   FunctionArgs<TAbi, TFunctionName> extends undefined
     ? [

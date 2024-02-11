@@ -1,9 +1,9 @@
-import { Abi } from "abitype";
-import { createLruSimpleCache } from "src/cache/factories/createLruSimpleCache";
-import { SimpleCache, SimpleCacheKey } from "src/cache/types/SimpleCache";
-import { createSimpleCacheKey } from "src/cache/utils/createSimpleCacheKey";
-import { CachedReadContract } from "src/contract/types/CachedContract";
-import { ReadContract } from "src/contract/types/Contract";
+import { Abi } from 'abitype';
+import { createLruSimpleCache } from 'src/cache/factories/createLruSimpleCache';
+import { SimpleCache, SimpleCacheKey } from 'src/cache/types/SimpleCache';
+import { createSimpleCacheKey } from 'src/cache/utils/createSimpleCacheKey';
+import { CachedReadContract } from 'src/contract/types/CachedContract';
+import { ReadContract } from 'src/contract/types/Contract';
 
 // TODO: Figure out a good default cache size
 const DEFAULT_CACHE_SIZE = 100;
@@ -45,7 +45,7 @@ export function createCachedReadContract<TAbi extends Abi = Abi>({
         cache,
         key: createSimpleCacheKey([
           namespace,
-          "read",
+          'read',
           {
             address: contract.address,
             functionName,
@@ -72,7 +72,7 @@ export function createCachedReadContract<TAbi extends Abi = Abi>({
     deleteRead(functionName, args, options) {
       const key = createSimpleCacheKey([
         namespace,
-        "read",
+        'read',
         {
           address: contract.address,
           functionName,
@@ -93,7 +93,7 @@ export function createCachedReadContract<TAbi extends Abi = Abi>({
         cache,
         key: createSimpleCacheKey([
           namespace,
-          "getEvents",
+          'getEvents',
           {
             address: contract.address,
             eventName,
