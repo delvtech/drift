@@ -6,8 +6,8 @@ import {
   ReadWriteContract,
   arrayToFriendly,
   friendlyToArray,
-} from "@delvtech/evm-client";
-import { createSimulateContractParameters } from "src/contract/utils/createSimulateContractParameters";
+} from '@delvtech/evm-client';
+import { createSimulateContractParameters } from 'src/contract/utils/createSimulateContractParameters';
 import {
   Abi,
   Address,
@@ -15,8 +15,8 @@ import {
   WalletClient,
   decodeFunctionData,
   encodeFunctionData,
-} from "viem";
-import { createReadWriteContract } from "./createReadWriteContract";
+} from 'viem';
+import { createReadWriteContract } from './createReadWriteContract';
 
 export interface CreateReadContractOptions<TAbi extends Abi = Abi> {
   abi: TAbi;
@@ -58,9 +58,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
     async read(functionName, args, options) {
       const argsArray = friendlyToArray({
         abi,
-        type: "function",
+        type: 'function',
         name: functionName,
-        kind: "inputs",
+        kind: 'inputs',
         value: args,
       });
 
@@ -76,9 +76,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
 
       return arrayToFriendly({
         abi: abi as Abi,
-        type: "function",
+        type: 'function',
         name: functionName,
-        kind: "outputs",
+        kind: 'outputs',
         values: arrayOutput,
       });
     },
@@ -86,9 +86,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
     async simulateWrite(functionName, args, options) {
       const argsArray = friendlyToArray({
         abi,
-        type: "function",
+        type: 'function',
         name: functionName,
-        kind: "inputs",
+        kind: 'inputs',
         value: args,
       });
 
@@ -104,9 +104,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
 
       return arrayToFriendly({
         abi: abi as Abi,
-        type: "function",
+        type: 'function',
         name: functionName,
-        kind: "outputs",
+        kind: 'outputs',
         values: arrayOutput,
       });
     },
@@ -117,8 +117,8 @@ export function createReadContract<TAbi extends Abi = Abi>({
         abi: abi as Abi,
         eventName: eventName as string,
         args: options?.filter,
-        fromBlock: options?.fromBlock ?? "earliest",
-        toBlock: options?.toBlock ?? "latest",
+        fromBlock: options?.fromBlock ?? 'earliest',
+        toBlock: options?.toBlock ?? 'latest',
       });
 
       const events = await publicClient.getFilterLogs({ filter });
@@ -127,9 +127,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
         const friendlyArgs = Array.isArray(args)
           ? arrayToFriendly({
               abi: abi as Abi,
-              type: "event",
+              type: 'event',
               name: eventName,
-              kind: "inputs",
+              kind: 'inputs',
               values: args as readonly unknown[],
             })
           : args;
@@ -147,9 +147,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
     encodeFunctionData(functionName, args) {
       const arrayArgs = friendlyToArray({
         abi: abi,
-        type: "function",
+        type: 'function',
         name: functionName,
-        kind: "inputs",
+        kind: 'inputs',
         value: args,
       });
 
@@ -174,9 +174,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
         args: arrayToFriendly({
           // Cast to allow any array type for values
           abi: abi as Abi,
-          type: "function",
+          type: 'function',
           name: functionName,
-          kind: "inputs",
+          kind: 'inputs',
           values: arrayArgs,
         }),
         functionName,

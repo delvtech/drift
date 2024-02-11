@@ -15,7 +15,7 @@ export type { CreateCachedReadContractOptions } from 'src/contract/createCachedR
 export type { CreateCachedReadWriteContractOptions } from 'src/contract/createCachedReadWriteContract';
 export type {
   CreateReadContractOptions,
-  ViemReadContract,
+  EthersReadContract,
 } from 'src/contract/createReadContract';
 export type { ReadWriteContractOptions } from 'src/contract/createReadWriteContract';
 

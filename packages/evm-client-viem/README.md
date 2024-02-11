@@ -3,7 +3,7 @@
 Viem bindings for [@delvtech/evm-client](https://github.com/delvtech/evm-client/tree/main/packages/evm-client)
 
 ```ts
-import { createCachedReadContract } from '@council/evm-client-viem';
+import { createCachedReadContract } from '@delvtech/evm-client-viem';
 import { PublicClient } from 'viem';
 import erc20Abi from './abis/erc20Abi.json';
 
