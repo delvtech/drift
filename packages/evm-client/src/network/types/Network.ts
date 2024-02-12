@@ -21,26 +21,23 @@ export interface Network {
   ): Promise<Transaction | undefined>;
 }
 
-export type NetworkGetBlockArgs = [
-  options?:
-    | {
-        blockHash?: `0x${string}`;
-        blockNumber?: never;
-        blockTag?: never;
-      }
-    | {
-        blockHash?: never;
-        blockNumber?: bigint;
-        blockTag?: never;
-      }
-    | {
-        blockHash?: never;
-        blockNumber?: never;
-        /**
-         * @default 'latest'
-         */
-        blockTag?: BlockTag;
-      },
-];
+export type NetworkGetBlockOptions =
+  | {
+      blockHash?: `0x${string}`;
+      blockNumber?: never;
+      blockTag?: never;
+    }
+  | {
+      blockHash?: never;
+      blockNumber?: bigint;
+      blockTag?: never;
+    }
+  | {
+      blockHash?: never;
+      blockNumber?: never;
+      blockTag?: BlockTag;
+    };
+
+export type NetworkGetBlockArgs = [options?: NetworkGetBlockOptions];
 
 export type NetworkGetTransactionArgs = [hash: `0x${string}`];
