@@ -2,13 +2,14 @@
   "name": "evm-client",
   "private": true,
   "scripts": {
-    "build": "turbo build",
     "build:packages": "turbo build --filter=./packages/*",
+    "build": "turbo build",
     "dev": "turbo dev",
-    "typecheck": "turbo typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "lint": "turbo lint",
+    "release": "turbo build && changeset publish",
     "test": "turbo test",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "typecheck": "turbo typecheck"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
