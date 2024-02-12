@@ -17,6 +17,7 @@ import { BlockTag } from 'src/network/types/Block';
 export interface ReadContract<TAbi extends Abi = Abi> {
   abi: TAbi;
   address: `0x${string}`;
+  name: string;
 
   /**
    * Reads a specified function from the contract.
