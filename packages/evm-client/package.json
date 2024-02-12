@@ -32,11 +32,11 @@
   },
   "scripts": {
     "build": "tsup",
-    "watch": "tsup --watch",
-    "test": "vitest run",
+    "lint": "eslint .",
     "test:watch": "vitest",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "watch": "tsup --watch"
   },
   "dependencies": {
     "lru-cache": "^10.0.1"
