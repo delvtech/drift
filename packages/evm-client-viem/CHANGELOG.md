@@ -1,5 +1,11 @@
 # @delvtech/evm-client-viem
 
+## 0.0.2
+
+### Patch Changes
+
+- c2da7c3: Bump evm-client version
+
 ## 0.0.1
 
 ### Patch Changes
