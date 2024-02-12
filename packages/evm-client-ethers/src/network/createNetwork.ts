@@ -1,5 +1,5 @@
-import { Network } from "@delvtech/evm-client";
-import { Provider } from "ethers";
+import { Network } from '@delvtech/evm-client';
+import { Provider } from 'ethers';
 
 export function createNetwork(provider: Provider): Network {
   return {
@@ -7,7 +7,7 @@ export function createNetwork(provider: Provider): Network {
       const { blockHash, blockNumber, blockTag } = options;
 
       const block = await provider.getBlock(
-        blockHash || blockNumber || blockTag || "latest",
+        blockHash || blockNumber || blockTag || 'latest',
       );
 
       if (!block) {
@@ -52,7 +52,7 @@ export function createNetwork(provider: Provider): Network {
         gasPrice: BigInt(gasPrice),
         input: data as `0x${string}`,
         nonce,
-        to: typeof to === "string" ? (to as `0x${string}`) : to,
+        to: typeof to === 'string' ? (to as `0x${string}`) : to,
         value: BigInt(value),
         type: type.toString(16) as `0x${number}`,
         chainId: Number(chainId),

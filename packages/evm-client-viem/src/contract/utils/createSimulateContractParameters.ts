@@ -1,4 +1,4 @@
-import { ContractWriteOptions } from "@delvtech/evm-client";
+import { ContractWriteOptions } from '@delvtech/evm-client';
 
 /**
  * Get parameters for `simulateContract` from `ContractWriteOptions`
@@ -31,7 +31,7 @@ export function createSimulateContractParameters(
 }
 
 type SimulateContractParameters = {
-  accessList?: ContractWriteOptions["accessList"];
+  accessList?: ContractWriteOptions['accessList'];
   account?: `0x${string}`;
   gas?: bigint;
   nonce?: number;
