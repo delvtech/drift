@@ -5,12 +5,12 @@ export default defineConfig({
   // easier for wrapper packages to selectively re-export `*` from some entry
   // points and while augmenting or modifying others.
   entry: [
+    'src/exports/cache.ts',
+    'src/exports/contract.ts',
     'src/exports/errors.ts',
-    'src/exports/factories.ts',
     'src/exports/index.ts',
+    'src/exports/network.ts',
     'src/exports/stubs.ts',
-    'src/exports/types.ts',
-    'src/exports/utils.ts',
   ],
   format: ['esm'],
   sourcemap: true,

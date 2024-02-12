@@ -1,9 +1,14 @@
-// Cache
-export type { SimpleCache, SimpleCacheKey } from 'src/cache/types/SimpleCache';
+// Factories
+export {
+  createCachedReadContract,
+  type CreateCachedReadContractOptions,
+} from 'src/contract/factories/createCachedReadContract';
+export {
+  createCachedReadWriteContract,
+  type CreateCachedReadWriteContractOptions,
+} from 'src/contract/factories/createCachedReadWriteContract';
 
-// Contract
-export type { CreateCachedReadContractOptions } from 'src/contract/factories/createCachedReadContract';
-export type { CreateCachedReadWriteContractOptions } from 'src/contract/factories/createCachedReadWriteContract';
+// Types
 export type {
   AbiArrayType,
   AbiEntry,
@@ -39,16 +44,7 @@ export type {
   FunctionReturn,
 } from 'src/contract/types/Function';
 
-// Network
-export type { Block, BlockTag } from 'src/network/types/Block';
-export type {
-  Network,
-  NetworkGetBlockArgs,
-  NetworkGetBlockOptions,
-  NetworkGetTransactionArgs,
-} from 'src/network/types/Network';
-export type {
-  MinedTransaction,
-  Transaction,
-  TransactionInfo,
-} from 'src/network/types/Transaction';
+// Utils
+export { arrayToFriendly } from 'src/contract/utils/arrayToFriendly';
+export { friendlyToArray } from 'src/contract/utils/friendlyToArray';
+export { getAbiEntry } from 'src/contract/utils/getAbiEntry';

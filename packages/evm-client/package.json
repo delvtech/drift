@@ -8,25 +8,25 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./cache": {
+      "types": "./dist/cache.d.ts",
+      "default": "./dist/cache.js"
+    },
+    "./contract": {
+      "types": "./dist/contract.d.ts",
+      "default": "./dist/contract.js"
+    },
     "./errors": {
       "types": "./dist/errors.d.ts",
       "default": "./dist/errors.js"
     },
-    "./factories": {
-      "types": "./dist/factories.d.ts",
-      "default": "./dist/factories.js"
+    "./network": {
+      "types": "./dist/network.d.ts",
+      "default": "./dist/network.js"
     },
     "./stubs": {
       "types": "./dist/stubs.d.ts",
       "default": "./dist/stubs.js"
-    },
-    "./types": {
-      "types": "./dist/types.d.ts",
-      "default": "./dist/types.js"
-    },
-    "./utils": {
-      "types": "./dist/utils.d.ts",
-      "default": "./dist/utils.js"
     },
     "./package.json": "./package.json"
   },

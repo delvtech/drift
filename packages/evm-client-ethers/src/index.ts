@@ -1,25 +1,59 @@
-// Errors
-export * from '@delvtech/evm-client/errors';
-
 // Contract
-export { createCachedReadContract } from 'src/contract/createCachedReadContract';
-export { createCachedReadWriteContract } from 'src/contract/createCachedReadWriteContract';
-export { createReadContract } from 'src/contract/createReadContract';
-export { createReadWriteContract } from 'src/contract/createReadWriteContract';
+export {
+  createCachedReadContract,
+  type CreateCachedReadContractOptions,
+} from 'src/contract/createCachedReadContract';
+export {
+  createCachedReadWriteContract,
+  type CreateCachedReadWriteContractOptions,
+} from 'src/contract/createCachedReadWriteContract';
+export {
+  createReadContract,
+  type CreateReadContractOptions,
+  type EthersReadContract,
+} from 'src/contract/createReadContract';
+export {
+  createReadWriteContract,
+  type ReadWriteContractOptions,
+} from 'src/contract/createReadWriteContract';
 
 // Network
 export { createNetwork } from 'src/network/createNetwork';
 
-// Types
-export type { CreateCachedReadContractOptions } from 'src/contract/createCachedReadContract';
-export type { CreateCachedReadWriteContractOptions } from 'src/contract/createCachedReadWriteContract';
-export type {
-  CreateReadContractOptions,
-  EthersReadContract,
-} from 'src/contract/createReadContract';
-export type { ReadWriteContractOptions } from 'src/contract/createReadWriteContract';
-
 // Re-exports
-export { createLruSimpleCache } from '@delvtech/evm-client/factories';
-export * from '@delvtech/evm-client/types';
-export * from '@delvtech/evm-client/utils';
+export * from '@delvtech/evm-client/cache';
+
+export {
+  arrayToFriendly,
+  friendlyToArray,
+  getAbiEntry,
+} from '@delvtech/evm-client/contract';
+export type {
+  AbiArrayType,
+  AbiEntry,
+  AbiEntryName,
+  AbiFriendlyType,
+  CachedReadContract,
+  CachedReadWriteContract,
+  ContractDecodeFunctionDataArgs,
+  ContractEncodeFunctionDataArgs,
+  ContractGetEventsArgs,
+  ContractGetEventsOptions,
+  ContractReadArgs,
+  ContractReadOptions,
+  ContractWriteArgs,
+  ContractWriteOptions,
+  DecodedFunctionData,
+  Event,
+  EventArgs,
+  EventFilter,
+  EventName,
+  FunctionArgs,
+  FunctionName,
+  FunctionReturn,
+  ReadContract,
+  ReadWriteContract,
+} from '@delvtech/evm-client/contract';
+
+export * from '@delvtech/evm-client/errors';
+export * from '@delvtech/evm-client/network';
