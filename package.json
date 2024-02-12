@@ -3,10 +3,11 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
-    "build:packages": "turbo run build --filter=./packages/*",
+    "build:packages": "turbo build --filter=./packages/*",
     "dev": "turbo dev",
+    "typecheck": "turbo typecheck",
     "lint": "turbo lint",
-    "test": "turbo run test",
+    "test": "turbo test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
