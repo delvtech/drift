@@ -23,10 +23,10 @@
     "lint": "eslint ."
   },
   "peerDependencies": {
-    "viem": ">=2"
+    "viem": "^2"
   },
   "dependencies": {
-    "@delvtech/evm-client": "*"
+    "@delvtech/evm-client": "~0.0.0"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
