@@ -78,7 +78,7 @@ export function friendlyToArray<
 
   // No parameters
   if (!parameters.length) {
-    return [value] as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
+    return [] as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
   }
 
   const valueObject: Record<string, unknown> =
