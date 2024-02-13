@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.0.5
+
+### Patch Changes
+
+- 6307e1b: Fix the last fix...
+
 ## 0.0.4
 
 ### Patch Changes
