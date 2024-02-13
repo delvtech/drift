@@ -82,7 +82,7 @@ export function friendlyToArray<
   }
 
   // Single parameters
-  if (parameters.length) {
+  if (parameters.length === 1) {
     return [value] as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
   }
 
