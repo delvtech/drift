@@ -16,6 +16,13 @@
     },
     "./package.json": "./package.json"
   },
+  "typesVersions": {
+    "*": {
+      "stubs": [
+        "./dist/stubs.d.ts"
+      ]
+    }
+  },
   "scripts": {
     "build": "tsup",
     "lint": "eslint .",
