@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.0.6
+
+### Patch Changes
+
+- a2edb5a: Fix handling of single params
+
 ## 0.0.5
 
 ### Patch Changes
