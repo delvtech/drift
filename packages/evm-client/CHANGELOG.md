@@ -1,5 +1,12 @@
 # @delvtech/evm-client
 
+## 0.0.3
+
+### Patch Changes
+
+- 76b1bc8: Fix type resolutions by adding a `typeVersions` field to the `package.json`s
+- fdcc9ef: Modify exports
+
 ## 0.0.2
 
 ### Patch Changes
