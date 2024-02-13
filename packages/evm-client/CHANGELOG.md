@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.0.4
+
+### Patch Changes
+
+- cfdf0db: Fix param prep for contract calls with single params
+
 ## 0.0.3
 
 ### Patch Changes
