@@ -1,5 +1,12 @@
 # @delvtech/evm-client-ethers
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [cfdf0db]
+  - @delvtech/evm-client@0.0.4
+
 ## 0.0.3
 
 ### Patch Changes
