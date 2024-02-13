@@ -1,5 +1,11 @@
 # @delvtech/evm-client-viem
 
+## 0.0.4
+
+### Patch Changes
+
+- 46a7309: Fix ReadWriteContract.simulateWrite method
+
 ## 0.0.3
 
 ### Patch Changes
