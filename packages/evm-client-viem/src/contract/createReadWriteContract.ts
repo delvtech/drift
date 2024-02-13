@@ -41,7 +41,7 @@ export function createReadWriteContract<TAbi extends Abi = Abi>({
     async simulateWrite(functionName, args, options) {
       const [account] = await walletClient.getAddresses();
 
-      return super.simulateWrite(functionName, args, {
+      return readContract.simulateWrite(functionName, args, {
         from: account,
         ...options,
       });
