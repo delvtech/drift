@@ -1,6 +1,6 @@
 {
   "name": "@delvtech/evm-client-viem",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
@@ -39,7 +39,7 @@
     }
   },
   "dependencies": {
-    "@delvtech/evm-client": "0.0.6"
+    "@delvtech/evm-client": "0.0.7"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
