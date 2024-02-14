@@ -52,7 +52,7 @@
   "scripts": {
     "build": "tsup",
     "lint": "eslint .",
-    "test:watch": "vitest",
+    "test:watch": "vitest --reporter=verbose",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "watch": "tsup --watch"

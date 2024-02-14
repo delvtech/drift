@@ -18,11 +18,11 @@ export const IERC20 = {
       constant: false,
       inputs: [
         {
-          name: '_spender',
+          name: 'spender',
           type: 'address',
         },
         {
-          name: '_value',
+          name: 'value',
           type: 'uint256',
         },
       ],
@@ -55,15 +55,15 @@ export const IERC20 = {
       constant: false,
       inputs: [
         {
-          name: '_from',
+          name: 'from',
           type: 'address',
         },
         {
-          name: '_to',
+          name: 'to',
           type: 'address',
         },
         {
-          name: '_value',
+          name: 'value',
           type: 'uint256',
         },
       ],
@@ -96,7 +96,7 @@ export const IERC20 = {
       constant: true,
       inputs: [
         {
-          name: '_owner',
+          name: 'owner',
           type: 'address',
         },
       ],
@@ -129,11 +129,11 @@ export const IERC20 = {
       constant: false,
       inputs: [
         {
-          name: '_to',
+          name: 'to',
           type: 'address',
         },
         {
-          name: '_value',
+          name: 'value',
           type: 'uint256',
         },
       ],
@@ -152,11 +152,11 @@ export const IERC20 = {
       constant: true,
       inputs: [
         {
-          name: '_owner',
+          name: 'owner',
           type: 'address',
         },
         {
-          name: '_spender',
+          name: 'spender',
           type: 'address',
         },
       ],
