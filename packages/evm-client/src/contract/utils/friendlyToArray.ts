@@ -91,7 +91,7 @@ export function friendlyToArray<
 
   const array: unknown[] = [];
   parameters.forEach(({ name }, i) => {
-    array.push(valueObject[name ?? i]);
+    array.push(valueObject[name || i]);
   });
 
   return array as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
