@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.0.7
+
+### Patch Changes
+
+- 9db4f0f: Fix argument handling for parameters that have empty strings as names
+
 ## 0.0.6
 
 ### Patch Changes
