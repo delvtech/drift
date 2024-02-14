@@ -81,13 +81,13 @@ export function friendlyToArray<
     return [] as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
   }
 
-  // Single parameters
+  // Single parameter
   if (parameters.length === 1) {
     return [value] as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
   }
 
   const valueObject: Record<string, unknown> =
-    !!value && typeof value === 'object' ? value : {};
+    value && typeof value === 'object' ? value : {};
 
   const array: unknown[] = [];
   parameters.forEach(({ name }, i) => {
