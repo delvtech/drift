@@ -30,7 +30,13 @@
     "watch": "tsup --watch"
   },
   "peerDependencies": {
+    "sinon": "^17.0.1",
     "viem": "^2"
+  },
+  "peerDependenciesMeta": {
+    "sinon": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@delvtech/evm-client": "0.0.6"

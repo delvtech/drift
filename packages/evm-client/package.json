@@ -52,10 +52,18 @@
   "scripts": {
     "build": "tsup",
     "lint": "eslint .",
-    "test:watch": "vitest",
+    "test:watch": "vitest --reporter=verbose",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "watch": "tsup --watch"
+  },
+  "peerDependencies": {
+    "sinon": "^17.0.1"
+  },
+  "peerDependenciesMeta": {
+    "sinon": {
+      "optional": true
+    }
   },
   "dependencies": {
     "lru-cache": "^10.0.1"
