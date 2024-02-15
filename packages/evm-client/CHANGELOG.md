@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.0.8
+
+### Patch Changes
+
+- ca77392: Added a new field to something
+
 ## 0.0.7
 
 ### Patch Changes
