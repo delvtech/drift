@@ -1,5 +1,12 @@
 # @delvtech/evm-client-viem
 
+## 0.0.9
+
+### Patch Changes
+
+- d6d1829: Fixed the return type for Viem functions that return a single tuple/array.
+  Fixed options for ethers functions
+
 ## 0.0.8
 
 ### Patch Changes
