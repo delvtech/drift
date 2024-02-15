@@ -75,9 +75,38 @@ describe('ReadContractStub', () => {
   it('stubs the getEvents function', async () => {
     const contract = new ReadContractStub(ERC20ABI);
 
+    // throws an error if you forget to stub the event your requesting
     expect(contract.getEvents('Transfer')).rejects.toThrowError();
 
-    const stubbedEvents: Event<typeof ERC20ABI, 'Transfer'>[] = [
+    // Stub out the events when calling `getEvents` without any filter args
+    const stubbedAllEvents: Event<typeof ERC20ABI, 'Transfer'>[] = [
+      {
+        eventName: 'Transfer',
+        args: {
+          to: ALICE,
+          from: BOB,
+          value: 100n,
+        },
+        blockNumber: 1n,
+        data: '0x123abc',
+        transactionHash: '0x123abc',
+      },
+      {
+        eventName: 'Transfer',
+        args: {
+          from: ALICE,
+          to: BOB,
+          value: 100n,
+        },
+        blockNumber: 1n,
+        data: '0x123abc',
+        transactionHash: '0x123abc',
+      },
+    ];
+    contract.stubEvents('Transfer', undefined, stubbedAllEvents);
+
+    // Stub out the events when calling `getEvents` *with* filter args
+    const stubbedFilteredEvents: Event<typeof ERC20ABI, 'Transfer'>[] = [
       {
         eventName: 'Transfer',
         args: {
@@ -90,12 +119,28 @@ describe('ReadContractStub', () => {
         transactionHash: '0x123abc',
       },
     ];
-    contract.stubEvents('Transfer', stubbedEvents);
+    contract.stubEvents(
+      'Transfer',
+      { filter: { from: BOB } },
+      stubbedFilteredEvents,
+    );
 
+    // getting events without any filter args should return the stub that was
+    // specified without any filter args
     const events = await contract.getEvents('Transfer');
-    expect(events).toBe(stubbedEvents);
-
+    expect(events).toBe(stubbedAllEvents);
     const stub = contract.getEventsStub('Transfer');
     expect(stub?.callCount).toBe(1);
+
+    // getting events with filter args should return the stub that was specified
+    // *with* filter args
+    const filteredEvents = await contract.getEvents('Transfer', {
+      filter: { from: BOB },
+    });
+    expect(filteredEvents).toBe(stubbedFilteredEvents);
+    const filteredStub = contract.getEventsStub('Transfer', {
+      filter: { from: BOB },
+    });
+    expect(filteredStub?.callCount).toBe(1);
   });
 });

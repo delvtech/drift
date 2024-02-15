@@ -45,7 +45,7 @@ describe('createCachedReadContract', () => {
         transactionHash: '0x123abc',
       },
     ];
-    contract.stubEvents('Transfer', stubbedEvents);
+    contract.stubEvents('Transfer', undefined, stubbedEvents);
 
     const events = await cachedContract.getEvents('Transfer');
     expect(events).toBe(stubbedEvents);

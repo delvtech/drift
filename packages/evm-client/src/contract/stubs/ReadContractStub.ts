@@ -98,7 +98,7 @@ export class ReadContractStub<TAbi extends Abi = Abi>
   async getEvents<TEventName extends EventName<TAbi>>(
     ...[eventName, options]: ContractGetEventsArgs<TAbi, TEventName>
   ): Promise<Event<TAbi, TEventName>[]> {
-    const stub = this.getEventsStub(eventName);
+    const stub = this.getEventsStub(eventName, options);
     if (!stub) {
       throw new Error(
         `Called getEvents for ${eventName} on a stubbed contract without a return value. The function must be stubbed first:\n\tcontract.stubEvents("${eventName}", value)`,
@@ -162,18 +162,17 @@ export class ReadContractStub<TAbi extends Abi = Abi>
    * Stubs the return value for a given event name when `getEvents` is called
    * with that event name. This method overrides any previously stubbed values
    * for the same event.
-   *
-   * *Note: The stub doesn't account for dynamic values based on provided
-   * arguments/options.*
    */
   stubEvents<TEventName extends EventName<TAbi>>(
     eventName: TEventName,
+    args: ContractGetEventsOptions<TAbi, TEventName> | undefined,
     value: Event<TAbi, TEventName>[],
   ): void {
-    if (this.eventsStubMap.has(eventName)) {
-      this.getEventsStub(eventName)!.resolves(value);
+    const stubKey = stringify({ eventName, args });
+    if (this.eventsStubMap.has(stubKey)) {
+      this.getEventsStub(eventName, args)!.resolves(value as any);
     } else {
-      this.eventsStubMap.set(eventName, stub().resolves(value) as any);
+      this.eventsStubMap.set(stubKey, stub().resolves(value) as any);
     }
   }
 
@@ -209,8 +208,10 @@ export class ReadContractStub<TAbi extends Abi = Abi>
    */
   getEventsStub<TEventName extends EventName<TAbi>>(
     eventName: TEventName,
+    args?: ContractGetEventsOptions<TAbi, TEventName> | undefined,
   ): EventsStub<TAbi, TEventName> | undefined {
-    return this.eventsStubMap.get(eventName) as
+    const stubKey = stringify({ eventName, args });
+    return this.eventsStubMap.get(stubKey) as
       | EventsStub<TAbi, TEventName>
       | undefined;
   }
@@ -270,3 +271,12 @@ type SimulateWriteStub<
   ],
   Promise<FunctionReturn<TAbi, TFunctionName>>
 >;
+
+function stringify(obj: Record<any, any>) {
+  // simple non-recursive stringify replacer for bigints
+  function replacer(_: any, v: any) {
+    return typeof v === 'bigint' ? v.toString() : v;
+  }
+
+  return JSON.stringify(obj, replacer);
+}
