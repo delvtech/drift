@@ -52,7 +52,7 @@ export function createReadContract<TAbi extends Abi = Abi>({
     },
 
     async read(functionName, args, options) {
-      const argsArray = friendlyToArray({
+      const argsArray: any[] = friendlyToArray({
         abi: abi as Abi,
         type: 'function',
         name: functionName,
@@ -60,9 +60,15 @@ export function createReadContract<TAbi extends Abi = Abi>({
         value: args,
       });
 
+      // Ethers recognizes the options as an object at the end of the arguments.
+      // If we pass in undefined, it will be interpreted as an argument to the
+      // function, so we only include it if it is defined.
+      if (options) {
+        argsArray.push(options);
+      }
+
       const output = await ethersContract[functionName]?.staticCallResult(
         ...argsArray,
-        options,
       );
 
       return arrayToFriendly({
@@ -75,7 +81,7 @@ export function createReadContract<TAbi extends Abi = Abi>({
     },
 
     async simulateWrite(functionName, args, options) {
-      const argsArray = friendlyToArray({
+      const argsArray: any[] = friendlyToArray({
         abi: abi as Abi,
         type: 'function',
         name: functionName,
@@ -83,9 +89,15 @@ export function createReadContract<TAbi extends Abi = Abi>({
         value: args,
       });
 
+      // Ethers recognizes the options as an object at the end of the arguments.
+      // If we pass in undefined, it will be interpreted as an argument to the
+      // function, so we only include it if it is defined.
+      if (options) {
+        argsArray.push(options);
+      }
+
       const output = await ethersContract[functionName]?.staticCallResult(
         ...argsArray,
-        options,
       );
 
       return arrayToFriendly({

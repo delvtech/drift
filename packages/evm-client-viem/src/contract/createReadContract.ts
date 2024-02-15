@@ -2,6 +2,7 @@ import {
   DecodedFunctionData,
   Event,
   FunctionName,
+  FunctionReturn,
   ReadContract,
   ReadWriteContract,
   arrayToFriendly,
@@ -17,6 +18,7 @@ import {
   encodeFunctionData,
 } from 'viem';
 import { createReadWriteContract } from './createReadWriteContract';
+import { outputToFriendly } from './utils/outputToFriendly';
 
 export interface CreateReadContractOptions<TAbi extends Abi = Abi> {
   abi: TAbi;
@@ -72,15 +74,11 @@ export function createReadContract<TAbi extends Abi = Abi>({
         ...options,
       });
 
-      const arrayOutput = Array.isArray(output) ? output : [output];
-
-      return arrayToFriendly({
-        abi: abi as Abi,
-        type: 'function',
-        name: functionName,
-        kind: 'outputs',
-        values: arrayOutput,
-      });
+      return outputToFriendly({
+        abi,
+        functionName,
+        output,
+      }) as FunctionReturn<TAbi, typeof functionName>;
     },
 
     async simulateWrite(functionName, args, options) {
@@ -100,15 +98,11 @@ export function createReadContract<TAbi extends Abi = Abi>({
         ...createSimulateContractParameters(options),
       });
 
-      const arrayOutput = Array.isArray(result) ? result : [result];
-
-      return arrayToFriendly({
-        abi: abi as Abi,
-        type: 'function',
-        name: functionName,
-        kind: 'outputs',
-        values: arrayOutput,
-      });
+      return outputToFriendly({
+        abi,
+        functionName,
+        output: result,
+      }) as FunctionReturn<TAbi, typeof functionName>;
     },
 
     async getEvents(eventName, options) {

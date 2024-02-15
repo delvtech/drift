@@ -26,6 +26,9 @@
   "scripts": {
     "build": "tsup",
     "lint": "eslint .",
+    "test:watch": "vitest",
+    "test": "vitest run",
+    "test:integration": "vitest run integration",
     "typecheck": "tsc --noEmit",
     "watch": "tsup --watch"
   },
@@ -44,9 +47,13 @@
   "devDependencies": {
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
+    "sinon": "^17.0.1",
+    "tsconfig-paths": "^4.2.0",
     "tsup": "^8.0.2",
     "typescript": "^5.3.3",
-    "viem": "^2.7.3"
+    "viem": "^2.7.3",
+    "vite-tsconfig-paths": "^4.3.1",
+    "vitest": "^1.2.2"
   },
   "publishConfig": {
     "access": "public"

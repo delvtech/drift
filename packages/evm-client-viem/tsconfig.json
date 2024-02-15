@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "@repo/typescript-config/base.json",
-  "include": ["./*.ts", "src", "./.eslintrc.cjs"],
+  "include": ["./*.ts", "src", "integration-tests"],
   "exclude": ["node_modules"],
   "compilerOptions": {
     "rootDir": ".",
