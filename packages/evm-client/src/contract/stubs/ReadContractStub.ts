@@ -131,7 +131,7 @@ export class ReadContractStub<TAbi extends Abi = Abi>
     }
 
     // Account for dynamic args if provided
-    if (args) {
+    if (args || options) {
       readStub.withArgs(args, options).resolves(value);
       return;
     }

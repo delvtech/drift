@@ -7,6 +7,34 @@ import { describe, expect, it } from 'vitest';
 const ERC20ABI = IERC20.abi;
 
 describe('ReadContractStub', () => {
+  it('stubs the read function without args, but with options', async () => {
+    const contract = new ReadContractStub(IERC20.abi);
+
+    // stub total supply
+    contract.stubRead({
+      functionName: 'totalSupply',
+      value: 30n,
+      // options can be specfied as well
+      options: { blockNumber: 12n },
+    });
+    contract.stubRead({
+      functionName: 'totalSupply',
+      value: 40n,
+      // options can be specfied as well
+      options: { blockNumber: 16n },
+    });
+    // Now try and read them based on their args
+    const totalSupplyAtBlock12 = await contract.read('totalSupply', undefined, {
+      blockNumber: 12n,
+    });
+    expect(totalSupplyAtBlock12).toBe(30n);
+
+    const totalSupplyAtBlock16 = await contract.read('totalSupply', undefined, {
+      blockNumber: 16n,
+    });
+    expect(totalSupplyAtBlock16).toBe(40n);
+  });
+
   it('stubs the read function', async () => {
     const contract = new ReadContractStub(IERC20.abi);
 
