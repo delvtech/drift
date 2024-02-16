@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.0.8
+
+### Patch Changes
+
+- 593a286: Add ability to stub events for dynamic filter args
+
 ## 0.0.7
 
 ### Patch Changes
