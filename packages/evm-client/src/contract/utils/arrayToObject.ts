@@ -2,13 +2,13 @@ import { Abi, AbiItemType, AbiParameter, AbiParameterKind } from 'abitype';
 import {
   AbiArrayType,
   AbiEntryName,
-  AbiFriendlyType,
+  AbiObjectType,
 } from 'src/contract/types/AbiEntry';
 import { getAbiEntry } from 'src/contract/utils/getAbiEntry';
 
 /**
- * Converts an {@linkcode AbiFriendlyType} into an array of input or output
- * values, ensuring the the correct number and order of values are present.
+ * Converts an array of input or output values into an object typ, ensuring the
+ * values are properly identified based on their index.
  *
  * @example
  * const abi = [
@@ -33,23 +33,23 @@ import { getAbiEntry } from 'src/contract/utils/getAbiEntry';
  *   },
  * ] as const;
  *
- * const preppedArgs = friendlyToArray({
+ * const parsedArgs = arrayToObject({
  *   abi,
  *   type: "function",
  *   name: "transfer",
  *   kind: "inputs",
- *   value: { value: 123n, to: "0x123" },
- * }); // -> ["0x123", 123n]
+ *   values: ["0x123", 123n],
+ * }); // -> { to: "0x123", value: 123n }
  *
- * const preppedFilter = friendlyToArray({
+ * const parsedFilter = arrayToObject({
  *   abi,
  *   type: "event",
  *   name: "Approval",
  *   kind: "inputs",
- *   value: { spender: "0x123" },
- * }); // -> [undefined, "0x123", undefined]
+ *   values: [undefined, "0x123", undefined],
+ * }); // -> { owner: undefined, spender: "0x123", value: undefined }
  */
-export function friendlyToArray<
+export function arrayToObject<
   TAbi extends Abi,
   TItemType extends AbiItemType,
   TName extends AbiEntryName<TAbi, TItemType>,
@@ -59,16 +59,16 @@ export function friendlyToArray<
   type,
   name,
   kind,
-  value,
+  values,
 }: {
   abi: TAbi;
   name: TName;
-  value?: Abi extends TAbi
-    ? Record<string, unknown> // <- fallback for unknown ABI type
-    : Partial<AbiFriendlyType<TAbi, TItemType, TName, TParameterKind>>;
+  values?: Abi extends TAbi
+    ? readonly unknown[] // <- fallback for unknown ABI type
+    : Partial<AbiArrayType<TAbi, TItemType, TName, TParameterKind>>;
   kind: TParameterKind;
   type: TItemType;
-}): AbiArrayType<TAbi, TItemType, TName, TParameterKind> {
+}): AbiObjectType<TAbi, TItemType, TName, TParameterKind> {
   const abiEntry = getAbiEntry({ abi, type, name });
 
   let parameters: AbiParameter[] = [];
@@ -76,23 +76,16 @@ export function friendlyToArray<
     parameters = (abiEntry as any)[kind];
   }
 
-  // No parameters
-  if (!parameters.length) {
-    return [] as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
-  }
+  const valuesArray = values || [];
 
-  // Single parameter
-  if (parameters.length === 1) {
-    return [value] as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
-  }
-
-  const valueObject: Record<string, unknown> =
-    value && typeof value === 'object' ? value : {};
-
-  const array: unknown[] = [];
+  const valuesObject: Record<string, any> = {};
   parameters.forEach(({ name }, i) => {
-    array.push(valueObject[name || i]);
+    if (name) {
+      valuesObject[name] = valuesArray[i];
+    } else {
+      valuesObject[i] = valuesArray[i];
+    }
   });
 
-  return array as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
+  return valuesObject as any;
 }
