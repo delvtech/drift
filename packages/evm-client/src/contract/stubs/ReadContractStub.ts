@@ -117,10 +117,12 @@ export class ReadContractStub<TAbi extends Abi = Abi>
     functionName,
     args,
     value,
+    options,
   }: {
     functionName: TFunctionName;
     args?: FunctionArgs<TAbi, TFunctionName>;
     value: FunctionReturn<TAbi, TFunctionName>;
+    options?: ContractReadOptions
   }): void {
     let readStub = this.readStubMap.get(functionName);
     if (!readStub) {
@@ -130,7 +132,7 @@ export class ReadContractStub<TAbi extends Abi = Abi>
 
     // Account for dynamic args if provided
     if (args) {
-      readStub.withArgs(args).resolves(value);
+      readStub.withArgs(args, options).resolves(value);
       return;
     }
 

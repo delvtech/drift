@@ -25,11 +25,15 @@ describe('ReadContractStub', () => {
       functionName: 'balanceOf',
       args: ALICE,
       value: aliceValue,
+      // options can be specfied as well
+      options: { blockNumber: 10n },
     });
 
     // Now try and read them based on their args
     const bobResult = await contract.read('balanceOf', BOB);
-    const aliceResult = await contract.read('balanceOf', ALICE);
+    const aliceResult = await contract.read('balanceOf', ALICE, {
+      blockNumber: 10n,
+    });
     expect(bobResult).toBe(bobValue);
     expect(aliceResult).toBe(aliceValue);
 
