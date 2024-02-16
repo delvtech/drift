@@ -1,5 +1,12 @@
 # @delvtech/evm-client-ethers
 
+## 0.0.9
+
+### Patch Changes
+
+- Updated dependencies [593a286]
+  - @delvtech/evm-client@0.0.8
+
 ## 0.0.8
 
 ### Patch Changes
