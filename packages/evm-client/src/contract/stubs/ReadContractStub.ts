@@ -279,5 +279,5 @@ function stableStringify(obj: Record<any, any>) {
     return typeof v === 'bigint' ? v.toString() : v;
   }
 
-  return stringify(obj, replacer);
+  return stringify.stableStringify(obj, replacer);
 }
