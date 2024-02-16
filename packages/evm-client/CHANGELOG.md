@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.0.11
+
+### Patch Changes
+
+- 1098f69: Fix bug causing stub lookups to fail
+
 ## 0.0.10
 
 ### Patch Changes
