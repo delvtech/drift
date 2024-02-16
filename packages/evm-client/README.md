@@ -62,21 +62,24 @@ The API is meant to be easy to both read and write.
 
 #### Utils
 
+- **[`objectToArray`](./src/contract/utils/friendlyToArray.ts):** A function
+  that takes an object of inputs (function and event arguments) and converts it
+  into an array, ensuring parameters are properly ordered and the correct number
+  of parameters are present.
+
+- **[`arrayToObject`](./src/contract/utils/arrayToFriendly.ts):** The opposite
+  of `objectToArray`. A function to transform contract input and output arrays
+  into objects.
+
 - **[`arrayToFriendly`](./src/contract/utils/arrayToFriendly.ts):** A function
-  to transform contract input and output arrays into "Friendly" types. The
-  friendly type of an input/output array depends on the number of input/output
-  parameters:
+  to transform contract output arrays into "Friendly" types. The friendly type
+  of an output array depends on the number of output parameters:
 
   - Multiple parameters: An object with the argument names as keys (or their
     index if no name is found in the ABI) and the primitive type of the
     parameters as values.
   - Single parameters: The primitive type of the single parameter.
   - No parameters: `undefined`
-
-- **[`friendlyToArray`](./src/contract/utils/friendlyToArray.ts):** The opposite
-  of `arrayToFriendly`. A function that takes a "Friendly" type and converts it
-  into an array, ensuring parameters are properly ordered and the correct number
-  of parameters are present.
 
 #### Factories
 
@@ -103,13 +106,13 @@ information like blocks and transactions.
 
 #### Stubs
 
-- **[`NetworkStub`](./src/network/stubs/NetworkStub.ts):** A stub of a
-  `Network` for use in tests.
+- **[`NetworkStub`](./src/network/stubs/NetworkStub.ts):** A stub of a `Network`
+  for use in tests.
 
 ### SimpleCache
 
-A simple cache abstraction providing a minimal interface for facilitating contract
-caching.
+A simple cache abstraction providing a minimal interface for facilitating
+contract caching.
 
 #### Types
 
