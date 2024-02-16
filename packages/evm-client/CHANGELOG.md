@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.0.10
+
+### Patch Changes
+
+- 5cf2921: Add ability to stub options to stubRead
+
 ## 0.0.9
 
 ### Patch Changes
