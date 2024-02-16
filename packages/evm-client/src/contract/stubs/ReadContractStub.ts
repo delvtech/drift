@@ -122,7 +122,7 @@ export class ReadContractStub<TAbi extends Abi = Abi>
     functionName: TFunctionName;
     args?: FunctionArgs<TAbi, TFunctionName>;
     value: FunctionReturn<TAbi, TFunctionName>;
-    options?: ContractReadOptions
+    options?: ContractReadOptions;
   }): void {
     let readStub = this.readStubMap.get(functionName);
     if (!readStub) {
@@ -132,7 +132,11 @@ export class ReadContractStub<TAbi extends Abi = Abi>
 
     // Account for dynamic args if provided
     if (args || options) {
-      readStub.withArgs(args, options).resolves(value);
+      // The stub returned from the map doesn't have a strong FunctionName type
+      // so we have to cast to avoid contravariance errors with the args.
+      (readStub as ReadStub<TAbi, TFunctionName>)
+        .withArgs(args, options)
+        .resolves(value);
       return;
     }
 

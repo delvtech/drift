@@ -32,8 +32,8 @@ export function createCachedReadWriteContract<TAbi extends Abi = Abi>({
   };
 }
 
-function isCached(
-  contract: ReadWriteContract | CachedReadWriteContract,
-): contract is CachedReadWriteContract {
+function isCached<TAbi extends Abi>(
+  contract: ReadWriteContract<TAbi> | CachedReadWriteContract<TAbi>,
+): contract is CachedReadWriteContract<TAbi> {
   return 'clearCache' in contract;
 }

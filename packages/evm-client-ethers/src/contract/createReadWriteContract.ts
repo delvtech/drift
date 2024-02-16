@@ -1,5 +1,5 @@
 import {
-  friendlyToArray,
+  objectToArray,
   ReadContract,
   ReadWriteContract,
 } from '@delvtech/evm-client';
@@ -41,7 +41,7 @@ export function createReadWriteContract<TAbi extends Abi = Abi>({
     },
 
     async write(functionName, args, options) {
-      const argsArray = friendlyToArray({
+      const argsArray = objectToArray({
         abi: abi as Abi,
         type: 'function',
         name: functionName,

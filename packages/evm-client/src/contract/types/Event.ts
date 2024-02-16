@@ -1,8 +1,8 @@
 import { Abi } from 'abitype';
-import { EmptyObject } from 'src/base/types';
 import {
   AbiEntry,
-  AbiFriendlyType,
+  AbiObjectType,
+  AbiParameters,
   AbiParametersToObject,
   NamedAbiParameter,
 } from 'src/contract/types/AbiEntry';
@@ -19,22 +19,17 @@ type NamedEventInput<
   TAbi extends Abi,
   TEventName extends EventName<TAbi>,
 > = Extract<
-  AbiEntry<TAbi, 'event', TEventName>['inputs'][number],
+  AbiParameters<TAbi, 'event', TEventName, 'inputs'>,
   NamedAbiParameter
 >;
 
 /**
- * Get a user-friendly argument type for an abi event, which is determined by
- * it's inputs:
- * - __Single input:__ the type of the single input.
- * - __Multiple inputs:__ an object with the input names as keys and the input
- *   types as values.
- * - __No inputs:__ `undefined`.
+ * Get an object type for an event's arguments from an abi.
  */
 export type EventArgs<
   TAbi extends Abi,
   TEventName extends EventName<TAbi>,
-> = AbiFriendlyType<TAbi, 'event', TEventName, 'inputs'>;
+> = AbiObjectType<TAbi, 'event', TEventName, 'inputs'>;
 
 /**
  * Get a union of indexed input objects for an event from an abi
@@ -45,20 +40,14 @@ type IndexedEventInput<
 > = Extract<NamedEventInput<TAbi, TEventName>, { indexed: true }>;
 
 /**
- * Get an object type for an event's indexed fields from an abi or `undefined`
- * if there are no indexed fields.
+ * Get an object type for an event's indexed fields from an abi
  */
-export type EventFilter<TAbi extends Abi, TEventName extends EventName<TAbi>> =
-  AbiParametersToObject<
-    IndexedEventInput<TAbi, TEventName>[],
-    'inputs'
-  > extends infer TParamObject
-    ? TParamObject extends EmptyObject
-      ? undefined
-      : Partial<
-          AbiParametersToObject<IndexedEventInput<TAbi, TEventName>[], 'inputs'>
-        >
-    : never;
+export type EventFilter<
+  TAbi extends Abi,
+  TEventName extends EventName<TAbi>,
+> = Partial<
+  AbiParametersToObject<IndexedEventInput<TAbi, TEventName>[], 'inputs'>
+>;
 
 /**
  * A strongly typed event object based on an abi

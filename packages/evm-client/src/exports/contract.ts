@@ -14,6 +14,8 @@ export type {
   AbiEntry,
   AbiEntryName,
   AbiFriendlyType,
+  AbiObjectType,
+  AbiParameters,
 } from 'src/contract/types/AbiEntry';
 export type {
   CachedReadContract,
@@ -46,5 +48,6 @@ export type {
 
 // Utils
 export { arrayToFriendly } from 'src/contract/utils/arrayToFriendly';
-export { friendlyToArray } from 'src/contract/utils/friendlyToArray';
+export { arrayToObject } from 'src/contract/utils/arrayToObject';
 export { getAbiEntry } from 'src/contract/utils/getAbiEntry';
+export { objectToArray } from 'src/contract/utils/objectToArray';

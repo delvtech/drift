@@ -1,12 +1,12 @@
 import {
+  AbiObjectType,
   DecodedFunctionData,
-  Event,
   FunctionName,
   FunctionReturn,
   ReadContract,
   ReadWriteContract,
-  arrayToFriendly,
-  friendlyToArray,
+  arrayToObject,
+  objectToArray,
 } from '@delvtech/evm-client';
 import { createSimulateContractParameters } from 'src/contract/utils/createSimulateContractParameters';
 import {
@@ -58,7 +58,7 @@ export function createReadContract<TAbi extends Abi = Abi>({
     },
 
     async read(functionName, args, options) {
-      const argsArray = friendlyToArray({
+      const argsArray = objectToArray({
         abi,
         type: 'function',
         name: functionName,
@@ -82,7 +82,7 @@ export function createReadContract<TAbi extends Abi = Abi>({
     },
 
     async simulateWrite(functionName, args, options) {
-      const argsArray = friendlyToArray({
+      const argsArray = objectToArray({
         abi,
         type: 'function',
         name: functionName,
@@ -118,28 +118,28 @@ export function createReadContract<TAbi extends Abi = Abi>({
       const events = await publicClient.getFilterLogs({ filter });
 
       return events.map(({ args, blockNumber, data, transactionHash }) => {
-        const friendlyArgs = Array.isArray(args)
-          ? arrayToFriendly({
+        const objectArgs = Array.isArray(args)
+          ? arrayToObject({
               abi: abi as Abi,
               type: 'event',
               name: eventName,
               kind: 'inputs',
-              values: args as readonly unknown[],
+              values: args,
             })
-          : args;
+          : (args as AbiObjectType<TAbi, 'event', typeof eventName, 'inputs'>);
 
         return {
-          args: friendlyArgs,
+          args: objectArgs,
           blockNumber: blockNumber ?? undefined,
           data,
           eventName,
           transactionHash: transactionHash ?? undefined,
         };
-      }) as Event<TAbi, typeof eventName>[];
+      });
     },
 
     encodeFunctionData(functionName, args) {
-      const arrayArgs = friendlyToArray({
+      const arrayArgs = objectToArray({
         abi: abi,
         type: 'function',
         name: functionName,
@@ -165,7 +165,7 @@ export function createReadContract<TAbi extends Abi = Abi>({
       const arrayArgs = Array.isArray(args) ? args : [args];
 
       return {
-        args: arrayToFriendly({
+        args: arrayToObject({
           // Cast to allow any array type for values
           abi: abi as Abi,
           type: 'function',

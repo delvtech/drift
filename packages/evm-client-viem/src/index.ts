@@ -25,14 +25,17 @@ export * from '@delvtech/evm-client/cache';
 
 export {
   arrayToFriendly,
-  friendlyToArray,
+  arrayToObject,
   getAbiEntry,
+  objectToArray,
 } from '@delvtech/evm-client/contract';
 export type {
   AbiArrayType,
   AbiEntry,
   AbiEntryName,
   AbiFriendlyType,
+  AbiObjectType,
+  AbiParameters,
   CachedReadContract,
   CachedReadWriteContract,
   ContractDecodeFunctionDataArgs,

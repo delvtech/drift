@@ -1,5 +1,5 @@
 import {
-  friendlyToArray,
+  objectToArray,
   ReadContract,
   ReadWriteContract,
 } from '@delvtech/evm-client';
@@ -50,7 +50,7 @@ export function createReadWriteContract<TAbi extends Abi = Abi>({
     async write(functionName, args, options) {
       const [account] = await walletClient.getAddresses();
 
-      const arrayArgs = friendlyToArray({
+      const arrayArgs = objectToArray({
         abi: abi,
         type: 'function',
         name: functionName,

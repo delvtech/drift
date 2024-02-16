@@ -1,10 +1,10 @@
 import { IERC20 } from 'src/base/testing/IERC20';
-import { friendlyToArray } from 'src/contract/utils/friendlyToArray';
+import { objectToArray } from 'src/contract/utils/objectToArray';
 import { describe, expect, it } from 'vitest';
 
-describe('friendlyToArray', () => {
-  it('correctly converts object into arrays', async () => {
-    const transferArgsArray = friendlyToArray({
+describe('objectToArray', () => {
+  it('correctly converts objects into arrays', async () => {
+    const transferArgsArray = objectToArray({
       abi: IERC20.abi,
       type: 'function',
       name: 'transfer',
@@ -17,7 +17,7 @@ describe('friendlyToArray', () => {
     expect(transferArgsArray).toEqual(['0x123', 123n]);
 
     // empty parameter names (index keys)
-    const votesArgsArray = friendlyToArray({
+    const votesArgsArray = objectToArray({
       abi: exampleAbi,
       type: 'function',
       name: 'votes',
@@ -30,27 +30,22 @@ describe('friendlyToArray', () => {
     expect(votesArgsArray).toEqual(['0x123', 0n]);
   });
 
-  it('correctly converts single values into arrays', async () => {
-    const balanceInputArray = friendlyToArray({
-      abi: IERC20.abi,
-      type: 'function',
-      name: 'balanceOf',
-      kind: 'inputs',
-      value: '0x123',
-    });
-    expect(balanceInputArray).toEqual(['0x123']);
+  const emptyArray = objectToArray({
+    abi: IERC20.abi,
+    type: 'function',
+    name: 'symbol',
+    kind: 'inputs',
+    value: {},
   });
+  expect(emptyArray).toEqual([]);
 
-  it('converts undefined into an empty array', async () => {
-    const emptyArray = friendlyToArray({
-      abi: IERC20.abi,
-      type: 'function',
-      name: 'symbol',
-      kind: 'inputs',
-      value: undefined,
-    });
-    expect(emptyArray).toEqual([]);
+  const emptyArrayFromUndefined = objectToArray({
+    abi: IERC20.abi,
+    type: 'function',
+    name: 'symbol',
+    kind: 'inputs',
   });
+  expect(emptyArrayFromUndefined).toEqual([]);
 });
 
 export const exampleAbi = [

@@ -1,11 +1,12 @@
 import {
   AbiEntryNotFoundError,
-  arrayToFriendly,
   DecodedFunctionData,
-  friendlyToArray,
   FunctionName,
   ReadContract,
   ReadWriteContract,
+  arrayToFriendly,
+  arrayToObject,
+  objectToArray,
 } from '@delvtech/evm-client';
 import { Abi } from 'abitype';
 import { Contract, EventLog, InterfaceAbi, Provider, Signer } from 'ethers';
@@ -52,7 +53,7 @@ export function createReadContract<TAbi extends Abi = Abi>({
     },
 
     async read(functionName, args, options) {
-      const argsArray: any[] = friendlyToArray({
+      const argsArray: any[] = objectToArray({
         abi: abi as Abi,
         type: 'function',
         name: functionName,
@@ -81,7 +82,7 @@ export function createReadContract<TAbi extends Abi = Abi>({
     },
 
     async simulateWrite(functionName, args, options) {
-      const argsArray: any[] = friendlyToArray({
+      const argsArray: any[] = objectToArray({
         abi: abi as Abi,
         type: 'function',
         name: functionName,
@@ -110,7 +111,7 @@ export function createReadContract<TAbi extends Abi = Abi>({
     },
 
     async getEvents(eventName, options) {
-      const filterValues = friendlyToArray({
+      const filterValues = objectToArray({
         // Cast to allow any array type for values
         abi: abi as Abi,
         type: 'event',
@@ -127,7 +128,7 @@ export function createReadContract<TAbi extends Abi = Abi>({
       )) as EventLog[];
 
       return events.map(({ blockNumber, data, transactionHash, args }) => {
-        const friendlyArgs = arrayToFriendly({
+        const objectArgs = arrayToObject({
           // Cast to allow any array type for values
           abi: abi as Abi,
           type: 'event',
@@ -137,7 +138,7 @@ export function createReadContract<TAbi extends Abi = Abi>({
         });
 
         return {
-          args: friendlyArgs,
+          args: objectArgs,
           blockNumber: BigInt(blockNumber),
           data: data as `0x${string}`,
           eventName,
@@ -147,7 +148,7 @@ export function createReadContract<TAbi extends Abi = Abi>({
     },
 
     encodeFunctionData(functionName, args) {
-      const arrayArgs = friendlyToArray({
+      const arrayArgs = objectToArray({
         // Cast to allow any array type for values
         abi: abi as Abi,
         type: 'function',
@@ -183,7 +184,7 @@ export function createReadContract<TAbi extends Abi = Abi>({
       }
 
       return {
-        args: arrayToFriendly({
+        args: arrayToObject({
           abi: abi as Abi,
           type: 'function',
           name: parsed.name,
