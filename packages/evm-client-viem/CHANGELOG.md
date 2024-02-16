@@ -1,5 +1,12 @@
 # @delvtech/evm-client-viem
 
+## 0.0.13
+
+### Patch Changes
+
+- Updated dependencies [1098f69]
+  - @delvtech/evm-client@0.0.11
+
 ## 0.0.12
 
 ### Patch Changes
