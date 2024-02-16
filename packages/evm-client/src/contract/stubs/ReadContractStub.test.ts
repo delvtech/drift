@@ -38,30 +38,32 @@ describe('ReadContractStub', () => {
   it('stubs the read function', async () => {
     const contract = new ReadContractStub(IERC20.abi);
 
-    expect(contract.read('balanceOf', NANCY)).rejects.toThrowError();
+    expect(contract.read('balanceOf', { owner: NANCY })).rejects.toThrowError();
 
     // Stub bob and alice's balances first
     const bobValue = 10n;
     contract.stubRead({
       functionName: 'balanceOf',
-      args: BOB,
+      args: { owner: BOB },
       value: bobValue,
     });
 
     const aliceValue = 20n;
     contract.stubRead({
       functionName: 'balanceOf',
-      args: ALICE,
+      args: { owner: ALICE },
       value: aliceValue,
       // options can be specfied as well
       options: { blockNumber: 10n },
     });
 
     // Now try and read them based on their args
-    const bobResult = await contract.read('balanceOf', BOB);
-    const aliceResult = await contract.read('balanceOf', ALICE, {
-      blockNumber: 10n,
-    });
+    const bobResult = await contract.read('balanceOf', { owner: BOB });
+    const aliceResult = await contract.read(
+      'balanceOf',
+      { owner: ALICE },
+      { blockNumber: 10n },
+    );
     expect(bobResult).toBe(bobValue);
     expect(aliceResult).toBe(aliceValue);
 
@@ -71,7 +73,7 @@ describe('ReadContractStub', () => {
       functionName: 'balanceOf',
       value: defaultValue,
     });
-    const defaultResult = await contract.read('balanceOf', NANCY);
+    const defaultResult = await contract.read('balanceOf', { owner: NANCY });
     expect(defaultResult).toBe(defaultValue);
 
     const stub = contract.getReadStub('balanceOf');

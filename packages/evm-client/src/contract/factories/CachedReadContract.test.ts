@@ -64,12 +64,14 @@ describe('createCachedReadContract', () => {
     const stubbedValue = 100n;
     contract.stubRead({ functionName: 'balanceOf', value: stubbedValue });
 
-    const value = await cachedContract.read('balanceOf', '0x123abc');
+    const value = await cachedContract.read('balanceOf', { owner: '0x123abc' });
     expect(value).toBe(stubbedValue);
 
-    cachedContract.deleteRead('balanceOf', '0x123abc');
+    cachedContract.deleteRead('balanceOf', { owner: '0x123abc' });
 
-    const value2 = await cachedContract.read('balanceOf', '0x123abc');
+    const value2 = await cachedContract.read('balanceOf', {
+      owner: '0x123abc',
+    });
     expect(value2).toBe(stubbedValue);
 
     const stub = contract.getReadStub('balanceOf');
@@ -81,18 +83,17 @@ describe('createCachedReadContract', () => {
     const cachedContract = createCachedReadContract({ contract });
 
     contract.stubRead({ functionName: 'balanceOf', value: 100n });
-    const stubbedValue = '0x123abc';
     contract.stubRead({
       functionName: 'name',
-      value: stubbedValue,
+      value: 'Base Token',
     });
-    2;
-    await cachedContract.read('balanceOf', '0x123abc');
+
+    await cachedContract.read('balanceOf', { owner: '0x123abc' });
     await cachedContract.read('name');
 
     cachedContract.clearCache();
 
-    await cachedContract.read('balanceOf', '0x123abc');
+    await cachedContract.read('balanceOf', { owner: '0x123abc' });
     await cachedContract.read('name');
 
     const stubA = contract.getReadStub('balanceOf');

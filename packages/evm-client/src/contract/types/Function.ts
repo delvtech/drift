@@ -1,5 +1,5 @@
 import { Abi, AbiStateMutability } from 'abitype';
-import { AbiEntry, AbiFriendlyType } from 'src/contract/types/AbiEntry';
+import { AbiFriendlyType, AbiObjectType } from 'src/contract/types/AbiEntry';
 
 /**
  * Get a union of function names from an abi
@@ -8,22 +8,17 @@ export type FunctionName<
   TAbi extends Abi,
   TAbiStateMutability extends AbiStateMutability = AbiStateMutability,
 > = Extract<
-  AbiEntry<TAbi, 'function'>,
-  { stateMutability: TAbiStateMutability }
+  TAbi[number],
+  { type: 'function'; stateMutability: TAbiStateMutability }
 >['name'];
 
 /**
- * Get a user-friendly argument type for an abi function, which is determined by
- * it's inputs:
- * - __Single input:__ the type of the single input.
- * - __Multiple inputs:__ an object with the input names as keys and the input
- *   types as values.
- * - __No inputs:__ `undefined` or an empty object.
+ * Get an object type for an abi function's arguments.
  */
 export type FunctionArgs<
   TAbi extends Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = AbiFriendlyType<TAbi, 'function', TFunctionName, 'inputs'>;
+> = AbiObjectType<TAbi, 'function', TFunctionName, 'inputs'>;
 
 /**
  * Get a user-friendly return type for an abi function, which is determined by
