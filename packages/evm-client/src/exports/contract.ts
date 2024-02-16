@@ -14,6 +14,8 @@ export type {
   AbiEntry,
   AbiEntryName,
   AbiFriendlyType,
+  AbiObjectType,
+  AbiParameters,
 } from 'src/contract/types/AbiEntry';
 export type {
   CachedReadContract,
