@@ -1,4 +1,5 @@
 import { Abi } from 'abitype';
+import stringify from 'fast-safe-stringify';
 import { SinonStub, stub } from 'sinon';
 import {
   ContractDecodeFunctionDataArgs,
@@ -168,7 +169,7 @@ export class ReadContractStub<TAbi extends Abi = Abi>
     args: ContractGetEventsOptions<TAbi, TEventName> | undefined,
     value: Event<TAbi, TEventName>[],
   ): void {
-    const stubKey = stringify({ eventName, args });
+    const stubKey = stableStringify({ eventName, args });
     if (this.eventsStubMap.has(stubKey)) {
       this.getEventsStub(eventName, args)!.resolves(value as any);
     } else {
@@ -210,7 +211,7 @@ export class ReadContractStub<TAbi extends Abi = Abi>
     eventName: TEventName,
     args?: ContractGetEventsOptions<TAbi, TEventName> | undefined,
   ): EventsStub<TAbi, TEventName> | undefined {
-    const stubKey = stringify({ eventName, args });
+    const stubKey = stableStringify({ eventName, args });
     return this.eventsStubMap.get(stubKey) as
       | EventsStub<TAbi, TEventName>
       | undefined;
@@ -272,11 +273,11 @@ type SimulateWriteStub<
   Promise<FunctionReturn<TAbi, TFunctionName>>
 >;
 
-function stringify(obj: Record<any, any>) {
+function stableStringify(obj: Record<any, any>) {
   // simple non-recursive stringify replacer for bigints
   function replacer(_: any, v: any) {
     return typeof v === 'bigint' ? v.toString() : v;
   }
 
-  return JSON.stringify(obj, replacer);
+  return stringify.stableStringify(obj, replacer);
 }
