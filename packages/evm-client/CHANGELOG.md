@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.0.9
+
+### Patch Changes
+
+- dd129be: Use stable stringify for stub keys
+
 ## 0.0.8
 
 ### Patch Changes
