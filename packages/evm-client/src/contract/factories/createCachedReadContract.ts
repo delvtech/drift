@@ -35,6 +35,7 @@ export function createCachedReadContract<TAbi extends Abi = Abi>({
 }: CreateCachedReadContractOptions<TAbi>): CachedReadContract<TAbi> {
   return {
     ...contract,
+    cache,
 
     /**
      * Reads data from the contract. First checks the cache, and if not present,
