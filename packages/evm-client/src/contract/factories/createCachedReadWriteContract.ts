@@ -8,7 +8,7 @@ import { ReadWriteContract } from 'src/contract/types/Contract';
 
 export interface CreateCachedReadWriteContractOptions<TAbi extends Abi = Abi>
   extends CreateCachedReadContractOptions<TAbi> {
-  contract: ReadWriteContract<TAbi> | CachedReadWriteContract<TAbi>;
+  contract: ReadWriteContract<TAbi>;
 }
 
 /**
@@ -22,18 +22,19 @@ export function createCachedReadWriteContract<TAbi extends Abi = Abi>({
   cache,
   namespace,
 }: CreateCachedReadWriteContractOptions<TAbi>): CachedReadWriteContract<TAbi> {
-  const cachedReadContract = isCached(contract)
-    ? contract
-    : createCachedReadContract({ contract, cache, namespace });
+  // Avoid double-caching if given a contract that already has a cache.
+  if (isCached(contract)) {
+    return contract;
+  }
 
   return {
     ...contract,
-    ...cachedReadContract,
+    ...createCachedReadContract({ contract, cache, namespace }),
   };
 }
 
 function isCached<TAbi extends Abi>(
-  contract: ReadWriteContract<TAbi> | CachedReadWriteContract<TAbi>,
+  contract: ReadWriteContract<TAbi>,
 ): contract is CachedReadWriteContract<TAbi> {
   return 'clearCache' in contract;
 }
