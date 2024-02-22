@@ -14,6 +14,7 @@ export function createSimulateContractParameters(
     maxFeePerGas,
     maxPriorityFeePerGas,
     nonce,
+    value
   } = options || {};
 
   const gasPriceOptions =
@@ -25,6 +26,7 @@ export function createSimulateContractParameters(
     accessList,
     account: from,
     gas,
+    value,
     ...gasPriceOptions,
     nonce: nonce !== undefined ? Number(nonce) : undefined,
   };
@@ -35,6 +37,7 @@ type SimulateContractParameters = {
   account?: `0x${string}`;
   gas?: bigint;
   nonce?: number;
+  value?: bigint;
 } & (
   | { gasPrice?: bigint }
   | { maxFeePerGas?: bigint }
