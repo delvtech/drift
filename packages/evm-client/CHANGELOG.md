@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.1.1
+
+### Patch Changes
+
+- eb6575b: Added a `cache` property to the `CachedReadContract` type and ensured the factories preserve the prototypes of the contract's they're given.
+
 ## 0.1.0
 
 ### Minor Changes

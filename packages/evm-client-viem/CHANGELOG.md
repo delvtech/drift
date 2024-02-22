@@ -1,5 +1,13 @@
 # @delvtech/evm-client-viem
 
+## 0.1.1
+
+### Patch Changes
+
+- 23ae786: Add missing `value` field to readWriteContract.write() method arguments
+- Updated dependencies [eb6575b]
+  - @delvtech/evm-client@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
