@@ -1,5 +1,12 @@
 # @delvtech/evm-client-ethers
 
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies [eb6575b]
+  - @delvtech/evm-client@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
