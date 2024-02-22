@@ -33,8 +33,16 @@ export function createCachedReadContract<TAbi extends Abi = Abi>({
   cache = createLruSimpleCache({ max: DEFAULT_CACHE_SIZE }),
   namespace,
 }: CreateCachedReadContractOptions<TAbi>): CachedReadContract<TAbi> {
-  return {
-    ...contract,
+  // Because this is part of the public API, we won't know if the original
+  // contract is a plain object or a class instance, so we use Object.create to
+  // preserve the original contract's prototype chain when extending, ensuring
+  // the new contract includes all the original contract's methods and
+  // instanceof checks will still work.
+  const contractPrototype = Object.getPrototypeOf(contract);
+  const newContract = Object.create(contractPrototype);
+
+  const overrides: Partial<CachedReadContract<TAbi>> = {
+    cache,
 
     /**
      * Reads data from the contract. First checks the cache, and if not present,
@@ -111,6 +119,8 @@ export function createCachedReadContract<TAbi extends Abi = Abi>({
       cache.clear();
     },
   };
+
+  return Object.assign(newContract, contract, overrides);
 }
 
 async function getOrSet<TValue>({
