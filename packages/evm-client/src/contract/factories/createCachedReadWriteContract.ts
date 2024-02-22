@@ -26,11 +26,17 @@ export function createCachedReadWriteContract<TAbi extends Abi = Abi>({
   if (isCached(contract)) {
     return contract;
   }
-
-  return {
-    ...contract,
-    ...createCachedReadContract({ contract, cache, namespace }),
-  };
+  // Because this is part of the public API, we won't know if the original
+  // contract is a plain object or a class instance, so we use Object.create to
+  // preserve the original contract's prototype chain when extending, ensuring
+  // the new contract includes all the original contract's methods and
+  // instanceof checks will still work.
+  const contractPrototype = Object.getPrototypeOf(contract);
+  const newContract = Object.create(contractPrototype);
+  return Object.assign(
+    newContract,
+    createCachedReadContract({ contract, cache, namespace }),
+  );
 }
 
 function isCached<TAbi extends Abi>(
