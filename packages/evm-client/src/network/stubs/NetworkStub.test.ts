@@ -31,4 +31,14 @@ describe('NetworkStub', () => {
 
     expect(tx).toBe(stubbedTx);
   });
+
+  it('reaches timeout when waiting for transactions that are never stubbed', async () => {
+    const network = new NetworkStub();
+
+    const waitPromise = await network.waitForTransaction('0x123abc', {
+      timeout: 1000,
+    });
+
+    expect(waitPromise).toBe(undefined);
+  });
 });
