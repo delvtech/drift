@@ -83,24 +83,20 @@ export class NetworkStub implements Network {
   async waitForTransaction(
     ...[hash, { timeout = 60_000 } = {}]: NetworkWaitForTransactionArgs
   ): Promise<Transaction | undefined> {
-    const stub = this.getTransactionStub;
-    if (!stub) {
-      throw new Error(
-        `The getTransaction function must be stubbed first:\n\tcontract.stubGetTransaction()`,
-      );
-    }
+    return new Promise(async (resolve) => {
+      let transaction: Transaction | undefined;
 
-    return new Promise((resolve) => {
-      let transaction = stub([hash]);
+      transaction = await this.getTransactionStub?.([hash]).catch();
+
       if (transaction) {
         return resolve(transaction);
       }
 
       // Poll for the transaction until it's found or the timeout is reached
       let waitedTime = 0;
-      const interval = setInterval(() => {
+      const interval = setInterval(async () => {
         waitedTime += 1000;
-        transaction = stub([hash]);
+        transaction = await this.getTransactionStub?.([hash]).catch();
         if (transaction || waitedTime >= timeout) {
           clearInterval(interval);
           resolve(transaction);
