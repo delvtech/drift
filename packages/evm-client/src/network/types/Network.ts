@@ -53,9 +53,8 @@ export type NetworkWaitForTransactionArgs = [
   hash: `0x${string}`,
   options?: {
     /**
-     * The number of milliseconds to wait for the transaction until rejecting the
-     * promise.
-     * @default 60_000
+     * The number of milliseconds to wait for the transaction until rejecting
+     * the promise.
      */
     timeout?: number;
   },
