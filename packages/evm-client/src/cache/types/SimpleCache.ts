@@ -11,6 +11,11 @@ export interface SimpleCache<
   TKey extends SimpleCacheKey = SimpleCacheKey,
 > {
   /**
+   * Returns an iterable of key-value pairs for every entry in the cache.
+   */
+  readonly entries: Iterable<[TKey, TValue]>;
+
+  /**
    * Retrieves the value associated with the specified key.
    */
   get: (key: TKey) => TValue | undefined;

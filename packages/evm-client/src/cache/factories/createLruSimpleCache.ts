@@ -19,6 +19,10 @@ export function createLruSimpleCache<
   const cache = new LRUCache(options);
 
   return {
+    get entries() {
+      return cache.entries() as Generator<[TKey, TValue]>;
+    },
+
     get(key) {
       return cache.get(stringify(key));
     },
