@@ -28,6 +28,11 @@ export interface TransactionReceipt {
   blockHash: `0x${string}`;
   blockNumber: bigint;
   from: `0x${string}`;
+  /**
+   * The address the transaction is sent to. `null` when it is a contract
+   * creation transaction.
+   */
+  to: `0x${string}` | null;
   cumulativeGasUsed: bigint;
   gasUsed: bigint;
   // TODO:
