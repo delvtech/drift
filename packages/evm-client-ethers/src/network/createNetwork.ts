@@ -73,7 +73,6 @@ export function createNetwork(provider: Provider): Network {
       }
 
       return {
-        type: transaction.type.toString(16) as `0x${number}`,
         blockHash: transaction.blockHash as `0x${string}`,
         blockNumber: BigInt(transaction.blockNumber),
         from: transaction.from as `0x${string}`,
