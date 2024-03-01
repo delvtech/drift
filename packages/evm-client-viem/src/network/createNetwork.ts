@@ -47,5 +47,12 @@ export function createNetwork(publicClient: PublicClient): Network {
         transactionIndex: transactionIndex ?? undefined,
       };
     },
+
+    async waitForTransaction(hash, options) {
+      return await publicClient.waitForTransactionReceipt({
+        hash,
+        timeout: options?.timeout,
+      });
+    },
   };
 }
