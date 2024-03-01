@@ -4,8 +4,9 @@ import {
   Network,
   NetworkGetBlockArgs,
   NetworkGetTransactionArgs,
+  NetworkWaitForTransactionArgs,
 } from 'src/network/types/Network';
-import { Transaction } from 'src/network/types/Transaction';
+import { Transaction, TransactionReceipt } from 'src/network/types/Transaction';
 
 /**
  * A mock implementation of a `Network` designed to facilitate unit
@@ -78,4 +79,48 @@ export class NetworkStub implements Network {
     }
     return this.getTransactionStub(args);
   }
+
+  async waitForTransaction(
+    ...[hash, { timeout = 60_000 } = {}]: NetworkWaitForTransactionArgs
+  ): Promise<TransactionReceipt | undefined> {
+    return new Promise(async (resolve) => {
+      let transaction: Transaction | undefined;
+
+      transaction = await this.getTransactionStub?.([hash]).catch();
+
+      if (transaction) {
+        return resolve(transactionToReceipt(transaction));
+      }
+
+      // Poll for the transaction until it's found or the timeout is reached
+      let waitedTime = 0;
+      const interval = setInterval(async () => {
+        waitedTime += 1000;
+        transaction = await this.getTransactionStub?.([hash]).catch();
+        if (transaction || waitedTime >= timeout) {
+          clearInterval(interval);
+          resolve(transactionToReceipt(transaction));
+        }
+      }, 1000);
+    });
+  }
+}
+
+export function transactionToReceipt(
+  transaction: Transaction | undefined,
+): TransactionReceipt | undefined {
+  return transaction
+    ? {
+        blockHash: transaction.blockHash!,
+        blockNumber: transaction.blockNumber!,
+        from: transaction.from!,
+        to: transaction.to!,
+        transactionIndex: transaction.transactionIndex!,
+        cumulativeGasUsed: 0n,
+        effectiveGasPrice: 0n,
+        transactionHash: transaction.hash!,
+        gasUsed: 0n,
+        logsBloom: '0x',
+      }
+    : undefined;
 }

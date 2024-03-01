@@ -21,3 +21,34 @@ export interface Transaction extends TransactionInfo {
 }
 
 export type MinedTransaction = Transaction & Required<TransactionInfo>;
+
+// https://github.com/ethereum/execution-apis/blob/e3d2745289bd2bb61dc8593069871be4be441952/src/schemas/receipt.yaml#L37
+export interface TransactionReceipt {
+  blockHash: `0x${string}`;
+  blockNumber: bigint;
+  from: `0x${string}`;
+  /**
+   * Address of the receiver or `null` in a contract creation transaction.
+   */
+  to: `0x${string}` | null;
+  /**
+   * The sum of gas used by this transaction and all preceding transactions in
+   * the same block.
+   */
+  cumulativeGasUsed: bigint;
+  /**
+   * The amount of gas used for this specific transaction alone.
+   */
+  gasUsed: bigint;
+  // TODO:
+  // logs: Log[];
+  logsBloom: `0x${string}`;
+  transactionHash: `0x${string}`;
+  transactionIndex: number;
+  /**
+   * The actual value per gas deducted from the sender's account. Before
+   * EIP-1559, this is equal to the transaction's gas price. After, it is equal
+   * to baseFeePerGas + min(maxFeePerGas - baseFeePerGas, maxPriorityFeePerGas).
+   */
+  effectiveGasPrice: bigint;
+}

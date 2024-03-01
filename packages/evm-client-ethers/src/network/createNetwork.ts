@@ -60,5 +60,30 @@ export function createNetwork(provider: Provider): Network {
         transactionIndex: index,
       };
     },
+
+    async waitForTransaction(hash, options) {
+      const transaction = await provider.waitForTransaction(
+        hash,
+        undefined,
+        options?.timeout,
+      );
+
+      if (!transaction) {
+        return;
+      }
+
+      return {
+        blockHash: transaction.blockHash as `0x${string}`,
+        blockNumber: BigInt(transaction.blockNumber),
+        from: transaction.from as `0x${string}`,
+        to: transaction.to as `0x${string}` | null,
+        cumulativeGasUsed: BigInt(transaction.cumulativeGasUsed),
+        gasUsed: BigInt(transaction.gasUsed),
+        logsBloom: transaction.logsBloom as `0x${string}`,
+        transactionHash: transaction.hash as `0x${string}`,
+        transactionIndex: transaction.index,
+        effectiveGasPrice: BigInt(transaction.gasPrice),
+      };
+    },
   };
 }
