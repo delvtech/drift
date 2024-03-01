@@ -116,7 +116,6 @@ export function transactionToReceipt(
         from: transaction.from!,
         to: transaction.to!,
         transactionIndex: transaction.transactionIndex!,
-        type: transaction.type,
         cumulativeGasUsed: 0n,
         effectiveGasPrice: 0n,
         transactionHash: transaction.hash!,
