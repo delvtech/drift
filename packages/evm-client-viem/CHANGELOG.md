@@ -1,5 +1,16 @@
 # @delvtech/evm-client-viem
 
+## 0.2.0
+
+### Minor Changes
+
+- affd95f: Add `entries` property to the `SimpleCache` type.
+
+### Patch Changes
+
+- Updated dependencies [affd95f]
+  - @delvtech/evm-client@0.2.0
+
 ## 0.1.1
 
 ### Patch Changes
