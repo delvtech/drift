@@ -1,5 +1,5 @@
 import { Block, BlockTag } from 'src/network/types/Block';
-import { Transaction } from 'src/network/types/Transaction';
+import { Transaction, TransactionReceipt } from 'src/network/types/Transaction';
 
 // https://ethereum.github.io/execution-apis/api-documentation/
 
@@ -25,7 +25,7 @@ export interface Network {
    */
   waitForTransaction(
     ...args: NetworkWaitForTransactionArgs
-  ): Promise<Transaction | undefined>;
+  ): Promise<TransactionReceipt | undefined>;
 }
 
 export type NetworkGetBlockOptions =

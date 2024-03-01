@@ -1,5 +1,8 @@
+import {
+  NetworkStub,
+  transactionToReceipt,
+} from 'src/network/stubs/NetworkStub';
 import { describe, expect, it } from 'vitest';
-import { NetworkStub } from './NetworkStub';
 
 describe('NetworkStub', () => {
   it('waits for stubbed transactions', async () => {
@@ -29,7 +32,7 @@ describe('NetworkStub', () => {
 
     const tx = await waitPromise;
 
-    expect(tx).toBe(stubbedTx);
+    expect(tx).toEqual(transactionToReceipt(stubbedTx));
   });
 
   it('reaches timeout when waiting for transactions that are never stubbed', async () => {

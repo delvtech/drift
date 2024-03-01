@@ -21,3 +21,19 @@ export interface Transaction extends TransactionInfo {
 }
 
 export type MinedTransaction = Transaction & Required<TransactionInfo>;
+
+// https://github.com/ethereum/execution-apis/blob/e3d2745289bd2bb61dc8593069871be4be441952/src/schemas/receipt.yaml#L37
+export interface TransactionReceipt {
+  type?: `0x${string}`;
+  blockHash: `0x${string}`;
+  blockNumber: bigint;
+  from: `0x${string}`;
+  cumulativeGasUsed: bigint;
+  gasUsed: bigint;
+  // TODO:
+  // logs: Log[];
+  logsBloom: `0x${string}`;
+  transactionHash: `0x${string}`;
+  transactionIndex: number;
+  effectiveGasPrice: bigint;
+}
