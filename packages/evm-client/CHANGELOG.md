@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.2.1
+
+### Patch Changes
+
+- 5f6a374: Add `waitForTransaction` method to `Network` type.
+
 ## 0.2.0
 
 ### Minor Changes
