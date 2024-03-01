@@ -4,6 +4,7 @@ import {
   Network,
   NetworkGetBlockArgs,
   NetworkGetTransactionArgs,
+  NetworkWaitForTransactionArgs,
 } from 'src/network/types/Network';
 import { Transaction } from 'src/network/types/Transaction';
 
@@ -77,5 +78,34 @@ export class NetworkStub implements Network {
       );
     }
     return this.getTransactionStub(args);
+  }
+
+  async waitForTransaction(
+    ...[hash, { timeout = 60_000 } = {}]: NetworkWaitForTransactionArgs
+  ): Promise<Transaction | undefined> {
+    const stub = this.getTransactionStub;
+    if (!stub) {
+      throw new Error(
+        `The getTransaction function must be stubbed first:\n\tcontract.stubGetTransaction()`,
+      );
+    }
+
+    return new Promise((resolve) => {
+      let transaction = stub([hash]);
+      if (transaction) {
+        return resolve(transaction);
+      }
+
+      // Poll for the transaction until it's found or the timeout is reached
+      let waitedTime = 0;
+      const interval = setInterval(() => {
+        waitedTime += 1000;
+        transaction = stub([hash]);
+        if (transaction || waitedTime >= timeout) {
+          clearInterval(interval);
+          resolve(transaction);
+        }
+      }, 1000);
+    });
   }
 }

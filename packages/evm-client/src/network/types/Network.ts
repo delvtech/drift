@@ -19,6 +19,13 @@ export interface Network {
   getTransaction(
     ...args: NetworkGetTransactionArgs
   ): Promise<Transaction | undefined>;
+
+  /**
+   * Wait for a transaction to be mined.
+   */
+  waitForTransaction(
+    ...args: NetworkWaitForTransactionArgs
+  ): Promise<Transaction | undefined>;
 }
 
 export type NetworkGetBlockOptions =
@@ -41,3 +48,15 @@ export type NetworkGetBlockOptions =
 export type NetworkGetBlockArgs = [options?: NetworkGetBlockOptions];
 
 export type NetworkGetTransactionArgs = [hash: `0x${string}`];
+
+export type NetworkWaitForTransactionArgs = [
+  hash: `0x${string}`,
+  options?: {
+    /**
+     * The number of milliseconds to wait for the transaction until rejecting the
+     * promise.
+     * @default 60_000
+     */
+    timeout?: number;
+  },
+];
