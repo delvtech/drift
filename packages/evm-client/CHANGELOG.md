@@ -1,5 +1,12 @@
 # @delvtech/evm-client
 
+## 0.2.2
+
+### Patch Changes
+
+- 01ec0b1: Add onTransactionMined callback to ReadWriteContract
+- 01ec0b1: Make onTransactionMined optional
+
 ## 0.2.1
 
 ### Patch Changes
