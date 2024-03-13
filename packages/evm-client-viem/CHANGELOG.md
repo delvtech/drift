@@ -1,5 +1,12 @@
 # @delvtech/evm-client-viem
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [e3880c8]
+  - @delvtech/evm-client@0.2.3
+
 ## 0.2.2
 
 ### Patch Changes

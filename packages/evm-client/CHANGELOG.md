@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.2.3
+
+### Patch Changes
+
+- e3880c8: Add txHash to onTransactionMined
+
 ## 0.2.2
 
 ### Patch Changes
