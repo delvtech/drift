@@ -163,6 +163,11 @@ export interface ContractWriteOptions {
    * Chain ID that this transaction is valid on.
    */
   chainId?: bigint;
+
+  /**
+   * A callback for when the transaction has been mined.
+   */
+  onTransactionMined(): void;
 }
 
 export type ContractWriteArgs<
