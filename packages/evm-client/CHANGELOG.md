@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.2.4
+
+### Patch Changes
+
+- 322edf5: Remove onTransactionMined
+
 ## 0.2.3
 
 ### Patch Changes
