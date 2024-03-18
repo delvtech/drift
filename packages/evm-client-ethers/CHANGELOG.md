@@ -1,5 +1,16 @@
 # @delvtech/evm-client-ethers
 
+## 0.3.0
+
+### Minor Changes
+
+- 91106f8: Add a getBalance method to the Network interface for fetching native currency balances (e.g. ETH)
+
+### Patch Changes
+
+- Updated dependencies [91106f8]
+  - @delvtech/evm-client@0.3.0
+
 ## 0.2.4
 
 ### Patch Changes
