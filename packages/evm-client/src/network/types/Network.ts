@@ -8,6 +8,11 @@ import { Transaction, TransactionReceipt } from 'src/network/types/Transaction';
  */
 export interface Network {
   /**
+   * Get the balance of native currency for an account.
+   */
+  getBalance(...args: NetworkGetBalanceArgs): Promise<bigint>;
+
+  /**
    * Get a block from a block tag, number, or hash. If no argument is provided,
    * the latest block is returned.
    */
@@ -44,6 +49,11 @@ export type NetworkGetBlockOptions =
       blockNumber?: never;
       blockTag?: BlockTag;
     };
+
+export type NetworkGetBalanceArgs = [
+  address: string,
+  block?: NetworkGetBlockOptions,
+];
 
 export type NetworkGetBlockArgs = [options?: NetworkGetBlockOptions];
 
