@@ -51,7 +51,7 @@ export type NetworkGetBlockOptions =
     };
 
 export type NetworkGetBalanceArgs = [
-  address: string,
+  address: `0x${string}`,
   block?: NetworkGetBlockOptions,
 ];
 
