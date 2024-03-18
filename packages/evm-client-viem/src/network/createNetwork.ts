@@ -1,8 +1,32 @@
 import { Network } from '@delvtech/evm-client';
-import { PublicClient, TransactionLegacy, rpcTransactionType } from 'viem';
+import {
+  GetBalanceParameters,
+  PublicClient,
+  TransactionLegacy,
+  rpcTransactionType,
+} from 'viem';
 
 export function createNetwork(publicClient: PublicClient): Network {
   return {
+    async getBalance(account, options) {
+      const { blockHash, blockNumber, blockTag } = options ?? {};
+
+      const parameters: Partial<GetBalanceParameters> = {
+        address: account,
+      };
+
+      if (blockNumber) {
+        parameters.blockNumber = blockNumber;
+      } else if (blockTag) {
+        parameters.blockTag = blockHash;
+      } else if (blockHash) {
+        const block = await publicClient.getBlock({ blockHash });
+        parameters.blockNumber = block.number;
+      }
+
+      return publicClient.getBalance(parameters as GetBalanceParameters);
+    },
+
     async getBlock(args) {
       const block = await publicClient.getBlock(args);
 
