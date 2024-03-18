@@ -2,6 +2,7 @@ import { SinonStub, stub } from 'sinon';
 import { Block } from 'src/network/types/Block';
 import {
   Network,
+  NetworkGetBalanceArgs,
   NetworkGetBlockArgs,
   NetworkGetTransactionArgs,
   NetworkWaitForTransactionArgs,
@@ -13,12 +14,35 @@ import { Transaction, TransactionReceipt } from 'src/network/types/Transaction';
  * testing.
  */
 export class NetworkStub implements Network {
+  protected getBalanceStub:
+    | SinonStub<[NetworkGetBalanceArgs?], Promise<bigint>>
+    | undefined;
   protected getBlockStub:
     | SinonStub<[NetworkGetBlockArgs?], Promise<Block | undefined>>
     | undefined;
   protected getTransactionStub:
     | SinonStub<[NetworkGetTransactionArgs?], Promise<Transaction | undefined>>
     | undefined;
+
+  stubGetBalance({
+    args,
+    value,
+  }: {
+    args?: NetworkGetBalanceArgs | undefined;
+    value: bigint;
+  }): void {
+    if (!this.getBalanceStub) {
+      this.getBalanceStub = stub();
+    }
+
+    // Account for dynamic args if provided
+    if (args) {
+      this.getBalanceStub.withArgs(args).resolves(value);
+      return;
+    }
+
+    this.getBalanceStub.resolves(value);
+  }
 
   stubGetBlock({
     args,
@@ -58,6 +82,15 @@ export class NetworkStub implements Network {
     }
 
     this.getTransactionStub.resolves(value);
+  }
+
+  getBalance(...args: NetworkGetBalanceArgs): Promise<bigint> {
+    if (!this.getBalanceStub) {
+      throw new Error(
+        `The getBalance function must be stubbed first:\n\tcontract.stubGetBalance()`,
+      );
+    }
+    return this.getBalanceStub(args);
   }
 
   getBlock(...args: NetworkGetBlockArgs): Promise<Block | undefined> {
