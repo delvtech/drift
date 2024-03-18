@@ -3,6 +3,15 @@ import { Provider } from 'ethers';
 
 export function createNetwork(provider: Provider): Network {
   return {
+    async getBalance(account, options = {}) {
+      const { blockHash, blockNumber, blockTag } = options;
+
+      return provider.getBalance(
+        account,
+        blockHash || blockNumber || blockTag || 'latest',
+      );
+    },
+
     async getBlock(options = {}) {
       const { blockHash, blockNumber, blockTag } = options;
 
