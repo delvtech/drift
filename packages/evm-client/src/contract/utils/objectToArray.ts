@@ -54,6 +54,7 @@ export function objectToArray<
   TItemType extends AbiItemType,
   TName extends AbiEntryName<TAbi, TItemType>,
   TParameterKind extends AbiParameterKind,
+  TValue extends AbiObjectType<TAbi, TItemType, TName, TParameterKind>,
 >({
   abi,
   type,
@@ -63,11 +64,9 @@ export function objectToArray<
 }: {
   abi: TAbi;
   name: TName;
-  value?: Abi extends TAbi
-    ? Record<string, unknown> // <- fallback for unknown ABI type
-    : Partial<AbiObjectType<TAbi, TItemType, TName, TParameterKind>>;
   kind: TParameterKind;
   type: TItemType;
+  value?: Abi extends TAbi ? Record<string, unknown> : TValue;
 }): AbiArrayType<TAbi, TItemType, TName, TParameterKind> {
   const abiEntry = getAbiEntry({ abi, type, name });
 
