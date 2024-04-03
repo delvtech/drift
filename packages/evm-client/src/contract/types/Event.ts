@@ -19,7 +19,7 @@ type NamedEventInput<
   TAbi extends Abi,
   TEventName extends EventName<TAbi>,
 > = Extract<
-  AbiParameters<TAbi, 'event', TEventName, 'inputs'>,
+  AbiParameters<TAbi, 'event', TEventName, 'inputs'>[number],
   NamedAbiParameter
 >;
 
