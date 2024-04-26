@@ -81,6 +81,9 @@ export function createNetwork(provider: Provider): Network {
         return;
       }
 
+      // status is either 0 (reverted) or 1 (success)
+      const status = !transaction.status ? 'reverted' : 'success';
+
       return {
         blockHash: transaction.blockHash as `0x${string}`,
         blockNumber: BigInt(transaction.blockNumber),
@@ -92,6 +95,7 @@ export function createNetwork(provider: Provider): Network {
         transactionHash: transaction.hash as `0x${string}`,
         transactionIndex: transaction.index,
         effectiveGasPrice: BigInt(transaction.gasPrice),
+        status,
       };
     },
   };

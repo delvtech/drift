@@ -154,6 +154,7 @@ export function transactionToReceipt(
         transactionHash: transaction.hash!,
         gasUsed: 0n,
         logsBloom: '0x',
+        status: 'success',
       }
     : undefined;
 }
