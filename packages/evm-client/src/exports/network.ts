@@ -11,4 +11,5 @@ export type {
   MinedTransaction,
   Transaction,
   TransactionInfo,
+  TransactionReceipt,
 } from 'src/network/types/Transaction';
