@@ -45,6 +45,9 @@ export interface TransactionReceipt {
   logsBloom: `0x${string}`;
   transactionHash: `0x${string}`;
   transactionIndex: number;
+
+  status: 'success' | 'reverted';
+
   /**
    * The actual value per gas deducted from the sender's account. Before
    * EIP-1559, this is equal to the transaction's gas price. After, it is equal
