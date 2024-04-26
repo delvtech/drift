@@ -1,6 +1,6 @@
 {
   "name": "@delvtech/evm-client-ethers",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
@@ -36,7 +36,7 @@
     "ethers": "^6"
   },
   "dependencies": {
-    "@delvtech/evm-client": "0.4.0"
+    "@delvtech/evm-client": "0.4.1"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
