@@ -72,7 +72,7 @@ export function createNetwork(publicClient: PublicClient): Network {
       };
     },
 
-    async waitForTransaction(hash, options) {
+    waitForTransaction(hash, options) {
       return publicClient.waitForTransactionReceipt({
         hash,
         timeout: options?.timeout,
