@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.4.0
+
+### Minor Changes
+
+- 51fd2e4: Add status field to Transaction
+
 ## 0.3.1
 
 ### Patch Changes
