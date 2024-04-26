@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.4.1
+
+### Patch Changes
+
+- 4609a60: Export TransactionReceipt type
+
 ## 0.4.0
 
 ### Minor Changes
