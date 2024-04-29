@@ -10,7 +10,7 @@ type DefinedValue = NonNullable<
  * The method ensures that any given raw key, regardless of its structure,
  * is converted into a format suitable for consistent cache key referencing.
  *
- * - For primitives (string, number, boolean), it returns them directly.
+ * - For scalar (string, number, boolean), it returns them directly.
  * - For arrays, it recursively processes each element.
  * - For objects, it sorts the keys and then recursively processes each value, ensuring consistent key generation.
  * - For other types, it attempts to convert the raw key to a string.
@@ -28,9 +28,10 @@ export function createSimpleCacheKey(rawKey: DefinedValue): SimpleCacheKey {
     case 'object': {
       if (Array.isArray(rawKey)) {
         return rawKey.map((value) =>
-          // undefined or null values in arrays are left as is
+          // undefined or null values are converted to null to follow the
+          // precedent set by JSON.stringify
           value === undefined || value === null
-            ? value
+            ? null
             : createSimpleCacheKey(value),
         );
       }

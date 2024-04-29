@@ -18,9 +18,20 @@ export function createLruSimpleCache<
 >(options: LRUCache.Options<string, TValue, void>): SimpleCache<TValue, TKey> {
   const cache = new LRUCache(options);
 
+  function* entriesGenerator(
+    originalGenerator: Generator<[TKey, TValue]>,
+  ): Generator<[TKey, TValue]> {
+    for (const [key, value] of originalGenerator) {
+      // Modify the entry here before yielding it
+      const modifiedEntry = [JSON.parse(key as string), value];
+      yield modifiedEntry as [TKey, TValue];
+    }
+  }
+
   return {
     get entries() {
-      return cache.entries() as Generator<[TKey, TValue]>;
+      // Keys need to be returned in the same format as they were given to the cache
+      return entriesGenerator(cache.entries() as Generator<[TKey, TValue]>);
     },
 
     get(key) {
