@@ -8,7 +8,7 @@ export interface TransactionInfo {
 }
 
 /** Basic legacy compatible transaction */
-// https://github.com/ethereum/execution-apis/blob/main/src/schemas/transaction.yaml#L184
+// https://github.com/ethereum/execution-apis/blob/e8727564bb74a1ebcd22a933b7b57eb7b71a11c3/src/schemas/transaction.yaml#L184
 export interface Transaction extends TransactionInfo {
   type: `0x${string}`;
   nonce: number;
