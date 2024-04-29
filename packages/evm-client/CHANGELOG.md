@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.4.2
+
+### Patch Changes
+
+- 52edea9: Add deleteReadMatch method to CachedReadContract
+
 ## 0.4.1
 
 ### Patch Changes
