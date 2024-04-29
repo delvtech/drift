@@ -17,8 +17,10 @@ export type NamedAbiParameter = AbiParameter & { name: string };
  * Get a union of possible names for an abi item type.
  *
  * @example
+ * ```ts
  * type Erc20EventNames = AbiEntryName<Erc20Abi, "event">;
  * // -> "Approval" | "Transfer"
+ * ```
  */
 export type AbiEntryName<
   TAbi extends Abi,
@@ -29,6 +31,7 @@ export type AbiEntryName<
  * Get the ABI entry for a specific type, name, and state mutability.
  *
  * @example
+ * ```ts
  * type ApproveEntry = AbiEntry<Erc20Abi, "function", "approve">;
  * // ->
  * // {
@@ -38,6 +41,7 @@ export type AbiEntryName<
  * //   outputs: [{ name: "", type: "bool" }];
  * //   stateMutability: "nonpayable";
  * // }
+ * ```
  */
 export type AbiEntry<
   TAbi extends Abi,
@@ -53,8 +57,10 @@ export type AbiEntry<
  * Get the parameters for a specific ABI entry.
  *
  * @example
+ * ```ts
  * type ApproveParameters = AbiParameters<Erc20Abi, "function", "approve", "inputs">;
  * // -> [{ name: "spender", type: "address" }, { name: "value", type: "uint256" }]
+ * ```
  */
 export type AbiParameters<
   TAbi extends Abi = Abi,
@@ -71,6 +77,12 @@ export type AbiParameters<
 /**
  * Add default names to any ABI parameters that are missing a name. The default
  * name is the index of the parameter.
+ *
+ * @example
+ * ```ts
+ * type Parameters = WithDefaultNames<[{ name: "spender", type: "address" }, { type: "uint256" }]>;
+ * // -> [{ name: "spender", type: "address" }, { name: "1", type: "uint256" }]
+ * ```
  */
 type WithDefaultNames<TParameters extends readonly AbiParameter[]> = {
   [K in keyof TParameters]: TParameters[K] extends infer TParameter extends
@@ -84,13 +96,18 @@ type WithDefaultNames<TParameters extends readonly AbiParameter[]> = {
 /**
  * Convert an array or tuple of named abi parameters to an object type with the
  * parameter names as keys and their primitive types as values. If a parameter
- * has no name, it's index is used as the key.
+ * has an empty name, it's index is used as the key.
+ *
+ * @example
+ * ```ts
+ * type Parameters = NamedParametersToObject<[{ name: "spender", type: "address" }, { name: "", type: "uint256" }]>;
+ * // -> { spender: `${string}`, "1": bigint }
+ * ```
  */
 type NamedParametersToObject<
   TParameters extends readonly NamedAbiParameter[],
   TParameterKind extends AbiParameterKind = AbiParameterKind,
 > = Prettify<
-  // <- Combine all the keys into a single object
   {
     // For every parameter name, excluding empty names, add a key to the object
     // for the parameter name
@@ -112,8 +129,8 @@ type NamedParametersToObject<
             ? // Exclude `number` to ensure only the specific index keys are
               // included and not `number` itself
               Exclude<K, number>
-            : never // <- Prototype key (e.g., `length`, `toString`)
-          : never]: TParameters[K] extends NamedAbiParameter
+            : never // <- Key for named parameters (already handled above)
+          : never /* <- Prototype key (e.g., `length`, `toString`) */]: TParameters[K] extends NamedAbiParameter
           ? AbiParameterToPrimitiveType<TParameters[K], TParameterKind>
           : never; // <- Prototype value
       }
@@ -134,10 +151,13 @@ type NamedParametersToObject<
  * Convert an array or tuple of abi parameters to an object type.
  *
  * @example
+ * ```ts
  * type ApproveArgs = AbiParametersToObject<[
  *   { name: "spender", type: "address" },
  *   { name: "value", type: "uint256" }
- * ]>; // -> { spender: `${string}`, value: bigint }
+ * ]>;
+ * // -> { spender: `0x${string}`, value: bigint }
+ * ```
  */
 export type AbiParametersToObject<
   TParameters extends readonly AbiParameter[],
@@ -152,11 +172,13 @@ export type AbiParametersToObject<
  * Get an array of primitive types for any ABI parameters.
  *
  * @example
+ * ```ts
  * type ApproveInput = AbiArrayType<Erc20Abi, "function", "approve", "inputs">;
- * // -> [`${string}`, bigint]
+ * // -> [`0x${string}`, bigint]
  *
  * type BalanceOutput = AbiArrayType<Erc20Abi, "function", "balanceOf", "outputs">;
  * // -> [bigint]
+ * ```
  */
 export type AbiArrayType<
   TAbi extends Abi,
@@ -179,11 +201,13 @@ export type AbiArrayType<
  * Get an object of primitive types for any ABI parameters.
  *
  * @example
+ * ```ts
  * type ApproveArgs = AbiObjectType<Erc20Abi, "function", "approve", "inputs">;
- * // -> { spender: `${string}`, value: bigint }
+ * // -> { spender: `0x${string}`, value: bigint }
  *
  * type Balance = AbiObjectType<Erc20Abi, "function", "balanceOf", "outputs">;
  * // -> { balance: bigint }
+ * ```
  */
 export type AbiObjectType<
   TAbi extends Abi,
@@ -204,6 +228,7 @@ export type AbiObjectType<
  * - __No parameters:__ `undefined`.
  *
  * @example
+ * ```ts
  * type ApproveArgs = AbiFriendlyType<Erc20Abi, "function", "approve", "inputs">;
  * // -> { spender: `${string}`, value: bigint }
  *
@@ -212,6 +237,7 @@ export type AbiObjectType<
  *
  * type DecimalArgs = AbiFriendlyType<Erc20Abi, "function", "decimals", "inputs">;
  * // -> undefined
+ * ```
  */
 export type AbiFriendlyType<
   TAbi extends Abi,
