@@ -1,4 +1,5 @@
 import { Abi } from 'abitype';
+import isMatch from 'lodash.ismatch';
 import { createLruSimpleCache } from 'src/cache/factories/createLruSimpleCache';
 import { SimpleCache, SimpleCacheKey } from 'src/cache/types/SimpleCache';
 import { createSimpleCacheKey } from 'src/cache/utils/createSimpleCacheKey';
@@ -61,7 +62,6 @@ export function createCachedReadContract<TAbi extends Abi = Abi>({
             options,
           },
         ]),
-
         callback: () => contract.read(functionName, args, options),
       });
     },
@@ -90,6 +90,30 @@ export function createCachedReadContract<TAbi extends Abi = Abi>({
       ]);
 
       cache.delete(key);
+    },
+
+    deleteReadMatch(...args) {
+      const [functionName, functionArgs, options] = args;
+
+      const sourceKey = createSimpleCacheKey([
+        namespace,
+        'read',
+        {
+          address: contract.address,
+          functionName,
+          args: functionArgs,
+          options,
+        },
+      ]);
+
+      for (const [key] of cache.entries) {
+        if (
+          typeof key === 'object' &&
+          isMatch(key, sourceKey as SimpleCacheKey[])
+        ) {
+          cache.delete(key);
+        }
+      }
     },
 
     /**
