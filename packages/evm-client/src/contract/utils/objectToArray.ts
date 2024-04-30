@@ -83,10 +83,7 @@ export function objectToArray<
   const valueObject: Record<string, unknown> =
     value && typeof value === 'object' ? value : {};
 
-  const array: unknown[] = [];
-  parameters.forEach(({ name }, i) => {
-    array.push(valueObject[name || i]);
-  });
+  const array = parameters.map(({ name }, i) => valueObject[name || i]);
 
   return array as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
 }

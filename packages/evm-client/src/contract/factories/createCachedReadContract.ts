@@ -92,7 +92,7 @@ export function createCachedReadContract<TAbi extends Abi = Abi>({
       cache.delete(key);
     },
 
-    deleteReadMatch(...args) {
+    deleteReadsMatching(...args) {
       const [functionName, functionArgs, options] = args;
 
       const sourceKey = createSimpleCacheKey([

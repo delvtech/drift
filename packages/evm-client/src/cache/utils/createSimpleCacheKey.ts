@@ -7,16 +7,18 @@ type DefinedValue = NonNullable<
 /**
  * Converts a given raw key into a `SimpleCacheKey``.
  *
- * The method ensures that any given raw key, regardless of its structure,
- * is converted into a format suitable for consistent cache key referencing.
+ * The method ensures that any given raw key, regardless of its structure, is
+ * converted into a format suitable for consistent cache key referencing.
  *
  * - For scalar (string, number, boolean), it returns them directly.
  * - For arrays, it recursively processes each element.
- * - For objects, it sorts the keys and then recursively processes each value, ensuring consistent key generation.
+ * - For objects, it sorts the keys and then recursively processes each value,
+ *   ensuring consistent key generation.
  * - For other types, it attempts to convert the raw key to a string.
  *
  * @param rawKey - The raw input to be converted into a cache key.
- * @returns A standardized cache key suitable for consistent referencing within the cache.
+ * @returns A standardized cache key suitable for consistent referencing within
+ * the cache.
  */
 export function createSimpleCacheKey(rawKey: DefinedValue): SimpleCacheKey {
   switch (typeof rawKey) {
