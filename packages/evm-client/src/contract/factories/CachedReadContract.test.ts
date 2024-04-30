@@ -101,7 +101,7 @@ describe('createCachedReadContract', () => {
     expect(bobValue).toBe(200n);
 
     // Deleting anything that matches a balanceOf call
-    cachedContract.deleteReadMatch('balanceOf');
+    cachedContract.deleteReadsMatching('balanceOf');
 
     // Request bob and alice's balance again
     const aliceValue2 = await cachedContract.read('balanceOf', {
@@ -138,7 +138,7 @@ describe('createCachedReadContract', () => {
     await cachedContract.read('allowance', bobArgs);
 
     // Deleting any allowance calls where BOB is the spender
-    cachedContract.deleteReadMatch('allowance', { spender: BOB });
+    cachedContract.deleteReadsMatching('allowance', { spender: BOB });
 
     // Request bob and alice's allowance again
     await cachedContract.read('allowance', aliceArgs);

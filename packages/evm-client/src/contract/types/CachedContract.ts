@@ -15,7 +15,7 @@ export interface CachedReadContract<TAbi extends Abi = Abi>
   deleteRead<TFunctionName extends FunctionName<TAbi>>(
     ...[functionName, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ): void;
-  deleteReadMatch<TFunctionName extends FunctionName<TAbi>>(
+  deleteReadsMatching<TFunctionName extends FunctionName<TAbi>>(
     ...[functionName, args, options]: DeepPartial<
       ContractReadArgs<TAbi, TFunctionName>
     >
