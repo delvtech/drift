@@ -1,6 +1,6 @@
 # @delvtech/evm-client-viem
 
-Viem bindings for [@delvtech/evm-client](https://github.com/delvtech/evm-client/tree/main/packages/evm-client)
+Viem implementations of [@delvtech/evm-client](https://github.com/delvtech/evm-client/tree/main/packages/evm-client).
 
 ```ts
 import { createCachedReadContract } from '@delvtech/evm-client-viem';
