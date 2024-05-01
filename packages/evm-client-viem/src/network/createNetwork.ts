@@ -37,6 +37,10 @@ export function createNetwork(publicClient: PublicClient): Network {
       return { blockNumber: block.number, timestamp: block.timestamp };
     },
 
+    getChainId() {
+      return publicClient.getChainId();
+    },
+
     async getTransaction(hash) {
       const {
         blockHash,

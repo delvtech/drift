@@ -31,6 +31,11 @@ export function createNetwork(provider: Provider): Network {
       };
     },
 
+    async getChainId() {
+      const network = await provider.getNetwork();
+      return Number(network.chainId);
+    },
+
     async getTransaction(hash) {
       const transaction = await provider.getTransaction(hash);
 
