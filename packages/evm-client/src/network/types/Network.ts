@@ -19,6 +19,11 @@ export interface Network {
   getBlock(...args: NetworkGetBlockArgs): Promise<Block | undefined>;
 
   /**
+   * Get the chain ID of the network.
+   */
+  getChainId(): Promise<number>;
+
+  /**
    * Get a transaction from a transaction hash.
    */
   getTransaction(

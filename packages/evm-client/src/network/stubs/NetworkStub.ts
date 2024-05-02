@@ -20,6 +20,7 @@ export class NetworkStub implements Network {
   protected getBlockStub:
     | SinonStub<[NetworkGetBlockArgs?], Promise<Block | undefined>>
     | undefined;
+  protected getChainIdStub: SinonStub<[], Promise<number>> | undefined;
   protected getTransactionStub:
     | SinonStub<[NetworkGetTransactionArgs?], Promise<Transaction | undefined>>
     | undefined;
@@ -64,6 +65,14 @@ export class NetworkStub implements Network {
     this.getBlockStub.resolves(value);
   }
 
+  stubGetChainId(id: number): void {
+    if (!this.getChainIdStub) {
+      this.getChainIdStub = stub();
+    }
+
+    this.getChainIdStub.resolves(id);
+  }
+
   stubGetTransaction({
     args,
     value,
@@ -100,6 +109,15 @@ export class NetworkStub implements Network {
       );
     }
     return this.getBlockStub(args);
+  }
+
+  getChainId(): Promise<number> {
+    if (!this.getChainIdStub) {
+      throw new Error(
+        `The getChainId function must be stubbed first:\n\tcontract.stubGetChainId()`,
+      );
+    }
+    return this.getChainIdStub();
   }
 
   getTransaction(
