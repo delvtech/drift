@@ -17,7 +17,7 @@ export interface ReadWriteContractOptions<TAbi extends Abi = Abi>
   /**
    * Turn this off for debugging
    */
-  validateBeforeWrite?: boolean;
+  simulateBeforeWrite?: boolean;
 }
 
 /**
@@ -30,7 +30,7 @@ export function createReadWriteContract<TAbi extends Abi = Abi>({
   publicClient,
   walletClient,
   readContract = createReadContract({ abi, address, publicClient }),
-  validateBeforeWrite: validateBeforeWrite = true,
+  simulateBeforeWrite: simulateBeforeWrite = true,
 }: ReadWriteContractOptions<TAbi>): ReadWriteContract<TAbi> {
   return {
     ...readContract,
@@ -63,7 +63,7 @@ export function createReadWriteContract<TAbi extends Abi = Abi>({
         value: args,
       });
 
-      if (!validateBeforeWrite) {
+      if (!simulateBeforeWrite) {
         return walletClient.writeContract({
           address,
           abi: abi as Abi,

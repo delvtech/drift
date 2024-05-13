@@ -2,4 +2,4 @@
 "@delvtech/evm-client-viem": minor
 ---
 
-This is adding a validateBeforeWrite param to createReadWriteContract.
+This added a validateBeforeWrite param to createReadWriteContract.
