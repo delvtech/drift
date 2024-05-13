@@ -1,5 +1,14 @@
 # @delvtech/evm-client-ethers
 
+## 0.4.3
+
+### Patch Changes
+
+- 93531e6: Added getChainId method to the Network interface.
+- Updated dependencies [93531e6]
+- Updated dependencies [919f525]
+  - @delvtech/evm-client@0.5.0
+
 ## 0.4.2
 
 ### Patch Changes

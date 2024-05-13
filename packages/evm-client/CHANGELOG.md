@@ -1,5 +1,15 @@
 # @delvtech/evm-client
 
+## 0.5.0
+
+### Minor Changes
+
+- 919f525: Renamed `deleteReadMatch` to `deleteReadsMatching`
+
+### Patch Changes
+
+- 93531e6: Added getChainId method to the Network interface.
+
 ## 0.4.2
 
 ### Patch Changes
