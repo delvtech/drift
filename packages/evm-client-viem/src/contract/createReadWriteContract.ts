@@ -8,12 +8,16 @@ import {
   CreateReadContractOptions,
 } from 'src/contract/createReadContract';
 import { createSimulateContractParameters } from 'src/contract/utils/createSimulateContractParameters';
-import { Abi, WalletClient } from 'viem';
+import { Abi, Address, WalletClient } from 'viem';
 
 export interface ReadWriteContractOptions<TAbi extends Abi = Abi>
   extends CreateReadContractOptions<TAbi> {
   walletClient: WalletClient;
   readContract?: ReadContract<TAbi>;
+  /**
+   * Turn this off for debugging
+   */
+  validateBeforeWrite?: boolean;
 }
 
 /**
@@ -26,6 +30,7 @@ export function createReadWriteContract<TAbi extends Abi = Abi>({
   publicClient,
   walletClient,
   readContract = createReadContract({ abi, address, publicClient }),
+  validateBeforeWrite: validateBeforeWrite = true,
 }: ReadWriteContractOptions<TAbi>): ReadWriteContract<TAbi> {
   return {
     ...readContract,
@@ -57,6 +62,17 @@ export function createReadWriteContract<TAbi extends Abi = Abi>({
         kind: 'inputs',
         value: args,
       });
+
+      if (!validateBeforeWrite) {
+        return walletClient.writeContract({
+          address,
+          abi: abi as Abi,
+          functionName,
+          args: arrayArgs,
+          account: account as Address,
+          chain: undefined,
+        });
+      }
 
       const { request } = await publicClient.simulateContract({
         abi: abi as Abi,
