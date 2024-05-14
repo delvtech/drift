@@ -1,5 +1,11 @@
 # @delvtech/evm-client-viem
 
+## 0.6.0
+
+### Minor Changes
+
+- e1b3850: This reverted the simulateBeforeWrite param to createReadWriteContract
+
 ## 0.5.0
 
 ### Minor Changes
