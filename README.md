@@ -15,8 +15,8 @@ library agnostic.
 ## Creating a release
 
 This repo uses [changesets](https://github.com/changesets/changesets) to manage
-versioning and changelogs. This means you shouldn't need to manually change of
-the internal package versions.
+versioning and changelogs. This means you shouldn't need to manually change any
+of the internal package versions.
 
 Before opening a PR, run `yarn changeset` and follow the prompts to describe the
 changes you've made. This will create a changeset file that should be committed.
