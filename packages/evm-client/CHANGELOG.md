@@ -1,5 +1,11 @@
 # @delvtech/evm-client
 
+## 0.5.1
+
+### Patch Changes
+
+- 66d9dc3: Added `ConstructorArgs` type
+
 ## 0.5.0
 
 ### Minor Changes
