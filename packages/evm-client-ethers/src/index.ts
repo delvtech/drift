@@ -38,6 +38,7 @@ export type {
   AbiParameters,
   CachedReadContract,
   CachedReadWriteContract,
+  ConstructorArgs,
   ContractDecodeFunctionDataArgs,
   ContractEncodeFunctionDataArgs,
   ContractGetEventsArgs,

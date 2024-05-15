@@ -40,6 +40,7 @@ export type {
   EventName,
 } from 'src/contract/types/Event';
 export type {
+  ConstructorArgs,
   DecodedFunctionData,
   FunctionArgs,
   FunctionName,

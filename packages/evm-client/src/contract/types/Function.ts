@@ -21,6 +21,16 @@ export type FunctionArgs<
 > = AbiObjectType<TAbi, 'function', TFunctionName, 'inputs'>;
 
 /**
+ * Get an object type for an abi's constructor arguments.
+ */
+export type ConstructorArgs<TAbi extends Abi> = AbiObjectType<
+  TAbi,
+  'constructor',
+  any,
+  'inputs'
+>;
+
+/**
  * Get a user-friendly return type for an abi function, which is determined by
  * it's outputs:
  * - __Single output:__ the type of the single output.
