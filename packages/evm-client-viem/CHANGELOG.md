@@ -1,5 +1,13 @@
 # @delvtech/evm-client-viem
 
+## 0.6.1
+
+### Patch Changes
+
+- 66d9dc3: Added `ConstructorArgs` type
+- Updated dependencies [66d9dc3]
+  - @delvtech/evm-client@0.5.1
+
 ## 0.6.0
 
 ### Minor Changes
