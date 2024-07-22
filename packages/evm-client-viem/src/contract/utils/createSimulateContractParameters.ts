@@ -40,6 +40,5 @@ type SimulateContractParameters = {
   value?: bigint;
 } & (
   | { gasPrice?: bigint }
-  | { maxFeePerGas?: bigint }
-  | { maxPriorityFeePerGas?: bigint }
+  | { maxFeePerGas?: bigint; maxPriorityFeePerGas?: bigint }
 );
