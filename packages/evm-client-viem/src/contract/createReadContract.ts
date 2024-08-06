@@ -78,6 +78,7 @@ export function createReadContract<TAbi extends Abi = Abi>({
         abi,
         functionName,
         output,
+        argsArray,
       }) as FunctionReturn<TAbi, typeof functionName>;
     },
 
@@ -102,6 +103,7 @@ export function createReadContract<TAbi extends Abi = Abi>({
         abi,
         functionName,
         output: result,
+        argsArray,
       }) as FunctionReturn<TAbi, typeof functionName>;
     },
 
