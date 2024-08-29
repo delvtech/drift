@@ -1,5 +1,11 @@
 # @delvtech/evm-client-viem
 
+## 0.6.2
+
+### Patch Changes
+
+- 0c6b18c: Refactor `getEvents` to use `eth_getLogs`
+
 ## 0.6.1
 
 ### Patch Changes
