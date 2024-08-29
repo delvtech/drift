@@ -106,16 +106,13 @@ export function createReadContract<TAbi extends Abi = Abi>({
     },
 
     async getEvents(eventName, options) {
-      const filter = await publicClient.createContractEventFilter({
-        address: address,
+      const events = await publicClient.getContractEvents({
+        address,
         abi: abi as Abi,
         eventName: eventName as string,
-        args: options?.filter,
         fromBlock: options?.fromBlock ?? 'earliest',
         toBlock: options?.toBlock ?? 'latest',
       });
-
-      const events = await publicClient.getFilterLogs({ filter });
 
       return events.map(({ args, blockNumber, data, transactionHash }) => {
         const objectArgs = Array.isArray(args)
