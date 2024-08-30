@@ -1,5 +1,11 @@
 # @delvtech/evm-client-viem
 
+## 0.6.3
+
+### Patch Changes
+
+- fe53048: Fix bug causing event args to not get passed to getEvents requets"
+
 ## 0.6.2
 
 ### Patch Changes
