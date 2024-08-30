@@ -112,6 +112,7 @@ export function createReadContract<TAbi extends Abi = Abi>({
         eventName: eventName as string,
         fromBlock: options?.fromBlock ?? 'earliest',
         toBlock: options?.toBlock ?? 'latest',
+        args: options?.filter,
       });
 
       return events.map(({ args, blockNumber, data, transactionHash }) => {
