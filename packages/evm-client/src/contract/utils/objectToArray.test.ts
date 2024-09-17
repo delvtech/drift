@@ -48,7 +48,7 @@ describe("objectToArray", () => {
   expect(emptyArrayFromUndefined).toEqual([]);
 });
 
-export const exampleAbi = [
+const exampleAbi = [
   {
     inputs: [
       { name: "", type: "address" },

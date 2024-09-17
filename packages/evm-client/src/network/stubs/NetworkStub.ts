@@ -96,7 +96,7 @@ export class NetworkStub implements Network {
   getBalance(...args: NetworkGetBalanceArgs): Promise<bigint> {
     if (!this.getBalanceStub) {
       throw new Error(
-        `The getBalance function must be stubbed first:\n\tcontract.stubGetBalance()`,
+        "The getBalance function must be stubbed first:\n\tcontract.stubGetBalance()",
       );
     }
     return this.getBalanceStub(args);
@@ -105,7 +105,7 @@ export class NetworkStub implements Network {
   getBlock(...args: NetworkGetBlockArgs): Promise<Block | undefined> {
     if (!this.getBlockStub) {
       throw new Error(
-        `The getBlock function must be stubbed first:\n\tcontract.stubGetBlock()`,
+        "The getBlock function must be stubbed first:\n\tcontract.stubGetBlock()",
       );
     }
     return this.getBlockStub(args);
@@ -114,7 +114,7 @@ export class NetworkStub implements Network {
   getChainId(): Promise<number> {
     if (!this.getChainIdStub) {
       throw new Error(
-        `The getChainId function must be stubbed first:\n\tcontract.stubGetChainId()`,
+        "The getChainId function must be stubbed first:\n\tcontract.stubGetChainId()",
       );
     }
     return this.getChainIdStub();
@@ -125,7 +125,7 @@ export class NetworkStub implements Network {
   ): Promise<Transaction | undefined> {
     if (!this.getTransactionStub) {
       throw new Error(
-        `The getTransaction function must be stubbed first:\n\tcontract.stubGetTransaction()`,
+        "The getTransaction function must be stubbed first:\n\tcontract.stubGetTransaction()",
       );
     }
     return this.getTransactionStub(args);
@@ -134,6 +134,7 @@ export class NetworkStub implements Network {
   async waitForTransaction(
     ...[hash, { timeout = 60_000 } = {}]: NetworkWaitForTransactionArgs
   ): Promise<TransactionReceipt | undefined> {
+    // biome-ignore lint/suspicious/noAsyncPromiseExecutor: special case for testing
     return new Promise(async (resolve) => {
       let transaction: Transaction | undefined;
 

@@ -22,7 +22,10 @@
 
     "rules": {
       "style": {
-        "noNonNullAssertion": "info"
+        "noNonNullAssertion": {
+          "level": "info",
+          "fix": "none"
+        }
       },
       "suspicious": {
         "noExplicitAny": "info"

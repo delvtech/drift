@@ -53,7 +53,7 @@ describe("arrayToFriendly", () => {
   });
 });
 
-export const exampleAbi = [
+const exampleAbi = [
   {
     inputs: [
       { name: "", type: "address" },
