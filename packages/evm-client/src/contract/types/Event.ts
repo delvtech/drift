@@ -1,5 +1,5 @@
-import { Abi } from "abitype";
-import {
+import type { Abi } from "abitype";
+import type {
   AbiEntry,
   AbiObjectType,
   AbiParameters,

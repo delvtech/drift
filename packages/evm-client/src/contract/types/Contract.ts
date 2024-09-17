@@ -1,13 +1,13 @@
-import { Abi } from "abitype";
-import { EmptyObject } from "src/base/types";
-import { Event, EventFilter, EventName } from "src/contract/types/Event";
-import {
+import type { Abi } from "abitype";
+import type { EmptyObject } from "src/base/types";
+import type { Event, EventFilter, EventName } from "src/contract/types/Event";
+import type {
   DecodedFunctionData,
   FunctionArgs,
   FunctionName,
   FunctionReturn,
 } from "src/contract/types/Function";
-import { BlockTag } from "src/network/types/Block";
+import type { BlockTag } from "src/network/types/Block";
 
 // https://ethereum.github.io/execution-apis/api-documentation/
 

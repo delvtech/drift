@@ -1,4 +1,4 @@
-import { AbiItemType } from "abitype";
+import type { AbiItemType } from "abitype";
 
 export class AbiEntryNotFoundError extends Error {
   constructor({ type, name }: { type: AbiItemType; name?: string }) {

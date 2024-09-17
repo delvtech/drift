@@ -1,7 +1,7 @@
 import { IERC20 } from "src/base/testing/IERC20";
 import { ALICE, BOB, NANCY } from "src/base/testing/accounts";
 import { ReadContractStub } from "src/contract/stubs/ReadContractStub";
-import { Event } from "src/contract/types/Event";
+import type { Event } from "src/contract/types/Event";
 import { describe, expect, it } from "vitest";
 
 const ERC20ABI = IERC20.abi;

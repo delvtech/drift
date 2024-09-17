@@ -1,14 +1,14 @@
 import {
   objectToArray,
-  ReadContract,
-  ReadWriteContract,
+  type ReadContract,
+  type ReadWriteContract,
 } from "@delvtech/evm-client";
 import {
   createReadContract,
-  CreateReadContractOptions,
+  type CreateReadContractOptions,
 } from "src/contract/createReadContract";
 import { createSimulateContractParameters } from "src/contract/utils/createSimulateContractParameters";
-import { Abi, WalletClient } from "viem";
+import type { Abi, WalletClient } from "viem";
 
 export interface ReadWriteContractOptions<TAbi extends Abi = Abi>
   extends CreateReadContractOptions<TAbi> {

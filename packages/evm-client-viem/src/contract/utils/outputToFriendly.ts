@@ -1,9 +1,9 @@
 import {
-  FunctionReturn,
+  type FunctionReturn,
   arrayToFriendly,
   getAbiEntry,
 } from "@delvtech/evm-client";
-import { Abi } from "viem";
+import type { Abi } from "viem";
 
 export function outputToFriendly<TAbi extends Abi>({
   abi,

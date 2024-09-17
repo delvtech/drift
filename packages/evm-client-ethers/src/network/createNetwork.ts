@@ -1,5 +1,5 @@
-import { Network } from "@delvtech/evm-client";
-import { Provider } from "ethers";
+import type { Network } from "@delvtech/evm-client";
+import type { Provider } from "ethers";
 
 export function createNetwork(provider: Provider): Network {
   return {

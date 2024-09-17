@@ -1,10 +1,10 @@
-import { Abi } from "abitype";
+import type { Abi } from "abitype";
 import {
-  CreateCachedReadContractOptions,
+  type CreateCachedReadContractOptions,
   createCachedReadContract,
 } from "src/contract/factories/createCachedReadContract";
-import { CachedReadWriteContract } from "src/contract/types/CachedContract";
-import { ReadWriteContract } from "src/contract/types/Contract";
+import type { CachedReadWriteContract } from "src/contract/types/CachedContract";
+import type { ReadWriteContract } from "src/contract/types/Contract";
 
 export interface CreateCachedReadWriteContractOptions<TAbi extends Abi = Abi>
   extends CreateCachedReadContractOptions<TAbi> {

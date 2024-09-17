@@ -1,7 +1,7 @@
-import { Abi } from "abitype";
+import type { Abi } from "abitype";
 import stringify from "fast-safe-stringify";
-import { SinonStub, stub } from "sinon";
-import {
+import { type SinonStub, stub } from "sinon";
+import type {
   ContractDecodeFunctionDataArgs,
   ContractEncodeFunctionDataArgs,
   ContractGetEventsArgs,
@@ -12,8 +12,8 @@ import {
   ContractWriteOptions,
   ReadContract,
 } from "src/contract/types/Contract";
-import { Event, EventName } from "src/contract/types/Event";
-import {
+import type { Event, EventName } from "src/contract/types/Event";
+import type {
   DecodedFunctionData,
   FunctionArgs,
   FunctionName,

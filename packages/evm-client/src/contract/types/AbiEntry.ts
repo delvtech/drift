@@ -1,4 +1,4 @@
-import {
+import type {
   Abi,
   AbiItemType,
   AbiParameter,
@@ -7,7 +7,7 @@ import {
   AbiParameterToPrimitiveType,
   AbiStateMutability,
 } from "abitype";
-import { EmptyObject, Prettify } from "src/base/types";
+import type { EmptyObject, Prettify } from "src/base/types";
 
 // https://docs.soliditylang.org/en/latest/abi-spec.html#json
 

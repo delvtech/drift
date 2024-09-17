@@ -1,4 +1,4 @@
-import { SimpleCacheKey } from "src/cache/types/SimpleCache";
+import type { SimpleCacheKey } from "src/cache/types/SimpleCache";
 
 type DefinedValue = NonNullable<
   Record<string, any> | string | number | boolean | symbol

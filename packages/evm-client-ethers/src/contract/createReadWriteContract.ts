@@ -1,10 +1,10 @@
 import {
   objectToArray,
-  ReadContract,
-  ReadWriteContract,
+  type ReadContract,
+  type ReadWriteContract,
 } from "@delvtech/evm-client";
-import { Abi } from "abitype";
-import { Contract, InterfaceAbi, Provider, Signer } from "ethers";
+import type { Abi } from "abitype";
+import { Contract, type InterfaceAbi, type Provider, type Signer } from "ethers";
 import { createReadContract } from "src/contract/createReadContract";
 
 export interface ReadWriteContractOptions<TAbi extends Abi = Abi> {

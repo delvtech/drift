@@ -1,8 +1,8 @@
-import { Network } from "@delvtech/evm-client";
+import type { Network } from "@delvtech/evm-client";
 import {
-  GetBalanceParameters,
-  PublicClient,
-  TransactionLegacy,
+  type GetBalanceParameters,
+  type PublicClient,
+  type TransactionLegacy,
   rpcTransactionType,
 } from "viem";
 

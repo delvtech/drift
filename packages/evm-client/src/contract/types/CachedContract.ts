@@ -1,11 +1,11 @@
-import { Abi } from "abitype";
-import {
+import type { Abi } from "abitype";
+import type {
   ContractReadArgs,
   ReadContract,
   ReadWriteContract,
 } from "src/contract/types/Contract";
-import { FunctionName } from "src/contract/types/Function";
-import { SimpleCache } from "src/exports";
+import type { FunctionName } from "src/contract/types/Function";
+import type { SimpleCache } from "src/exports";
 
 export interface CachedReadContract<TAbi extends Abi = Abi>
   extends ReadContract<TAbi> {

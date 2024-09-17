@@ -1,10 +1,10 @@
-import { Abi } from "abitype";
+import type { Abi } from "abitype";
 import isMatch from "lodash.ismatch";
 import { createLruSimpleCache } from "src/cache/factories/createLruSimpleCache";
-import { SimpleCache, SimpleCacheKey } from "src/cache/types/SimpleCache";
+import type { SimpleCache, SimpleCacheKey } from "src/cache/types/SimpleCache";
 import { createSimpleCacheKey } from "src/cache/utils/createSimpleCacheKey";
-import { CachedReadContract } from "src/contract/types/CachedContract";
-import { ReadContract } from "src/contract/types/Contract";
+import type { CachedReadContract } from "src/contract/types/CachedContract";
+import type { ReadContract } from "src/contract/types/Contract";
 
 // TODO: Figure out a good default cache size
 const DEFAULT_CACHE_SIZE = 100;

@@ -4,7 +4,7 @@ import {
   transactionToReceipt,
 } from "src/network/stubs/NetworkStub";
 import { describe, expect, it } from "vitest";
-import { Transaction } from "../types/Transaction";
+import type { Transaction } from "../types/Transaction";
 
 describe("NetworkStub", () => {
   it("stubs getBalance", async () => {

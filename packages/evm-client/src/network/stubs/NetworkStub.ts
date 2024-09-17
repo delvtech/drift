@@ -1,13 +1,13 @@
-import { SinonStub, stub } from "sinon";
-import { Block } from "src/network/types/Block";
-import {
+import { type SinonStub, stub } from "sinon";
+import type { Block } from "src/network/types/Block";
+import type {
   Network,
   NetworkGetBalanceArgs,
   NetworkGetBlockArgs,
   NetworkGetTransactionArgs,
   NetworkWaitForTransactionArgs,
 } from "src/network/types/Network";
-import { Transaction, TransactionReceipt } from "src/network/types/Transaction";
+import type { Transaction, TransactionReceipt } from "src/network/types/Transaction";
 
 /**
  * A mock implementation of a `Network` designed to facilitate unit

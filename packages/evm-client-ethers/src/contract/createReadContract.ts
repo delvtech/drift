@@ -1,15 +1,15 @@
 import {
   AbiEntryNotFoundError,
-  DecodedFunctionData,
-  FunctionName,
-  ReadContract,
-  ReadWriteContract,
+  type DecodedFunctionData,
+  type FunctionName,
+  type ReadContract,
+  type ReadWriteContract,
   arrayToFriendly,
   arrayToObject,
   objectToArray,
 } from "@delvtech/evm-client";
-import { Abi } from "abitype";
-import { Contract, EventLog, InterfaceAbi, Provider, Signer } from "ethers";
+import type { Abi } from "abitype";
+import { Contract, type EventLog, type InterfaceAbi, type Provider, type Signer } from "ethers";
 import { createReadWriteContract } from "src/contract/createReadWriteContract";
 
 export interface CreateReadContractOptions<TAbi extends Abi = Abi> {

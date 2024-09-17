@@ -1,5 +1,5 @@
-import { Abi, AbiItemType } from "abitype";
-import { AbiEntry, AbiEntryName } from "src/contract/types/AbiEntry";
+import type { Abi, AbiItemType } from "abitype";
+import type { AbiEntry, AbiEntryName } from "src/contract/types/AbiEntry";
 import { AbiEntryNotFoundError } from "src/errors/AbiEntryNotFound";
 
 /**

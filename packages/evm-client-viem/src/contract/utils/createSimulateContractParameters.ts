@@ -1,4 +1,4 @@
-import { ContractWriteOptions } from "@delvtech/evm-client";
+import type { ContractWriteOptions } from "@delvtech/evm-client";
 
 /**
  * Get parameters for `simulateContract` from `ContractWriteOptions`

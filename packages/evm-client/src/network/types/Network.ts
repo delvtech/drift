@@ -1,5 +1,5 @@
-import { Block, BlockTag } from "src/network/types/Block";
-import { Transaction, TransactionReceipt } from "src/network/types/Transaction";
+import type { Block, BlockTag } from "src/network/types/Block";
+import type { Transaction, TransactionReceipt } from "src/network/types/Transaction";
 
 // https://ethereum.github.io/execution-apis/api-documentation/
 

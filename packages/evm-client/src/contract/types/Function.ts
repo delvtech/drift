@@ -1,5 +1,5 @@
-import { Abi, AbiStateMutability } from "abitype";
-import { AbiFriendlyType, AbiObjectType } from "src/contract/types/AbiEntry";
+import type { Abi, AbiStateMutability } from "abitype";
+import type { AbiFriendlyType, AbiObjectType } from "src/contract/types/AbiEntry";
 
 /**
  * Get a union of function names from an abi
