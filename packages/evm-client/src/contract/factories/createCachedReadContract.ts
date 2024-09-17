@@ -157,7 +157,7 @@ async function getOrSet<TValue>({
   callback: () => Promise<TValue> | TValue;
 }): Promise<TValue> {
   let value = cache.get(key);
-  if (value) {
+  if (typeof value !== 'undefined') {
     return value;
   }
 
