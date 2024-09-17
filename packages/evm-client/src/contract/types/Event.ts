@@ -1,16 +1,16 @@
-import { Abi } from 'abitype';
+import { Abi } from "abitype";
 import {
   AbiEntry,
   AbiObjectType,
   AbiParameters,
   AbiParametersToObject,
   NamedAbiParameter,
-} from 'src/contract/types/AbiEntry';
+} from "src/contract/types/AbiEntry";
 
 /**
  * Get a union of event names from an abi
  */
-export type EventName<TAbi extends Abi> = AbiEntry<TAbi, 'event'>['name'];
+export type EventName<TAbi extends Abi> = AbiEntry<TAbi, "event">["name"];
 
 /**
  * Get a union of named input parameters for an event from an abi
@@ -19,7 +19,7 @@ type NamedEventInput<
   TAbi extends Abi,
   TEventName extends EventName<TAbi>,
 > = Extract<
-  AbiParameters<TAbi, 'event', TEventName, 'inputs'>[number],
+  AbiParameters<TAbi, "event", TEventName, "inputs">[number],
   NamedAbiParameter
 >;
 
@@ -29,7 +29,7 @@ type NamedEventInput<
 export type EventArgs<
   TAbi extends Abi,
   TEventName extends EventName<TAbi>,
-> = AbiObjectType<TAbi, 'event', TEventName, 'inputs'>;
+> = AbiObjectType<TAbi, "event", TEventName, "inputs">;
 
 /**
  * Get a union of indexed input objects for an event from an abi
@@ -46,7 +46,7 @@ export type EventFilter<
   TAbi extends Abi,
   TEventName extends EventName<TAbi>,
 > = Partial<
-  AbiParametersToObject<IndexedEventInput<TAbi, TEventName>[], 'inputs'>
+  AbiParametersToObject<IndexedEventInput<TAbi, TEventName>[], "inputs">
 >;
 
 /**

@@ -1,4 +1,4 @@
-import { SimpleCacheKey } from 'src/cache/types/SimpleCache';
+import { SimpleCacheKey } from "src/cache/types/SimpleCache";
 
 type DefinedValue = NonNullable<
   Record<string, any> | string | number | boolean | symbol
@@ -22,12 +22,12 @@ type DefinedValue = NonNullable<
  */
 export function createSimpleCacheKey(rawKey: DefinedValue): SimpleCacheKey {
   switch (typeof rawKey) {
-    case 'string':
-    case 'number':
-    case 'boolean':
+    case "string":
+    case "number":
+    case "boolean":
       return rawKey;
 
-    case 'object': {
+    case "object": {
       if (Array.isArray(rawKey)) {
         return rawKey.map((value) =>
           // undefined or null values are converted to null to follow the

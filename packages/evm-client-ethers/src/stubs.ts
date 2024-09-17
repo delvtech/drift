@@ -1,1 +1,1 @@
-export * from '@delvtech/evm-client/stubs';
+export * from "@delvtech/evm-client/stubs";

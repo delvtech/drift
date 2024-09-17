@@ -46,7 +46,7 @@ export interface TransactionReceipt {
   transactionHash: `0x${string}`;
   transactionIndex: number;
 
-  status: 'success' | 'reverted';
+  status: "success" | "reverted";
 
   /**
    * The actual value per gas deducted from the sender's account. Before

@@ -1,10 +1,10 @@
-import { Abi, AbiItemType, AbiParameter, AbiParameterKind } from 'abitype';
+import { Abi, AbiItemType, AbiParameter, AbiParameterKind } from "abitype";
 import {
   AbiArrayType,
   AbiEntryName,
   AbiFriendlyType,
-} from 'src/contract/types/AbiEntry';
-import { getAbiEntry } from 'src/contract/utils/getAbiEntry';
+} from "src/contract/types/AbiEntry";
+import { getAbiEntry } from "src/contract/utils/getAbiEntry";
 
 /**
  * Converts an array of input or output values into an

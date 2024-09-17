@@ -7,10 +7,10 @@ import {
   arrayToFriendly,
   arrayToObject,
   objectToArray,
-} from '@delvtech/evm-client';
-import { Abi } from 'abitype';
-import { Contract, EventLog, InterfaceAbi, Provider, Signer } from 'ethers';
-import { createReadWriteContract } from 'src/contract/createReadWriteContract';
+} from "@delvtech/evm-client";
+import { Abi } from "abitype";
+import { Contract, EventLog, InterfaceAbi, Provider, Signer } from "ethers";
+import { createReadWriteContract } from "src/contract/createReadWriteContract";
 
 export interface CreateReadContractOptions<TAbi extends Abi = Abi> {
   address: `0x${string}`;
@@ -55,9 +55,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
     async read(functionName, args, options) {
       const argsArray: any[] = objectToArray({
         abi: abi as Abi,
-        type: 'function',
+        type: "function",
         name: functionName,
-        kind: 'inputs',
+        kind: "inputs",
         value: args,
       });
 
@@ -74,9 +74,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
 
       return arrayToFriendly({
         abi: abi as Abi,
-        type: 'function',
+        type: "function",
         name: functionName,
-        kind: 'outputs',
+        kind: "outputs",
         values: output,
       });
     },
@@ -84,9 +84,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
     async simulateWrite(functionName, args, options) {
       const argsArray: any[] = objectToArray({
         abi: abi as Abi,
-        type: 'function',
+        type: "function",
         name: functionName,
-        kind: 'inputs',
+        kind: "inputs",
         value: args,
       });
 
@@ -103,9 +103,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
 
       return arrayToFriendly({
         abi: abi as Abi,
-        type: 'function',
+        type: "function",
         name: functionName,
-        kind: 'outputs',
+        kind: "outputs",
         values: output,
       });
     },
@@ -114,9 +114,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
       const filterValues = objectToArray({
         // Cast to allow any array type for values
         abi: abi as Abi,
-        type: 'event',
+        type: "event",
         name: eventName,
-        kind: 'inputs',
+        kind: "inputs",
         value: options?.filter,
       });
 
@@ -131,9 +131,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
         const objectArgs = arrayToObject({
           // Cast to allow any array type for values
           abi: abi as Abi,
-          type: 'event',
+          type: "event",
           name: eventName,
-          kind: 'inputs',
+          kind: "inputs",
           values: args,
         });
 
@@ -151,9 +151,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
       const arrayArgs = objectToArray({
         // Cast to allow any array type for values
         abi: abi as Abi,
-        type: 'function',
+        type: "function",
         name: functionName,
-        kind: 'inputs',
+        kind: "inputs",
         value: args,
       });
 
@@ -161,7 +161,7 @@ export function createReadContract<TAbi extends Abi = Abi>({
 
       if (!abiFragment) {
         throw new AbiEntryNotFoundError({
-          type: 'function',
+          type: "function",
           name: functionName,
         });
       }
@@ -186,9 +186,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
       return {
         args: arrayToObject({
           abi: abi as Abi,
-          type: 'function',
+          type: "function",
           name: parsed.name,
-          kind: 'inputs',
+          kind: "inputs",
           values: parsed.args,
         }),
         functionName: parsed.name,

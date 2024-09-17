@@ -1,10 +1,10 @@
-import { Network } from '@delvtech/evm-client';
+import { Network } from "@delvtech/evm-client";
 import {
   GetBalanceParameters,
   PublicClient,
   TransactionLegacy,
   rpcTransactionType,
-} from 'viem';
+} from "viem";
 
 export function createNetwork(publicClient: PublicClient): Network {
   return {

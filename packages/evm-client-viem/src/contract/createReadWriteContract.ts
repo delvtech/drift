@@ -2,13 +2,13 @@ import {
   objectToArray,
   ReadContract,
   ReadWriteContract,
-} from '@delvtech/evm-client';
+} from "@delvtech/evm-client";
 import {
   createReadContract,
   CreateReadContractOptions,
-} from 'src/contract/createReadContract';
-import { createSimulateContractParameters } from 'src/contract/utils/createSimulateContractParameters';
-import { Abi, WalletClient } from 'viem';
+} from "src/contract/createReadContract";
+import { createSimulateContractParameters } from "src/contract/utils/createSimulateContractParameters";
+import { Abi, WalletClient } from "viem";
 
 export interface ReadWriteContractOptions<TAbi extends Abi = Abi>
   extends CreateReadContractOptions<TAbi> {
@@ -52,9 +52,9 @@ export function createReadWriteContract<TAbi extends Abi = Abi>({
 
       const arrayArgs = objectToArray({
         abi: abi,
-        type: 'function',
+        type: "function",
         name: functionName,
-        kind: 'inputs',
+        kind: "inputs",
         value: args,
       });
 

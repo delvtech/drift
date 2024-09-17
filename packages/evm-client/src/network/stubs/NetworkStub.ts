@@ -1,13 +1,13 @@
-import { SinonStub, stub } from 'sinon';
-import { Block } from 'src/network/types/Block';
+import { SinonStub, stub } from "sinon";
+import { Block } from "src/network/types/Block";
 import {
   Network,
   NetworkGetBalanceArgs,
   NetworkGetBlockArgs,
   NetworkGetTransactionArgs,
   NetworkWaitForTransactionArgs,
-} from 'src/network/types/Network';
-import { Transaction, TransactionReceipt } from 'src/network/types/Transaction';
+} from "src/network/types/Network";
+import { Transaction, TransactionReceipt } from "src/network/types/Transaction";
 
 /**
  * A mock implementation of a `Network` designed to facilitate unit
@@ -171,8 +171,8 @@ export function transactionToReceipt(
         effectiveGasPrice: 0n,
         transactionHash: transaction.hash!,
         gasUsed: 0n,
-        logsBloom: '0x',
-        status: 'success',
+        logsBloom: "0x",
+        status: "success",
       }
     : undefined;
 }

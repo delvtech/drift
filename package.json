@@ -26,8 +26,5 @@
     "typescript": "^5.4.5"
   },
   "packageManager": "yarn@1.22.21",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+  "workspaces": ["apps/*", "packages/*"]
 }

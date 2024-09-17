@@ -2,8 +2,8 @@ import {
   FunctionReturn,
   arrayToFriendly,
   getAbiEntry,
-} from '@delvtech/evm-client';
-import { Abi } from 'viem';
+} from "@delvtech/evm-client";
+import { Abi } from "viem";
 
 export function outputToFriendly<TAbi extends Abi>({
   abi,
@@ -21,7 +21,7 @@ export function outputToFriendly<TAbi extends Abi>({
   // (tuple) parameter.
   const abiEntry = getAbiEntry({
     abi,
-    type: 'function',
+    type: "function",
     name: functionName,
   });
   if (abiEntry.outputs.length === 1) {
@@ -30,9 +30,9 @@ export function outputToFriendly<TAbi extends Abi>({
 
   return arrayToFriendly({
     abi: abi as Abi,
-    type: 'function',
+    type: "function",
     name: functionName,
-    kind: 'outputs',
+    kind: "outputs",
     values: output as unknown[],
   }) as FunctionReturn<TAbi, typeof functionName>;
 }
