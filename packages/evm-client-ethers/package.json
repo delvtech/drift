@@ -25,7 +25,6 @@
   },
   "scripts": {
     "build": "tsup",
-    "lint": "eslint .",
     "test:watch": "vitest",
     "test": "vitest run",
     "test:integration": "vitest run integration",
@@ -39,7 +38,6 @@
     "@delvtech/evm-client": "0.5.1"
   },
   "devDependencies": {
-    "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "abitype": "^1.0.0",
     "ethers": "^6.11.0",

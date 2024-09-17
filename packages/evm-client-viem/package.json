@@ -25,7 +25,6 @@
   },
   "scripts": {
     "build": "tsup",
-    "lint": "eslint .",
     "test:watch": "vitest",
     "test": "vitest run",
     "test:integration": "vitest run integration",
@@ -45,7 +44,6 @@
     "@delvtech/evm-client": "0.5.1"
   },
   "devDependencies": {
-    "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "sinon": "^17.0.1",
     "tsconfig-paths": "^4.2.0",
