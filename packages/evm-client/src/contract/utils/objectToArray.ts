@@ -1,10 +1,10 @@
-import { Abi, AbiItemType, AbiParameter, AbiParameterKind } from 'abitype';
-import {
+import type { Abi, AbiItemType, AbiParameter, AbiParameterKind } from "abitype";
+import type {
   AbiArrayType,
   AbiEntryName,
   AbiObjectType,
-} from 'src/contract/types/AbiEntry';
-import { getAbiEntry } from 'src/contract/utils/getAbiEntry';
+} from "src/contract/types/AbiEntry";
+import { getAbiEntry } from "src/contract/utils/getAbiEntry";
 
 /**
  * Converts an object into an array of input or output values, ensuring the the
@@ -81,7 +81,7 @@ export function objectToArray<
   }
 
   const valueObject: Record<string, unknown> =
-    value && typeof value === 'object' ? value : {};
+    value && typeof value === "object" ? value : {};
 
   const array = parameters.map(({ name }, i) => valueObject[name || i]);
 

@@ -1,4 +1,4 @@
-import {
+import type {
   Abi,
   AbiItemType,
   AbiParameter,
@@ -6,8 +6,8 @@ import {
   AbiParametersToPrimitiveTypes,
   AbiParameterToPrimitiveType,
   AbiStateMutability,
-} from 'abitype';
-import { EmptyObject, Prettify } from 'src/base/types';
+} from "abitype";
+import type { EmptyObject, Prettify } from "src/base/types";
 
 // https://docs.soliditylang.org/en/latest/abi-spec.html#json
 
@@ -25,7 +25,7 @@ export type NamedAbiParameter = AbiParameter & { name: string };
 export type AbiEntryName<
   TAbi extends Abi,
   TItemType extends AbiItemType = AbiItemType,
-> = Extract<TAbi[number], { type: TItemType; name?: string }>['name'];
+> = Extract<TAbi[number], { type: TItemType; name?: string }>["name"];
 
 /**
  * Get the ABI entry for a specific type, name, and state mutability.
@@ -67,12 +67,11 @@ export type AbiParameters<
   TItemType extends AbiItemType = AbiItemType,
   TName extends AbiEntryName<TAbi, TItemType> = AbiEntryName<TAbi, TItemType>,
   TParameterKind extends AbiParameterKind = AbiParameterKind,
-> =
-  AbiEntry<TAbi, TItemType, TName> extends infer TAbiEntry
-    ? TParameterKind extends keyof TAbiEntry
-      ? TAbiEntry[TParameterKind]
-      : []
-    : [];
+> = AbiEntry<TAbi, TItemType, TName> extends infer TAbiEntry
+  ? TParameterKind extends keyof TAbiEntry
+    ? TAbiEntry[TParameterKind]
+    : []
+  : [];
 
 /**
  * Add default names to any ABI parameters that are missing a name. The default
@@ -112,8 +111,8 @@ type NamedParametersToObject<
     // For every parameter name, excluding empty names, add a key to the object
     // for the parameter name
     [TName in Exclude<
-      TParameters[number]['name'],
-      ''
+      TParameters[number]["name"],
+      ""
     >]: AbiParameterToPrimitiveType<
       Extract<TParameters[number], { name: TName }>,
       TParameterKind
@@ -125,7 +124,7 @@ type NamedParametersToObject<
         // For every key on the parameters type, if it's value is a parameter
         // and the parameter's name is empty (""), then add a key for the index
         [K in keyof TParameters as TParameters[K] extends NamedAbiParameter
-          ? TParameters[K]['name'] extends ''
+          ? TParameters[K]["name"] extends ""
             ? // Exclude `number` to ensure only the specific index keys are
               // included and not `number` itself
               Exclude<K, number>
@@ -137,12 +136,12 @@ type NamedParametersToObject<
     : // If the parameters are not in a Tuple, then we can't use the index as a
       // key, so we have to use `number` as the key for any parameters that have
       // empty names ("") in arrays
-      Extract<TParameters[number], { name: '' }> extends never
+      Extract<TParameters[number], { name: "" }> extends never
       ? unknown // <- No parameters with empty names
       : {
           [index: number]: AbiParameterToPrimitiveType<
-            Extract<TParameters[number], { name: '' }>,
-            'inputs'
+            Extract<TParameters[number], { name: "" }>,
+            "inputs"
           >;
         })
 >;
@@ -185,17 +184,16 @@ export type AbiArrayType<
   TItemType extends AbiItemType = AbiItemType,
   TName extends AbiEntryName<TAbi, TItemType> = AbiEntryName<TAbi, TItemType>,
   TParameterKind extends AbiParameterKind = AbiParameterKind,
-> =
-  AbiParameters<
-    TAbi,
-    TItemType,
-    TName,
-    TParameterKind
-  > extends infer TParameters
-    ? TParameters extends readonly AbiParameter[]
-      ? AbiParametersToPrimitiveTypes<TParameters>
-      : []
-    : [];
+> = AbiParameters<
+  TAbi,
+  TItemType,
+  TName,
+  TParameterKind
+> extends infer TParameters
+  ? TParameters extends readonly AbiParameter[]
+    ? AbiParametersToPrimitiveTypes<TParameters>
+    : []
+  : [];
 
 /**
  * Get an object of primitive types for any ABI parameters.
@@ -245,19 +243,18 @@ export type AbiFriendlyType<
   TName extends AbiEntryName<TAbi, TItemType> = AbiEntryName<TAbi, TItemType>,
   TParameterKind extends AbiParameterKind = AbiParameterKind,
   TStateMutability extends AbiStateMutability = AbiStateMutability,
-> =
-  AbiEntry<TAbi, TItemType, TName, TStateMutability> extends infer TAbiEntry
-    ? TParameterKind extends keyof TAbiEntry & AbiParameterKind // Check if the ABI entry includes the parameter kind (inputs/outputs)
-      ? TAbiEntry[TParameterKind] extends readonly [AbiParameter] // Check if it's a single parameter
-        ? AbiParameterToPrimitiveType<
-            TAbiEntry[TParameterKind][0],
-            TParameterKind
-          > // Single parameter type
-        : TAbiEntry[TParameterKind] extends readonly [
-              AbiParameter,
-              ...AbiParameter[],
-            ] // Check if it's multiple parameters
-          ? AbiParametersToObject<TAbiEntry[TParameterKind], TParameterKind> // Multiple parameters type
-          : undefined // Empty parameters
-      : undefined // ABI entry doesn't include the parameter kind (inputs/outputs)
-    : undefined; // ABI entry not found
+> = AbiEntry<TAbi, TItemType, TName, TStateMutability> extends infer TAbiEntry
+  ? TParameterKind extends keyof TAbiEntry & AbiParameterKind // Check if the ABI entry includes the parameter kind (inputs/outputs)
+    ? TAbiEntry[TParameterKind] extends readonly [AbiParameter] // Check if it's a single parameter
+      ? AbiParameterToPrimitiveType<
+          TAbiEntry[TParameterKind][0],
+          TParameterKind
+        > // Single parameter type
+      : TAbiEntry[TParameterKind] extends readonly [
+            AbiParameter,
+            ...AbiParameter[],
+          ] // Check if it's multiple parameters
+        ? AbiParametersToObject<TAbiEntry[TParameterKind], TParameterKind> // Multiple parameters type
+        : undefined // Empty parameters
+    : undefined // ABI entry doesn't include the parameter kind (inputs/outputs)
+  : undefined; // ABI entry not found

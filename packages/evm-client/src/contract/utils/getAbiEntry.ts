@@ -1,6 +1,6 @@
-import { Abi, AbiItemType } from 'abitype';
-import { AbiEntry, AbiEntryName } from 'src/contract/types/AbiEntry';
-import { AbiEntryNotFoundError } from 'src/errors/AbiEntryNotFound';
+import type { Abi, AbiItemType } from "abitype";
+import type { AbiEntry, AbiEntryName } from "src/contract/types/AbiEntry";
+import { AbiEntryNotFoundError } from "src/errors/AbiEntryNotFound";
 
 /**
  * Get an entry from an ABI by type and name.
@@ -22,7 +22,7 @@ export function getAbiEntry<
   const abiItem = abi.find(
     (item) =>
       item.type === type &&
-      (type === 'constructor' || (item as any).name === name),
+      (type === "constructor" || (item as any).name === name),
   ) as AbiEntry<TAbi, TItemType, TName> | undefined;
 
   if (!abiItem) {

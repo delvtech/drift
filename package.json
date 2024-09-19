@@ -5,18 +5,18 @@
     "build:packages": "turbo build --filter=./packages/*",
     "build": "turbo build",
     "dev": "turbo dev",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "lint": "turbo lint",
+    "format": "biome format --write",
+    "lint": "biome lint --diagnostic-level error .",
+    "lint:fix": "yarn lint --fix",
+    "lint:fix:unsafe": "yarn lint:fix --unsafe",
     "release": "turbo build && changeset publish",
     "test": "turbo test",
     "typecheck": "turbo typecheck"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.1",
     "@changesets/cli": "^2.27.1",
-    "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
-    "prettier": "^3.2.5",
-    "prettier-plugin-organize-imports": "^3.2.4",
     "turbo": "latest"
   },
   "engines": {
@@ -26,8 +26,5 @@
     "typescript": "^5.4.5"
   },
   "packageManager": "yarn@1.22.21",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+  "workspaces": ["apps/*", "packages/*"]
 }

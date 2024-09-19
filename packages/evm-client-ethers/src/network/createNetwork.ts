@@ -1,5 +1,5 @@
-import { Network } from '@delvtech/evm-client';
-import { Provider } from 'ethers';
+import type { Network } from "@delvtech/evm-client";
+import type { Provider } from "ethers";
 
 export function createNetwork(provider: Provider): Network {
   return {
@@ -8,7 +8,7 @@ export function createNetwork(provider: Provider): Network {
 
       return provider.getBalance(
         account,
-        blockHash || blockNumber || blockTag || 'latest',
+        blockHash || blockNumber || blockTag || "latest",
       );
     },
 
@@ -16,7 +16,7 @@ export function createNetwork(provider: Provider): Network {
       const { blockHash, blockNumber, blockTag } = options;
 
       const block = await provider.getBlock(
-        blockHash || blockNumber || blockTag || 'latest',
+        blockHash || blockNumber || blockTag || "latest",
       );
 
       if (!block) {
@@ -66,7 +66,7 @@ export function createNetwork(provider: Provider): Network {
         gasPrice: BigInt(gasPrice),
         input: data as `0x${string}`,
         nonce,
-        to: typeof to === 'string' ? (to as `0x${string}`) : to,
+        to: typeof to === "string" ? (to as `0x${string}`) : to,
         value: BigInt(value),
         type: type.toString(16) as `0x${number}`,
         chainId: Number(chainId),
@@ -87,7 +87,7 @@ export function createNetwork(provider: Provider): Network {
       }
 
       // status is either 0 (reverted) or 1 (success)
-      const status = !transaction.status ? 'reverted' : 'success';
+      const status = !transaction.status ? "reverted" : "success";
 
       return {
         blockHash: transaction.blockHash as `0x${string}`,

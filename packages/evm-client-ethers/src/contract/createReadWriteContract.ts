@@ -1,11 +1,11 @@
 import {
   objectToArray,
-  ReadContract,
-  ReadWriteContract,
-} from '@delvtech/evm-client';
-import { Abi } from 'abitype';
-import { Contract, InterfaceAbi, Provider, Signer } from 'ethers';
-import { createReadContract } from 'src/contract/createReadContract';
+  type ReadContract,
+  type ReadWriteContract,
+} from "@delvtech/evm-client";
+import type { Abi } from "abitype";
+import { Contract, type InterfaceAbi, type Provider, type Signer } from "ethers";
+import { createReadContract } from "src/contract/createReadContract";
 
 export interface ReadWriteContractOptions<TAbi extends Abi = Abi> {
   address: `0x${string}`;
@@ -43,9 +43,9 @@ export function createReadWriteContract<TAbi extends Abi = Abi>({
     async write(functionName, args, options) {
       const argsArray = objectToArray({
         abi: abi as Abi,
-        type: 'function',
+        type: "function",
         name: functionName,
-        kind: 'inputs',
+        kind: "inputs",
         value: args,
       });
 

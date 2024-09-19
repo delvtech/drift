@@ -32,26 +32,15 @@
   },
   "typesVersions": {
     "*": {
-      "cache": [
-        "./dist/cache.d.ts"
-      ],
-      "contract": [
-        "./dist/contract.d.ts"
-      ],
-      "errors": [
-        "./dist/errors.d.ts"
-      ],
-      "network": [
-        "./dist/network.d.ts"
-      ],
-      "stubs": [
-        "./dist/stubs.d.ts"
-      ]
+      "cache": ["./dist/cache.d.ts"],
+      "contract": ["./dist/contract.d.ts"],
+      "errors": ["./dist/errors.d.ts"],
+      "network": ["./dist/network.d.ts"],
+      "stubs": ["./dist/stubs.d.ts"]
     }
   },
   "scripts": {
     "build": "tsup",
-    "lint": "eslint .",
     "test:watch": "vitest --reporter=verbose",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
@@ -72,12 +61,11 @@
     "lru-cache": "^10.0.1"
   },
   "devDependencies": {
-    "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "@types/sinon": "^17.0.3",
     "abitype": "^1.0.0",
     "dotenv": "^16.4.2",
-    "eslint": "^8.56.0",
+    "fast-json-stable-stringify": "^2.1.0",
     "sinon": "^17.0.1",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
@@ -89,7 +77,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist"
-  ]
+  "files": ["dist"]
 }

@@ -1,13 +1,13 @@
-import { Abi } from 'abitype';
-import { EmptyObject } from 'src/base/types';
-import { Event, EventFilter, EventName } from 'src/contract/types/Event';
-import {
+import type { Abi } from "abitype";
+import type { EmptyObject } from "src/base/types";
+import type { Event, EventFilter, EventName } from "src/contract/types/Event";
+import type {
   DecodedFunctionData,
   FunctionArgs,
   FunctionName,
   FunctionReturn,
-} from 'src/contract/types/Function';
-import { BlockTag } from 'src/network/types/Block';
+} from "src/contract/types/Function";
+import type { BlockTag } from "src/network/types/Block";
 
 // https://ethereum.github.io/execution-apis/api-documentation/
 
@@ -22,7 +22,7 @@ export interface ReadContract<TAbi extends Abi = Abi> {
   /**
    * Reads a specified function from the contract.
    */
-  read<TFunctionName extends FunctionName<TAbi, 'pure' | 'view'>>(
+  read<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     ...args: ContractReadArgs<TAbi, TFunctionName>
   ): Promise<FunctionReturn<TAbi, TFunctionName>>;
 
@@ -30,7 +30,7 @@ export interface ReadContract<TAbi extends Abi = Abi> {
    * Simulates a write operation on a specified function of the contract.
    */
   simulateWrite<
-    TFunctionName extends FunctionName<TAbi, 'nonpayable' | 'payable'>,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
     ...args: ContractWriteArgs<TAbi, TFunctionName>
   ): Promise<FunctionReturn<TAbi, TFunctionName>>;
@@ -75,7 +75,7 @@ export interface ReadWriteContract<TAbi extends Abi = Abi>
    * Writes to a specified function on the contract.
    * @returns The transaction hash of the submitted transaction.
    */
-  write<TFunctionName extends FunctionName<TAbi, 'nonpayable' | 'payable'>>(
+  write<TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">>(
     ...args: ContractWriteArgs<TAbi, TFunctionName>
   ): Promise<`0x${string}`>;
 }
@@ -97,18 +97,17 @@ export type ContractReadOptions =
 export type ContractReadArgs<
   TAbi extends Abi,
   TFunctionName extends FunctionName<TAbi>,
-> =
-  FunctionArgs<TAbi, TFunctionName> extends EmptyObject
-    ? [
-        functionName: TFunctionName,
-        args?: FunctionArgs<TAbi, TFunctionName>,
-        options?: ContractReadOptions,
-      ]
-    : [
-        functionName: TFunctionName,
-        args: FunctionArgs<TAbi, TFunctionName>,
-        options?: ContractReadOptions,
-      ];
+> = FunctionArgs<TAbi, TFunctionName> extends EmptyObject
+  ? [
+      functionName: TFunctionName,
+      args?: FunctionArgs<TAbi, TFunctionName>,
+      options?: ContractReadOptions,
+    ]
+  : [
+      functionName: TFunctionName,
+      args: FunctionArgs<TAbi, TFunctionName>,
+      options?: ContractReadOptions,
+    ];
 
 export interface ContractGetEventsOptions<
   TAbi extends Abi,
@@ -167,26 +166,24 @@ export interface ContractWriteOptions {
 
 export type ContractWriteArgs<
   TAbi extends Abi,
-  TFunctionName extends FunctionName<TAbi, 'nonpayable' | 'payable'>,
-> =
-  FunctionArgs<TAbi, TFunctionName> extends EmptyObject
-    ? [
-        functionName: TFunctionName,
-        args?: FunctionArgs<TAbi, TFunctionName>,
-        options?: ContractWriteOptions,
-      ]
-    : [
-        functionName: TFunctionName,
-        args: FunctionArgs<TAbi, TFunctionName>,
-        options?: ContractWriteOptions,
-      ];
+  TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+> = FunctionArgs<TAbi, TFunctionName> extends EmptyObject
+  ? [
+      functionName: TFunctionName,
+      args?: FunctionArgs<TAbi, TFunctionName>,
+      options?: ContractWriteOptions,
+    ]
+  : [
+      functionName: TFunctionName,
+      args: FunctionArgs<TAbi, TFunctionName>,
+      options?: ContractWriteOptions,
+    ];
 
 export type ContractEncodeFunctionDataArgs<
   TAbi extends Abi,
   TFunctionName extends FunctionName<TAbi>,
-> =
-  FunctionArgs<TAbi, TFunctionName> extends EmptyObject
-    ? [functionName: TFunctionName, args?: FunctionArgs<TAbi, TFunctionName>]
-    : [functionName: TFunctionName, args: FunctionArgs<TAbi, TFunctionName>];
+> = FunctionArgs<TAbi, TFunctionName> extends EmptyObject
+  ? [functionName: TFunctionName, args?: FunctionArgs<TAbi, TFunctionName>]
+  : [functionName: TFunctionName, args: FunctionArgs<TAbi, TFunctionName>];
 
 export type ContractDecodeFunctionDataArgs = [data: `0x${string}`];

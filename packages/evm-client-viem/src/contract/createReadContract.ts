@@ -1,24 +1,24 @@
 import {
-  AbiObjectType,
-  DecodedFunctionData,
-  FunctionName,
-  FunctionReturn,
-  ReadContract,
-  ReadWriteContract,
+  type AbiObjectType,
+  type DecodedFunctionData,
+  type FunctionName,
+  type FunctionReturn,
+  type ReadContract,
+  type ReadWriteContract,
   arrayToObject,
   objectToArray,
-} from '@delvtech/evm-client';
-import { createSimulateContractParameters } from 'src/contract/utils/createSimulateContractParameters';
+} from "@delvtech/evm-client";
+import { createSimulateContractParameters } from "src/contract/utils/createSimulateContractParameters";
 import {
-  Abi,
-  Address,
-  PublicClient,
-  WalletClient,
+  type Abi,
+  type Address,
+  type PublicClient,
+  type WalletClient,
   decodeFunctionData,
   encodeFunctionData,
-} from 'viem';
-import { createReadWriteContract } from './createReadWriteContract';
-import { outputToFriendly } from './utils/outputToFriendly';
+} from "viem";
+import { createReadWriteContract } from "./createReadWriteContract";
+import { outputToFriendly } from "./utils/outputToFriendly";
 
 export interface CreateReadContractOptions<TAbi extends Abi = Abi> {
   abi: TAbi;
@@ -28,6 +28,9 @@ export interface CreateReadContractOptions<TAbi extends Abi = Abi> {
 
 export interface ViemReadContract<TAbi extends Abi = Abi>
   extends ReadContract<TAbi> {
+  /**
+   * Connect a signer to upgrade the contract to a read-write contract.
+   */
   connectWallet(walletClient: WalletClient): ReadWriteContract<TAbi>;
 }
 
@@ -44,9 +47,6 @@ export function createReadContract<TAbi extends Abi = Abi>({
     abi,
     address,
 
-    /**
-     * Connect a signer to upgrade the contract to a read-write contract.
-     */
     connectWallet(walletClient: WalletClient) {
       return createReadWriteContract({
         address,
@@ -60,9 +60,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
     async read(functionName, args, options) {
       const argsArray = objectToArray({
         abi,
-        type: 'function',
+        type: "function",
         name: functionName,
-        kind: 'inputs',
+        kind: "inputs",
         value: args,
       });
 
@@ -84,9 +84,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
     async simulateWrite(functionName, args, options) {
       const argsArray = objectToArray({
         abi,
-        type: 'function',
+        type: "function",
         name: functionName,
-        kind: 'inputs',
+        kind: "inputs",
         value: args,
       });
 
@@ -110,8 +110,8 @@ export function createReadContract<TAbi extends Abi = Abi>({
         address,
         abi: abi as Abi,
         eventName: eventName as string,
-        fromBlock: options?.fromBlock ?? 'earliest',
-        toBlock: options?.toBlock ?? 'latest',
+        fromBlock: options?.fromBlock ?? "earliest",
+        toBlock: options?.toBlock ?? "latest",
         args: options?.filter,
       });
 
@@ -119,12 +119,12 @@ export function createReadContract<TAbi extends Abi = Abi>({
         const objectArgs = Array.isArray(args)
           ? arrayToObject({
               abi: abi as Abi,
-              type: 'event',
+              type: "event",
               name: eventName,
-              kind: 'inputs',
+              kind: "inputs",
               values: args,
             })
-          : (args as AbiObjectType<TAbi, 'event', typeof eventName, 'inputs'>);
+          : (args as AbiObjectType<TAbi, "event", typeof eventName, "inputs">);
 
         return {
           args: objectArgs,
@@ -139,9 +139,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
     encodeFunctionData(functionName, args) {
       const arrayArgs = objectToArray({
         abi: abi,
-        type: 'function',
+        type: "function",
         name: functionName,
-        kind: 'inputs',
+        kind: "inputs",
         value: args,
       });
 
@@ -166,9 +166,9 @@ export function createReadContract<TAbi extends Abi = Abi>({
         args: arrayToObject({
           // Cast to allow any array type for values
           abi: abi as Abi,
-          type: 'function',
+          type: "function",
           name: functionName,
-          kind: 'inputs',
+          kind: "inputs",
           values: arrayArgs,
         }),
         functionName,

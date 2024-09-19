@@ -1,13 +1,13 @@
-import { ALICE } from 'src/base/testing/accounts';
+import { ALICE } from "src/base/testing/accounts";
 import {
   NetworkStub,
   transactionToReceipt,
-} from 'src/network/stubs/NetworkStub';
-import { describe, expect, it } from 'vitest';
-import { Transaction } from '../types/Transaction';
+} from "src/network/stubs/NetworkStub";
+import { describe, expect, it } from "vitest";
+import type { Transaction } from "../types/Transaction";
 
-describe('NetworkStub', () => {
-  it('stubs getBalance', async () => {
+describe("NetworkStub", () => {
+  it("stubs getBalance", async () => {
     const network = new NetworkStub();
 
     network.stubGetBalance({
@@ -20,7 +20,7 @@ describe('NetworkStub', () => {
     expect(balance).toEqual(100n);
   });
 
-  it('stubs getBlock', async () => {
+  it("stubs getBlock", async () => {
     const network = new NetworkStub();
 
     const block = {
@@ -37,7 +37,7 @@ describe('NetworkStub', () => {
     expect(blockResponse).toEqual(block);
   });
 
-  it('stubs getChainId', async () => {
+  it("stubs getChainId", async () => {
     const network = new NetworkStub();
 
     network.stubGetChainId(42069);
@@ -47,16 +47,16 @@ describe('NetworkStub', () => {
     expect(chainId).toEqual(42069);
   });
 
-  it('stubs getTransaction', async () => {
+  it("stubs getTransaction", async () => {
     const network = new NetworkStub();
 
-    const txHash = '0x123abc';
+    const txHash = "0x123abc";
     const tx: Transaction = {
       gas: 100n,
       gasPrice: 100n,
-      input: '0x456def',
+      input: "0x456def",
       nonce: 0,
-      type: '0x0',
+      type: "0x0",
       value: 0n,
     };
 
@@ -70,16 +70,16 @@ describe('NetworkStub', () => {
     expect(transaction).toEqual(tx);
   });
 
-  it('waits for stubbed transactions', async () => {
+  it("waits for stubbed transactions", async () => {
     const network = new NetworkStub();
 
-    const txHash = '0x123abc';
+    const txHash = "0x123abc";
     const stubbedTx = {
       gas: 100n,
       gasPrice: 100n,
-      input: '0x456def',
+      input: "0x456def",
       nonce: 0,
-      type: '0x0',
+      type: "0x0",
       value: 0n,
     } as const;
 
@@ -100,10 +100,10 @@ describe('NetworkStub', () => {
     expect(tx).toEqual(transactionToReceipt(stubbedTx));
   });
 
-  it('reaches timeout when waiting for transactions that are never stubbed', async () => {
+  it("reaches timeout when waiting for transactions that are never stubbed", async () => {
     const network = new NetworkStub();
 
-    const waitPromise = await network.waitForTransaction('0x123abc', {
+    const waitPromise = await network.waitForTransaction("0x123abc", {
       timeout: 1000,
     });
 

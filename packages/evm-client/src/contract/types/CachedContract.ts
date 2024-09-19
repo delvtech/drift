@@ -1,11 +1,11 @@
-import { Abi } from 'abitype';
-import {
+import type { Abi } from "abitype";
+import type {
   ContractReadArgs,
   ReadContract,
   ReadWriteContract,
-} from 'src/contract/types/Contract';
-import { FunctionName } from 'src/contract/types/Function';
-import { SimpleCache } from 'src/exports';
+} from "src/contract/types/Contract";
+import type { FunctionName } from "src/contract/types/Function";
+import type { SimpleCache } from "src/exports";
 
 export interface CachedReadContract<TAbi extends Abi = Abi>
   extends ReadContract<TAbi> {
@@ -27,6 +27,6 @@ export interface CachedReadWriteContract<TAbi extends Abi = Abi>
     ReadWriteContract<TAbi> {}
 
 /** Recursively make all properties in T partial. */
-type DeepPartial<T> = Partial<{
-  [K in keyof T]: DeepPartial<T[K]>;
-}>;
+type DeepPartial<T> = {
+  [K in keyof T]?: DeepPartial<T[K]>;
+};

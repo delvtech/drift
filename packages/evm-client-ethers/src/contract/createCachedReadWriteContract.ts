@@ -1,13 +1,13 @@
 import {
-  CachedReadWriteContract,
-  SimpleCache,
+  type CachedReadWriteContract,
+  type SimpleCache,
   createCachedReadWriteContract as baseFactory,
-} from '@delvtech/evm-client';
-import { Abi } from 'abitype';
+} from "@delvtech/evm-client";
+import type { Abi } from "abitype";
 import {
-  ReadWriteContractOptions,
+  type ReadWriteContractOptions,
   createReadWriteContract,
-} from 'src/contract/createReadWriteContract';
+} from "src/contract/createReadWriteContract";
 
 export interface CreateCachedReadWriteContractOptions<TAbi extends Abi = Abi>
   extends ReadWriteContractOptions<TAbi> {
