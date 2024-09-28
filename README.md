@@ -11,6 +11,17 @@ type-safe contract APIs, and easy test mocks, Drift helps you build efficient
 and reliable applications without overthinking call optimizations or juggling
 countless hooks.
 
+## Features
+
+- 🌐 **Multi-Library Support:** Compatible with `ethers.js`, `viem`, and soon
+  `web3.js`.
+- ⚡ **Optimized Performance:** Built-in caching for fewer network calls
+  without manual management.
+- 🔒 **Type Safety:** Catch errors at compile time with type-checked APIs.
+- 🧪 **Testing Made Easy:** Use built-in mocks for reliable and straightforward
+  testing.
+- 🔄 **Extensible:** Designed to grow with your project's needs.
+
 ## Why Drift?
 
 Building on Ethereum often means:
@@ -33,17 +44,6 @@ Drift abstracts away these complexities:
 - **Type-Safe APIs:** Benefit from TypeScript with type-checked contract
   interactions.
 - **Easy Testing:** Built-in mocks simplify testing your contract interactions.
-
-## Features
-
-- 🌐 **Multi-Library Support:** Compatible with `ethers.js`, `viem`, and soon
-  `web3.js`.
-- ⚡ **Optimized Performance:** Built-in caching for fewer network calls
-  without manual management.
-- 🔒 **Type Safety:** Catch errors at compile time with type-checked APIs.
-- 🧪 **Testing Made Easy:** Use built-in mocks for reliable and straightforward
-  testing.
-- 🔄 **Extensible:** Designed to grow with your project's needs.
 
 ## Installation
 
