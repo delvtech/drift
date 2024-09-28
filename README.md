@@ -22,29 +22,6 @@ countless hooks.
   testing.
 - 🔄 **Extensible:** Designed to grow with your project's needs.
 
-## Why Drift?
-
-Building on Ethereum often means:
-
-- **Juggling Different Web3 Libraries:** Choosing between `ethers.js`, `viem`,
-  or others can feel like vendor lock-in, and rewrites are time-consuming.
-- **Managing Multiple Hooks:** Each contract call often needs its own hook and
-  query key to prevent redundant network requests.
-- **Optimizing Network Calls:** Manually caching calls and optimizing queries to
-  minimize RPC requests slows down development.
-- **Complex Testing:** Setting up mocks for contract interactions can be
-  cumbersome and error-prone.
-
-Drift abstracts away these complexities:
-
-- **Unified Interface:** Write your contract logic once and use it across
-  different web3 providers.
-- **Built-in Caching:** Automatically reduce redundant RPC calls — no need to
-  manage hooks for each call.
-- **Type-Safe APIs:** Benefit from TypeScript with type-checked contract
-  interactions.
-- **Easy Testing:** Built-in mocks simplify testing your contract interactions.
-
 ## Installation
 
 Install Drift and the adapter for your preferred web3 library:
@@ -154,9 +131,28 @@ const txHash = await vault.write(
 );
 ```
 
-Drift optimizes your contract interactions behind the scenes, so you don't have
-to sacrifice code readability for performance or manage hooks and query keys
-manually.
+## Why Drift?
+
+Building on Ethereum often means:
+
+- **Juggling Different Web3 Libraries:** Choosing between `ethers.js`, `viem`,
+  or others can feel like vendor lock-in, and rewrites are time-consuming.
+- **Managing Multiple Hooks:** Each contract call often needs its own hook and
+  query key to prevent redundant network requests.
+- **Optimizing Network Calls:** Manually caching calls and optimizing queries to
+  minimize RPC requests slows down development.
+- **Complex Testing:** Setting up mocks for contract interactions can be
+  cumbersome and error-prone.
+
+Drift abstracts away these complexities:
+
+- **Unified Interface:** Write your contract logic once and use it across
+  different web3 providers.
+- **Built-in Caching:** Automatically reduce redundant RPC calls — no need to
+  manage hooks for each call.
+- **Type-Safe APIs:** Benefit from TypeScript with type-checked contract
+  interactions.
+- **Easy Testing:** Built-in mocks simplify testing your contract interactions.
 
 ## Example: Building Vault Clients
 
