@@ -1,18 +1,22 @@
 # Drift
 
-**Write once, run anywhere:** Drift lets you write a single implementation for
-interacting with Ethereum smart contracts, while seamlessly supporting multiple
-web3 libraries like `ethers.js`, `viem`, and more. With built-in caching,
-type-safe contract APIs, and easy test mocks, Drift helps you build efficient
-and reliable applications without overthinking call optimizations or juggling
-countless hooks.
+**Effortless Ethereum Development Across Web3 Libraries**
+
+Write Ethereum smart contract interactions once with Drift and run them
+anywhere. Seamlessly support multiple web3 libraries like ethers.js, viem, and
+more—without getting locked into a single provider or rewriting code.
+
+With built-in caching, type-safe contract APIs, and easy-to-use testing mocks,
+Drift lets you build efficient and reliable applications without worrying about
+call optimizations or juggling countless hooks. Focus on what matters: creating
+great features and user experiences.
 
 ## Features
 
 - 🌐 **Multi-Library Support:** Compatible with `ethers.js`, `viem`, and soon
   `web3.js`.
-- ⚡ **Optimized Performance:** Built-in caching for fewer network calls
-  without manual management.
+- ⚡ **Optimized Performance:** Built-in caching for fewer network calls without
+  manual management.
 - 🔒 **Type Safety:** Catch errors at compile time with type-checked APIs.
 - 🧪 **Testing Made Easy:** Use built-in mocks for reliable and straightforward
   testing.
