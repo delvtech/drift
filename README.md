@@ -1,10 +1,6 @@
 # Drift
 
-**Write once, run anywhere:** Simplify Ethereum contract interactions with
-built-in caching, type-safe APIs, and support for multiple web3 libraries —
-without the headache of managing multiple hooks or redundant network requests.
-
-Drift is a TypeScript library that lets you write a single implementation for
+**Write once, run anywhere:** Drift lets you write a single implementation for
 interacting with Ethereum smart contracts, while seamlessly supporting multiple
 web3 libraries like `ethers.js`, `viem`, and more. With built-in caching,
 type-safe contract APIs, and easy test mocks, Drift helps you build efficient
