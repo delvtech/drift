@@ -15,18 +15,33 @@ great features and user experiences.
 
 Building on Ethereum often means dealing with:
 
-- **Hard Dependency on a Specific Web3 Library:** There are several competing options, like ethers.js, viem, or web3.js. Tying your business logic to a specific one creates vendor lock-in and makes it harder to switch down the road.
-- **Managing Multiple Hooks:** Each contract call often needs its own hook and query key to prevent redundant network requests.
-- **Optimizing Network Calls:** Manually caching calls and optimizing queries to minimize RPC requests slows down development.
-- **Complex Testing:** Setting up mocks for contract interactions can be cumbersome and error-prone.
+- **Hard Dependency on a Specific Web3 Library:** There are several competing
+  options, like ethers.js, viem, or web3.js. Tying your business logic to a
+  specific one creates vendor lock-in and makes it harder to switch down the
+  road.
+- **Managing Multiple Hooks:** Each contract call often needs its own hook and
+  query key to prevent redundant network requests.
+- **Optimizing Network Calls:** Manually caching calls and optimizing queries to
+  minimize RPC requests slows down development.
+- **Complex Testing:** Setting up mocks for contract interactions can be
+  cumbersome and error-prone.
 
 ## Drift Solves These Problems
 
-- 🌐 **Multi-Library Support:** Drift provides a unified interface compatible with multiple web3 libraries. Write your contract logic once and use it across different providers.
-- ⚡ **Optimized Performance:** Automatically reduces redundant RPC calls with built-in caching. No need to manage hooks or query keys for each call.
-- 🔒 **Type Safety:** Drift's type-checked APIs help catch errors at compile time. If your ABI changes, your mocks will reflect that at compile time, keeping your tests in sync.
-- 🧪 **Testing Made Easy:** Built-in mocks simplify testing your contract interactions. Drift's testing mocks are also type-safe, ensuring your tests are always in sync with your contracts.
-- 🔄 **Extensibility:** Designed to grow with your project's needs, Drift allows you to easily extend support to new web3 libraries by creating small adapter packages.
+- 🌐 **Multi-Library Support:** Drift provides a unified interface compatible
+  with multiple web3 libraries. Write your contract logic once and use it across
+  different providers.
+- ⚡ **Optimized Performance:** Automatically reduces redundant RPC calls with
+  built-in caching. No need to manage hooks or query keys for each call.
+- 🔒 **Type Safety:** Drift's type-checked APIs help catch errors at compile
+  time. If your ABI changes, your mocks will reflect that at compile time,
+  keeping your tests in sync.
+- 🧪 **Testing Made Easy:** Built-in mocks simplify testing your contract
+  interactions. Drift's testing mocks are also type-safe, ensuring your tests
+  are always in sync with your contracts.
+- 🔄 **Extensibility:** Designed to grow with your project's needs, Drift allows
+  you to easily extend support to new web3 libraries by creating small adapter
+  packages.
 
 ## Installation
 
@@ -439,7 +454,7 @@ implementation:
 import { LRUCache } from "lru-cache";
 
 const customCache = new LRUCache({ max: 500 });
-const drift = new Drift(viemAdapter(publicClient, { cache: customCache }));
+const drift = new Drift(viemAdapter({ publicClient }), { cache: customCache });
 ```
 
 ### Extending Drift for Your Needs
