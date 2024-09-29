@@ -11,16 +11,22 @@ Drift lets you build efficient and reliable applications without worrying about
 call optimizations or juggling countless hooks. Focus on what matters: creating
 great features and user experiences.
 
-## Features
+## Why Drift?
 
-- 🌐 **Multi-Library Support:** Compatible with `ethers.js`, `viem`, and soon
-  `web3.js`.
-- ⚡ **Optimized Performance:** Built-in caching for fewer network calls without
-  manual management.
-- 🔒 **Type Safety:** Catch errors at compile time with type-checked APIs.
-- 🧪 **Testing Made Easy:** Use built-in mocks for reliable and straightforward
-  testing.
-- 🔄 **Extensible:** Designed to grow with your project's needs.
+Building on Ethereum often means dealing with:
+
+- **Hard Dependency on a Specific Web3 Library:** There are several competing options, like ethers.js, viem, or web3.js. Tying your business logic to a specific one creates vendor lock-in and makes it harder to switch down the road.
+- **Managing Multiple Hooks:** Each contract call often needs its own hook and query key to prevent redundant network requests.
+- **Optimizing Network Calls:** Manually caching calls and optimizing queries to minimize RPC requests slows down development.
+- **Complex Testing:** Setting up mocks for contract interactions can be cumbersome and error-prone.
+
+## Drift Solves These Problems
+
+- 🌐 **Multi-Library Support:** Drift provides a unified interface compatible with multiple web3 libraries. Write your contract logic once and use it across different providers.
+- ⚡ **Optimized Performance:** Automatically reduces redundant RPC calls with built-in caching. No need to manage hooks or query keys for each call.
+- 🔒 **Type Safety:** Drift's type-checked APIs help catch errors at compile time. If your ABI changes, your mocks will reflect that at compile time, keeping your tests in sync.
+- 🧪 **Testing Made Easy:** Built-in mocks simplify testing your contract interactions. Drift's testing mocks are also type-safe, ensuring your tests are always in sync with your contracts.
+- 🔄 **Extensibility:** Designed to grow with your project's needs, Drift allows you to easily extend support to new web3 libraries by creating small adapter packages.
 
 ## Installation
 
@@ -130,29 +136,6 @@ const txHash = await vault.write(
   },
 );
 ```
-
-## Why Drift?
-
-Building on Ethereum often means:
-
-- **Juggling Different Web3 Libraries:** Choosing between `ethers.js`, `viem`,
-  or others can feel like vendor lock-in, and rewrites are time-consuming.
-- **Managing Multiple Hooks:** Each contract call often needs its own hook and
-  query key to prevent redundant network requests.
-- **Optimizing Network Calls:** Manually caching calls and optimizing queries to
-  minimize RPC requests slows down development.
-- **Complex Testing:** Setting up mocks for contract interactions can be
-  cumbersome and error-prone.
-
-Drift abstracts away these complexities:
-
-- **Unified Interface:** Write your contract logic once and use it across
-  different web3 providers.
-- **Built-in Caching:** Automatically reduce redundant RPC calls — no need to
-  manage hooks for each call.
-- **Type-Safe APIs:** Benefit from TypeScript with type-checked contract
-  interactions.
-- **Easy Testing:** Built-in mocks simplify testing your contract interactions.
 
 ## Example: Building Vault Clients
 
