@@ -472,9 +472,3 @@ Guide](./.github/CONTRIBUTING.md) to get started.
 ## License
 
 Drift is open-source software licensed under the [TODO License](LICENSE).
-
----
-
-Build smarter, not harder — let Drift handle caching and call optimization so
-you can focus on what matters, without the hassle of managing multiple hooks or
-redundant network requests.
