@@ -170,7 +170,7 @@ import {
   ReadWriteAdapter,
   ReadWriteContract,
 } from "@delvtech/drift";
-import { vaultAbi } from "../abis/VaultAbi";
+import { vaultAbi } from "./abis/VaultAbi";
 
 type VaultAbi = typeof vaultAbi;
 
@@ -300,73 +300,67 @@ export class ReadWriteVault extends CoreReadWriteVault {
 }
 ```
 
+Then, in your app:
+
+```typescript
+import { ReadVault } from "sdk-viem";
+import { createPublicClient, http } from "viem";
+
+const publicClient = createPublicClient({
+  transport: http(),
+  // ...other options
+});
+
+// Instantiate the ReadVault client with viem directly
+const readVault = new ReadVault("0xYourVaultAddress", publicClient);
+```
+
 ### 4. Test Your Clients with Drift's Built-in Mocks
 
 Testing smart contract interactions can be complex and time-consuming. Drift
 simplifies this process by providing built-in mocks that allow you to stub
 responses and focus on testing your application logic.
 
-#### Example: Testing Contract Interactions with Mocks
+#### Example: Testing Client Methods with Multiple RPC Calls
 
-Suppose you have a method `getShortAccruedYield` in your `ReadVault` client that
-calculates the accrued yield for a mature position. You want to test this method
-without making actual RPC calls.
+Suppose you have a method `getAccountValue` in your `ReadVault` client that
+get's the total asset value for an account by fetching their vault balance and
+converting it to assets. Under the hood, this method makes multiple RPC
+requests.
 
 Here's how you can use Drift's mocks to stub contract calls and test your
 method:
 
 ```typescript
-// test/ReadVault.test.ts
+// sdk-core/src/ReadVault.test.ts
 import { MockDrift } from "@delvtech/drift/testing";
-import { parseBigInt } from "parse-bigint";
-import { ReadVault } from "sdk-core";
-import { vaultAbi } from "../abis/VaultAbi";
+import { vaultAbi } from "./abis/VaultAbi";
+import { ReadVault } from "./VaultClient";
 
-test("getShortAccruedYield should return the amount of yield a mature position has earned", async () => {
+test("getUserAssetValue should return the total asset value for a user", async () => {
   // Set up mocks
   const mockDrift = new MockDrift();
-  const mockContract = drift.contract({
+  const mockContract = mockDrift.contract({
     abi: vaultAbi,
     address: "0xVaultAddress",
   });
 
-  // Stub the getBlock method
-  mockDrift.onGetBlock().returns({ number: 1n, timestamp: 1699503565n });
-
-  // Stub contract reads for getPoolConfig
-  mockContract.onRead("getPoolConfig").returns({
-    positionDuration: 86400n, // one day in seconds
-    checkpointDuration: 86400n, // one day in seconds
-    // ...other config values
-  });
-
-  // Stub the checkpoint when the short was opened
-  mockContract.onRead("getCheckpoint", { _checkpointTime: 1n }).returns({
-    vaultSharePrice: parseBigInt("1.008e18"),
-    weightedSpotPrice: 0n,
-    lastWeightedSpotPriceUpdateTime: 0n,
-  });
-
-  // Stub the checkpoint when the short matured
-  mockContract.onRead("getCheckpoint", { _checkpointTime: 86401n }).returns({
-    vaultSharePrice: parseBigInt("1.01e18"),
-    weightedSpotPrice: 0n,
-    lastWeightedSpotPriceUpdateTime: 0n,
-  });
+  // Stub the vault's return values
+  mockContract.onRead("balanceOf", { account: "0xUserAddress" }).returns(
+    BigInt(100e18), // User has 100 vault shares
+  );
+  mockContract.onRead("convertToAssets", { shares: BigInt(100e18) }).returns(
+    BigInt(150e18), // 100 vault shares are worth 150 in assets
+  );
 
   // Instantiate your client with the mocked Drift instance
-  const readVault = new ReadVault("0xYourVaultAddress", mockDrift);
+  const readVault = new ReadVault("0xVaultAddress", mockDrift);
 
   // Call the method you want to test
-  const accruedYield = await readVault.getShortAccruedYield({
-    checkpointTime: 1n,
-    bondAmount: parseBigInt("100e18"),
-  });
+  const accountAssetValue = await readVault.getAccountValue("0xUserAddress");
 
   // Assert the expected result
-  // If you opened a short position on 100 bonds at a previous checkpoint price
-  // of 1.008 and the price was 1.01 at maturity, your accrued profit would be 0.20.
-  expect(accruedYield).toEqual(parseBigInt("0.20e18"));
+  expect(accountAssetValue).toEqual(BigInt(150e18));
 });
 ```
 
