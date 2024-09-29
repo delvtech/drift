@@ -34,8 +34,7 @@ Building on Ethereum often means dealing with:
 - ⚡ **Optimized Performance:** Automatically reduces redundant RPC calls with
   built-in caching. No need to manage hooks or query keys for each call.
 - 🔒 **Type Safety:** Drift's type-checked APIs help catch errors at compile
-  time. If your ABI changes, your mocks will reflect that at compile time,
-  keeping your tests in sync.
+  time.
 - 🧪 **Testing Made Easy:** Built-in mocks simplify testing your contract
   interactions. Drift's testing mocks are also type-safe, ensuring your tests
   are always in sync with your contracts.
