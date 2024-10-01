@@ -1,10 +1,10 @@
 import type { Abi } from "abitype";
-import type { Prettify } from "src/base/types";
 import type {
   ReadContract,
   ReadWriteContract,
 } from "src/contract/types/Contract";
 import type { Network } from "src/network/types/Network";
+import type { RequiredKeys } from "src/utils/types";
 
 export interface Adapter {
   network: Network;
@@ -18,7 +18,5 @@ export interface Adapter {
   ) => ReadWriteContract<TAbi>;
 }
 
-export type ReadWriteAdapter = Prettify<
-  Omit<Adapter, "createReadWriteContract"> &
-    Pick<Required<Adapter>, "readWriteContract">
->;
+export type ReadAdapter = Omit<Adapter, "readWriteContract">;
+export type ReadWriteAdapter = RequiredKeys<Adapter, "readWriteContract">;

@@ -6,6 +6,7 @@ import type {
 } from "src/contract/types/Contract";
 import type { FunctionName } from "src/contract/types/Function";
 import type { SimpleCache } from "src/exports";
+import type { DeepPartial } from "src/utils/types";
 
 export interface CachedReadContract<TAbi extends Abi = Abi>
   extends ReadContract<TAbi> {
@@ -25,8 +26,3 @@ export interface CachedReadContract<TAbi extends Abi = Abi>
 export interface CachedReadWriteContract<TAbi extends Abi = Abi>
   extends CachedReadContract<TAbi>,
     ReadWriteContract<TAbi> {}
-
-/** Recursively make all properties in T partial. */
-type DeepPartial<T> = {
-  [K in keyof T]?: DeepPartial<T[K]>;
-};

@@ -3,11 +3,11 @@ import type {
   AbiItemType,
   AbiParameter,
   AbiParameterKind,
-  AbiParametersToPrimitiveTypes,
   AbiParameterToPrimitiveType,
+  AbiParametersToPrimitiveTypes,
   AbiStateMutability,
 } from "abitype";
-import type { EmptyObject, Prettify } from "src/base/types";
+import type { EmptyObject, Prettify } from "src/utils/types";
 
 // https://docs.soliditylang.org/en/latest/abi-spec.html#json
 

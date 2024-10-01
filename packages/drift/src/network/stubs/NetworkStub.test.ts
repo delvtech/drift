@@ -1,8 +1,8 @@
-import { ALICE } from "src/base/testing/accounts";
 import {
   NetworkStub,
   transactionToReceipt,
 } from "src/network/stubs/NetworkStub";
+import { ALICE } from "src/utils/testing/accounts";
 import { describe, expect, it } from "vitest";
 import type { Transaction } from "../types/Transaction";
 

@@ -1,5 +1,5 @@
-import { IERC20 } from "src/base/testing/IERC20";
 import { ReadWriteContractStub } from "src/contract/stubs/ReadWriteContractStub";
+import { IERC20 } from "src/utils/testing/IERC20";
 import { describe, expect, it } from "vitest";
 
 const ERC20ABI = IERC20.abi;

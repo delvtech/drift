@@ -1,5 +1,5 @@
-import { IERC20 } from "src/base/testing/IERC20";
 import { arrayToFriendly } from "src/contract/utils/arrayToFriendly";
+import { IERC20 } from "src/utils/testing/IERC20";
 import { describe, expect, it } from "vitest";
 
 describe("arrayToFriendly", () => {

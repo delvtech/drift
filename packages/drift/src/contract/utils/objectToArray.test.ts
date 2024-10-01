@@ -1,5 +1,5 @@
-import { IERC20 } from "src/base/testing/IERC20";
 import { objectToArray } from "src/contract/utils/objectToArray";
+import { IERC20 } from "src/utils/testing/IERC20";
 import { describe, expect, it } from "vitest";
 
 describe("objectToArray", () => {
