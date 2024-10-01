@@ -16,6 +16,12 @@ describe("MockAdapter", () => {
     expect(block).toBe(blockStub);
   });
 
+  it("Stubs the signer address", async () => {
+    const adapter = new MockAdapter();
+    const signer = await adapter.getSignerAddress();
+    expect(signer).toBeTypeOf("string");
+  });
+
   it("Creates mock read contracts", async () => {
     const mockAdapter = new MockAdapter();
     const contract = mockAdapter.readContract(IERC20.abi);

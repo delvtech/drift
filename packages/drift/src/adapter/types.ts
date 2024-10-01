@@ -4,19 +4,22 @@ import type {
   AdapterReadWriteContract,
 } from "src/adapter/contract/types/Contract";
 import type { AdapterNetwork } from "src/adapter/network/AdapterNetwork";
-import type { RequiredKeys } from "src/utils/types";
 
-export interface Adapter {
+export interface ReadAdapter {
   network: AdapterNetwork;
   readContract: <TAbi extends Abi>(
     abi: TAbi,
     address: string,
   ) => AdapterReadContract<TAbi>;
-  readWriteContract?: <TAbi extends Abi>(
+}
+
+export interface ReadWriteAdapter extends ReadAdapter {
+  // Write-only properties
+  getSignerAddress: () => Promise<string>;
+  readWriteContract: <TAbi extends Abi>(
     abi: TAbi,
     address: string,
   ) => AdapterReadWriteContract<TAbi>;
 }
 
-export type ReadAdapter = Omit<Adapter, "readWriteContract">;
-export type ReadWriteAdapter = RequiredKeys<Adapter, "readWriteContract">;
+export type Adapter = ReadAdapter | ReadWriteAdapter;

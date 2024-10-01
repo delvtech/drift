@@ -40,8 +40,8 @@ export interface DriftOptions<TCache extends SimpleCache = SimpleCache> {
   namespace?: string;
 }
 
-// This is the one place where the Read/ReadWrite distinction is skipped in
-// favor of a unified entrypoint to the Drift API.
+// This is the one place where the Read/ReadWrite concepts are combined into a
+// single class in favor of a unified entrypoint to the Drift API.
 export class Drift<
   TAdapter extends Adapter = Adapter,
   TCache extends SimpleCache = SimpleCache,
@@ -49,6 +49,13 @@ export class Drift<
   readonly adapter: TAdapter;
   cache: DriftCache<TCache>;
   namespace?: string;
+
+  // Write-only property definitions //
+
+  getSignerAddress: TAdapter extends ReadWriteAdapter
+    ? () => Promise<string>
+    : undefined;
+
   write: TAdapter extends ReadWriteAdapter
     ? <
         TAbi extends Abi,
@@ -58,6 +65,8 @@ export class Drift<
       ) => Promise<string>
     : undefined;
 
+  // Implementation //
+
   constructor(
     adapter: TAdapter,
     { cache, namespace }: DriftOptions<TCache> = {},
@@ -65,7 +74,16 @@ export class Drift<
     this.adapter = adapter;
     this.cache = createDriftCache(cache);
     this.namespace = namespace;
-    this.write = this.isReadWrite()
+
+    // Write-only property assignment //
+
+    const isReadWrite = this.isReadWrite();
+
+    this.getSignerAddress = isReadWrite
+      ? () => this.adapter.getSignerAddress()
+      : (undefined as any);
+
+    this.write = isReadWrite
       ? async ({ abi, address, fn, args, onMined, ...writeOptions }) => {
           if (isReadWriteAdapter(this.adapter)) {
             const txHash = await createCachedReadWriteContract({
@@ -83,7 +101,7 @@ export class Drift<
       : (undefined as any);
   }
 
-  isReadWrite = (): this is Drift<ReadWriteAdapter, TCache> =>
+  isReadWrite = (): this is Drift<TAdapter & ReadWriteAdapter, TCache> =>
     isReadWriteAdapter(this.adapter);
 
   contract = <TAbi extends Abi>({
