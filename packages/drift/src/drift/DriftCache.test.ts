@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 describe("createDriftCache", () => {
   it("Invalidates reads by their read key", () => {
-    const driftCache = createDriftCache();
+    const cache = createDriftCache();
     const params = {
       abi: IERC20.abi,
       address: "0xContract",
@@ -14,20 +14,18 @@ describe("createDriftCache", () => {
         spender: "0xSpender",
       },
     } as const;
-
-    const key = driftCache.readKey(params);
+    const key = cache.readKey(params);
     const value = 100n;
-    driftCache.set(key, value);
 
-    expect(driftCache.get(key)).toEqual(value);
+    cache.set(key, value);
+    expect(cache.get(key)).toEqual(value);
 
-    driftCache.invalidateRead(params);
-
-    expect(driftCache.get(key)).toBeUndefined();
+    cache.invalidateRead(params);
+    expect(cache.get(key)).toBeUndefined();
   });
 
   it("Invalidates reads matching a partial read key", () => {
-    const driftCache = createDriftCache();
+    const cache = createDriftCache();
     const params = {
       abi: IERC20.abi,
       address: "0xContract",
@@ -37,15 +35,54 @@ describe("createDriftCache", () => {
         spender: "0xSpender",
       },
     } as const;
-
-    const key = driftCache.readKey(params);
+    const key = cache.readKey(params);
     const value = 100n;
-    driftCache.set(key, value);
 
-    expect(driftCache.get(key)).toEqual(value);
+    cache.set(key, value);
+    expect(cache.get(key)).toEqual(value);
 
-    driftCache.invalidateReadsMatching({ address: "0xContract" });
+    cache.invalidateReadsMatching({ address: "0xContract" });
+    expect(cache.get(key)).toBeUndefined();
+  });
 
-    expect(driftCache.get(key)).toBeUndefined();
+  it("Preloads reads by their key", async () => {
+    const cache = createDriftCache();
+    const params = {
+      abi: IERC20.abi,
+      address: "0xContract",
+      fn: "allowance",
+      args: {
+        owner: "0xOwner",
+        spender: "0xSpender",
+      },
+    } as const;
+    const key = cache.readKey(params);
+    const value = 100n;
+
+    cache.preloadRead({ value, ...params });
+    expect(cache.get(key)).toEqual(value);
+  });
+
+  it("Preloads events by their key", async () => {
+    const cache = createDriftCache();
+    const params = {
+      abi: IERC20.abi,
+      address: "0xContract",
+      event: "Approval",
+    } as const;
+    const key = cache.eventsKey(params);
+    const value = [
+      {
+        eventName: "Approval",
+        args: {
+          owner: "0xOwner",
+          spender: "0xSpender",
+          value: 100n,
+        },
+      },
+    ] as const;
+
+    cache.preloadEvents({ value, ...params });
+    expect(cache.get(key)).toEqual(value);
   });
 });

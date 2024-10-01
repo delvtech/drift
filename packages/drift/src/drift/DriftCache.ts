@@ -2,39 +2,63 @@ import type { Abi } from "abitype";
 import isMatch from "lodash.ismatch";
 import type { SimpleCache, SimpleCacheKey } from "src/cache/types/SimpleCache";
 import { createSimpleCacheKey } from "src/cache/utils/createSimpleCacheKey";
-import type { EventName } from "src/contract/types/Event";
-import type { FunctionName } from "src/contract/types/Function";
+import type { Event, EventName } from "src/contract/types/Event";
+import type { FunctionName, FunctionReturn } from "src/contract/types/Function";
 import type { DriftGetEventsParams, DriftReadParams } from "src/drift/types";
 import { createLruSimpleCache } from "src/exports";
 import { extendInstance } from "src/utils/extendInstance";
 import type { DeepPartial } from "src/utils/types";
 
 export type DriftCache<T extends SimpleCache = SimpleCache> = T & {
-  // Key Management //
+  // Key Generators //
 
   partialReadKey<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
-    params: DeepPartial<Omit<DriftReadParams<TAbi, TFunctionName>, "cache">>,
+    params: DeepPartial<DriftReadKeyParams<TAbi, TFunctionName>>,
   ): SimpleCacheKey;
 
   readKey<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
-    params: Omit<DriftReadParams<TAbi, TFunctionName>, "cache">,
+    params: DriftReadKeyParams<TAbi, TFunctionName>,
   ): SimpleCacheKey;
 
   eventsKey<TAbi extends Abi, TEventName extends EventName<TAbi>>(
-    params: Omit<DriftGetEventsParams<TAbi, TEventName>, "cache">,
+    params: DriftEventsKeyParams<TAbi, TEventName>,
   ): SimpleCacheKey;
 
   // Cache Management //
 
+  preloadRead<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
+    params: DriftReadParams<TAbi, TFunctionName> & {
+      value: FunctionReturn<TAbi, TFunctionName>;
+    },
+  ): void | Promise<void>;
+
   invalidateRead<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
     params: DriftReadParams<TAbi, TFunctionName>,
-  ): void;
+  ): void | Promise<void>;
 
   invalidateReadsMatching<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >(params: DeepPartial<DriftReadParams<TAbi, TFunctionName>>): void;
+  >(
+    params: DeepPartial<DriftReadParams<TAbi, TFunctionName>>,
+  ): void | Promise<void>;
+
+  preloadEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
+    params: DriftGetEventsParams<TAbi, TEventName> & {
+      value: readonly Event<TAbi, TEventName>[];
+    },
+  ): void | Promise<void>;
 };
+
+export type DriftReadKeyParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+> = Omit<DriftReadParams<TAbi, TFunctionName>, "cache">;
+
+export type DriftEventsKeyParams<
+  TAbi extends Abi = Abi,
+  TEventName extends EventName<TAbi> = EventName<TAbi>,
+> = Omit<DriftGetEventsParams<TAbi, TEventName>, "cache">;
 
 /**
  * Extends a {@linkcode SimpleCache} with additional API methods for use with
@@ -55,6 +79,10 @@ export function createDriftCache<T extends SimpleCache>(
     eventsKey: ({ abi, namespace, ...params }) =>
       createSimpleCacheKey([namespace, "events", params]),
 
+    preloadRead: ({ cache: targetCache = cache, value, ...params }) => {
+      targetCache.set(driftCache.readKey(params as DriftReadKeyParams), value);
+    },
+
     invalidateRead: ({ cache: targetCache = cache, ...params }) =>
       targetCache.delete(driftCache.readKey(params)),
 
@@ -69,6 +97,10 @@ export function createDriftCache<T extends SimpleCache>(
           cache.delete(key);
         }
       }
+    },
+
+    preloadEvents: ({ cache: targetCache = cache, value, ...params }) => {
+      targetCache.set(driftCache.eventsKey(params), value);
     },
   });
 
