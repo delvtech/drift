@@ -27,24 +27,24 @@ export type DriftCache<T extends SimpleCache = SimpleCache> = T & {
   // Cache Management //
 
   preloadRead<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
-    params: DriftReadParams<TAbi, TFunctionName> & {
+    params: DriftReadKeyParams<TAbi, TFunctionName> & {
       value: FunctionReturn<TAbi, TFunctionName>;
     },
   ): void | Promise<void>;
 
   invalidateRead<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
-    params: DriftReadParams<TAbi, TFunctionName>,
+    params: DriftReadKeyParams<TAbi, TFunctionName>,
   ): void | Promise<void>;
 
   invalidateReadsMatching<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
   >(
-    params: DeepPartial<DriftReadParams<TAbi, TFunctionName>>,
+    params: DeepPartial<DriftReadKeyParams<TAbi, TFunctionName>>,
   ): void | Promise<void>;
 
   preloadEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
-    params: DriftGetEventsParams<TAbi, TEventName> & {
+    params: DriftEventsKeyParams<TAbi, TEventName> & {
       value: readonly Event<TAbi, TEventName>[];
     },
   ): void | Promise<void>;
@@ -79,14 +79,12 @@ export function createDriftCache<T extends SimpleCache>(
     eventsKey: ({ abi, namespace, ...params }) =>
       createSimpleCacheKey([namespace, "events", params]),
 
-    preloadRead: ({ cache: targetCache = cache, value, ...params }) => {
-      targetCache.set(driftCache.readKey(params as DriftReadKeyParams), value);
-    },
+    preloadRead: ({ value, ...params }) =>
+      cache.set(driftCache.readKey(params as DriftReadKeyParams), value),
 
-    invalidateRead: ({ cache: targetCache = cache, ...params }) =>
-      targetCache.delete(driftCache.readKey(params)),
+    invalidateRead: (params) => cache.delete(driftCache.readKey(params)),
 
-    invalidateReadsMatching({ cache: targetCache = cache, ...params }) {
+    invalidateReadsMatching(params) {
       const sourceKey = driftCache.partialReadKey(params);
 
       for (const [key] of cache.entries) {
@@ -99,9 +97,8 @@ export function createDriftCache<T extends SimpleCache>(
       }
     },
 
-    preloadEvents: ({ cache: targetCache = cache, value, ...params }) => {
-      targetCache.set(driftCache.eventsKey(params), value);
-    },
+    preloadEvents: ({ value, ...params }) =>
+      cache.set(driftCache.eventsKey(params), value),
   });
 
   return driftCache;
