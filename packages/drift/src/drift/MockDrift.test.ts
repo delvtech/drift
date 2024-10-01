@@ -16,6 +16,14 @@ describe("MockDrift", () => {
     });
     expect(await mockContract.read("symbol")).toBe("FOO");
 
+    // expect(
+    //   await mockDrift.read({
+    //     abi: IERC20.abi,
+    //     address: "0xVaultAddress",
+    //     fn: "symbol",
+    //   }),
+    // ).toBe("FOO");
+
     mockContract.stubWrite("approve", "0xHash");
     expect(
       await mockContract.write("approve", {

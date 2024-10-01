@@ -1,21 +1,21 @@
 import type { Abi } from "abitype";
 import type {
-  ReadContract,
-  ReadWriteContract,
-} from "src/contract/types/Contract";
-import type { Network } from "src/network/types/Network";
+  AdapterReadContract,
+  AdapterReadWriteContract,
+} from "src/adapter/contract/types/Contract";
+import type { AdapterNetwork } from "src/adapter/network/AdapterNetwork";
 import type { RequiredKeys } from "src/utils/types";
 
 export interface Adapter {
-  network: Network;
+  network: AdapterNetwork;
   readContract: <TAbi extends Abi>(
     abi: TAbi,
     address: string,
-  ) => ReadContract<TAbi>;
+  ) => AdapterReadContract<TAbi>;
   readWriteContract?: <TAbi extends Abi>(
     abi: TAbi,
     address: string,
-  ) => ReadWriteContract<TAbi>;
+  ) => AdapterReadWriteContract<TAbi>;
 }
 
 export type ReadAdapter = Omit<Adapter, "readWriteContract">;

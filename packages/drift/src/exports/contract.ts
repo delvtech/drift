@@ -2,11 +2,11 @@
 export {
   createCachedReadContract,
   type CreateCachedReadContractOptions,
-} from "src/contract/factories/createCachedReadContract";
+} from "src/cache/utils/createCachedReadContract";
 export {
   createCachedReadWriteContract,
   type CreateCachedReadWriteContractOptions,
-} from "src/contract/factories/createCachedReadWriteContract";
+} from "src/cache/utils/createCachedReadWriteContract";
 
 // Types
 export type {
@@ -20,7 +20,7 @@ export type {
 export type {
   CachedReadContract,
   CachedReadWriteContract,
-} from "src/contract/types/CachedContract";
+} from "src/cache/types/CachedContract";
 export type {
   ContractDecodeFunctionDataArgs,
   ContractEncodeFunctionDataArgs,

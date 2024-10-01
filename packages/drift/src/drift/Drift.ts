@@ -1,16 +1,35 @@
 import type { Abi } from "abitype";
-import type { Adapter, ReadWriteAdapter } from "src/adapter/types";
-import type { SimpleCache } from "src/cache/types/SimpleCache";
-import { createCachedReadContract } from "src/contract/factories/createCachedReadContract";
-import { createCachedReadWriteContract } from "src/contract/factories/createCachedReadWriteContract";
-import type { FunctionName, FunctionReturn } from "src/contract/types/Function";
-import { type DriftCache, createDriftCache } from "src/drift/DriftCache";
+import type { Event, EventName } from "src/adapter/contract/types/Event";
 import type {
-  DriftContract,
-  DriftContractParams,
-  DriftReadParams,
-  DriftWriteParams,
-} from "src/drift/types";
+  DecodedFunctionData,
+  FunctionName,
+  FunctionReturn,
+} from "src/adapter/contract/types/Function";
+import type { Adapter, ReadWriteAdapter } from "src/adapter/types";
+import { createDriftCache } from "src/cache/DriftCache/createDriftCache";
+import type { DriftCache } from "src/cache/DriftCache/types";
+import type { SimpleCache } from "src/cache/SimpleCache/types";
+import { createCachedReadContract } from "src/cache/utils/createCachedReadContract";
+import { createCachedReadWriteContract } from "src/cache/utils/createCachedReadWriteContract";
+import type {
+  CachedReadContract,
+  CachedReadWriteContract,
+} from "src/contract/CachedContract";
+import type {
+  ContractParams,
+  DecodeFunctionDataParams,
+  EncodeFunctionDataParams,
+  GetEventsParams,
+  ReadParams,
+  WriteParams,
+} from "src/types";
+
+export type DriftContract<
+  TAbi extends Abi,
+  TAdapter extends Adapter = Adapter,
+> = TAdapter extends ReadWriteAdapter
+  ? CachedReadWriteContract<TAbi>
+  : CachedReadContract<TAbi>;
 
 export interface DriftOptions<TCache extends SimpleCache = SimpleCache> {
   cache?: TCache;
@@ -35,7 +54,7 @@ export class Drift<
         TAbi extends Abi,
         TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
       >(
-        params: DriftWriteParams<TAbi, TFunctionName>,
+        params: WriteParams<TAbi, TFunctionName>,
       ) => Promise<string>
     : undefined;
 
@@ -72,7 +91,7 @@ export class Drift<
     address,
     cache = this.cache,
     namespace = this.namespace,
-  }: DriftContractParams<TAbi>): DriftContract<TAbi, TAdapter> =>
+  }: ContractParams<TAbi>): DriftContract<TAbi, TAdapter> =>
     this.isReadWrite()
       ? createCachedReadWriteContract({
           contract: this.adapter.readWriteContract(abi, address),
@@ -85,6 +104,9 @@ export class Drift<
           namespace,
         }) as DriftContract<TAbi, TAdapter>);
 
+  /**
+   * Reads a specified function from a contract.
+   */
   read = async <
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
@@ -94,7 +116,7 @@ export class Drift<
     fn,
     args,
     ...readOptions
-  }: DriftReadParams<TAbi, TFunctionName>): Promise<
+  }: ReadParams<TAbi, TFunctionName>): Promise<
     FunctionReturn<TAbi, TFunctionName>
   > => {
     return createCachedReadContract({
@@ -102,6 +124,79 @@ export class Drift<
       cache: this.cache,
     }).read(fn, args, readOptions);
   };
+
+  /**
+   * Simulates a write operation on a specified function of a contract.
+   */
+  simulateWrite<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >({
+    abi,
+    address,
+    fn,
+    args,
+    ...writeOptions
+  }: WriteParams<TAbi, TFunctionName>): Promise<
+    FunctionReturn<TAbi, TFunctionName>
+  > {
+    return createCachedReadContract({
+      contract: this.adapter.readContract(abi, address),
+      cache: this.cache,
+    }).simulateWrite(fn, args, writeOptions);
+  }
+
+  /**
+   * Retrieves specified events from a contract.
+   */
+  getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
+    abi,
+    address,
+    event,
+    ...params
+  }: GetEventsParams<TAbi, TEventName>): Promise<Event<TAbi, TEventName>[]> {
+    return createCachedReadContract({
+      contract: this.adapter.readContract(abi, address),
+      cache: this.cache,
+    }).getEvents(event, params);
+  }
+
+  /**
+   * Encodes a function call into calldata.
+   */
+  encodeFunctionData<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >({
+    abi,
+    fn,
+    args,
+  }: EncodeFunctionDataParams<TAbi, TFunctionName>): `0x${string}` {
+    return createCachedReadContract({
+      contract: this.adapter.readContract(abi, "0x0"),
+      cache: this.cache,
+    }).encodeFunctionData(fn, args);
+  }
+
+  /**
+   * Decodes a string of function calldata into it's arguments and function
+   * name.
+   */
+  decodeFunctionData<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+  >({
+    abi,
+    data,
+  }: DecodeFunctionDataParams<TAbi, TFunctionName>): DecodedFunctionData<
+    TAbi,
+    TFunctionName
+  > {
+    return createCachedReadContract({
+      contract: this.adapter.readContract(abi, "0x0"),
+      cache: this.cache,
+    }).decodeFunctionData(data as `0x${string}`);
+  }
 }
 
 function isReadWriteAdapter(adapter: Adapter): adapter is ReadWriteAdapter {

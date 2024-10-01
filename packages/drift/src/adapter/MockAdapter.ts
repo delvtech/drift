@@ -1,11 +1,11 @@
 import type { Abi } from "abitype";
+import { ReadContractStub } from "src/adapter/contract/stubs/ReadContractStub";
+import { ReadWriteContractStub } from "src/adapter/contract/stubs/ReadWriteContractStub";
+import { MockNetwork } from "src/adapter/network/MockNetwork";
 import type { ReadWriteAdapter } from "src/adapter/types";
-import { ReadContractStub } from "src/contract/stubs/ReadContractStub";
-import { ReadWriteContractStub } from "src/contract/stubs/ReadWriteContractStub";
-import { NetworkStub } from "src/network/stubs/NetworkStub";
 
 export class MockAdapter implements ReadWriteAdapter {
-  network = new NetworkStub();
+  network = new MockNetwork();
   readContract = <TAbi extends Abi>(abi: TAbi) => new ReadContractStub(abi);
   readWriteContract = <TAbi extends Abi>(abi: TAbi) =>
     new ReadWriteContractStub(abi);
