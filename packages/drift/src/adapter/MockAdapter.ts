@@ -101,8 +101,8 @@ export class MockAdapter implements ReadWriteAdapter {
   async getBlock(...args: NetworkGetBlockArgs) {
     return this.getMock<NetworkGetBlockArgs, Promise<Block | undefined>>({
       method: "getBlock",
-      create: () =>
-        sinonStub().resolves({
+      create: (mock) =>
+        mock.resolves({
           blockNumber: 0n,
           timestamp: 0n,
         }),
