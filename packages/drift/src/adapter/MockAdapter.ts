@@ -49,19 +49,20 @@ export class MockAdapter implements ReadWriteAdapter {
       mockKey += `:${stringify(key)}`;
     }
     let mock = this.mocks.get(mockKey);
-    if (!mock) {
-      mock = sinonStub().throws(
-        new NotImplementedError({
-          method,
-          mockKey,
-        }),
-      );
-      if (create) {
-        // TODO: Cleanup type casting
-        mock = create(mock as any);
-      }
-      this.mocks.set(mockKey, mock);
+    if (mock) {
+      return mock as any;
     }
+    mock = sinonStub().throws(
+      new NotImplementedError({
+        method,
+        mockKey,
+      }),
+    );
+    if (create) {
+      // TODO: Cleanup type casting
+      mock = create(mock as any);
+    }
+    this.mocks.set(mockKey, mock);
     return mock as any;
   }
 
