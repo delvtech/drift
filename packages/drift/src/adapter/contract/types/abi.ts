@@ -137,7 +137,7 @@ type NamedParametersToObject<
       // key, so we have to use `number` as the key for any parameters that have
       // empty names ("") in arrays
       Extract<TParameters[number], { name: "" }> extends never
-      ? unknown // <- No parameters with empty names
+      ? any // <- No parameters with empty names
       : {
           [index: number]: AbiParameterToPrimitiveType<
             Extract<TParameters[number], { name: "" }>,

@@ -2,7 +2,7 @@ import type { Abi, AbiStateMutability } from "abitype";
 import type {
   AbiFriendlyType,
   AbiObjectType,
-} from "src/adapter/contract/types/AbiEntry";
+} from "src/adapter/contract/types/abi";
 
 /**
  * Get a union of function names from an abi

@@ -1,10 +1,10 @@
 import type { Abi } from "abitype";
-import type { Event, EventName } from "src/adapter/contract/types/Event";
+import type { Event, EventName } from "src/adapter/contract/types/event";
 import type {
   DecodedFunctionData,
   FunctionName,
   FunctionReturn,
-} from "src/adapter/contract/types/Function";
+} from "src/adapter/contract/types/function";
 import type { Adapter, ReadWriteAdapter } from "src/adapter/types";
 import { createDriftCache } from "src/cache/DriftCache/createDriftCache";
 import type { DriftCache } from "src/cache/DriftCache/types";
@@ -12,9 +12,9 @@ import type { SimpleCache } from "src/cache/SimpleCache/types";
 import { createCachedReadContract } from "src/cache/utils/createCachedReadContract";
 import { createCachedReadWriteContract } from "src/cache/utils/createCachedReadWriteContract";
 import type {
-  CachedReadContract,
-  CachedReadWriteContract,
-} from "src/contract/CachedContract";
+  ReadContract,
+  ReadWriteContract,
+} from "src/contract/types";
 import type {
   ContractParams,
   DecodeFunctionDataParams,
@@ -28,8 +28,8 @@ export type DriftContract<
   TAbi extends Abi,
   TAdapter extends Adapter = Adapter,
 > = TAdapter extends ReadWriteAdapter
-  ? CachedReadWriteContract<TAbi>
-  : CachedReadContract<TAbi>;
+  ? ReadWriteContract<TAbi>
+  : ReadContract<TAbi>;
 
 export interface DriftOptions<TCache extends SimpleCache = SimpleCache> {
   cache?: TCache;
@@ -109,18 +109,9 @@ export class Drift<
     address,
     cache = this.cache,
     namespace = this.namespace,
-  }: ContractParams<TAbi>): DriftContract<TAbi, TAdapter> =>
-    this.isReadWrite()
-      ? createCachedReadWriteContract({
-          contract: this.adapter.readWriteContract(abi, address),
-          cache,
-          namespace,
-        })
-      : (createCachedReadContract({
-          contract: this.adapter.readContract(abi, address),
-          cache,
-          namespace,
-        }) as DriftContract<TAbi, TAdapter>);
+  }: ContractParams<TAbi>): DriftContract<TAbi, TAdapter> => {
+    con
+  }
 
   /**
    * Reads a specified function from a contract.

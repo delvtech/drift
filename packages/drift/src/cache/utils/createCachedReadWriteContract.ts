@@ -1,5 +1,5 @@
 import type { Abi } from "abitype";
-import type { AdapterReadWriteContract } from "src/adapter/contract/types/Contract";
+import type { AdapterReadWriteContract } from "src/adapter/contract/types/contract";
 import type { CachedReadWriteContract } from "src/cache/types/CachedContract";
 import {
   type CreateCachedReadContractOptions,

@@ -1,22 +1,22 @@
 import { type SinonStub, stub } from "sinon";
+import type { Block } from "src/adapter/network/types/Block";
 import type {
-  AdapterNetwork,
+  NetworkAdapter,
   NetworkGetBalanceArgs,
   NetworkGetBlockArgs,
   NetworkGetTransactionArgs,
   NetworkWaitForTransactionArgs,
-} from "src/adapter/network/AdapterNetwork";
-import type { Block } from "src/adapter/network/Block";
+} from "src/adapter/network/types/NetworkAdapter";
 import type {
   Transaction,
   TransactionReceipt,
-} from "src/adapter/network/Transaction";
+} from "src/adapter/network/types/Transaction";
 
 /**
  * A mock implementation of a `Network` designed to facilitate unit
  * testing.
  */
-export class MockNetwork implements AdapterNetwork {
+export class MockNetwork implements NetworkAdapter {
   protected getBalanceStub:
     | SinonStub<[NetworkGetBalanceArgs?], Promise<bigint>>
     | undefined;

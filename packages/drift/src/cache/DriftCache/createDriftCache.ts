@@ -30,6 +30,9 @@ export function createDriftCache<T extends SimpleCache>(
     preloadRead: ({ value, ...params }) =>
       cache.set(driftCache.readKey(params as DriftReadKeyParams), value),
 
+    preloadEvents: ({ value, ...params }) =>
+      cache.set(driftCache.eventsKey(params), value),
+
     invalidateRead: (params) => cache.delete(driftCache.readKey(params)),
 
     invalidateReadsMatching(params) {
@@ -44,9 +47,6 @@ export function createDriftCache<T extends SimpleCache>(
         }
       }
     },
-
-    preloadEvents: ({ value, ...params }) =>
-      cache.set(driftCache.eventsKey(params), value),
   });
 
   return driftCache;

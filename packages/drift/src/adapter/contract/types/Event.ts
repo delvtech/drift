@@ -5,7 +5,7 @@ import type {
   AbiParameters,
   AbiParametersToObject,
   NamedAbiParameter,
-} from "src/adapter/contract/types/AbiEntry";
+} from "src/adapter/contract/types/abi";
 
 /**
  * Get a union of event names from an abi

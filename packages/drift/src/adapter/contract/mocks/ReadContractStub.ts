@@ -11,14 +11,14 @@ import type {
   ContractReadOptions,
   ContractWriteArgs,
   ContractWriteOptions,
-} from "src/adapter/contract/types/Contract";
-import type { Event, EventName } from "src/adapter/contract/types/Event";
+} from "src/adapter/contract/types/contract";
+import type { Event, EventName } from "src/adapter/contract/types/event";
 import type {
   DecodedFunctionData,
   FunctionArgs,
   FunctionName,
   FunctionReturn,
-} from "src/adapter/contract/types/Function";
+} from "src/adapter/contract/types/function";
 
 /**
  * A mock implementation of a `ReadContract` designed to facilitate unit

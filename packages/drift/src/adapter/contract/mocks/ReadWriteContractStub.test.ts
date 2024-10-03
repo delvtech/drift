@@ -1,4 +1,4 @@
-import { ReadWriteContractStub } from "src/adapter/contract/stubs/ReadWriteContractStub";
+import { ReadWriteContractStub } from "src/adapter/contract/mocks/ReadWriteContractStub";
 import { IERC20 } from "src/utils/testing/IERC20";
 import { describe, expect, it } from "vitest";
 

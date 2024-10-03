@@ -1,18 +1,15 @@
 import type { Abi } from "abitype";
-import type { Event, EventName } from "src/adapter/contract/types/Event";
+import type { Event, EventName } from "src/adapter/contract/types/event";
 import type {
   FunctionName,
   FunctionReturn,
-} from "src/adapter/contract/types/Function";
+} from "src/adapter/contract/types/function";
+import type { GetEventsParams, ReadParams } from "src/adapter/types";
 import type { SimpleCache, SimpleCacheKey } from "src/cache/SimpleCache/types";
-import type {
-  DriftGetEventsParams,
-  DriftReadParams,
-} from "src/drift/types/DriftContract";
-import type { DeepPartial } from "src/utils/types";
+import type { DeepPartial, MaybePromise } from "src/utils/types";
 
 export type DriftCache<T extends SimpleCache = SimpleCache> = T & {
-  // Key Generators //
+  // Key generation //
 
   partialReadKey<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
     params: DeepPartial<DriftReadKeyParams<TAbi, TFunctionName>>,
@@ -26,38 +23,38 @@ export type DriftCache<T extends SimpleCache = SimpleCache> = T & {
     params: DriftEventsKeyParams<TAbi, TEventName>,
   ): SimpleCacheKey;
 
-  // Cache Management //
+  // Cache management //
 
   preloadRead<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
     params: DriftReadKeyParams<TAbi, TFunctionName> & {
       value: FunctionReturn<TAbi, TFunctionName>;
     },
-  ): void | Promise<void>;
+  ): MaybePromise<void>;
+
+  preloadEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
+    params: DriftEventsKeyParams<TAbi, TEventName> & {
+      value: readonly Event<TAbi, TEventName>[];
+    },
+  ): MaybePromise<void>;
 
   invalidateRead<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
     params: DriftReadKeyParams<TAbi, TFunctionName>,
-  ): void | Promise<void>;
+  ): MaybePromise<void>;
 
   invalidateReadsMatching<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
   >(
     params: DeepPartial<DriftReadKeyParams<TAbi, TFunctionName>>,
-  ): void | Promise<void>;
-
-  preloadEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
-    params: DriftEventsKeyParams<TAbi, TEventName> & {
-      value: readonly Event<TAbi, TEventName>[];
-    },
-  ): void | Promise<void>;
+  ): MaybePromise<void>;
 };
 
 export type DriftReadKeyParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = Omit<DriftReadParams<TAbi, TFunctionName>, "cache">;
+> = Omit<ReadParams<TAbi, TFunctionName>, "cache">;
 
 export type DriftEventsKeyParams<
   TAbi extends Abi = Abi,
   TEventName extends EventName<TAbi> = EventName<TAbi>,
-> = Omit<DriftGetEventsParams<TAbi, TEventName>, "cache">;
+> = Omit<GetEventsParams<TAbi, TEventName>, "cache">;

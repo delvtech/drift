@@ -2,7 +2,7 @@ import type { Abi, AbiItemType } from "abitype";
 import type {
   AbiEntry,
   AbiEntryName,
-} from "src/adapter/contract/types/AbiEntry";
+} from "src/adapter/contract/types/abi";
 import { AbiEntryNotFoundError } from "src/errors/AbiEntryNotFound";
 
 /**

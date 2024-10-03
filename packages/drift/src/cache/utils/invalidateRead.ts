@@ -1,5 +1,5 @@
 import type { Abi } from "abitype";
-import type { FunctionName } from "src/adapter/contract/types/Function";
+import type { FunctionName } from "src/adapter/contract/types/function";
 import type { DriftReadKeyParams } from "src/cache/DriftCache/types";
 import type { SimpleCache } from "src/cache/SimpleCache/types";
 import { readKey } from "src/cache/utils/readKey";

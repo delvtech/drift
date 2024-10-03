@@ -1,7 +1,7 @@
 import type { Abi } from "abitype";
 import { MockAdapter } from "src/adapter/MockAdapter";
-import type { ReadWriteContractStub } from "src/adapter/contract/stubs/ReadWriteContractStub";
-import type { CachedReadWriteContract } from "src/contract/CachedContract";
+import type { ReadWriteContractStub } from "src/adapter/contract/mocks/ReadWriteContractStub";
+import type { ReadWriteContract } from "src/contract/types";
 import { Drift, type DriftOptions } from "src/drift/Drift";
 import type { SimpleCache } from "src/exports";
 import type { ContractParams } from "src/types";
@@ -16,5 +16,5 @@ export class MockDrift<TCache extends SimpleCache> extends Drift<
 
   declare contract: <TAbi extends Abi>(
     params: ContractParams<TAbi>,
-  ) => CachedReadWriteContract<TAbi> & ReadWriteContractStub<TAbi>;
+  ) => ReadWriteContract<TAbi> & ReadWriteContractStub<TAbi>;
 }

@@ -3,7 +3,7 @@ import type {
   AbiArrayType,
   AbiEntryName,
   AbiFriendlyType,
-} from "src/adapter/contract/types/AbiEntry";
+} from "src/adapter/contract/types/abi";
 import { getAbiEntry } from "src/adapter/contract/utils/getAbiEntry";
 
 /**

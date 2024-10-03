@@ -1,5 +1,5 @@
-import { ReadContractStub } from "src/adapter/contract/stubs/ReadContractStub";
-import type { Event } from "src/adapter/contract/types/Event";
+import { ReadContractStub } from "src/adapter/contract/mocks/ReadContractStub";
+import type { Event } from "src/adapter/contract/types/event";
 import { IERC20 } from "src/utils/testing/IERC20";
 import { ALICE, BOB, NANCY } from "src/utils/testing/accounts";
 import { describe, expect, it } from "vitest";

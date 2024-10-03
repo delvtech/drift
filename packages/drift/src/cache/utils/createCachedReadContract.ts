@@ -1,10 +1,10 @@
 import type { Abi } from "abitype";
 import isMatch from "lodash.ismatch";
-import type { AdapterReadContract } from "src/adapter/contract/types/Contract";
+import type { AdapterReadContract } from "src/adapter/contract/types/contract";
 import { createLruSimpleCache } from "src/cache/SimpleCache/createLruSimpleCache";
 import { createSimpleCacheKey } from "src/cache/SimpleCache/createSimpleCacheKey";
 import type { SimpleCache, SimpleCacheKey } from "src/cache/SimpleCache/types";
-import type { CachedReadContract } from "src/contract/CachedContract";
+import type { ReadContract } from "src/contract/types";
 
 // TODO: Figure out a good default cache size
 const DEFAULT_CACHE_SIZE = 100;
@@ -33,7 +33,7 @@ export function createCachedReadContract<TAbi extends Abi = Abi>({
   contract,
   cache = createLruSimpleCache({ max: DEFAULT_CACHE_SIZE }),
   namespace,
-}: CreateCachedReadContractOptions<TAbi>): CachedReadContract<TAbi> {
+}: CreateCachedReadContractOptions<TAbi>): ReadContract<TAbi> {
   // Because this is part of the public API, we won't know if the original
   // contract is a plain object or a class instance, so we use Object.create to
   // preserve the original contract's prototype chain when extending, ensuring
@@ -42,7 +42,7 @@ export function createCachedReadContract<TAbi extends Abi = Abi>({
   const contractPrototype = Object.getPrototypeOf(contract);
   const newContract = Object.create(contractPrototype);
 
-  const overrides: Partial<CachedReadContract<TAbi>> = {
+  const overrides: Partial<ReadContract<TAbi>> = {
     cache,
 
     /**

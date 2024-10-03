@@ -1,6 +1,6 @@
 import type { Abi } from "abitype";
 import isMatch from "lodash.ismatch";
-import type { FunctionName } from "src/adapter/contract/types/Function";
+import type { FunctionName } from "src/adapter/contract/types/function";
 import type { DriftReadKeyParams } from "src/cache/DriftCache/types";
 import type { SimpleCache, SimpleCacheKey } from "src/cache/SimpleCache/types";
 import { partialReadKey } from "src/cache/utils/partialReadKey";

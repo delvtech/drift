@@ -4,7 +4,7 @@ import {
 } from "src/adapter/network/MockNetwork";
 import { ALICE } from "src/utils/testing/accounts";
 import { describe, expect, it } from "vitest";
-import type { Transaction } from "./Transaction";
+import type { Transaction } from "./types/Transaction";
 
 describe("MockNetwork", () => {
   it("stubs getBalance", async () => {

@@ -1,15 +1,16 @@
-import type { Block, BlockTag } from "src/adapter/network/Block";
+import type { Block, BlockTag } from "src/adapter/network/types/Block";
 import type {
   Transaction,
   TransactionReceipt,
-} from "src/adapter/network/Transaction";
+} from "src/adapter/network/types/Transaction";
+import type { Address, HexString, TransactionHash } from "src/types";
 
 // https://ethereum.github.io/execution-apis/api-documentation/
 
 /**
  * An interface representing data the SDK needs to get from the network.
  */
-export interface AdapterNetwork {
+export interface NetworkAdapter {
   /**
    * Get the balance of native currency for an account.
    */
@@ -43,7 +44,7 @@ export interface AdapterNetwork {
 
 export type NetworkGetBlockOptions =
   | {
-      blockHash?: `0x${string}`;
+      blockHash?: HexString;
       blockNumber?: never;
       blockTag?: never;
     }
@@ -59,16 +60,16 @@ export type NetworkGetBlockOptions =
     };
 
 export type NetworkGetBalanceArgs = [
-  address: `0x${string}`,
+  address: Address,
   block?: NetworkGetBlockOptions,
 ];
 
 export type NetworkGetBlockArgs = [options?: NetworkGetBlockOptions];
 
-export type NetworkGetTransactionArgs = [hash: `0x${string}`];
+export type NetworkGetTransactionArgs = [hash: TransactionHash];
 
 export type NetworkWaitForTransactionArgs = [
-  hash: `0x${string}`,
+  hash: TransactionHash,
   options?: {
     /**
      * The number of milliseconds to wait for the transaction until rejecting

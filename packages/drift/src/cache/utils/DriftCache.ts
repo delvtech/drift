@@ -1,5 +1,5 @@
 import type { Abi } from "abitype";
-import type { Event, EventName } from "src/adapter/contract/types/Event";
+import type { Event, EventName } from "src/adapter/contract/types/event";
 import type {
   DriftEventsKeyParams
 } from "src/cache/DriftCache/types";
