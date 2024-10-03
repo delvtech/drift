@@ -519,7 +519,7 @@ describe("MockAdapter", () => {
           fn: "transfer",
           args: { to: "0x", value: 123n },
         })
-        .returns("0x123");
+        .resolves("0x123");
       expect(
         await adapter.write({
           abi: IERC20.abi,
@@ -542,8 +542,8 @@ describe("MockAdapter", () => {
         ...params1,
         args: { to: "0x2", value: 123n },
       };
-      adapter.onWrite(params1).returns("0x1");
-      adapter.onWrite(params2).returns("0x2");
+      adapter.onWrite(params1).resolves("0x1");
+      adapter.onWrite(params2).resolves("0x2");
       expect(await adapter.write(params1)).toBe("0x1");
       expect(await adapter.write(params2)).toBe("0x2");
     });
