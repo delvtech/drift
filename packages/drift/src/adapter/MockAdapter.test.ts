@@ -59,7 +59,7 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const { blockNumber, timestamp } = await adapter.getBlock();
+      const { blockNumber, timestamp = 0n } = (await adapter.getBlock()) ?? {};
       const block1: Block = {
         blockNumber: blockNumber ?? 0n + 1n,
         timestamp: timestamp + 1n,
@@ -235,14 +235,17 @@ describe("MockAdapter", () => {
   describe("decodeFunctionData", () => {
     it("Throws an error by default", async () => {
       const adapter = new MockAdapter();
-      expect(
-        (async () =>
-          adapter.decodeFunctionData({
-            abi: IERC20.abi,
-            fn: "balanceOf",
-            data: "0x",
-          }))(),
-      ).rejects.toThrowError();
+      let error: unknown;
+      try {
+        adapter.decodeFunctionData({
+          abi: IERC20.abi,
+          fn: "balanceOf",
+          data: "0x",
+        });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {
@@ -286,13 +289,17 @@ describe("MockAdapter", () => {
   describe("getEvents", () => {
     it("Rejects with an error by default", async () => {
       const adapter = new MockAdapter();
-      expect(
-        adapter.getEvents({
+      let error: unknown;
+      try {
+        await adapter.getEvents({
           abi: IERC20.abi,
           address: "0x",
           event: "Transfer",
-        }),
-      ).rejects.toThrowError();
+        });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {
@@ -365,13 +372,17 @@ describe("MockAdapter", () => {
   describe("read", () => {
     it("Rejects with an error by default", async () => {
       const adapter = new MockAdapter();
-      expect(
-        adapter.read({
+      let error: unknown;
+      try {
+        await adapter.read({
           abi: IERC20.abi,
           address: "0x",
           fn: "symbol",
-        }),
-      ).rejects.toThrowError();
+        });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {
@@ -433,14 +444,18 @@ describe("MockAdapter", () => {
   describe("simulateWrite", () => {
     it("Rejects with an error by default", async () => {
       const adapter = new MockAdapter();
-      expect(
-        adapter.simulateWrite({
+      let error: unknown;
+      try {
+        await adapter.simulateWrite({
           abi: IERC20.abi,
           address: "0x",
           fn: "transfer",
           args: { to: "0x", value: 123n },
-        }),
-      ).rejects.toThrowError();
+        });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {

@@ -1,16 +1,22 @@
 import type { Abi } from "abitype";
-import { type SinonStub, stub as createStub } from "sinon";
+import stringify from "fast-json-stable-stringify";
+import { type SinonStub, stub as sinonStub } from "sinon";
 import type { Event, EventName } from "src/adapter/contract/types/event";
 import type {
   FunctionName,
   FunctionReturn,
 } from "src/adapter/contract/types/function";
+import type { Block } from "src/adapter/network/types/Block";
 import type {
   NetworkGetBalanceArgs,
   NetworkGetBlockArgs,
   NetworkGetTransactionArgs,
   NetworkWaitForTransactionArgs,
 } from "src/adapter/network/types/NetworkAdapter";
+import type {
+  Transaction,
+  TransactionReceipt,
+} from "src/adapter/network/types/Transaction";
 import type {
   DecodeFunctionDataParams,
   EncodeFunctionDataParams,
@@ -19,6 +25,7 @@ import type {
   ReadWriteAdapter,
   WriteParams,
 } from "src/adapter/types";
+import type { SimpleCacheKey } from "src/exports";
 import type { Address, Bytes, TransactionHash } from "src/types";
 import type { OptionalKeys } from "src/utils/types";
 
@@ -26,146 +33,165 @@ import type { OptionalKeys } from "src/utils/types";
 export class MockAdapter implements ReadWriteAdapter {
   // stubs //
 
-  protected stubs = new Map<string, SinonStub>();
+  protected mocks = new Map<string, SinonStub>();
 
-  protected getStub<TInsert extends boolean | (() => SinonStub)>({
+  protected getMock({
+    method,
     key,
     create,
   }: {
-    key: string;
-    create?: TInsert;
-  }): TInsert extends false | undefined ? SinonStub | undefined : SinonStub {
-    let stub = this.stubs.get(key);
-    if (!stub && create) {
-      stub = typeof create === "function" ? create() : createStub();
-      this.stubs.set(key, stub);
+    method: keyof ReadWriteAdapter;
+    key?: SimpleCacheKey;
+    create?: () => SinonStub;
+  }): SinonStub {
+    let mockKey = method;
+    if (key) {
+      mockKey += `:${stringify(key)}`;
     }
-    return stub as any;
+    let mock = this.mocks.get(mockKey);
+    if (!mock) {
+      mock = create
+        ? create()
+        : // Throws an error by default if no explicit return value is set.
+          sinonStub().throws(
+            new NotImplementedError({
+              method,
+              mockKey,
+            }),
+          );
+      this.mocks.set(mockKey, mock);
+    }
+    return mock;
   }
 
   reset() {
-    this.stubs.clear();
+    this.mocks.clear();
   }
 
   // getBalance //
 
-  protected get getBalanceStub() {
-    return this.getStub({
-      key: "getBalance",
-      create: () => createStub().resolves(0n),
-    });
-  }
-
-  getBalance(...args: NetworkGetBalanceArgs) {
-    return this.getBalanceStub(...args);
-  }
-
   onGetBalance(...args: Partial<NetworkGetBalanceArgs>) {
-    return this.getBalanceStub.withArgs(...args);
+    return this.getMock({
+      method: "getBalance",
+      create: () => sinonStub().resolves(0n),
+    }).withArgs(...args);
+  }
+
+  getBalance(...args: NetworkGetBalanceArgs): Promise<bigint> {
+    return this.getMock({
+      method: "getBalance",
+      create: () => sinonStub().resolves(0n),
+    })(...args);
   }
 
   // getBlock //
 
-  protected get getBlockStub() {
-    return this.getStub({
-      key: "getBlock",
+  onGetBlock(...args: Partial<NetworkGetBlockArgs>) {
+    return this.getMock({
+      method: "getBlock",
       create: () =>
-        createStub().resolves({
+        sinonStub().resolves({
           blockNumber: 0n,
           timestamp: 0n,
         }),
-    });
+    }).withArgs(...args);
   }
 
-  getBlock(...args: NetworkGetBlockArgs) {
-    return this.getBlockStub(...args);
-  }
-
-  onGetBlock(...args: Partial<NetworkGetBlockArgs>) {
-    return this.getBlockStub.withArgs(...args);
+  async getBlock(...args: NetworkGetBlockArgs): Promise<Block | undefined> {
+    return this.getMock({
+      method: "getBlock",
+      create: () =>
+        sinonStub().resolves({
+          blockNumber: 0n,
+          timestamp: 0n,
+        }),
+    })(...args);
   }
 
   // getChainId //
 
-  protected get getChainIdStub() {
-    return this.getStub({
-      key: "getChainId",
-      create: () => createStub().resolves(0),
+  onGetChainId() {
+    return this.getMock({
+      method: "getChainId",
+      create: () => sinonStub().resolves(96024),
     });
   }
 
-  getChainId() {
-    return this.getChainIdStub();
-  }
-
-  onGetChainId() {
-    return this.getChainIdStub;
+  async getChainId(): Promise<number> {
+    return this.getMock({
+      method: "getChainId",
+      create: () => sinonStub().resolves(96024),
+    })();
   }
 
   // getTransaction //
 
-  protected get getTransactionStub() {
-    return this.getStub({
-      key: "getTransaction",
-      create: () => createStub().resolves(undefined),
-    });
-  }
-
-  getTransaction(...args: NetworkGetTransactionArgs) {
-    return this.getTransactionStub(...args);
-  }
-
   onGetTransaction(...args: Partial<NetworkGetTransactionArgs>) {
-    return this.getTransactionStub.withArgs(...args);
+    return this.getMock({
+      method: "getTransaction",
+      create: () => sinonStub().resolves(undefined),
+    }).withArgs(...args);
+  }
+
+  async getTransaction(
+    ...args: NetworkGetTransactionArgs
+  ): Promise<Transaction | undefined> {
+    return this.getMock({
+      method: "getTransaction",
+      create: () => sinonStub().resolves(undefined),
+    })(...args);
   }
 
   // waitForTransaction //
 
-  protected get waitForTransactionStub() {
-    return this.getStub({
-      key: "waitForTransaction",
-      create: () => createStub().resolves(undefined),
-    });
-  }
-
-  waitForTransaction(...args: NetworkWaitForTransactionArgs) {
-    return this.waitForTransactionStub(...args);
-  }
-
   onWaitForTransaction(...args: Partial<NetworkWaitForTransactionArgs>) {
-    return this.waitForTransactionStub.withArgs(...args);
+    return this.getMock({
+      method: "waitForTransaction",
+      create: () => sinonStub().resolves(undefined),
+    }).withArgs(...args);
+  }
+
+  async waitForTransaction(
+    ...args: NetworkWaitForTransactionArgs
+  ): Promise<TransactionReceipt | undefined> {
+    return this.getMock({
+      method: "waitForTransaction",
+      create: () => sinonStub().resolves(undefined),
+    })(...args);
   }
 
   // encodeFunction //
 
-  protected get encodeFunctionDataStub() {
-    return this.getStub({
-      key: "encodeFunctionData",
-      create: () => createStub().returns("0x0"),
-    });
+  onEncodeFunctionData<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(params: OnEncodeFunctionDataParams<TAbi, TFunctionName>) {
+    return this.getMock({
+      method: "encodeFunctionData",
+      create: () => sinonStub().returns("0x0"),
+    }).withArgs(params);
   }
 
   encodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
   >(params: EncodeFunctionDataParams<TAbi, TFunctionName>): Bytes {
-    return this.encodeFunctionDataStub(params);
-  }
-
-  onEncodeFunctionData<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >(params: EncodeFunctionDataStubParams<TAbi, TFunctionName>) {
-    return this.encodeFunctionDataStub.withArgs(params);
+    return this.getMock({
+      method: "encodeFunctionData",
+      create: () => sinonStub().returns("0x0"),
+    })(params);
   }
 
   // decodeFunction //
 
-  // TODO: This should be specific to the abi to ensure the correct return type.
-  protected decodeFunctionDataStubKey({
-    fn,
-  }: Partial<DecodeFunctionDataParams>) {
-    return `decodeFunctionData:${fn}`;
+  onDecodeFunctionData<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(params: OnDecodeFunctionDataParams<TAbi, TFunctionName>) {
+    return this.getMock({
+      method: "decodeFunctionData",
+      key: params.fn,
+    }).withArgs(params);
   }
 
   decodeFunctionData<
@@ -174,216 +200,148 @@ export class MockAdapter implements ReadWriteAdapter {
   >(
     params: DecodeFunctionDataParams<TAbi, TFunctionName>,
   ): FunctionReturn<TAbi, TFunctionName> {
-    const stub = this.getStub({
-      key: this.decodeFunctionDataStubKey(params),
-    });
-    if (!stub) {
-      throw new NotImplementedError({
-        name: params.fn || params.data,
-        method: "decodeFunctionData",
-        stubMethod: "onDecodeFunctionData",
-      });
-    }
-    return stub(params);
-  }
-
-  // TODO: Does calling `onDecodeFunctionData` without calling any methods on
-  // it, e.g. `returns`, break the error behavior?
-  onDecodeFunctionData<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >(params: DecodeFunctionDataStubParams<TAbi, TFunctionName>) {
-    return this.getStub({
-      key: this.decodeFunctionDataStubKey(params),
-      create: true,
-    }).withArgs(params);
+    // TODO: This should be specific to the abi to ensure the correct return type.
+    return this.getMock({
+      method: "decodeFunctionData",
+      key: params.fn,
+    })(params);
   }
 
   // getEvents //
 
-  protected getEventsStubKey({
-    address,
-    event,
-  }: Partial<GetEventsParams<any>>): string {
-    return `getEvents:${address}:${event}`;
-  }
-
-  getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
-    params: GetEventsParams<TAbi, TEventName>,
-  ): Promise<Event<TAbi, TEventName>[]> {
-    const stub = this.stubs.get(this.getEventsStubKey(params));
-    if (!stub) {
-      return Promise.reject(
-        new NotImplementedError({
-          name: params.event,
-          method: "getEvents",
-          stubMethod: "onGetEvents",
-        }),
-      );
-    }
-    return Promise.resolve(stub(params));
-  }
-
   onGetEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
     params: GetEventsParams<TAbi, TEventName>,
   ) {
-    return this.getStub<
-      [GetEventsParams<TAbi, TEventName>],
-      Promise<Event<TAbi, TEventName>[]>
-    >({
-      key: this.getEventsStubKey(params),
-      args: [params],
-    });
+    return this.getMock({
+      method: "getEvents",
+      key: params.event,
+    }).withArgs(params);
+  }
+
+  async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
+    params: GetEventsParams<TAbi, TEventName>,
+  ): Promise<Event<TAbi, TEventName>[]> {
+    return this.getMock({
+      method: "getEvents",
+      key: params.event,
+    })(params);
   }
 
   // read //
 
-  protected readStubKey({ address, fn }: ReadStubParams) {
-    return `read:${address}:${fn}`;
+  onRead<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
+  >(params: OnReadParams<TAbi, TFunctionName>) {
+    return this.getMock({
+      method: "read",
+      key: params.fn,
+    }).withArgs(params);
   }
 
-  read<
+  async read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(
     params: ReadParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
-    const stub = this.stubs.get(this.readStubKey(params));
-    if (!stub) {
-      return Promise.reject(
-        new NotImplementedError({
-          name: params.fn,
-          method: "read",
-          stubMethod: "onRead",
-        }),
-      );
-    }
-    return Promise.resolve(stub(params));
-  }
-
-  onRead<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(params: ReadStubParams<TAbi, TFunctionName>) {
-    return this.getStub<
-      [ReadStubParams<TAbi, TFunctionName>],
-      Promise<FunctionReturn<TAbi, TFunctionName>>
-    >({
-      key: this.readStubKey(params),
-      args: [params],
-    });
+    return this.getMock({
+      method: "read",
+      key: params.fn,
+    })(params);
   }
 
   // simulateWrite //
 
-  protected simulateWriteStubKey({ address, fn }: WriteStubParams) {
-    return `simulateWrite:${address}:${fn}`;
+  onSimulateWrite<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(params: OnWriteParams<TAbi, TFunctionName>) {
+    return this.getMock({
+      method: "simulateWrite",
+      key: params.fn,
+    }).withArgs(params);
   }
 
-  simulateWrite<
+  async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
     params: WriteParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
-    const stub = this.stubs.get(this.simulateWriteStubKey(params));
-    if (!stub) {
-      return Promise.reject(
-        new NotImplementedError({
-          name: params.fn,
-          method: "simulateWrite",
-          stubMethod: "onSimulateWrite",
-        }),
-      );
-    }
-    return Promise.resolve(stub(params));
-  }
-
-  onSimulateWrite<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteStubParams<TAbi, TFunctionName>) {
-    return this.getStub<
-      [WriteStubParams<TAbi, TFunctionName>],
-      Promise<FunctionReturn<TAbi, TFunctionName>>
-    >({
-      key: this.simulateWriteStubKey(params),
-      args: [params],
-    });
+    return this.getMock({
+      method: "simulateWrite",
+      key: params.fn,
+    })(params);
   }
 
   // write //
 
-  protected get writeStub() {
-    return this.getStub<[WriteStubParams], Bytes>({
-      key: "write",
-    }).returns("0x0");
-  }
-
-  write<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>): Promise<TransactionHash> {
-    return Promise.resolve(this.writeStub(params));
-  }
-
   onWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteStubParams<TAbi, TFunctionName>) {
-    return this.writeStub.withArgs(params);
+  >(params: OnWriteParams<TAbi, TFunctionName>) {
+    return this.getMock({
+      method: "write",
+      key: params.fn,
+      create: () => sinonStub().resolves("0x0"),
+    }).withArgs(params);
+  }
+
+  async write<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(params: WriteParams<TAbi, TFunctionName>): Promise<TransactionHash> {
+    return this.getMock({
+      method: "write",
+      key: params.fn,
+      create: () => sinonStub().resolves("0x0"),
+    })(params);
   }
 
   // getSignerAddress //
 
-  protected get getSignerAddressStub() {
-    const key = "getSignerAddress";
-    let stub = this.stubs.get(key);
-    if (!stub) {
-      stub = createStub().resolves("0xMockSigner");
-      this.stubs.set(key, stub);
-    }
-  }
-
   onGetSignerAddress() {
-    return this.getSignerAddressStub;
+    return this.getMock({
+      method: "getSignerAddress",
+      create: () => sinonStub().resolves("0xMockSigner"),
+    });
   }
 
-  getSignerAddress(): Promise<Address> {
-    return Promise.resolve(this.getSignerAddressStub());
+  async getSignerAddress(): Promise<Address> {
+    return this.getMock({
+      method: "getSignerAddress",
+      create: () => sinonStub().resolves("0xMockSigner"),
+    })();
   }
 }
 
 // TODO: Make address optional and create a key from the abi entry and fn name.
-export type ReadStubParams<
+export type OnReadParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = OptionalKeys<ReadParams<TAbi, TFunctionName>, "args">;
+> = OptionalKeys<ReadParams<TAbi, TFunctionName>, "args" | "address">;
 
-export type WriteStubParams<
+export type OnWriteParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = OptionalKeys<WriteParams<TAbi, TFunctionName>, "args" | "abi">;
+> = OptionalKeys<WriteParams<TAbi, TFunctionName>, "args" | "address">;
 
-export type EncodeFunctionDataStubParams<
+export type OnEncodeFunctionDataParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 > = OptionalKeys<EncodeFunctionDataParams<TAbi, TFunctionName>, "args">;
 
-export type DecodeFunctionDataStubParams<
+export type OnDecodeFunctionDataParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = OptionalKeys<DecodeFunctionDataParams<TAbi, TFunctionName>, "data" | "abi">;
+> = OptionalKeys<DecodeFunctionDataParams<TAbi, TFunctionName>, "data">;
 
 class NotImplementedError extends Error {
-  constructor({
-    method,
-    stubMethod,
-    name,
-  }: { method: string; stubMethod: string; name?: string }) {
-    // TODO: This error message is not accurate.
+  constructor({ method, mockKey }: { method: string; mockKey: string }) {
     super(
-      `Called ${method}${name ? ` for "${name}"` : ""} on a MockAdapter without a return value. The function must be stubbed first:\n\tadapter.${stubMethod}("${name}").resolves(value)`,
+      `Called ${method} on a MockAdapter without a return value. No mock found with key "${mockKey}". Stub the return value first:
+    adapter.on${method.replace(/^./, (c) => c.toUpperCase())}(...args).resolves(value)`,
     );
     this.name = "NotImplementedError";
   }
