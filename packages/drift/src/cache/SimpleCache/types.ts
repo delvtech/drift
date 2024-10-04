@@ -1,3 +1,5 @@
+import type { SerializableKey } from "src/utils/createSerializableKey";
+
 /**
  * Represents a simple caching mechanism with basic operations such as
  * get, set, delete, clear, and find.
@@ -8,12 +10,17 @@
  */
 export interface SimpleCache<
   TValue = any,
-  TKey extends SimpleCacheKey = SimpleCacheKey,
+  TKey extends SerializableKey = SerializableKey,
 > {
   /**
    * Returns an iterable of key-value pairs for every entry in the cache.
    */
   readonly entries: Iterable<[TKey, TValue]>;
+
+  /**
+   * Returns a boolean indicating whether an entry exists for the specified key.
+   */
+  has: (key: TKey) => boolean;
 
   /**
    * Retrieves the value associated with the specified key.
@@ -47,18 +54,3 @@ export interface SimpleCache<
     predicate: (value: TValue, key: TKey) => boolean,
   ) => TValue | undefined;
 }
-
-/**
- * Represents possible serializable key types for the SimpleCache. Can be a
- * primitive (string, number, boolean), an array of SimpleCache (with possible
- * null/undefined values), or a record with string keys and SimpleCache values.
- */
-export type SimpleCacheKey =
-  | KeyPrimitive
-  | (SimpleCacheKey | null | undefined)[]
-  | {
-      [key: string]: SimpleCacheKey;
-    };
-
-/** Primitive types that can be used as part of a cache key. */
-type KeyPrimitive = string | number | boolean;

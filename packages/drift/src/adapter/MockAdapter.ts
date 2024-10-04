@@ -1,86 +1,52 @@
 import type { Abi } from "abitype";
-import stringify from "fast-json-stable-stringify";
-import { type SinonStub, stub as sinonStub } from "sinon";
-import type { Event, EventName } from "src/adapter/contract/types/event";
 import type {
+  AdapterDecodeFunctionDataParams,
+  AdapterEncodeFunctionDataParams,
+  AdapterGetEventsParams,
+  AdapterReadParams,
+  AdapterWriteParams,
+  ReadWriteAdapter,
+} from "src/adapter/types/Adapter";
+import type { Block } from "src/adapter/types/Block";
+import type { ContactEvent, EventName } from "src/adapter/types/Event";
+import type {
+  DecodedFunctionData,
   FunctionName,
   FunctionReturn,
-} from "src/adapter/contract/types/function";
-import type { Block } from "src/adapter/network/types/Block";
+} from "src/adapter/types/Function";
 import type {
   NetworkGetBalanceArgs,
   NetworkGetBlockArgs,
   NetworkGetTransactionArgs,
   NetworkWaitForTransactionArgs,
-} from "src/adapter/network/types/NetworkAdapter";
+} from "src/adapter/types/Network";
 import type {
   Transaction,
   TransactionReceipt,
-} from "src/adapter/network/types/Transaction";
-import type {
-  DecodeFunctionDataParams,
-  EncodeFunctionDataParams,
-  GetEventsParams,
-  ReadParams,
-  ReadWriteAdapter,
-  WriteParams,
-} from "src/adapter/types";
-import type { SimpleCacheKey } from "src/exports";
+} from "src/adapter/types/Transaction";
 import type { Address, Bytes, TransactionHash } from "src/types";
+import { MockStore } from "src/utils/MockStore";
 import type { OptionalKeys } from "src/utils/types";
 
 // TODO: Allow configuration of error throwing/default return value behavior
 export class MockAdapter implements ReadWriteAdapter {
-  // stubs //
+  mocks = new MockStore<ReadWriteAdapter>();
 
-  protected mocks = new Map<string, SinonStub>();
-
-  protected getMock<TArgs extends any[], TReturnType = any>({
-    method,
-    key,
-    create,
-  }: {
-    method: keyof ReadWriteAdapter;
-    key?: SimpleCacheKey;
-    create?: (mock: SinonStub<TArgs, TReturnType>) => SinonStub;
-  }): SinonStub<TArgs, TReturnType> {
-    let mockKey: string = method;
-    if (key) {
-      mockKey += `:${stringify(key)}`;
-    }
-    let mock = this.mocks.get(mockKey);
-    if (mock) {
-      return mock as any;
-    }
-    mock = sinonStub().throws(
-      new NotImplementedError({
-        method,
-        mockKey,
-      }),
-    );
-    if (create) {
-      // TODO: Cleanup type casting
-      mock = create(mock as any);
-    }
-    this.mocks.set(mockKey, mock);
-    return mock as any;
-  }
-
-  reset() {
-    this.mocks.clear();
-  }
+  reset = () => this.mocks.reset();
 
   // getBalance //
 
   onGetBalance(...args: Partial<NetworkGetBalanceArgs>) {
-    return this.getMock<NetworkGetBalanceArgs, Promise<bigint>>({
-      method: "getBalance",
-      create: (mock) => mock.resolves(0n),
-    }).withArgs(...args);
+    return this.mocks
+      .get<NetworkGetBalanceArgs, Promise<bigint>>({
+        method: "getBalance",
+        create: (mock) => mock.resolves(0n),
+      })
+      .withArgs(...args);
   }
 
   async getBalance(...args: NetworkGetBalanceArgs) {
-    return this.getMock<NetworkGetBalanceArgs, Promise<bigint>>({
+    return this.mocks.get<NetworkGetBalanceArgs, Promise<bigint>>({
       method: "getBalance",
       create: (mock) => mock.resolves(0n),
     })(...args);
@@ -89,18 +55,20 @@ export class MockAdapter implements ReadWriteAdapter {
   // getBlock //
 
   onGetBlock(...args: Partial<NetworkGetBlockArgs>) {
-    return this.getMock<NetworkGetBlockArgs, Promise<Block | undefined>>({
-      method: "getBlock",
-      create: (mock) =>
-        mock.resolves({
-          blockNumber: 0n,
-          timestamp: 0n,
-        }),
-    }).withArgs(...args);
+    return this.mocks
+      .get<NetworkGetBlockArgs, Promise<Block | undefined>>({
+        method: "getBlock",
+        create: (mock) =>
+          mock.resolves({
+            blockNumber: 0n,
+            timestamp: 0n,
+          }),
+      })
+      .withArgs(...args);
   }
 
   async getBlock(...args: NetworkGetBlockArgs) {
-    return this.getMock<NetworkGetBlockArgs, Promise<Block | undefined>>({
+    return this.mocks.get<NetworkGetBlockArgs, Promise<Block | undefined>>({
       method: "getBlock",
       create: (mock) =>
         mock.resolves({
@@ -113,14 +81,14 @@ export class MockAdapter implements ReadWriteAdapter {
   // getChainId //
 
   onGetChainId() {
-    return this.getMock<[], number>({
+    return this.mocks.get<[], number>({
       method: "getChainId",
       create: (mock) => mock.resolves(96024),
     });
   }
 
   async getChainId() {
-    return this.getMock<[], number>({
+    return this.mocks.get<[], number>({
       method: "getChainId",
       create: (mock) => mock.resolves(96024),
     })();
@@ -129,17 +97,16 @@ export class MockAdapter implements ReadWriteAdapter {
   // getTransaction //
 
   onGetTransaction(...args: Partial<NetworkGetTransactionArgs>) {
-    return this.getMock<
-      NetworkGetTransactionArgs,
-      Promise<Transaction | undefined>
-    >({
-      method: "getTransaction",
-      create: (mock) => mock.resolves(undefined),
-    }).withArgs(...args);
+    return this.mocks
+      .get<NetworkGetTransactionArgs, Promise<Transaction | undefined>>({
+        method: "getTransaction",
+        create: (mock) => mock.resolves(undefined),
+      })
+      .withArgs(...args);
   }
 
   async getTransaction(...args: NetworkGetTransactionArgs) {
-    return this.getMock<
+    return this.mocks.get<
       NetworkGetTransactionArgs,
       Promise<Transaction | undefined>
     >({
@@ -151,17 +118,19 @@ export class MockAdapter implements ReadWriteAdapter {
   // waitForTransaction //
 
   onWaitForTransaction(...args: Partial<NetworkWaitForTransactionArgs>) {
-    return this.getMock<
-      NetworkWaitForTransactionArgs,
-      Promise<TransactionReceipt | undefined>
-    >({
-      method: "waitForTransaction",
-      create: (mock) => mock.resolves(undefined),
-    }).withArgs(...args);
+    return this.mocks
+      .get<
+        NetworkWaitForTransactionArgs,
+        Promise<TransactionReceipt | undefined>
+      >({
+        method: "waitForTransaction",
+        create: (mock) => mock.resolves(undefined),
+      })
+      .withArgs(...args);
   }
 
   async waitForTransaction(...args: NetworkWaitForTransactionArgs) {
-    return this.getMock<
+    return this.mocks.get<
       NetworkWaitForTransactionArgs,
       Promise<TransactionReceipt | undefined>
     >({
@@ -175,18 +144,25 @@ export class MockAdapter implements ReadWriteAdapter {
   onEncodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >(params: OnEncodeFunctionDataParams<TAbi, TFunctionName>) {
-    return this.getMock<[EncodeFunctionDataParams], Bytes>({
-      method: "encodeFunctionData",
-      create: (mock) => mock.returns("0x0"),
-    }).withArgs(params);
+  >(
+    params: OptionalKeys<
+      AdapterEncodeFunctionDataParams<TAbi, TFunctionName>,
+      "args"
+    >,
+  ) {
+    return this.mocks
+      .get<[AdapterEncodeFunctionDataParams], Bytes>({
+        method: "encodeFunctionData",
+        create: (mock) => mock.returns("0x0"),
+      })
+      .withArgs(params);
   }
 
   encodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >(params: EncodeFunctionDataParams<TAbi, TFunctionName>) {
-    return this.getMock<[EncodeFunctionDataParams], Bytes>({
+  >(params: AdapterEncodeFunctionDataParams<TAbi, TFunctionName>) {
+    return this.mocks.get<[AdapterEncodeFunctionDataParams], Bytes>({
       method: "encodeFunctionData",
       create: (mock) => mock.returns("0x0"),
     })(params);
@@ -197,23 +173,30 @@ export class MockAdapter implements ReadWriteAdapter {
   onDecodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >(params: OnDecodeFunctionDataParams<TAbi, TFunctionName>) {
-    return this.getMock<
-      [DecodeFunctionDataParams<TAbi, TFunctionName>],
-      FunctionReturn<TAbi, TFunctionName>
-    >({
-      method: "decodeFunctionData",
-      key: params.fn,
-    }).withArgs(params);
+  >(
+    params: OptionalKeys<
+      AdapterDecodeFunctionDataParams<TAbi, TFunctionName>,
+      "data"
+    >,
+  ) {
+    return this.mocks
+      .get<
+        [AdapterDecodeFunctionDataParams<TAbi, TFunctionName>],
+        FunctionReturn<TAbi, TFunctionName>
+      >({
+        method: "decodeFunctionData",
+        key: params.fn,
+      })
+      .withArgs(params);
   }
 
   decodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >(params: DecodeFunctionDataParams<TAbi, TFunctionName>) {
-    return this.getMock<
-      [DecodeFunctionDataParams<TAbi, TFunctionName>],
-      FunctionReturn<TAbi, TFunctionName>
+  >(params: AdapterDecodeFunctionDataParams<TAbi, TFunctionName>) {
+    return this.mocks.get<
+      [AdapterDecodeFunctionDataParams<TAbi, TFunctionName>],
+      DecodedFunctionData<TAbi, TFunctionName>
     >({
       method: "decodeFunctionData",
       // TODO: This should be specific to the abi to ensure the correct return
@@ -225,23 +208,25 @@ export class MockAdapter implements ReadWriteAdapter {
   // getEvents //
 
   onGetEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
-    params: OnGetEventsParams<TAbi, TEventName>,
+    params: OptionalKeys<AdapterGetEventsParams<TAbi, TEventName>, "address">,
   ) {
-    return this.getMock<
-      [GetEventsParams<TAbi, TEventName>],
-      Promise<Event<TAbi, TEventName>[]>
-    >({
-      method: "getEvents",
-      key: params.event,
-    }).withArgs(params);
+    return this.mocks
+      .get<
+        [AdapterGetEventsParams<TAbi, TEventName>],
+        Promise<ContactEvent<TAbi, TEventName>[]>
+      >({
+        method: "getEvents",
+        key: params.event,
+      })
+      .withArgs(params);
   }
 
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
-    params: GetEventsParams<TAbi, TEventName>,
+    params: AdapterGetEventsParams<TAbi, TEventName>,
   ) {
-    return this.getMock<
-      [GetEventsParams<TAbi, TEventName>],
-      Promise<Event<TAbi, TEventName>[]>
+    return this.mocks.get<
+      [AdapterGetEventsParams<TAbi, TEventName>],
+      Promise<ContactEvent<TAbi, TEventName>[]>
     >({
       method: "getEvents",
       key: params.event,
@@ -253,23 +238,30 @@ export class MockAdapter implements ReadWriteAdapter {
   onRead<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(params: OnReadParams<TAbi, TFunctionName>) {
-    return this.getMock<
-      [ReadParams<TAbi, TFunctionName>],
-      FunctionReturn<TAbi, TFunctionName>
-    >({
-      method: "read",
-      key: params.fn,
-    }).withArgs(params as Partial<ReadParams<TAbi, TFunctionName>>);
+  >(
+    params: OptionalKeys<
+      AdapterReadParams<TAbi, TFunctionName>,
+      "args" | "address"
+    >,
+  ) {
+    return this.mocks
+      .get<
+        [AdapterReadParams<TAbi, TFunctionName>],
+        Promise<FunctionReturn<TAbi, TFunctionName>>
+      >({
+        method: "read",
+        key: params.fn,
+      })
+      .withArgs(params as Partial<AdapterReadParams<TAbi, TFunctionName>>);
   }
 
   async read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(params: ReadParams<TAbi, TFunctionName>) {
-    return this.getMock<
-      [ReadParams<TAbi, TFunctionName>],
-      FunctionReturn<TAbi, TFunctionName>
+  >(params: AdapterReadParams<TAbi, TFunctionName>) {
+    return this.mocks.get<
+      [AdapterReadParams<TAbi, TFunctionName>],
+      Promise<FunctionReturn<TAbi, TFunctionName>>
     >({
       method: "read",
       key: params.fn,
@@ -281,22 +273,29 @@ export class MockAdapter implements ReadWriteAdapter {
   onSimulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: OnWriteParams<TAbi, TFunctionName>) {
-    return this.getMock<
-      [WriteParams<TAbi, TFunctionName>],
-      Promise<FunctionReturn<TAbi, TFunctionName>>
-    >({
-      method: "simulateWrite",
-      key: params.fn,
-    }).withArgs(params as Partial<WriteParams<TAbi, TFunctionName>>);
+  >(
+    params: OptionalKeys<
+      AdapterWriteParams<TAbi, TFunctionName>,
+      "args" | "address"
+    >,
+  ) {
+    return this.mocks
+      .get<
+        [AdapterWriteParams<TAbi, TFunctionName>],
+        Promise<FunctionReturn<TAbi, TFunctionName>>
+      >({
+        method: "simulateWrite",
+        key: params.fn,
+      })
+      .withArgs(params as Partial<AdapterWriteParams<TAbi, TFunctionName>>);
   }
 
   async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>) {
-    return this.getMock<
-      [WriteParams<TAbi, TFunctionName>],
+  >(params: AdapterWriteParams<TAbi, TFunctionName>) {
+    return this.mocks.get<
+      [AdapterWriteParams<TAbi, TFunctionName>],
       Promise<FunctionReturn<TAbi, TFunctionName>>
     >({
       method: "simulateWrite",
@@ -309,72 +308,70 @@ export class MockAdapter implements ReadWriteAdapter {
   onWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: OnWriteParams<TAbi, TFunctionName>) {
-    return this.getMock<
-      [WriteParams<TAbi, TFunctionName>],
-      Promise<TransactionHash>
-    >({
-      method: "write",
-      key: params.fn,
-      create: (mock) => mock.resolves("0x0"),
-    }).withArgs(params as Partial<WriteParams<TAbi, TFunctionName>>);
+  >(
+    params: OptionalKeys<
+      AdapterWriteParams<TAbi, TFunctionName>,
+      "args" | "address"
+    >,
+  ) {
+    return this.mocks
+      .get<[AdapterWriteParams<TAbi, TFunctionName>], Promise<TransactionHash>>(
+        {
+          method: "write",
+          key: params.fn,
+          create: (mock) => mock.resolves("0x0"),
+        },
+      )
+      .withArgs(params as Partial<AdapterWriteParams<TAbi, TFunctionName>>);
   }
 
   async write<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>) {
-    return this.getMock<
-      [WriteParams<TAbi, TFunctionName>],
-      Promise<TransactionHash>
-    >({
-      method: "write",
-      key: params.fn,
-      create: (mock) => mock.resolves("0x0"),
-    })(params);
+  >(params: AdapterWriteParams<TAbi, TFunctionName>) {
+    const writePromise = Promise.resolve(
+      this.mocks.get<
+        [AdapterWriteParams<TAbi, TFunctionName>],
+        Promise<TransactionHash>
+      >({
+        method: "write",
+        key: params.fn,
+        create: (mock) => mock.resolves("0x0"),
+      })(params),
+    );
+
+    // TODO: unit test
+    if (params.onMined) {
+      writePromise.then((hash) => {
+        this.waitForTransaction(hash).then(params.onMined);
+        return hash;
+      });
+    }
+
+    return writePromise;
   }
 
   // getSignerAddress //
 
   onGetSignerAddress() {
-    return this.getMock<[], Address>({
+    return this.mocks.get<[], Address>({
       method: "getSignerAddress",
       create: (mock) => mock.resolves("0xMockSigner"),
     });
   }
 
   async getSignerAddress() {
-    return this.getMock<[], Address>({
+    return this.mocks.get<[], Address>({
       method: "getSignerAddress",
       create: (mock) => mock.resolves("0xMockSigner"),
     })();
   }
 }
 
-export type OnGetEventsParams<
-  TAbi extends Abi = Abi,
-  TEventName extends EventName<TAbi> = EventName<TAbi>,
-> = OptionalKeys<GetEventsParams<TAbi, TEventName>, "address">;
-
-export type OnReadParams<
+export type AdapterOnWriteParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = OptionalKeys<ReadParams<TAbi, TFunctionName>, "args" | "address">;
-
-export type OnWriteParams<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = OptionalKeys<WriteParams<TAbi, TFunctionName>, "args" | "address">;
-
-export type OnEncodeFunctionDataParams<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = OptionalKeys<EncodeFunctionDataParams<TAbi, TFunctionName>, "args">;
-
-export type OnDecodeFunctionDataParams<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = OptionalKeys<DecodeFunctionDataParams<TAbi, TFunctionName>, "data">;
+> = OptionalKeys<AdapterWriteParams<TAbi, TFunctionName>, "args" | "address">;
 
 export class NotImplementedError extends Error {
   constructor({ method, mockKey }: { method: string; mockKey: string }) {

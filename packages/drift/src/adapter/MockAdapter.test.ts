@@ -1,17 +1,17 @@
 import { MockAdapter } from "src/adapter/MockAdapter";
-import type { Event } from "src/adapter/contract/types/event";
-import type { Block } from "src/adapter/network/types/Block";
+import type {
+  AdapterDecodeFunctionDataParams,
+  AdapterEncodeFunctionDataParams,
+  AdapterGetEventsParams,
+  AdapterReadParams,
+  AdapterWriteParams,
+} from "src/adapter/types/Adapter";
+import type { Block } from "src/adapter/types/Block";
+import type { ContactEvent } from "src/adapter/types/Event";
 import type {
   Transaction,
   TransactionReceipt,
-} from "src/adapter/network/types/Transaction";
-import type {
-  DecodeFunctionDataParams,
-  EncodeFunctionDataParams,
-  GetEventsParams,
-  ReadParams,
-  WriteParams,
-} from "src/adapter/types";
+} from "src/adapter/types/Transaction";
 import { IERC20 } from "src/utils/testing/IERC20";
 import { describe, expect, it } from "vitest";
 
@@ -214,17 +214,21 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const params1: EncodeFunctionDataParams<typeof IERC20.abi, "balanceOf"> =
-        {
-          abi: IERC20.abi,
-          fn: "balanceOf",
-          args: { owner: "0x1" },
-        };
-      const params2: EncodeFunctionDataParams<typeof IERC20.abi, "balanceOf"> =
-        {
-          ...params1,
-          args: { owner: "0x2" },
-        };
+      const params1: AdapterEncodeFunctionDataParams<
+        typeof IERC20.abi,
+        "balanceOf"
+      > = {
+        abi: IERC20.abi,
+        fn: "balanceOf",
+        args: { owner: "0x1" },
+      };
+      const params2: AdapterEncodeFunctionDataParams<
+        typeof IERC20.abi,
+        "balanceOf"
+      > = {
+        ...params1,
+        args: { owner: "0x2" },
+      };
       adapter.onEncodeFunctionData(params1).returns("0x1");
       adapter.onEncodeFunctionData(params2).returns("0x2");
       expect(adapter.encodeFunctionData(params1)).toBe("0x1");
@@ -268,17 +272,21 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const params1: DecodeFunctionDataParams<typeof IERC20.abi, "balanceOf"> =
-        {
-          abi: IERC20.abi,
-          fn: "balanceOf",
-          data: "0x1",
-        };
-      const params2: DecodeFunctionDataParams<typeof IERC20.abi, "balanceOf"> =
-        {
-          ...params1,
-          data: "0x2",
-        };
+      const params1: AdapterDecodeFunctionDataParams<
+        typeof IERC20.abi,
+        "balanceOf"
+      > = {
+        abi: IERC20.abi,
+        fn: "balanceOf",
+        data: "0x1",
+      };
+      const params2: AdapterDecodeFunctionDataParams<
+        typeof IERC20.abi,
+        "balanceOf"
+      > = {
+        ...params1,
+        data: "0x2",
+      };
       adapter.onDecodeFunctionData(params1).returns(1n);
       adapter.onDecodeFunctionData(params2).returns(2n);
       expect(adapter.decodeFunctionData(params1)).toBe(1n);
@@ -304,7 +312,7 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed", async () => {
       const adapter = new MockAdapter();
-      const events: Event<typeof IERC20.abi, "Transfer">[] = [
+      const events: ContactEvent<typeof IERC20.abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -332,17 +340,17 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const params1: GetEventsParams<typeof IERC20.abi, "Transfer"> = {
+      const params1: AdapterGetEventsParams<typeof IERC20.abi, "Transfer"> = {
         abi: IERC20.abi,
         address: "0x1",
         event: "Transfer",
         filter: { from: "0x1" },
       };
-      const params2: GetEventsParams<typeof IERC20.abi, "Transfer"> = {
+      const params2: AdapterGetEventsParams<typeof IERC20.abi, "Transfer"> = {
         ...params1,
         filter: { from: "0x2" },
       };
-      const events1: Event<typeof IERC20.abi, "Transfer">[] = [
+      const events1: ContactEvent<typeof IERC20.abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -352,7 +360,7 @@ describe("MockAdapter", () => {
           },
         },
       ];
-      const events2: Event<typeof IERC20.abi, "Transfer">[] = [
+      const events2: ContactEvent<typeof IERC20.abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -405,13 +413,13 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const params1: ReadParams<typeof IERC20.abi, "allowance"> = {
+      const params1: AdapterReadParams<typeof IERC20.abi, "allowance"> = {
         abi: IERC20.abi,
         address: "0x1",
         fn: "allowance",
         args: { owner: "0x1", spender: "0x1" },
       };
-      const params2: ReadParams<typeof IERC20.abi, "allowance"> = {
+      const params2: AdapterReadParams<typeof IERC20.abi, "allowance"> = {
         ...params1,
         args: { owner: "0x2", spender: "0x2" },
       };
@@ -480,13 +488,13 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const params1: WriteParams<typeof IERC20.abi, "transfer"> = {
+      const params1: AdapterWriteParams<typeof IERC20.abi, "transfer"> = {
         abi: IERC20.abi,
         address: "0x1",
         fn: "transfer",
         args: { to: "0x1", value: 123n },
       };
-      const params2: WriteParams<typeof IERC20.abi, "transfer"> = {
+      const params2: AdapterWriteParams<typeof IERC20.abi, "transfer"> = {
         ...params1,
         args: { to: "0x2", value: 123n },
       };
@@ -532,13 +540,13 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const params1: WriteParams<typeof IERC20.abi, "transfer"> = {
+      const params1: AdapterWriteParams<typeof IERC20.abi, "transfer"> = {
         abi: IERC20.abi,
         address: "0x",
         fn: "transfer",
         args: { to: "0x1", value: 123n },
       };
-      const params2: WriteParams<typeof IERC20.abi, "transfer"> = {
+      const params2: AdapterWriteParams<typeof IERC20.abi, "transfer"> = {
         ...params1,
         args: { to: "0x2", value: 123n },
       };

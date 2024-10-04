@@ -21,6 +21,9 @@
     "enabled": true,
 
     "rules": {
+      "complexity": {
+        "noBannedTypes": "off"
+      },
       "style": {
         "noNonNullAssertion": {
           "level": "info",

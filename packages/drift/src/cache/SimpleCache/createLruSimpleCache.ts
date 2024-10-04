@@ -1,6 +1,7 @@
 import stringify from "fast-json-stable-stringify";
 import { LRUCache } from "lru-cache";
-import type { SimpleCache, SimpleCacheKey } from "src/cache/SimpleCache/types";
+import type { SimpleCache } from "src/cache/SimpleCache/types";
+import type { SerializableKey } from "src/utils/createSerializableKey";
 
 /**
  * An LRU (Least Recently Used) implementation of the `SimpleCache` interface.
@@ -14,7 +15,7 @@ import type { SimpleCache, SimpleCacheKey } from "src/cache/SimpleCache/types";
  */
 export function createLruSimpleCache<
   TValue extends NonNullable<unknown> = NonNullable<unknown>,
-  TKey extends SimpleCacheKey = SimpleCacheKey,
+  TKey extends SerializableKey = SerializableKey,
 >(options: LRUCache.Options<string, TValue, void>): SimpleCache<TValue, TKey> {
   const cache = new LRUCache(options);
 
@@ -29,6 +30,10 @@ export function createLruSimpleCache<
   }
 
   return {
+    has(key) {
+      return cache.has(stringify(key));
+    },
+
     get entries() {
       // Keys need to be returned in the same format as they were given to the cache
       return entriesGenerator(cache.entries() as Generator<[TKey, TValue]>);
