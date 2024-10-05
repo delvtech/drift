@@ -9,12 +9,12 @@ export type AnyFunction = (...args: any) => any;
  * Combines members of an intersection into a readable type.
  * @see https://twitter.com/mattpocockuk/status/1622730173446557697?s=20&t=NdpAcmEFXY01xkqU3KO0Mg
  */
-export type Prettify<T> = { [K in keyof T]: T[K] } & {};
+export type Pretty<T> = { [K in keyof T]: T[K] } & {};
 
 /**
  * Replace properties in `T` with properties in `U`.
  */
-export type ReplaceKeys<T, U> = Prettify<Omit<T, keyof U> & U>;
+export type ReplaceKeys<T, U> = Pretty<Omit<T, keyof U> & U>;
 
 /**
  * Make all properties in `T` whose keys are in the union `K` required and

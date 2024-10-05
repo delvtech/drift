@@ -44,7 +44,7 @@ export class MockStore<T> {
 export class NotImplementedError extends DriftError {
   constructor({ method, mockKey }: { method: string; mockKey: string }) {
     super(
-      `No mock found with key "${mockKey}". Called ${method} on a Mock without a return value. The value must be stubbed first:
+      `No mock found with key "${mockKey}". Called \`.${method}\` on a Mock without a return value. The value must be stubbed first:
     mock.on${method.replace(/^./, (c) => c.toUpperCase())}(...args).resolves(value)`,
     );
     this.name = "NotImplementedError";

@@ -30,7 +30,7 @@ import {
   type WriteParams,
 } from "src/client/Drift/Drift";
 import type { Address, Bytes, TransactionHash } from "src/types";
-import { MockStore } from "src/utils/MockStore";
+import { MockStore } from "src/utils/testing/MockStore";
 import type { OptionalKeys } from "src/utils/types";
 
 export class MockDrift extends Drift<MockAdapter> {

@@ -25,7 +25,7 @@ import type {
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
 import type { Address, Bytes, TransactionHash } from "src/types";
-import { MockStore } from "src/utils/MockStore";
+import { MockStore } from "src/utils/testing/MockStore";
 import type { OptionalKeys } from "src/utils/types";
 
 // TODO: Allow configuration of error throwing/default return value behavior

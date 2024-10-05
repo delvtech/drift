@@ -23,7 +23,7 @@ import {
 } from "src/client/Contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
 import type { Address, Bytes, TransactionHash } from "src/types";
-import { MockStore } from "src/utils/MockStore";
+import { MockStore } from "src/utils/testing/MockStore";
 import type { OptionalKeys } from "src/utils/types";
 
 // TODO: DRY up the mock clients and integrate them better so that modifying a

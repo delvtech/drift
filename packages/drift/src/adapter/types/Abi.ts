@@ -10,7 +10,7 @@ import type {
 import type {
   EmptyObject,
   MergeKeys,
-  Prettify,
+  Pretty,
   ReplaceKeys,
 } from "src/utils/types";
 
@@ -119,7 +119,7 @@ type NamedParametersToObject<
   TParameterKind extends AbiParameterKind = AbiParameterKind,
 > = NamedAbiParameter[] extends TParameters
   ? Record<number | string, any>
-  : Prettify<
+  : Pretty<
       {
         // For every parameter name, excluding empty names, add a key to the
         // object for the parameter name
@@ -130,7 +130,7 @@ type NamedParametersToObject<
           Extract<TParameters[number], { name: TName }>,
           TParameterKind
         > extends infer TPrimitive
-          ? TPrimitive extends unknown
+          ? unknown extends TPrimitive
             ? any
             : TPrimitive
           : never;
