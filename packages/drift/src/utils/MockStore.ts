@@ -1,7 +1,10 @@
 import stringify from "fast-json-stable-stringify";
 import { type SinonStub, stub as sinonStub } from "sinon";
 import type { SerializableKey } from "src/utils/createSerializableKey";
+import type { FunctionKey } from "src/utils/types";
 
+// TODO: Consider using a similar pattern for the cache or generalized
+// plugins/hooks
 export class MockStore<T> {
   protected mocks = new Map<string, SinonStub>();
 
@@ -10,11 +13,7 @@ export class MockStore<T> {
     key,
     create,
   }: {
-    method: NonNullable<
-      {
-        [K in keyof T]: T[K] extends Function ? K : never;
-      }[keyof T]
-    >;
+    method: FunctionKey<T>;
     key?: SerializableKey;
     create?: (mock: SinonStub<TArgs, TReturnType>) => SinonStub;
   }): SinonStub<TArgs, TReturnType> {
@@ -22,11 +21,10 @@ export class MockStore<T> {
     if (key) {
       mockKey += `:${stringify(key)}`;
     }
-    let mock = this.mocks.get(mockKey);
-    if (mock) {
-      return mock as any;
+    if (this.mocks.has(mockKey)) {
+      return this.mocks.get(mockKey) as any;
     }
-    mock = sinonStub().throws(
+    let mock = sinonStub().throws(
       new NotImplementedError({
         method: String(method),
         mockKey,

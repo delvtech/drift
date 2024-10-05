@@ -20,9 +20,9 @@ import type {
 import { createClientCache } from "src/cache/ClientCache/createClientCache";
 import type {
   ClientCache,
-  DriftEventsKeyParams,
-  DriftReadKeyParams,
+  EventsKeyParams,
   NameSpaceParam,
+  ReadKeyParams,
 } from "src/cache/ClientCache/types";
 import type { Address, Bytes, TransactionHash } from "src/types";
 import type { SerializableKey } from "src/utils/createSerializableKey";
@@ -73,7 +73,7 @@ export class ReadContract<
     adapter,
     address,
     cache = createClientCache() as TCache,
-    namespace,
+    cacheNamespace: namespace,
   }: ReadContractParams<TAbi, TAdapter, TCache>) {
     this.abi = abi;
     this.adapter = adapter;
@@ -88,8 +88,7 @@ export class ReadContract<
    * Retrieves specified events from the contract.
    */
   getEvents = async <TEventName extends EventName<TAbi>>(
-    event: TEventName,
-    options?: ContractGetEventsOptions<TAbi, TEventName>,
+    ...[event, options]: ContractGetEventsArgs<TAbi, TEventName>
   ): Promise<ContactEvent<TAbi, TEventName>[]> => {
     const key = this.eventsKey(event, options);
     if (this.cache.has(key)) {
@@ -110,14 +109,14 @@ export class ReadContract<
 
   preloadEvents = <TEventName extends EventName<TAbi>>(
     params: Omit<
-      DriftEventsKeyParams<TAbi, TEventName>,
+      EventsKeyParams<TAbi, TEventName>,
       keyof ReadContractParams
     > & {
       value: readonly ContactEvent<TAbi, TEventName>[];
     },
   ): MaybePromise<void> => {
     return this.cache.preloadEvents({
-      namespace: this.namespace,
+      cacheNamespace: this.namespace,
       abi: this.abi,
       address: this.address,
       ...params,
@@ -125,11 +124,10 @@ export class ReadContract<
   };
 
   eventsKey = <TEventName extends EventName<TAbi>>(
-    event: TEventName,
-    options?: ContractGetEventsOptions<TAbi, TEventName>,
+    ...[event, options]: ContractGetEventsArgs<TAbi, TEventName>
   ): SerializableKey => {
     return this.cache.eventsKey({
-      namespace: this.namespace,
+      cacheNamespace: this.namespace,
       abi: this.abi,
       address: this.address,
       event,
@@ -167,14 +165,14 @@ export class ReadContract<
 
   preloadRead = <TFunctionName extends FunctionName<TAbi>>(
     params: Omit<
-      DriftReadKeyParams<TAbi, TFunctionName>,
+      ReadKeyParams<TAbi, TFunctionName>,
       keyof ReadContractParams
     > & {
       value: FunctionReturn<TAbi, TFunctionName>;
     },
   ): MaybePromise<void> => {
     this.cache.preloadRead({
-      namespace: this.namespace,
+      cacheNamespace: this.namespace,
       // TODO: Cleanup type casting required due to an incompatibility between
       // `Omit` and the conditional args param.
       abi: this.abi as Abi,
@@ -187,7 +185,7 @@ export class ReadContract<
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ): MaybePromise<void> {
     return this.cache.invalidateRead({
-      namespace: this.namespace,
+      cacheNamespace: this.namespace,
       // TODO: Cleanup type casting required due to an incompatibility between
       // `Omit` and the conditional args param.
       abi: this.abi as Abi,
@@ -204,7 +202,7 @@ export class ReadContract<
     options?: ContractReadOptions,
   ): MaybePromise<void> => {
     const matchKey = this.cache.partialReadKey({
-      namespace: this.namespace,
+      cacheNamespace: this.namespace,
       abi: this.abi,
       address: this.address,
       fn,
@@ -231,7 +229,7 @@ export class ReadContract<
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ): SerializableKey => {
     return this.cache.readKey({
-      namespace: this.namespace,
+      cacheNamespace: this.namespace,
       // TODO: Cleanup type casting required due to an incompatibility between
       // `Omit` and the conditional args param.
       abi: this.abi as Abi,
@@ -248,7 +246,7 @@ export class ReadContract<
     options?: ContractReadOptions,
   ): SerializableKey => {
     return this.cache.partialReadKey({
-      namespace: this.namespace,
+      cacheNamespace: this.namespace,
       abi: this.abi,
       address: this.address,
       fn,
@@ -349,6 +347,11 @@ export class ReadWriteContract<
     });
   };
 }
+
+export type ContractGetEventsArgs<
+  TAbi extends Abi = Abi,
+  TEventName extends EventName<TAbi> = EventName<TAbi>,
+> = [event: TEventName, options?: ContractGetEventsOptions<TAbi, TEventName>];
 
 export type ContractReadArgs<
   TAbi extends Abi = Abi,

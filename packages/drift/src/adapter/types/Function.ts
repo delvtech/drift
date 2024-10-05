@@ -1,8 +1,5 @@
 import type { Abi, AbiStateMutability } from "abitype";
-import type {
-    AbiFriendlyType,
-    AbiObjectType,
-} from "src/adapter/types/Abi";
+import type { AbiFriendlyType, AbiObjectType } from "src/adapter/types/Abi";
 
 /**
  * Get a union of function names from an abi
@@ -45,15 +42,15 @@ export type ConstructorArgs<TAbi extends Abi> = AbiObjectType<
  */
 export type FunctionReturn<
   TAbi extends Abi,
-  TFunctionName extends FunctionName<TAbi>,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 > = AbiFriendlyType<TAbi, "function", TFunctionName, "outputs">;
 
 /**
  * Get an object representing decoded function or constructor data from an ABI.
  */
 export type DecodedFunctionData<
-  TAbi extends Abi,
-  TFunctionName extends FunctionName<TAbi>,
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 > = {
   [K in TFunctionName]: {
     args: FunctionArgs<TAbi, K>;

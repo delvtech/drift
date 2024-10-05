@@ -7,11 +7,20 @@ import type {
   AbiParametersToPrimitiveTypes,
   AbiStateMutability,
 } from "abitype";
-import type { EmptyObject, Prettify } from "src/utils/types";
+import type {
+  EmptyObject,
+  MergeKeys,
+  Prettify,
+  ReplaceKeys,
+} from "src/utils/types";
 
 // https://docs.soliditylang.org/en/latest/abi-spec.html#json
 
-export type NamedAbiParameter = AbiParameter & { name: string };
+export type NamedAbiParameter = AbiParameter extends infer TAbiParameter
+  ? TAbiParameter extends { name: string }
+    ? TAbiParameter
+    : ReplaceKeys<TAbiParameter, { name: string }>
+  : never;
 
 /**
  * Get a union of possible names for an abi item type.
@@ -88,9 +97,11 @@ type WithDefaultNames<TParameters extends readonly AbiParameter[]> = {
     AbiParameter
     ? TParameter extends NamedAbiParameter
       ? TParameter
-      : TParameter & { name: `${K}` }
+      : ReplaceKeys<MergeKeys<TParameter>, { name: `${K}` | string }>
     : never;
 };
+
+type foo = Exclude<unknown, unknown>;
 
 /**
  * Convert an array or tuple of named abi parameters to an object type with the
@@ -106,45 +117,56 @@ type WithDefaultNames<TParameters extends readonly AbiParameter[]> = {
 type NamedParametersToObject<
   TParameters extends readonly NamedAbiParameter[],
   TParameterKind extends AbiParameterKind = AbiParameterKind,
-> = Prettify<
-  {
-    // For every parameter name, excluding empty names, add a key to the object
-    // for the parameter name
-    [TName in Exclude<
-      TParameters[number]["name"],
-      ""
-    >]: AbiParameterToPrimitiveType<
-      Extract<TParameters[number], { name: TName }>,
-      TParameterKind
+> = NamedAbiParameter[] extends TParameters
+  ? Record<number | string, any>
+  : Prettify<
+      {
+        // For every parameter name, excluding empty names, add a key to the
+        // object for the parameter name
+        [TName in Exclude<
+          TParameters[number]["name"],
+          ""
+        >]: AbiParameterToPrimitiveType<
+          Extract<TParameters[number], { name: TName }>,
+          TParameterKind
+        > extends infer TPrimitive
+          ? TPrimitive extends unknown
+            ? any
+            : TPrimitive
+          : never;
+        // Check if the parameters are in a Tuple. Tuples have known indexes, so
+        // we can use the index as the key for the nameless parameters
+      } & (TParameters extends readonly [
+        NamedAbiParameter,
+        ...NamedAbiParameter[],
+      ]
+        ? {
+            // For every key on the parameters type, if it's value is a
+            // parameter and the parameter's name is empty (""), then add a key
+            // for the index
+            [K in keyof TParameters as TParameters[K] extends NamedAbiParameter
+              ? TParameters[K]["name"] extends ""
+                ? // Exclude `number` to ensure only the specific index keys are
+                  // included and not `number` itself. TODO: Test that this is
+                  // actually doing what's described.
+                  Exclude<K, number>
+                : never // <- Key for named parameters (already handled above)
+              : never /* <- Prototype key (e.g., `length`, `toString`) */]: TParameters[K] extends NamedAbiParameter
+              ? AbiParameterToPrimitiveType<TParameters[K], TParameterKind>
+              : never; // <- Prototype value
+          }
+        : // If the parameters are not in a Tuple, then we can't use the index
+          // as a key, so we have to use `number` as the key for any parameters
+          // that have empty names ("") in arrays
+          Extract<TParameters[number], { name: "" }> extends never
+          ? {} // <- No parameters with empty names
+          : {
+              [index: number]: AbiParameterToPrimitiveType<
+                Extract<TParameters[number], { name: "" }>,
+                TParameterKind
+              >;
+            })
     >;
-    // Check if the parameters are in a Tuple. Tuples have known indexes, so we
-    // can use the index as the key for the nameless parameters
-  } & (TParameters extends readonly [NamedAbiParameter, ...NamedAbiParameter[]]
-    ? {
-        // For every key on the parameters type, if it's value is a parameter
-        // and the parameter's name is empty (""), then add a key for the index
-        [K in keyof TParameters as TParameters[K] extends NamedAbiParameter
-          ? TParameters[K]["name"] extends ""
-            ? // Exclude `number` to ensure only the specific index keys are
-              // included and not `number` itself
-              Exclude<K, number>
-            : never // <- Key for named parameters (already handled above)
-          : never /* <- Prototype key (e.g., `length`, `toString`) */]: TParameters[K] extends NamedAbiParameter
-          ? AbiParameterToPrimitiveType<TParameters[K], TParameterKind>
-          : never; // <- Prototype value
-      }
-    : // If the parameters are not in a Tuple, then we can't use the index as a
-      // key, so we have to use `number` as the key for any parameters that have
-      // empty names ("") in arrays
-      Extract<TParameters[number], { name: "" }> extends never
-      ? {} // <- No parameters with empty names
-      : {
-          [index: number]: AbiParameterToPrimitiveType<
-            Extract<TParameters[number], { name: "" }>,
-            TParameterKind
-          >;
-        })
->;
 
 /**
  * Convert an array or tuple of abi parameters to an object type.

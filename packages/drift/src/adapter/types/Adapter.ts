@@ -19,16 +19,16 @@ import type { AnyObject, EmptyObject } from "src/utils/types";
 export type Adapter = ReadAdapter | ReadWriteAdapter;
 
 export interface ReadAdapter extends Network {
+  getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
+    params: AdapterGetEventsParams<TAbi, TEventName>,
+  ): Promise<ContactEvent<TAbi, TEventName>[]>;
+
   read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(
     params: AdapterReadParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>>;
-
-  getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
-    params: AdapterGetEventsParams<TAbi, TEventName>,
-  ): Promise<ContactEvent<TAbi, TEventName>[]>;
 
   simulateWrite<
     TAbi extends Abi,

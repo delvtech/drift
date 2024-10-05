@@ -12,33 +12,33 @@ import type { Address, HexString, TransactionHash } from "src/types";
  */
 export interface Network {
   /**
-   * Get the balance of native currency for an account.
-   */
-  getBalance(...args: NetworkGetBalanceArgs): Promise<bigint>;
-
-  /**
-   * Get a block from a block tag, number, or hash. If no argument is provided,
-   * the latest block is returned.
-   */
-  getBlock(...args: NetworkGetBlockArgs): Promise<Block | undefined>;
-
-  /**
    * Get the chain ID of the network.
    */
   getChainId(): Promise<number>;
 
   /**
+   * Get a block from a block tag, number, or hash. If no argument is provided,
+   * the latest block is returned.
+   */
+  getBlock(params?: NetworkGetBlockParams): Promise<Block | undefined>;
+
+  /**
+   * Get the balance of native currency for an account.
+   */
+  getBalance(params: NetworkGetBalanceParams): Promise<bigint>;
+
+  /**
    * Get a transaction from a transaction hash.
    */
   getTransaction(
-    ...args: NetworkGetTransactionArgs
+    params: NetworkGetTransactionParams,
   ): Promise<Transaction | undefined>;
 
   /**
    * Wait for a transaction to be mined.
    */
   waitForTransaction(
-    ...args: NetworkWaitForTransactionArgs
+    params: NetworkWaitForTransactionParams,
   ): Promise<TransactionReceipt | undefined>;
 }
 
@@ -59,22 +59,21 @@ export type NetworkGetBlockOptions =
       blockTag?: BlockTag;
     };
 
-export type NetworkGetBalanceArgs = [
-  address: Address,
-  block?: NetworkGetBlockOptions,
-];
+export type NetworkGetBalanceParams = {
+  address: Address;
+} & NetworkGetBlockOptions;
 
-export type NetworkGetBlockArgs = [options?: NetworkGetBlockOptions];
+export type NetworkGetBlockParams = NetworkGetBlockOptions;
 
-export type NetworkGetTransactionArgs = [hash: TransactionHash];
+export interface NetworkGetTransactionParams {
+  hash: TransactionHash;
+}
 
-export type NetworkWaitForTransactionArgs = [
-  hash: TransactionHash,
-  options?: {
-    /**
-     * The number of milliseconds to wait for the transaction until rejecting
-     * the promise.
-     */
-    timeout?: number;
-  },
-];
+export interface NetworkWaitForTransactionParams
+  extends NetworkGetTransactionParams {
+  /**
+   * The number of milliseconds to wait for the transaction until rejecting
+   * the promise.
+   */
+  timeout?: number;
+}

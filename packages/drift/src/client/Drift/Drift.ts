@@ -3,21 +3,33 @@ import type {
   Adapter,
   AdapterDecodeFunctionDataParams,
   AdapterEncodeFunctionDataParams,
-  AdapterGetEventsParams,
-  AdapterReadParams,
   AdapterWriteParams,
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
+import type { Block } from "src/adapter/types/Block";
 import type { ContactEvent, EventName } from "src/adapter/types/Event";
 import type {
   DecodedFunctionData,
   FunctionName,
   FunctionReturn,
 } from "src/adapter/types/Function";
-import type { TransactionReceipt } from "src/adapter/types/Transaction";
+import type { NetworkWaitForTransactionParams } from "src/adapter/types/Network";
+import type {
+  Transaction,
+  TransactionReceipt,
+} from "src/adapter/types/Transaction";
+import { createClientCache } from "src/cache/ClientCache/createClientCache";
+import type {
+  BalanceKeyParams,
+  BlockKeyParams,
+  ChainIdKeyParams,
+  ClientCache,
+  EventsKeyParams,
+  NameSpaceParam,
+  ReadKeyParams,
+  TransactionKeyParams,
+} from "src/cache/ClientCache/types";
 import type { SimpleCache } from "src/cache/SimpleCache/types";
-import { createClientCache } from "src/client/ClientCache/createClientCache";
-import type { ClientCache, NameSpaceParam } from "src/client/ClientCache/types";
 import {
   type Contract,
   type ContractParams,
@@ -26,25 +38,16 @@ import {
 } from "src/client/Contract/Contract";
 import type { Bytes, TransactionHash } from "src/types";
 
-export type DriftContract<
-  TAbi extends Abi,
-  TAdapter extends Adapter = Adapter,
-> = TAdapter extends ReadWriteAdapter
-  ? ReadWriteContract<TAbi>
-  : ReadContract<TAbi>;
-
 export interface DriftOptions<TCache extends SimpleCache = SimpleCache>
   extends NameSpaceParam {
   cache?: TCache;
 }
 
-// This is the one implementation that combines the Read/ReadWrite concepts in
-// favor of a unified entrypoint to the library's top-level API.
 export class Drift<
   TAdapter extends Adapter = Adapter,
   TCache extends SimpleCache = SimpleCache,
 > {
-  readonly adapter: TAdapter;
+  adapter: TAdapter;
   cache: ClientCache<TCache>;
   namespace?: PropertyKey;
 
@@ -67,7 +70,7 @@ export class Drift<
 
   constructor(
     adapter: TAdapter,
-    { cache, namespace }: DriftOptions<TCache> = {},
+    { cache, cacheNamespace: namespace }: DriftOptions<TCache> = {},
   ) {
     this.adapter = adapter;
     this.cache = createClientCache(cache);
@@ -86,9 +89,9 @@ export class Drift<
           const writePromise = this.adapter.write(params);
 
           if (params.onMined) {
-            writePromise.then((txHash) => {
-              this.adapter.waitForTransaction(txHash).then(params.onMined);
-              return txHash;
+            writePromise.then((hash) => {
+              this.adapter.waitForTransaction({ hash }).then(params.onMined);
+              return hash;
             });
           }
 
@@ -108,7 +111,7 @@ export class Drift<
     abi,
     address,
     cache = this.cache,
-    namespace = this.namespace,
+    cacheNamespace: namespace = this.namespace,
   }: ContractParams<TAbi>): Contract<TAbi, TAdapter, TCache> => {
     return (
       this.isReadWrite()
@@ -117,16 +120,107 @@ export class Drift<
             adapter: this.adapter,
             address,
             cache,
-            namespace,
+            cacheNamespace: namespace,
           })
         : new ReadContract({
             abi,
             adapter: this.adapter,
             address,
             cache,
-            namespace,
+            cacheNamespace: namespace,
           })
     ) as Contract<TAbi, TAdapter, TCache>;
+  };
+
+  /**
+   * Get the chain ID of the network.
+   */
+  getChainId = async (params?: GetChainIdParams): Promise<number> => {
+    const key = this.cache.chainIdKey(params);
+    if (this.cache.has(key)) {
+      return this.cache.get(key);
+    }
+    return this.adapter.getChainId().then((id) => {
+      this.cache.set(key, id);
+      return id;
+    });
+  };
+
+  /**
+   * Get a block from a block tag, number, or hash. If no argument is provided,
+   * the latest block is returned.
+   */
+  getBlock = async (params?: GetBlockParams): Promise<Block | undefined> => {
+    const key = this.cache.blockKey(params);
+    if (this.cache.has(key)) {
+      return this.cache.get(key);
+    }
+    return this.adapter.getBlock(params).then((block) => {
+      this.cache.set(key, block);
+      return block;
+    });
+  };
+
+  /**
+   * Get the balance of native currency for an account.
+   */
+  getBalance = async (params: GetBalanceParams): Promise<bigint> => {
+    const key = this.cache.balanceKey(params);
+    if (this.cache.has(key)) {
+      return this.cache.get(key);
+    }
+    return this.adapter.getBalance(params).then((balance) => {
+      this.cache.set(key, balance);
+      return balance;
+    });
+  };
+
+  /**
+   * Get a transaction from a transaction hash.
+   */
+  getTransaction = (
+    params: GetTransactionParams,
+  ): Promise<Transaction | undefined> => {
+    const key = this.cache.transactionKey(params);
+    if (this.cache.has(key)) {
+      return this.cache.get(key);
+    }
+    return this.adapter.getTransaction(params).then((tx) => {
+      this.cache.set(key, tx);
+      return tx;
+    });
+  };
+
+  /**
+   * Wait for a transaction to be mined.
+   */
+  waitForTransaction = (
+    params: WaitForTransactionParams,
+  ): Promise<TransactionReceipt | undefined> => {
+    const key = this.cache.transactionKey(params);
+    if (this.cache.has(key)) {
+      return this.cache.get(key);
+    }
+    return this.adapter.waitForTransaction(params).then((tx) => {
+      this.cache.set(key, tx);
+      return tx;
+    });
+  };
+
+  /**
+   * Retrieves specified events from a contract.
+   */
+  getEvents = async <TAbi extends Abi, TEventName extends EventName<TAbi>>(
+    params: GetEventsParams<TAbi, TEventName>,
+  ): Promise<ContactEvent<TAbi, TEventName>[]> => {
+    const key = this.cache.eventsKey(params);
+    if (this.cache.has(key)) {
+      return this.cache.get(key);
+    }
+    return this.adapter.getEvents(params).then((result) => {
+      this.cache.set(key, result);
+      return result;
+    });
   };
 
   /**
@@ -161,22 +255,6 @@ export class Drift<
   };
 
   /**
-   * Retrieves specified events from a contract.
-   */
-  getEvents = async <TAbi extends Abi, TEventName extends EventName<TAbi>>(
-    params: GetEventsParams<TAbi, TEventName>,
-  ): Promise<ContactEvent<TAbi, TEventName>[]> => {
-    const key = this.cache.eventsKey(params);
-    if (this.cache.has(key)) {
-      return this.cache.get(key);
-    }
-    return this.adapter.getEvents(params).then((result) => {
-      this.cache.set(key, result);
-      return result;
-    });
-  };
-
-  /**
    * Encodes a function call into calldata.
    */
   encodeFunctionData = <
@@ -202,10 +280,22 @@ export class Drift<
   };
 }
 
+export interface GetChainIdParams extends ChainIdKeyParams {}
+
+export type GetBlockParams = BlockKeyParams;
+
+export type GetBalanceParams = BalanceKeyParams;
+
+export interface GetTransactionParams extends TransactionKeyParams {}
+
+export interface WaitForTransactionParams
+  extends TransactionKeyParams,
+    NetworkWaitForTransactionParams {}
+
 export type ReadParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = NameSpaceParam & AdapterReadParams<TAbi, TFunctionName>;
+> = ReadKeyParams<TAbi, TFunctionName>;
 
 export type SimulateWriteParams<
   TAbi extends Abi = Abi,
@@ -228,7 +318,7 @@ export type WriteParams<
 export type GetEventsParams<
   TAbi extends Abi = Abi,
   TEventName extends EventName<TAbi> = EventName<TAbi>,
-> = NameSpaceParam & AdapterGetEventsParams<TAbi, TEventName>;
+> = EventsKeyParams<TAbi, TEventName>;
 
 export type EncodeFunctionDataParams<
   TAbi extends Abi = Abi,

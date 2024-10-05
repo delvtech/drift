@@ -15,10 +15,10 @@ import type {
   FunctionReturn,
 } from "src/adapter/types/Function";
 import type {
-  NetworkGetBalanceArgs,
-  NetworkGetBlockArgs,
-  NetworkGetTransactionArgs,
-  NetworkWaitForTransactionArgs,
+  NetworkGetBalanceParams,
+  NetworkGetBlockParams,
+  NetworkGetTransactionParams,
+  NetworkWaitForTransactionParams,
 } from "src/adapter/types/Network";
 import type {
   Transaction,
@@ -30,53 +30,13 @@ import type { OptionalKeys } from "src/utils/types";
 
 // TODO: Allow configuration of error throwing/default return value behavior
 export class MockAdapter implements ReadWriteAdapter {
-  mocks = new MockStore<ReadWriteAdapter>();
+  mocks: MockStore<ReadWriteAdapter>;
+
+  constructor(store = new MockStore<ReadWriteAdapter>()) {
+    this.mocks = store;
+  }
 
   reset = () => this.mocks.reset();
-
-  // getBalance //
-
-  onGetBalance(...args: Partial<NetworkGetBalanceArgs>) {
-    return this.mocks
-      .get<NetworkGetBalanceArgs, Promise<bigint>>({
-        method: "getBalance",
-        create: (mock) => mock.resolves(0n),
-      })
-      .withArgs(...args);
-  }
-
-  async getBalance(...args: NetworkGetBalanceArgs) {
-    return this.mocks.get<NetworkGetBalanceArgs, Promise<bigint>>({
-      method: "getBalance",
-      create: (mock) => mock.resolves(0n),
-    })(...args);
-  }
-
-  // getBlock //
-
-  onGetBlock(...args: Partial<NetworkGetBlockArgs>) {
-    return this.mocks
-      .get<NetworkGetBlockArgs, Promise<Block | undefined>>({
-        method: "getBlock",
-        create: (mock) =>
-          mock.resolves({
-            blockNumber: 0n,
-            timestamp: 0n,
-          }),
-      })
-      .withArgs(...args);
-  }
-
-  async getBlock(...args: NetworkGetBlockArgs) {
-    return this.mocks.get<NetworkGetBlockArgs, Promise<Block | undefined>>({
-      method: "getBlock",
-      create: (mock) =>
-        mock.resolves({
-          blockNumber: 0n,
-          timestamp: 0n,
-        }),
-    })(...args);
-  }
 
   // getChainId //
 
@@ -94,49 +54,104 @@ export class MockAdapter implements ReadWriteAdapter {
     })();
   }
 
-  // getTransaction //
+  // getBlock //
 
-  onGetTransaction(...args: Partial<NetworkGetTransactionArgs>) {
+  onGetBlock(params?: Partial<NetworkGetBlockParams>) {
     return this.mocks
-      .get<NetworkGetTransactionArgs, Promise<Transaction | undefined>>({
-        method: "getTransaction",
-        create: (mock) => mock.resolves(undefined),
+      .get<[NetworkGetBlockParams?], Promise<Block | undefined>>({
+        method: "getBlock",
+        create: (mock) =>
+          mock.resolves({
+            blockNumber: 0n,
+            timestamp: 0n,
+          }),
       })
-      .withArgs(...args);
+      .withArgs(params);
   }
 
-  async getTransaction(...args: NetworkGetTransactionArgs) {
-    return this.mocks.get<
-      NetworkGetTransactionArgs,
+  async getBlock(params?: NetworkGetBlockParams) {
+    return this.mocks.get<[NetworkGetBlockParams?], Promise<Block | undefined>>(
+      {
+        method: "getBlock",
+        create: (mock) =>
+          mock.resolves({
+            blockNumber: 0n,
+            timestamp: 0n,
+          }),
+      },
+    )(params);
+  }
+
+  // getBalance //
+
+  onGetBalance(params?: Partial<NetworkGetBalanceParams>) {
+    let mock = this.mocks.get<[NetworkGetBalanceParams], Promise<bigint>>({
+      method: "getBalance",
+      create: (mock) => mock.resolves(0n),
+    });
+    if (params) {
+      mock = mock.withArgs(params);
+    }
+    return mock;
+  }
+
+  async getBalance(params: NetworkGetBalanceParams) {
+    return this.mocks.get<[NetworkGetBalanceParams], Promise<bigint>>({
+      method: "getBalance",
+      create: (mock) => mock.resolves(0n),
+    })(params);
+  }
+
+  // getTransaction //
+
+  onGetTransaction(params?: Partial<NetworkGetTransactionParams>) {
+    let mock = this.mocks.get<
+      [NetworkGetTransactionParams],
       Promise<Transaction | undefined>
     >({
       method: "getTransaction",
       create: (mock) => mock.resolves(undefined),
-    })(...args);
+    });
+    if (params) {
+      mock = mock.withArgs(params);
+    }
+    return mock;
+  }
+
+  async getTransaction(params: NetworkGetTransactionParams) {
+    return this.mocks.get<
+      [NetworkGetTransactionParams],
+      Promise<Transaction | undefined>
+    >({
+      method: "getTransaction",
+      create: (mock) => mock.resolves(undefined),
+    })(params);
   }
 
   // waitForTransaction //
 
-  onWaitForTransaction(...args: Partial<NetworkWaitForTransactionArgs>) {
-    return this.mocks
-      .get<
-        NetworkWaitForTransactionArgs,
-        Promise<TransactionReceipt | undefined>
-      >({
-        method: "waitForTransaction",
-        create: (mock) => mock.resolves(undefined),
-      })
-      .withArgs(...args);
-  }
-
-  async waitForTransaction(...args: NetworkWaitForTransactionArgs) {
-    return this.mocks.get<
-      NetworkWaitForTransactionArgs,
+  onWaitForTransaction(params?: Partial<NetworkWaitForTransactionParams>) {
+    let mock = this.mocks.get<
+      [NetworkWaitForTransactionParams],
       Promise<TransactionReceipt | undefined>
     >({
       method: "waitForTransaction",
       create: (mock) => mock.resolves(undefined),
-    })(...args);
+    });
+    if (params) {
+      mock = mock.withArgs(params);
+    }
+    return mock;
+  }
+
+  async waitForTransaction(params: NetworkWaitForTransactionParams) {
+    return this.mocks.get<
+      [NetworkWaitForTransactionParams],
+      Promise<TransactionReceipt | undefined>
+    >({
+      method: "waitForTransaction",
+      create: (mock) => mock.resolves(undefined),
+    })(params);
   }
 
   // encodeFunction //
@@ -144,12 +159,7 @@ export class MockAdapter implements ReadWriteAdapter {
   onEncodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >(
-    params: OptionalKeys<
-      AdapterEncodeFunctionDataParams<TAbi, TFunctionName>,
-      "args"
-    >,
-  ) {
+  >(params: Partial<AdapterEncodeFunctionDataParams<TAbi, TFunctionName>>) {
     return this.mocks
       .get<[AdapterEncodeFunctionDataParams], Bytes>({
         method: "encodeFunctionData",
@@ -182,7 +192,7 @@ export class MockAdapter implements ReadWriteAdapter {
     return this.mocks
       .get<
         [AdapterDecodeFunctionDataParams<TAbi, TFunctionName>],
-        FunctionReturn<TAbi, TFunctionName>
+        DecodedFunctionData<TAbi, TFunctionName>
       >({
         method: "decodeFunctionData",
         key: params.fn,
@@ -193,7 +203,7 @@ export class MockAdapter implements ReadWriteAdapter {
   decodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >(params: AdapterDecodeFunctionDataParams<TAbi, TFunctionName>) {
+  >(params: Partial<AdapterDecodeFunctionDataParams<TAbi, TFunctionName>>) {
     return this.mocks.get<
       [AdapterDecodeFunctionDataParams<TAbi, TFunctionName>],
       DecodedFunctionData<TAbi, TFunctionName>
@@ -202,7 +212,7 @@ export class MockAdapter implements ReadWriteAdapter {
       // TODO: This should be specific to the abi to ensure the correct return
       // type.
       key: params.fn,
-    })(params);
+    })(params as AdapterDecodeFunctionDataParams<TAbi, TFunctionName>);
   }
 
   // getEvents //
@@ -343,7 +353,7 @@ export class MockAdapter implements ReadWriteAdapter {
     // TODO: unit test
     if (params.onMined) {
       writePromise.then((hash) => {
-        this.waitForTransaction(hash).then(params.onMined);
+        this.waitForTransaction({ hash }).then(params.onMined);
         return hash;
       });
     }

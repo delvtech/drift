@@ -1,13 +1,9 @@
 import isMatch from "lodash.ismatch";
-import type {
-  ClientCache,
-  DriftReadKeyParams,
-} from "src/cache/ClientCache/types";
+import type { ClientCache, ReadKeyParams } from "src/cache/ClientCache/types";
 import { createLruSimpleCache } from "src/cache/SimpleCache/createLruSimpleCache";
 import type { SimpleCache } from "src/cache/SimpleCache/types";
 import {
-  type SerializableKey,
-  createSerializableKey,
+  createSerializableKey
 } from "src/utils/createSerializableKey";
 import { extendInstance } from "src/utils/extendInstance";
 
@@ -22,33 +18,94 @@ export function createClientCache<T extends SimpleCache>(
     T,
     Omit<ClientCache, keyof SimpleCache>
   >(cache, {
-    partialReadKey: ({ abi, namespace, ...params }) =>
-      createSerializableKey([namespace, "read", params]),
+    // Chain ID //
 
-    readKey: (params) => clientCache.partialReadKey(params),
+    preloadChainId(value) {
+      return cache.set(clientCache.chainIdKey(), value);
+    },
 
-    eventsKey: ({ abi, namespace, ...params }) =>
-      createSerializableKey([namespace, "events", params]),
+    chainIdKey() {
+      return "chainId";
+    },
 
-    preloadRead: ({ value, ...params }) =>
-      cache.set(clientCache.readKey(params as DriftReadKeyParams), value),
+    // Block //
 
-    preloadEvents: ({ value, ...params }) =>
-      cache.set(clientCache.eventsKey(params), value),
+    preloadBlock({ value, ...params }) {
+      return cache.set(clientCache.blockKey(params), value);
+    },
 
-    invalidateRead: (params) => cache.delete(clientCache.readKey(params)),
+    blockKey({ namespace, options } = {}) {
+      return createSerializableKey([namespace, "block", options]);
+    },
+
+    // Balance //
+
+    preloadBalance({ value, ...params }) {
+      return cache.set(clientCache.balanceKey(params), value);
+    },
+
+    invalidateBalance(params) {
+      return cache.delete(clientCache.balanceKey(params));
+    },
+
+    balanceKey({ address, cacheNamespace: namespace, options }) {
+      return createSerializableKey([namespace, "balance", address, options]);
+    },
+
+    // Transaction //
+
+    preloadTransaction({ value, ...params }) {
+      return cache.set(clientCache.transactionKey(params), value);
+    },
+
+    transactionKey({ hash, cacheNamespace: namespace }) {
+      return createSerializableKey([namespace, "transaction", hash]);
+    },
+
+    // Events //
+
+    preloadEvents({ value, ...params }) {
+      return cache.set(clientCache.eventsKey(params), value);
+    },
+
+    eventsKey({ abi, cacheNamespace: namespace, ...params }) {
+      return createSerializableKey([namespace, "events", params]);
+    },
+
+    // Read //
+
+    preloadRead({ value, ...params }) {
+      return cache.set(clientCache.readKey(params as ReadKeyParams), value);
+    },
+
+    invalidateRead(params) {
+      return cache.delete(clientCache.readKey(params));
+    },
 
     invalidateReadsMatching(params) {
-      const sourceKey = clientCache.partialReadKey(params);
+      const matchKey = clientCache.partialReadKey(params);
 
       for (const [key] of cache.entries) {
+        if (key === matchKey) {
+          clientCache.delete(key);
+          continue;
+        }
         if (
           typeof key === "object" &&
-          isMatch(key, sourceKey as SerializableKey[])
+          typeof matchKey === "object" &&
+          isMatch(key, matchKey)
         ) {
-          cache.delete(key);
+          clientCache.delete(key);
         }
       }
+    },
+
+    readKey(params) {
+      return clientCache.partialReadKey(params);
+    },
+
+    partialReadKey({ abi, cacheNamespace: namespace, ...params }) {
+      return createSerializableKey([namespace, "read", params]);
     },
   });
 
