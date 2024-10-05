@@ -1,16 +1,20 @@
 import isMatch from "lodash.ismatch";
-import type { ClientCache, ReadKeyParams } from "src/cache/ClientCache/types";
+import type {
+  ClientCache,
+  ReadKeyParams
+} from "src/cache/ClientCache/types";
 import { createLruSimpleCache } from "src/cache/SimpleCache/createLruSimpleCache";
 import type { SimpleCache } from "src/cache/SimpleCache/types";
-import {
-  createSerializableKey
-} from "src/utils/createSerializableKey";
+import { createSerializableKey } from "src/utils/createSerializableKey";
 import { extendInstance } from "src/utils/extendInstance";
 
 /**
  * Extends a {@linkcode SimpleCache} with additional API methods for use with
  * Drift clients.
  */
+// TODO: Consider using a similar pattern as the `MockStore` for the cache or
+// implement a generalized plugins/hooks layer that can be used by the cache,
+// store, and other plugins.
 export function createClientCache<T extends SimpleCache>(
   cache: T = createLruSimpleCache({ max: 500 }) as T,
 ): ClientCache<T> {
@@ -20,12 +24,12 @@ export function createClientCache<T extends SimpleCache>(
   >(cache, {
     // Chain ID //
 
-    preloadChainId(value) {
-      return cache.set(clientCache.chainIdKey(), value);
+    preloadChainId({ value, ...params }) {
+      return cache.set(clientCache.chainIdKey(params), value);
     },
 
-    chainIdKey() {
-      return "chainId";
+    chainIdKey({ cacheNamespace } = {}) {
+      return createSerializableKey([cacheNamespace, "chainId"]);
     },
 
     // Block //
@@ -34,8 +38,12 @@ export function createClientCache<T extends SimpleCache>(
       return cache.set(clientCache.blockKey(params), value);
     },
 
-    blockKey({ namespace, options } = {}) {
-      return createSerializableKey([namespace, "block", options]);
+    blockKey({ cacheNamespace, blockHash, blockNumber, blockTag } = {}) {
+      return createSerializableKey([
+        cacheNamespace,
+        "block",
+        { blockHash, blockNumber, blockTag },
+      ]);
     },
 
     // Balance //
@@ -48,8 +56,12 @@ export function createClientCache<T extends SimpleCache>(
       return cache.delete(clientCache.balanceKey(params));
     },
 
-    balanceKey({ address, cacheNamespace: namespace, options }) {
-      return createSerializableKey([namespace, "balance", address, options]);
+    balanceKey({ cacheNamespace, address, blockHash, blockNumber, blockTag }) {
+      return createSerializableKey([
+        cacheNamespace,
+        "balance",
+        { address, blockHash, blockNumber, blockTag },
+      ]);
     },
 
     // Transaction //
@@ -58,8 +70,8 @@ export function createClientCache<T extends SimpleCache>(
       return cache.set(clientCache.transactionKey(params), value);
     },
 
-    transactionKey({ hash, cacheNamespace: namespace }) {
-      return createSerializableKey([namespace, "transaction", hash]);
+    transactionKey({ hash, cacheNamespace }) {
+      return createSerializableKey([cacheNamespace, "transaction", { hash }]);
     },
 
     // Events //
@@ -68,8 +80,12 @@ export function createClientCache<T extends SimpleCache>(
       return cache.set(clientCache.eventsKey(params), value);
     },
 
-    eventsKey({ abi, cacheNamespace: namespace, ...params }) {
-      return createSerializableKey([namespace, "events", params]);
+    eventsKey({ cacheNamespace, address, event, filter, fromBlock, toBlock }) {
+      return createSerializableKey([
+        cacheNamespace,
+        "events",
+        { address, event, filter, fromBlock, toBlock },
+      ]);
     },
 
     // Read //
@@ -104,8 +120,17 @@ export function createClientCache<T extends SimpleCache>(
       return clientCache.partialReadKey(params);
     },
 
-    partialReadKey({ abi, cacheNamespace: namespace, ...params }) {
-      return createSerializableKey([namespace, "read", params]);
+    partialReadKey({ cacheNamespace, address, args, block, fn }) {
+      return createSerializableKey([
+        cacheNamespace,
+        "read",
+        {
+          address,
+          args,
+          block,
+          fn,
+        },
+      ]);
     },
   });
 

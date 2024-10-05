@@ -1,9 +1,6 @@
 import type { Abi, AbiItemType } from "abitype";
-import type {
-    AbiEntry,
-    AbiEntryName,
-} from "src/adapter/types/Abi";
-import { AbiEntryNotFoundError } from "src/errors/AbiEntryNotFound";
+import type { AbiEntry, AbiEntryName } from "src/adapter/types/Abi";
+import { DriftError } from "src/error";
 
 /**
  * Get an entry from an ABI by type and name.
@@ -33,4 +30,11 @@ export function getAbiEntry<
   }
 
   return abiItem;
+}
+
+export class AbiEntryNotFoundError extends DriftError {
+  constructor({ type, name }: { type: AbiItemType; name?: string }) {
+    super(`No ${type}${name ? ` with name ${name}` : ""} found in ABI.`);
+    this.name = "AbiEntryNotFoundError";
+  }
 }

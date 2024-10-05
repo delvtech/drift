@@ -382,13 +382,3 @@ export type AdapterOnWriteParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 > = OptionalKeys<AdapterWriteParams<TAbi, TFunctionName>, "args" | "address">;
-
-export class NotImplementedError extends Error {
-  constructor({ method, mockKey }: { method: string; mockKey: string }) {
-    super(
-      `Called ${method} on a MockAdapter without a return value. No mock found with key "${mockKey}". Stub the return value first:
-    adapter.on${method.replace(/^./, (c) => c.toUpperCase())}(...args).resolves(value)`,
-    );
-    this.name = "NotImplementedError";
-  }
-}
