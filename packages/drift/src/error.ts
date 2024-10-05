@@ -19,6 +19,8 @@ export class DriftError extends Error {
     return this._name;
   }
   set name(name: string) {
-    this._name = `${DriftError.prefix}${name.replace(new RegExp(`^${DriftError.prefix}`), "")}`;
+    this._name = name.startsWith(DriftError.prefix)
+      ? name
+      : `${DriftError.prefix}${name}`;
   }
 }
