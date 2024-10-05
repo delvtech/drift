@@ -143,9 +143,11 @@ export class ReadContract<
   read = <TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ): Promise<FunctionReturn<TAbi, TFunctionName>> => {
-    // TODO: Cleanup type casting required due to an incompatibility between
-    // distributive types and the conditional args param.
-    const key = this.readKey(fn, args as any, options);
+    const key = this.readKey(
+      fn,
+      args as FunctionArgs<TAbi, TFunctionName>,
+      options,
+    );
     if (this.cache.has(key)) {
       return this.cache.get(key);
     }

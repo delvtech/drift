@@ -1,7 +1,3 @@
-/**
- * Added to every error name.
- * @internal
- */
 export class DriftError extends Error {
   static prefix = "✖ Drift:";
   private _name: string;
