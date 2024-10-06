@@ -11,7 +11,7 @@ import type {
   EmptyObject,
   MergeKeys,
   Pretty,
-  ReplaceKeys,
+  ReplaceProps,
 } from "src/utils/types";
 
 // https://docs.soliditylang.org/en/latest/abi-spec.html#json
@@ -19,7 +19,7 @@ import type {
 export type NamedAbiParameter = AbiParameter extends infer TAbiParameter
   ? TAbiParameter extends { name: string }
     ? TAbiParameter
-    : ReplaceKeys<TAbiParameter, { name: string }>
+    : ReplaceProps<TAbiParameter, { name: string }>
   : never;
 
 /**
@@ -97,7 +97,7 @@ type WithDefaultNames<TParameters extends readonly AbiParameter[]> = {
     AbiParameter
     ? TParameter extends NamedAbiParameter
       ? TParameter
-      : ReplaceKeys<MergeKeys<TParameter>, { name: `${K}` | string }>
+      : ReplaceProps<MergeKeys<TParameter>, { name: `${K}` | string }>
     : never;
 };
 

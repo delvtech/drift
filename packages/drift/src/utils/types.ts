@@ -14,13 +14,13 @@ export type Pretty<T> = { [K in keyof T]: T[K] } & {};
 /**
  * Replace properties in `T` with properties in `U`.
  */
-export type ReplaceKeys<T, U> = Pretty<Omit<T, keyof U> & U>;
+export type ReplaceProps<T, U> = Pretty<Omit<T, keyof U> & U>;
 
 /**
  * Make all properties in `T` whose keys are in the union `K` required and
  * non-nullable.
  */
-export type RequiredKeys<T, K extends keyof T> = ReplaceKeys<
+export type RequiredKeys<T, K extends keyof T> = ReplaceProps<
   T,
   {
     [U in K]-?: NonNullable<T[U]>;
@@ -30,7 +30,7 @@ export type RequiredKeys<T, K extends keyof T> = ReplaceKeys<
 /**
  * Make all properties in `T` whose keys are in the union `K` optional.
  */
-export type OptionalKeys<T, K extends keyof T> = ReplaceKeys<
+export type OptionalKeys<T, K extends keyof T> = ReplaceProps<
   T,
   {
     [U in K]?: T[U];

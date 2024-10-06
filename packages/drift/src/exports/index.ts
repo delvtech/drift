@@ -127,7 +127,7 @@ export type {
   MergeKeys,
   OptionalKeys,
   Pretty,
-  ReplaceKeys,
+  ReplaceProps,
   RequiredKeys,
   UnionToIntersection,
 } from "src/utils/types";
