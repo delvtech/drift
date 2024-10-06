@@ -49,7 +49,7 @@ export class Drift<
 > {
   adapter: TAdapter;
   cache: ClientCache<TCache>;
-  namespace?: PropertyKey;
+  cacheNamespace?: PropertyKey;
 
   // Write-only property definitions //
 
@@ -70,11 +70,11 @@ export class Drift<
 
   constructor(
     adapter: TAdapter,
-    { cache, cacheNamespace: namespace }: DriftOptions<TCache> = {},
+    { cache, cacheNamespace }: DriftOptions<TCache> = {},
   ) {
     this.adapter = adapter;
     this.cache = createClientCache(cache);
-    this.namespace = namespace;
+    this.cacheNamespace = cacheNamespace;
 
     // Write-only property assignment //
 
@@ -111,7 +111,7 @@ export class Drift<
     abi,
     address,
     cache = this.cache,
-    cacheNamespace: namespace = this.namespace,
+    cacheNamespace = this.cacheNamespace,
   }: ContractParams<TAbi>): Contract<TAbi, TAdapter, TCache> => {
     return (
       this.isReadWrite()
@@ -120,14 +120,14 @@ export class Drift<
             adapter: this.adapter,
             address,
             cache,
-            cacheNamespace: namespace,
+            cacheNamespace,
           })
         : new ReadContract({
             abi,
             adapter: this.adapter,
             address,
             cache,
-            cacheNamespace: namespace,
+            cacheNamespace,
           })
     ) as Contract<TAbi, TAdapter, TCache>;
   };

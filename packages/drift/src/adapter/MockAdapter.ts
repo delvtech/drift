@@ -30,11 +30,7 @@ import type { OptionalKeys } from "src/utils/types";
 
 // TODO: Allow configuration of error throwing/default return value behavior
 export class MockAdapter implements ReadWriteAdapter {
-  mocks: MockStore<ReadWriteAdapter>;
-
-  constructor(store = new MockStore<ReadWriteAdapter>()) {
-    this.mocks = store;
-  }
+  mocks = new MockStore<ReadWriteAdapter>();
 
   reset = () => this.mocks.reset();
 

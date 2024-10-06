@@ -66,20 +66,20 @@ export class ReadContract<
   adapter: TAdapter;
   address: Address;
   cache: TCache;
-  namespace?: PropertyKey;
+  cacheNamespace?: PropertyKey;
 
   constructor({
     abi,
     adapter,
     address,
     cache = createClientCache() as TCache,
-    cacheNamespace: namespace,
+    cacheNamespace,
   }: ReadContractParams<TAbi, TAdapter, TCache>) {
     this.abi = abi;
     this.adapter = adapter;
     this.address = address;
     this.cache = cache;
-    this.namespace = namespace;
+    this.cacheNamespace = cacheNamespace;
   }
 
   // Events //
@@ -116,7 +116,7 @@ export class ReadContract<
     },
   ): MaybePromise<void> => {
     return this.cache.preloadEvents({
-      cacheNamespace: this.namespace,
+      cacheNamespace: this.cacheNamespace,
       abi: this.abi,
       address: this.address,
       ...params,
@@ -127,7 +127,7 @@ export class ReadContract<
     ...[event, options]: ContractGetEventsArgs<TAbi, TEventName>
   ): SerializableKey => {
     return this.cache.eventsKey({
-      cacheNamespace: this.namespace,
+      cacheNamespace: this.cacheNamespace,
       abi: this.abi,
       address: this.address,
       event,
@@ -174,7 +174,7 @@ export class ReadContract<
     },
   ): MaybePromise<void> => {
     this.cache.preloadRead({
-      cacheNamespace: this.namespace,
+      cacheNamespace: this.cacheNamespace,
       // TODO: Cleanup type casting required due to an incompatibility between
       // `Omit` and the conditional args param.
       abi: this.abi as Abi,
@@ -187,7 +187,7 @@ export class ReadContract<
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ): MaybePromise<void> {
     return this.cache.invalidateRead({
-      cacheNamespace: this.namespace,
+      cacheNamespace: this.cacheNamespace,
       // TODO: Cleanup type casting required due to an incompatibility between
       // `Omit` and the conditional args param.
       abi: this.abi as Abi,
@@ -204,7 +204,7 @@ export class ReadContract<
     options?: ContractReadOptions,
   ): MaybePromise<void> => {
     const matchKey = this.cache.partialReadKey({
-      cacheNamespace: this.namespace,
+      cacheNamespace: this.cacheNamespace,
       abi: this.abi,
       address: this.address,
       fn,
@@ -231,7 +231,7 @@ export class ReadContract<
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ): SerializableKey => {
     return this.cache.readKey({
-      cacheNamespace: this.namespace,
+      cacheNamespace: this.cacheNamespace,
       // TODO: Cleanup type casting required due to an incompatibility between
       // `Omit` and the conditional args param.
       abi: this.abi as Abi,
@@ -248,7 +248,7 @@ export class ReadContract<
     options?: ContractReadOptions,
   ): SerializableKey => {
     return this.cache.partialReadKey({
-      cacheNamespace: this.namespace,
+      cacheNamespace: this.cacheNamespace,
       abi: this.abi,
       address: this.address,
       fn,

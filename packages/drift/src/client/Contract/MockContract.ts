@@ -45,13 +45,13 @@ export class MockContract<
   constructor({
     abi,
     address = ZERO_ADDRESS,
-    cacheNamespace: namespace,
+    cacheNamespace,
   }: MockContractParams<TAbi>) {
     super({
       abi,
       adapter: new MockAdapter(),
       address,
-      cacheNamespace: namespace,
+      cacheNamespace,
     });
   }
 
