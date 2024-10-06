@@ -373,8 +373,3 @@ export class MockAdapter implements ReadWriteAdapter {
     })();
   }
 }
-
-export type AdapterOnWriteParams<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = OptionalKeys<AdapterWriteParams<TAbi, TFunctionName>, "args" | "address">;

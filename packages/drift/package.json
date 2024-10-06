@@ -8,35 +8,16 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./cache": {
-      "types": "./dist/cache.d.ts",
-      "default": "./dist/cache.js"
-    },
-    "./contract": {
-      "types": "./dist/contract.d.ts",
-      "default": "./dist/contract.js"
-    },
-    "./errors": {
-      "types": "./dist/errors.d.ts",
-      "default": "./dist/errors.js"
-    },
-    "./network": {
-      "types": "./dist/network.d.ts",
-      "default": "./dist/network.js"
-    },
-    "./stubs": {
-      "types": "./dist/stubs.d.ts",
-      "default": "./dist/stubs.js"
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "default": "./dist/testing.js"
     },
     "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {
-      "cache": ["./dist/cache.d.ts"],
-      "contract": ["./dist/contract.d.ts"],
-      "errors": ["./dist/errors.d.ts"],
-      "network": ["./dist/network.d.ts"],
-      "stubs": ["./dist/stubs.d.ts"]
+      ".": ["./dist/index.d.ts"],
+      "testing": ["./dist/testing.d.ts"]
     }
   },
   "scripts": {
