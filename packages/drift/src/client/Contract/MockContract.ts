@@ -24,7 +24,6 @@ import type {
   AdapterWriteParams,
 } from "src/exports";
 import type { Bytes } from "src/types";
-import { IERC20 } from "src/utils/testing/IERC20";
 import type { OptionalKeys } from "src/utils/types";
 
 export type MockContractParams<
@@ -136,11 +135,3 @@ export class MockContract<
       ...options,
     });
 }
-
-const foo = new MockContract({ abi: IERC20.abi });
-foo
-  .onWrite("transfer", {
-    to: "0x123",
-    value: 100n,
-  })
-  .resolves();
