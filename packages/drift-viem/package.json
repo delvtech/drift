@@ -1,6 +1,6 @@
 {
   "name": "@delvtech/drift-viem",
-  "version": "0.0.1-beta.1",
+  "version": "0.0.1-beta.2",
   "license": "AGPL-3.0",
   "type": "module",
   "main": "dist/index.cjs",
@@ -55,7 +55,7 @@
     }
   },
   "dependencies": {
-    "@delvtech/drift": "0.0.1-beta.1"
+    "@delvtech/drift": "0.0.1-beta.2"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
