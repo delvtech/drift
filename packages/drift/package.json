@@ -57,6 +57,13 @@
     "vite-tsconfig-paths": "^5.0.1",
     "vitest": "^2.1.2"
   },
+  "author": {
+    "name": "DELV",
+    "email": "contact@delv.tech",
+    "url": "https://github.com/delvtech"
+  },
+  "repository": "https://github.com/delvtech/evm-client",
+  "bugs": "https://github.com/delvtech/evm-client/issues",
   "publishConfig": {
     "access": "public"
   },
