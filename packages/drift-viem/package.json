@@ -3,16 +3,28 @@
   "version": "0.0.1-beta.1",
   "license": "AGPL-3.0",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "types": "dist/index.d.cts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": {
+        "import": "./dist/index.d.ts",
+        "require": "./dist/index.d.cts"
+      },
+      "default": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      }
     },
     "./testing": {
-      "types": "./dist/testing.d.ts",
-      "default": "./dist/testing.js"
+      "types": {
+        "import": "./dist/testing.d.ts",
+        "require": "./dist/testing.d.cts"
+      },
+      "default": {
+        "import": "./dist/testing.js",
+        "require": "./dist/testing.cjs"
+      }
     },
     "./package.json": "./package.json"
   },
@@ -60,8 +72,8 @@
     "email": "contact@delv.tech",
     "url": "https://github.com/delvtech"
   },
-  "repository": "https://github.com/delvtech/evm-client",
-  "bugs": "https://github.com/delvtech/evm-client/issues",
+  "repository": "https://github.com/delvtech/drift",
+  "bugs": "https://github.com/delvtech/drift/issues",
   "publishConfig": {
     "access": "public"
   },
