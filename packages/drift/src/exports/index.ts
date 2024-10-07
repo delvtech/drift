@@ -121,6 +121,7 @@ export {
 export type {
   AnyFunction,
   AnyObject,
+  AutoCompleteKey,
   Converted,
   DeepPartial,
   EmptyObject,
