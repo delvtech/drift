@@ -1,5 +1,6 @@
 {
   "name": "drift",
+  "license": "AGPL-3.0",
   "private": true,
   "scripts": {
     "cli": "yarn workspace @delvtech/drift-cli dev",

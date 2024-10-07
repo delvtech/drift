@@ -1,7 +1,7 @@
 {
   "name": "@delvtech/drift",
   "version": "0.0.0",
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "type": "module",
   "exports": {
     ".": {
@@ -28,7 +28,7 @@
     "watch": "tsup --watch"
   },
   "peerDependencies": {
-    "sinon": "^17.0.1"
+    "sinon": "^17.0.3"
   },
   "peerDependenciesMeta": {
     "sinon": {
@@ -45,11 +45,10 @@
     "@repo/typescript-config": "*",
     "@types/sinon": "^17.0.3",
     "abitype": "^1.0.0",
-    "dotenv": "^16.4.2",
     "fast-json-stable-stringify": "^2.1.0",
     "sinon": "^17.0.1",
     "tsconfig-paths": "^4.2.0",
-    "tsup": "^8.0.2",
+    "tsup": "^8.3.0",
     "typescript": "^5.4.5",
     "vite-tsconfig-paths": "^4.3.1",
     "vitest": "^1.2.2"

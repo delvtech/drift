@@ -1,7 +1,7 @@
 {
   "name": "@delvtech/drift-viem",
   "version": "0.0.0",
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,15 +24,13 @@
   },
   "scripts": {
     "build": "tsup",
-    "test:watch": "vitest",
+    "test:watch": "vitest --reporter=verbose",
     "test": "vitest run",
-    "test:integration": "vitest run integration",
     "typecheck": "tsc --noEmit",
     "watch": "tsup --watch"
   },
   "peerDependencies": {
-    "@delvtech/drift": "0.0.0",
-    "sinon": "^17.0.1",
+    "sinon": "^17.0.3",
     "viem": "^2"
   },
   "peerDependenciesMeta": {
@@ -40,16 +38,18 @@
       "optional": true
     }
   },
+  "dependencies": {
+    "@delvtech/drift": "0.0.0"
+  },
   "devDependencies": {
-    "@delvtech/drift": "0.0.0",
     "@repo/typescript-config": "*",
-    "sinon": "^17.0.1",
+    "@types/sinon": "^17.0.3",
     "tsconfig-paths": "^4.2.0",
-    "tsup": "^8.0.2",
-    "typescript": "^5.3.3",
-    "viem": "^2.7.3",
-    "vite-tsconfig-paths": "^4.3.1",
-    "vitest": "^1.2.2"
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.2",
+    "viem": "^2.21.19",
+    "vite-tsconfig-paths": "^5.0.1",
+    "vitest": "^2.1.2"
   },
   "publishConfig": {
     "access": "public"
