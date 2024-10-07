@@ -24,6 +24,7 @@ import type {
   NameSpaceParam,
   ReadKeyParams,
 } from "src/cache/ClientCache/types";
+import { type SimpleCache, createLruSimpleCache } from "src/exports";
 import type { Address, Bytes, TransactionHash } from "src/types";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { AnyObject, EmptyObject, MaybePromise } from "src/utils/types";
@@ -31,7 +32,7 @@ import type { AnyObject, EmptyObject, MaybePromise } from "src/utils/types";
 export interface ContractParams<
   TAbi extends Abi = Abi,
   TAdapter extends Adapter = Adapter,
-  TCache extends ClientCache = ClientCache,
+  TCache extends SimpleCache = SimpleCache,
 > extends NameSpaceParam {
   abi: TAbi;
   adapter: TAdapter;
@@ -42,7 +43,7 @@ export interface ContractParams<
 export type Contract<
   TAbi extends Abi = Abi,
   TAdapter extends Adapter = Adapter,
-  TCache extends ClientCache = ClientCache,
+  TCache extends SimpleCache = SimpleCache,
 > = TAdapter extends ReadWriteAdapter
   ? ReadWriteContract<TAbi, TAdapter, TCache>
   : ReadContract<TAbi, TAdapter, TCache>;
@@ -50,7 +51,7 @@ export type Contract<
 export interface ReadContractParams<
   TAbi extends Abi = Abi,
   TAdapter extends ReadAdapter = ReadAdapter,
-  TCache extends ClientCache = ClientCache,
+  TCache extends SimpleCache = SimpleCache,
 > extends ContractParams<TAbi, TAdapter, TCache> {}
 
 /**
@@ -60,25 +61,25 @@ export interface ReadContractParams<
 export class ReadContract<
   TAbi extends Abi = Abi,
   TAdapter extends ReadAdapter = ReadAdapter,
-  TCache extends ClientCache = ClientCache,
+  TCache extends SimpleCache = SimpleCache,
 > {
   abi: TAbi;
   adapter: TAdapter;
   address: Address;
-  cache: TCache;
+  cache: ClientCache<TCache>;
   cacheNamespace?: PropertyKey;
 
   constructor({
     abi,
     adapter,
     address,
-    cache = createClientCache() as TCache,
+    cache = createLruSimpleCache({ max: 500 }) as TCache,
     cacheNamespace,
   }: ReadContractParams<TAbi, TAdapter, TCache>) {
     this.abi = abi;
     this.adapter = adapter;
     this.address = address;
-    this.cache = cache;
+    this.cache = createClientCache(cache);
     this.cacheNamespace = cacheNamespace;
   }
 
@@ -322,7 +323,7 @@ export type ReadWriteContractParams<
 export class ReadWriteContract<
   TAbi extends Abi = Abi,
   TAdapter extends ReadWriteAdapter = ReadWriteAdapter,
-  TCache extends ClientCache = ClientCache,
+  TCache extends SimpleCache = SimpleCache,
 > extends ReadContract<TAbi, TAdapter, TCache> {
   /**
    * Get the address of the signer for this contract.

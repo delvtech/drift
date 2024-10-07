@@ -1,8 +1,5 @@
 import isMatch from "lodash.ismatch";
-import type {
-  ClientCache,
-  ReadKeyParams
-} from "src/cache/ClientCache/types";
+import type { ClientCache, ReadKeyParams } from "src/cache/ClientCache/types";
 import { createLruSimpleCache } from "src/cache/SimpleCache/createLruSimpleCache";
 import type { SimpleCache } from "src/cache/SimpleCache/types";
 import { createSerializableKey } from "src/utils/createSerializableKey";
@@ -18,6 +15,9 @@ import { extendInstance } from "src/utils/extendInstance";
 export function createClientCache<T extends SimpleCache>(
   cache: T = createLruSimpleCache({ max: 500 }) as T,
 ): ClientCache<T> {
+  if (isClientCache(cache)) {
+    return cache;
+  }
   const clientCache: ClientCache<T> = extendInstance<
     T,
     Omit<ClientCache, keyof SimpleCache>
@@ -135,4 +135,27 @@ export function createClientCache<T extends SimpleCache>(
   });
 
   return clientCache;
+}
+
+function isClientCache<T extends SimpleCache>(
+  cache: T,
+): cache is ClientCache<T> {
+  return [
+    "preloadChainId",
+    "chainIdKey",
+    "preloadBlock",
+    "blockKey",
+    "preloadBalance",
+    "invalidateBalance",
+    "balanceKey",
+    "preloadTransaction",
+    "transactionKey",
+    "preloadEvents",
+    "eventsKey",
+    "preloadRead",
+    "invalidateRead",
+    "invalidateReadsMatching",
+    "readKey",
+    "partialReadKey",
+  ].every((key) => key in cache);
 }
