@@ -242,6 +242,8 @@ export class MockAdapter implements ReadWriteAdapter {
 
   // read //
 
+  // FIXME: Partial args in `on` methods is not working as expected. Currently,
+  // you must stub the method with all expected args.
   onRead<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,

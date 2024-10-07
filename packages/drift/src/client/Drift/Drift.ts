@@ -112,7 +112,11 @@ export class Drift<
     address,
     cache = this.cache,
     cacheNamespace = this.cacheNamespace,
-  }: ContractParams<TAbi>): Contract<TAbi, TAdapter, TCache> => {
+  }: Omit<ContractParams<TAbi>, "adapter">): Contract<
+    TAbi,
+    TAdapter,
+    TCache
+  > => {
     return (
       this.isReadWrite()
         ? new ReadWriteContract({
@@ -331,5 +335,5 @@ export type DecodeFunctionDataParams<
 > = AdapterDecodeFunctionDataParams<TAbi, TFunctionName>;
 
 function isReadWriteAdapter(adapter: Adapter): adapter is ReadWriteAdapter {
-  return "readWriteContract" in adapter;
+  return "write" in adapter;
 }
