@@ -462,4 +462,4 @@ Guide](./.github/CONTRIBUTING.md) to get started.
 
 ## License
 
-Drift is open-source software licensed under the [TODO License](LICENSE).
+Drift is open-source software licensed under the [Apache 2.0](./LICENSE).
