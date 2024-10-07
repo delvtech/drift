@@ -4,7 +4,7 @@ import type {
   AdapterReadParams,
 } from "src/adapter/types/Adapter";
 import type { Block } from "src/adapter/types/Block";
-import type { ContactEvent, EventName } from "src/adapter/types/Event";
+import type { ContractEvent, EventName } from "src/adapter/types/Event";
 import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
 import type { NetworkGetBlockParams } from "src/adapter/types/Network";
 import type { Transaction } from "src/adapter/types/Transaction";
@@ -60,7 +60,7 @@ export type ClientCache<T extends SimpleCache = SimpleCache> = T & {
 
   preloadEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
     params: EventsKeyParams<TAbi, TEventName> & {
-      value: readonly ContactEvent<TAbi, TEventName>[];
+      value: readonly ContractEvent<TAbi, TEventName>[];
     },
   ): MaybePromise<void>;
 

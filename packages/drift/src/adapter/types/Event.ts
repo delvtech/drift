@@ -52,7 +52,7 @@ export type EventFilter<
 /**
  * A strongly typed event object based on an abi
  */
-export interface ContactEvent<
+export interface ContractEvent<
   TAbi extends Abi,
   TEventName extends EventName<TAbi> = EventName<TAbi>,
 > {

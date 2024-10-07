@@ -8,9 +8,10 @@ import type {
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
 import type { Block } from "src/adapter/types/Block";
-import type { ContactEvent, EventName } from "src/adapter/types/Event";
+import type { ContractEvent, EventName } from "src/adapter/types/Event";
 import type {
   DecodedFunctionData,
+  FunctionArgs,
   FunctionName,
   FunctionReturn,
 } from "src/adapter/types/Function";
@@ -219,7 +220,7 @@ export class MockAdapter implements ReadWriteAdapter {
     return this.mocks
       .get<
         [AdapterGetEventsParams<TAbi, TEventName>],
-        Promise<ContactEvent<TAbi, TEventName>[]>
+        Promise<ContractEvent<TAbi, TEventName>[]>
       >({
         method: "getEvents",
         key: params.event,
@@ -232,7 +233,7 @@ export class MockAdapter implements ReadWriteAdapter {
   ) {
     return this.mocks.get<
       [AdapterGetEventsParams<TAbi, TEventName>],
-      Promise<ContactEvent<TAbi, TEventName>[]>
+      Promise<ContractEvent<TAbi, TEventName>[]>
     >({
       method: "getEvents",
       key: params.event,
@@ -244,34 +245,47 @@ export class MockAdapter implements ReadWriteAdapter {
   onRead<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(
-    params: OptionalKeys<
-      AdapterReadParams<TAbi, TFunctionName>,
-      "args" | "address"
-    >,
-  ) {
+  >({
+    abi,
+    address,
+    fn,
+    args,
+    block,
+  }: OptionalKeys<AdapterReadParams<TAbi, TFunctionName>, "args" | "address">) {
     return this.mocks
       .get<
         [AdapterReadParams<TAbi, TFunctionName>],
         Promise<FunctionReturn<TAbi, TFunctionName>>
       >({
         method: "read",
-        key: params.fn,
+        key: fn,
       })
-      .withArgs(params as Partial<AdapterReadParams<TAbi, TFunctionName>>);
+      .withArgs({
+        abi,
+        address,
+        fn,
+        args,
+        block,
+      } as Partial<AdapterReadParams<TAbi, TFunctionName>>);
   }
 
   async read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(params: AdapterReadParams<TAbi, TFunctionName>) {
+  >({ abi, address, fn, args, block }: AdapterReadParams<TAbi, TFunctionName>) {
     return this.mocks.get<
       [AdapterReadParams<TAbi, TFunctionName>],
       Promise<FunctionReturn<TAbi, TFunctionName>>
     >({
       method: "read",
-      key: params.fn,
-    })(params);
+      key: fn,
+    })({
+      abi,
+      address: address,
+      fn: fn,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
+      block: block,
+    });
   }
 
   // simulateWrite //

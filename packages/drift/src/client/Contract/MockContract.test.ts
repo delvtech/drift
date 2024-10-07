@@ -1,4 +1,4 @@
-import type { ContactEvent } from "src/adapter/types/Event";
+import type { ContractEvent } from "src/adapter/types/Event";
 import type { DecodedFunctionData } from "src/adapter/types/Function";
 import { MockContract } from "src/client/Contract/MockContract";
 import { IERC20 } from "src/utils/testing/IERC20";
@@ -22,7 +22,7 @@ describe("MockContract", () => {
 
     it("Can be stubbed", async () => {
       const contract = new MockContract({ abi });
-      const events: ContactEvent<Erc20Abi, "Transfer">[] = [
+      const events: ContractEvent<Erc20Abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -38,7 +38,7 @@ describe("MockContract", () => {
 
     it("Can be stubbed with specific args", async () => {
       const contract = new MockContract({ abi });
-      const events1: ContactEvent<Erc20Abi, "Transfer">[] = [
+      const events1: ContractEvent<Erc20Abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -48,7 +48,7 @@ describe("MockContract", () => {
           },
         },
       ];
-      const events2: ContactEvent<Erc20Abi, "Transfer">[] = [
+      const events2: ContractEvent<Erc20Abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -111,6 +111,18 @@ describe("MockContract", () => {
       const contract = new MockContract({ abi });
       contract.onRead("balanceOf").resolves(123n);
       expect(await contract.read("balanceOf", { owner: "0x" })).toBe(123n);
+    });
+
+    it("Inherits stubbed values from the adapter", async () => {
+      const contract = new MockContract({ abi });
+      contract.adapter
+        .onRead({
+          abi: contract.abi,
+          address: contract.address,
+          fn: "symbol",
+        })
+        .resolves("ABC");
+      expect(await contract.read("symbol")).toBe("ABC");
     });
   });
 

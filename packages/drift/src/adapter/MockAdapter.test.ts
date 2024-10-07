@@ -7,7 +7,7 @@ import type {
   AdapterWriteParams,
 } from "src/adapter/types/Adapter";
 import type { Block } from "src/adapter/types/Block";
-import type { ContactEvent } from "src/adapter/types/Event";
+import type { ContractEvent } from "src/adapter/types/Event";
 import type { DecodedFunctionData } from "src/adapter/types/Function";
 import type {
   Transaction,
@@ -331,7 +331,7 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed", async () => {
       const adapter = new MockAdapter();
-      const events: ContactEvent<typeof IERC20.abi, "Transfer">[] = [
+      const events: ContractEvent<typeof IERC20.abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -369,7 +369,7 @@ describe("MockAdapter", () => {
         ...params1,
         filter: { from: "0x2" },
       };
-      const events1: ContactEvent<typeof IERC20.abi, "Transfer">[] = [
+      const events1: ContractEvent<typeof IERC20.abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -379,7 +379,7 @@ describe("MockAdapter", () => {
           },
         },
       ];
-      const events2: ContactEvent<typeof IERC20.abi, "Transfer">[] = [
+      const events2: ContractEvent<typeof IERC20.abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {

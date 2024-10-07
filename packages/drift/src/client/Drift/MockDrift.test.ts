@@ -1,5 +1,5 @@
 import type { Block } from "src/adapter/types/Block";
-import type { ContactEvent } from "src/adapter/types/Event";
+import type { ContractEvent } from "src/adapter/types/Event";
 import type { DecodedFunctionData } from "src/adapter/types/Function";
 import type {
   Transaction,
@@ -343,7 +343,7 @@ describe("MockDrift", () => {
 
     it("Can be stubbed", async () => {
       const drift = new MockDrift();
-      const events: ContactEvent<typeof IERC20.abi, "Transfer">[] = [
+      const events: ContractEvent<typeof IERC20.abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -381,7 +381,7 @@ describe("MockDrift", () => {
         ...params1,
         filter: { from: "0x2" },
       };
-      const events1: ContactEvent<typeof IERC20.abi, "Transfer">[] = [
+      const events1: ContractEvent<typeof IERC20.abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -391,7 +391,7 @@ describe("MockDrift", () => {
           },
         },
       ];
-      const events2: ContactEvent<typeof IERC20.abi, "Transfer">[] = [
+      const events2: ContractEvent<typeof IERC20.abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {

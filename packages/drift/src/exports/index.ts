@@ -32,7 +32,7 @@ export type {
   ContractWriteOptions,
 } from "src/adapter/types/Contract";
 export type {
-  ContactEvent,
+  ContractEvent,
   EventArgs,
   EventFilter,
   EventName,
@@ -120,6 +120,7 @@ export {
 export type {
   AnyFunction,
   AnyObject,
+  Converted,
   DeepPartial,
   EmptyObject,
   FunctionKey,

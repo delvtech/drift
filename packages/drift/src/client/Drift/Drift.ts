@@ -7,7 +7,7 @@ import type {
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
 import type { Block } from "src/adapter/types/Block";
-import type { ContactEvent, EventName } from "src/adapter/types/Event";
+import type { ContractEvent, EventName } from "src/adapter/types/Event";
 import type {
   DecodedFunctionData,
   FunctionName,
@@ -212,7 +212,7 @@ export class Drift<
    */
   getEvents = async <TAbi extends Abi, TEventName extends EventName<TAbi>>(
     params: GetEventsParams<TAbi, TEventName>,
-  ): Promise<ContactEvent<TAbi, TEventName>[]> => {
+  ): Promise<ContractEvent<TAbi, TEventName>[]> => {
     const key = this.cache.eventsKey(params);
     if (this.cache.has(key)) {
       return this.cache.get(key);

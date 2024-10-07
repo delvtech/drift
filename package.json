@@ -2,6 +2,7 @@
   "name": "drift",
   "private": true,
   "scripts": {
+    "cli": "yarn workspace @delvtech/drift-cli dev",
     "build:packages": "turbo build --filter=./packages/*",
     "build": "turbo build",
     "dev": "turbo dev",

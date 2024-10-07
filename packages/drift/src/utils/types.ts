@@ -130,3 +130,20 @@ export type MergeKeys<T> = UnionToIntersection<T> extends infer I
       [K in keyof I]: K extends keyof T ? T[K] : I[K];
     }
   : never;
+
+/**
+ * Convert all properties in `T` whose values are of type `U` to type `V`.
+ *
+ * @example
+ * ```ts
+ * type Converted = Converted<{ a: string, b: number }, string, number>;
+ * // { a: number, b: number }
+ * ```
+ */
+export type Converted<T, U, V> = T extends U
+  ? V
+  : T extends Array<infer Inner>
+    ? Converted<Inner, U, V>[]
+    : T extends object
+      ? { [K in keyof T]: Converted<T[K], U, V> }
+      : T;

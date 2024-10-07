@@ -1,11 +1,12 @@
 import type { Abi } from "abitype";
+import type { SinonStub } from "sinon";
 import { MockAdapter } from "src/adapter/MockAdapter";
 import type {
   ContractGetEventsOptions,
   ContractReadOptions,
   ContractWriteOptions,
 } from "src/adapter/types/Contract";
-import type { ContactEvent, EventName } from "src/adapter/types/Event";
+import type { ContractEvent, EventName } from "src/adapter/types/Event";
 import type {
   DecodedFunctionData,
   FunctionArgs,
@@ -22,6 +23,7 @@ import {
   ReadWriteContract,
 } from "src/client/Contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
+import type { AdapterReadParams } from "src/exports";
 import type { Address, Bytes, TransactionHash } from "src/types";
 import { MockStore } from "src/utils/testing/MockStore";
 import type { OptionalKeys } from "src/utils/types";
@@ -68,7 +70,7 @@ export class MockContract<
           event: TEventName,
           options?: ContractGetEventsOptions<TAbi, TEventName>,
         ],
-        Promise<ContactEvent<TAbi, TEventName>[]>
+        Promise<ContractEvent<TAbi, TEventName>[]>
       >({
         method: "getEvents",
         key: event,
@@ -82,7 +84,7 @@ export class MockContract<
   ) => {
     return this.mocks.get<
       [event: TEventName, options?: ContractGetEventsOptions<TAbi, TEventName>],
-      Promise<ContactEvent<TAbi, TEventName>[]>
+      Promise<ContractEvent<TAbi, TEventName>[]>
     >({
       method: "getEvents",
       key: event,
@@ -96,27 +98,79 @@ export class MockContract<
     args?: FunctionArgs<TAbi, TFunctionName>,
     options?: ContractReadOptions,
   ) {
-    return this.mocks
-      .get<
-        ContractReadArgs<TAbi, TFunctionName>,
-        Promise<FunctionReturn<TAbi, TFunctionName>>
-      >({
-        method: "read",
-        key: fn,
-      })
-      .withArgs(fn, args as any, options);
+    // return this.mocks
+    //   .get<
+    //     ContractReadArgs<TAbi, TFunctionName>,
+    //     Promise<FunctionReturn<TAbi, TFunctionName>>
+    //   >({
+    //     method: "read",
+    //   })
+    //   .withArgs(fn, args as any, options);
+
+    // const mock = this.adapter.onRead({
+    //   abi: this.abi as Abi,
+    //   address: this.address,
+    //   fn,
+    //   ...{
+    //     args,
+    //     ...options,
+    //   },
+    // }) as SinonStub as SinonStub<
+    //   ContractReadArgs<TAbi, TFunctionName>,
+    //   Promise<FunctionReturn<TAbi, TFunctionName>>
+    // >;
+
+    // return mock.withArgs(fn, args as any, options);
+
+    return this.adapter.onRead({
+      abi: this.abi as Abi,
+      address: this.address,
+      args,
+      fn,
+      ...options,
+    }) as SinonStub as SinonStub<
+      [Omit<AdapterReadParams<TAbi, TFunctionName>, "address" | "abi" | "fn">],
+      Promise<FunctionReturn<TAbi, TFunctionName>>
+    >;
   }
 
   read = async <TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ) => {
-    return this.mocks.get<
-      ContractReadArgs<TAbi, TFunctionName>,
-      Promise<FunctionReturn<TAbi, TFunctionName>>
-    >({
-      method: "read",
-      key: fn,
-    })(fn, args as any, options);
+    // return this.mocks.get<
+    //   ContractReadArgs<TAbi, TFunctionName>,
+    //   Promise<FunctionReturn<TAbi, TFunctionName>>
+    // >({
+    //   method: "read",
+    //   key: fn,
+    // })(fn, args as any, options);
+
+    // return this.onRead(fn, args as any, options)(fn, args as any, options);
+
+    // return this.onRead(
+    //   fn,
+    //   args as any,
+    //   options,
+    // )({
+    //   args,
+    //   ...options,
+    // } as Omit<
+    //   AdapterReadParams<TAbi, TFunctionName>,
+    //   "address" | "abi" | "fn"
+    // >);
+    return this.adapter.onRead({
+      abi: this.abi as Abi,
+      address: this.address,
+      fn,
+      args,
+      ...options,
+    })({
+      abi: this.abi as Abi,
+      address: this.address,
+      fn,
+      args,
+      ...options,
+    }) as unknown as FunctionReturn<TAbi, TFunctionName>;
   };
 
   // simulateWrite //

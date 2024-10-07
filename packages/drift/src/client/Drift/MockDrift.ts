@@ -1,7 +1,7 @@
 import type { Abi } from "abitype";
 import { MockAdapter } from "src/adapter/MockAdapter";
 import type { Block } from "src/adapter/types/Block";
-import type { ContactEvent, EventName } from "src/adapter/types/Event";
+import type { ContractEvent, EventName } from "src/adapter/types/Event";
 import type {
   DecodedFunctionData,
   FunctionName,
@@ -238,7 +238,7 @@ export class MockDrift extends Drift<MockAdapter> {
     return this.mocks
       .get<
         [GetEventsParams<TAbi, TEventName>],
-        Promise<ContactEvent<TAbi, TEventName>[]>
+        Promise<ContractEvent<TAbi, TEventName>[]>
       >({
         method: "getEvents",
         key: params.event,
@@ -251,7 +251,7 @@ export class MockDrift extends Drift<MockAdapter> {
   ) => {
     return this.mocks.get<
       [GetEventsParams<TAbi, TEventName>],
-      Promise<ContactEvent<TAbi, TEventName>[]>
+      Promise<ContractEvent<TAbi, TEventName>[]>
     >({
       method: "getEvents",
       key: params.event,

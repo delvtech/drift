@@ -10,7 +10,7 @@ import type {
   ContractReadOptions,
   ContractWriteOptions,
 } from "src/adapter/types/Contract";
-import type { ContactEvent, EventName } from "src/adapter/types/Event";
+import type { ContractEvent, EventName } from "src/adapter/types/Event";
 import type {
   DecodedFunctionData,
   FunctionArgs,
@@ -89,7 +89,7 @@ export class ReadContract<
    */
   getEvents = async <TEventName extends EventName<TAbi>>(
     ...[event, options]: ContractGetEventsArgs<TAbi, TEventName>
-  ): Promise<ContactEvent<TAbi, TEventName>[]> => {
+  ): Promise<ContractEvent<TAbi, TEventName>[]> => {
     const key = this.eventsKey(event, options);
     if (this.cache.has(key)) {
       return this.cache.get(key);
@@ -112,7 +112,7 @@ export class ReadContract<
       EventsKeyParams<TAbi, TEventName>,
       keyof ReadContractParams
     > & {
-      value: readonly ContactEvent<TAbi, TEventName>[];
+      value: readonly ContractEvent<TAbi, TEventName>[];
     },
   ): MaybePromise<void> => {
     return this.cache.preloadEvents({

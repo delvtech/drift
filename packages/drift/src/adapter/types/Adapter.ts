@@ -4,7 +4,7 @@ import type {
   ContractReadOptions,
   ContractWriteOptions,
 } from "src/adapter/types/Contract";
-import type { ContactEvent, EventName } from "src/adapter/types/Event";
+import type { ContractEvent, EventName } from "src/adapter/types/Event";
 import type {
   DecodedFunctionData,
   FunctionArgs,
@@ -21,7 +21,7 @@ export type Adapter = ReadAdapter | ReadWriteAdapter;
 export interface ReadAdapter extends Network {
   getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
     params: AdapterGetEventsParams<TAbi, TEventName>,
-  ): Promise<ContactEvent<TAbi, TEventName>[]>;
+  ): Promise<ContractEvent<TAbi, TEventName>[]>;
 
   read<
     TAbi extends Abi,
