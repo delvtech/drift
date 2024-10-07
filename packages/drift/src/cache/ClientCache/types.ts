@@ -14,6 +14,11 @@ import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { MaybePromise, DeepPartial as Partial } from "src/utils/types";
 
 export type ClientCache<T extends SimpleCache = SimpleCache> = T & {
+  /**
+   * the underlying SimpleCache instance used by the ClientCache
+   */
+  store: T;
+
   // Chain ID //
 
   preloadChainId(
@@ -83,7 +88,9 @@ export type ClientCache<T extends SimpleCache = SimpleCache> = T & {
   invalidateReadsMatching<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >(params: Partial<ReadKeyParams<TAbi, TFunctionName>>): MaybePromise<void>;
+  >(
+    params: Partial<ReadKeyParams<TAbi, TFunctionName>>,
+  ): MaybePromise<void>;
 
   readKey<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
     params: ReadKeyParams<TAbi, TFunctionName>,

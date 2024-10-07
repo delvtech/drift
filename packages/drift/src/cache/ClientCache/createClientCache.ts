@@ -18,14 +18,14 @@ export function createClientCache<T extends SimpleCache>(
   if (isClientCache(cache)) {
     return cache;
   }
-  const clientCache: ClientCache<T> = extendInstance<
-    T,
-    Omit<ClientCache, keyof SimpleCache>
-  >(cache, {
+
+  const clientCache = extendInstance<SimpleCache, ClientCache>(cache, {
+    store: cache,
+
     // Chain ID //
 
     preloadChainId({ value, ...params }) {
-      return cache.set(clientCache.chainIdKey(params), value);
+      return cache.set(this.chainIdKey?.(params), value);
     },
 
     chainIdKey({ cacheNamespace } = {}) {
@@ -35,7 +35,7 @@ export function createClientCache<T extends SimpleCache>(
     // Block //
 
     preloadBlock({ value, ...params }) {
-      return cache.set(clientCache.blockKey(params), value);
+      return cache.set(this.blockKey(params), value);
     },
 
     blockKey({ cacheNamespace, blockHash, blockNumber, blockTag } = {}) {
@@ -49,11 +49,11 @@ export function createClientCache<T extends SimpleCache>(
     // Balance //
 
     preloadBalance({ value, ...params }) {
-      return cache.set(clientCache.balanceKey(params), value);
+      return cache.set(this.balanceKey(params), value);
     },
 
     invalidateBalance(params) {
-      return cache.delete(clientCache.balanceKey(params));
+      return cache.delete(this.balanceKey(params));
     },
 
     balanceKey({ cacheNamespace, address, blockHash, blockNumber, blockTag }) {
@@ -67,7 +67,7 @@ export function createClientCache<T extends SimpleCache>(
     // Transaction //
 
     preloadTransaction({ value, ...params }) {
-      return cache.set(clientCache.transactionKey(params), value);
+      return cache.set(this.transactionKey(params), value);
     },
 
     transactionKey({ hash, cacheNamespace }) {
@@ -77,7 +77,7 @@ export function createClientCache<T extends SimpleCache>(
     // Events //
 
     preloadEvents({ value, ...params }) {
-      return cache.set(clientCache.eventsKey(params), value);
+      return cache.set(this.eventsKey(params), value);
     },
 
     eventsKey({ cacheNamespace, address, event, filter, fromBlock, toBlock }) {
@@ -91,19 +91,19 @@ export function createClientCache<T extends SimpleCache>(
     // Read //
 
     preloadRead({ value, ...params }) {
-      return cache.set(clientCache.readKey(params as ReadKeyParams), value);
+      return cache.set(this.readKey(params as ReadKeyParams), value);
     },
 
     invalidateRead(params) {
-      return cache.delete(clientCache.readKey(params));
+      return cache.delete(this.readKey(params));
     },
 
     invalidateReadsMatching(params) {
-      const matchKey = clientCache.partialReadKey(params);
+      const matchKey = this.partialReadKey(params);
 
       for (const [key] of cache.entries) {
         if (key === matchKey) {
-          clientCache.delete(key);
+          cache.delete(key);
           continue;
         }
         if (
@@ -111,13 +111,13 @@ export function createClientCache<T extends SimpleCache>(
           typeof matchKey === "object" &&
           isMatch(key, matchKey)
         ) {
-          clientCache.delete(key);
+          cache.delete(key);
         }
       }
     },
 
     readKey(params) {
-      return clientCache.partialReadKey(params);
+      return this.partialReadKey(params);
     },
 
     partialReadKey({ cacheNamespace, address, args, block, fn }) {
@@ -134,7 +134,7 @@ export function createClientCache<T extends SimpleCache>(
     },
   });
 
-  return clientCache;
+  return clientCache as ClientCache<T>;
 }
 
 function isClientCache<T extends SimpleCache>(

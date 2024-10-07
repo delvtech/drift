@@ -6,8 +6,36 @@ export type MaybePromise<T> = T | Promise<T>;
 export type AnyFunction = (...args: any) => any;
 
 /**
+ * A property key that can be auto-completed to a specific value. A useful
+ * alternative to `T | string` when you want to retain the auto-completion from
+ * `T` but also allow arbitrary keys.
+ *
+ * @example
+ * ```ts
+ * type Color = "red" | "green" | "blue";
+ *
+ * const color: AutoCompleteKey<Color> = "red";
+ * // "red"
+ *
+ * const color2: AutoCompleteKey<Color> = "yellow";
+ * // "yellow"
+ * ```
+ *
+ * @see https://x.com/mattpocockuk/status/1822917967316676787
+ */
+export type AutoCompleteKey<T extends PropertyKey> =
+  | T
+  | (string & {})
+  | (number & {})
+  | (symbol & {});
+
+type Color = "red" | "green" | "blue";
+
+const color1: AutoCompleteKey<Color> = "green";
+
+/**
  * Combines members of an intersection into a readable type.
- * @see https://twitter.com/mattpocockuk/status/1622730173446557697?s=20&t=NdpAcmEFXY01xkqU3KO0Mg
+ * @see https://x.com/mattpocockuk/status/1622730173446557697?s=20&t=NdpAcmEFXY01xkqU3KO0Mg
  */
 export type Pretty<T> = { [K in keyof T]: T[K] } & {};
 
@@ -33,7 +61,7 @@ export type RequiredKeys<T, K extends keyof T> = ReplaceProps<
 export type OptionalKeys<T, K extends keyof T> = ReplaceProps<
   T,
   {
-    [U in K]?: T[U];
+    [OptionalKey in K]?: T[OptionalKey];
   }
 >;
 
@@ -79,9 +107,7 @@ export type FunctionKey<T> = Exclude<
  * argument type that satisfies all members of the function type union.
  */
 export type UnionToIntersection<T> = (
-  T extends any
-    ? (member: T) => any
-    : never
+  T extends any ? (member: T) => any : never
 ) extends (member: infer R) => any
   ? R
   : never;
@@ -132,18 +158,25 @@ export type MergeKeys<T> = UnionToIntersection<T> extends infer I
   : never;
 
 /**
- * Convert all properties in `T` whose values are of type `U` to type `V`.
+ * Convert all properties in `T` whose values are of type `U` to type `V`. If
+ * `T` is `U`, convert `T` itself to `V`.
  *
  * @example
  * ```ts
  * type Converted = Converted<{ a: string, b: number }, string, number>;
  * // { a: number, b: number }
+ *
+ * type ConvertedSimple = Converted<100n, bigint, number>;
+ * // number
+ *
+ * type NotConverted = Converted<"foo", bigint, number>;
+ * // "foo"
  * ```
  */
 export type Converted<T, U, V> = T extends U
   ? V
   : T extends Array<infer Inner>
-    ? Converted<Inner, U, V>[]
-    : T extends object
-      ? { [K in keyof T]: Converted<T[K], U, V> }
-      : T;
+  ? Converted<Inner, U, V>[]
+  : T extends object
+  ? { [K in keyof T]: Converted<T[K], U, V> }
+  : T;
