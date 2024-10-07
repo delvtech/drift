@@ -40,8 +40,7 @@ describe("MockDrift", () => {
       ).toBe("0xHash");
     });
 
-    // biome-ignore lint/suspicious/noFocusedTests: <explanation>
-    it.only("Creates contracts that share mock values", async () => {
+    it("Creates contracts that share mock values", async () => {
       const mockDrift = new MockDrift();
       const contract = mockDrift.contract({
         abi: IERC20.abi,
