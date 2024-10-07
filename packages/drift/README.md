@@ -194,7 +194,6 @@ export class ReadVault {
     return this.contract.getEvents("Deposit", {
       filter: {
         depositor: account,
-        recipient: account,
       },
     });
   }
