@@ -1,6 +1,6 @@
 {
   "name": "@delvtech/drift",
-  "version": "0.0.1-beta.0",
+  "version": "0.0.1-beta.1",
   "license": "AGPL-3.0",
   "type": "module",
   "exports": {
