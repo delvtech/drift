@@ -156,6 +156,7 @@ export class MockAdapter implements ReadWriteAdapter {
   onEncodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
+    // FIXME: The `fn` prop is getting typed as a generic `string`.
   >(params: Partial<AdapterEncodeFunctionDataParams<TAbi, TFunctionName>>) {
     return this.mocks
       .get<[AdapterEncodeFunctionDataParams], Bytes>({

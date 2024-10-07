@@ -71,6 +71,28 @@ describe("MockContract", () => {
         await contract.getEvents("Transfer", { filter: { from: "0x2" } }),
       ).toBe(events2);
     });
+
+    it("Inherits stubbed values from the adapter", async () => {
+      const contract = new MockContract({ abi });
+      const events: ContractEvent<Erc20Abi, "Transfer">[] = [
+        {
+          eventName: "Transfer",
+          args: {
+            from: "0x",
+            to: "0x",
+            value: 123n,
+          },
+        },
+      ];
+      contract.adapter
+        .onGetEvents({
+          abi: contract.abi,
+          address: contract.address,
+          event: "Transfer",
+        })
+        .resolves(events);
+      expect(await contract.getEvents("Transfer")).toBe(events);
+    });
   });
 
   describe("read", () => {
@@ -162,6 +184,21 @@ describe("MockContract", () => {
       expect(
         await contract.simulateWrite("transfer", { to: "0x2", value: 123n }),
       ).toBe(false);
+    });
+
+    it("Inherits stubbed values from the adapter", async () => {
+      const contract = new MockContract({ abi });
+      contract.adapter
+        .onSimulateWrite({
+          abi: contract.abi,
+          address: contract.address,
+          fn: "transfer",
+          args: { to: "0x", value: 123n },
+        })
+        .resolves(true);
+      expect(
+        await contract.simulateWrite("transfer", { to: "0x", value: 123n }),
+      ).toBe(true);
     });
   });
 
