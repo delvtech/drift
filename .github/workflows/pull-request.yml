@@ -22,10 +22,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'yarn'
+          cache: "yarn"
 
       - name: Install dependencies
         run: yarn --frozen-lockfile
 
       - name: Run ${{ matrix.task }}
         run: yarn ${{ matrix.task }}
+        env:
+          VITE_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
+          VITE_TOKEN_ADDRESS: "0x6B175474E89094C44Da98b954EedeAC495271d0F"
