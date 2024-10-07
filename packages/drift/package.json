@@ -44,14 +44,14 @@
   "devDependencies": {
     "@repo/typescript-config": "*",
     "@types/sinon": "^17.0.3",
-    "abitype": "^1.0.0",
+    "abitype": "^1.0.6",
     "fast-json-stable-stringify": "^2.1.0",
     "sinon": "^17.0.1",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.3.0",
-    "typescript": "^5.4.5",
-    "vite-tsconfig-paths": "^4.3.1",
-    "vitest": "^1.2.2"
+    "typescript": "^5.6.2",
+    "vite-tsconfig-paths": "^5.0.1",
+    "vitest": "^2.1.2"
   },
   "publishConfig": {
     "access": "public"
