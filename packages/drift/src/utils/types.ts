@@ -14,16 +14,16 @@ export type AnyFunction = (...args: any) => any;
  * ```ts
  * type Color = "red" | "green" | "blue";
  *
- * const color: AutoCompleteKey<Color> = "red";
+ * const color: AutocompleteKey<Color> = "red";
  * // "red"
  *
- * const color2: AutoCompleteKey<Color> = "yellow";
+ * const color2: AutocompleteKey<Color> = "yellow";
  * // "yellow"
  * ```
  *
  * @see https://x.com/mattpocockuk/status/1822917967316676787
  */
-export type AutoCompleteKey<T extends PropertyKey> =
+export type AutocompleteKey<T extends PropertyKey> =
   | T
   | (string & {})
   | (number & {})
@@ -31,7 +31,7 @@ export type AutoCompleteKey<T extends PropertyKey> =
 
 type Color = "red" | "green" | "blue";
 
-const color1: AutoCompleteKey<Color> = "green";
+const color1: AutocompleteKey<Color> = "green";
 
 /**
  * Combines members of an intersection into a readable type.
