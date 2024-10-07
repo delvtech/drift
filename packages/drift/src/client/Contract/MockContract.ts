@@ -1,11 +1,16 @@
 import type { Abi } from "abitype";
+import type { SinonStub } from "sinon";
 import { MockAdapter } from "src/adapter/MockAdapter";
 import type {
   ContractReadOptions,
   ContractWriteOptions,
 } from "src/adapter/types/Contract";
-import type { EventName } from "src/adapter/types/Event";
-import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
+import type { ContractEvent, EventName } from "src/adapter/types/Event";
+import type {
+  FunctionArgs,
+  FunctionName,
+  FunctionReturn,
+} from "src/adapter/types/Function";
 import type { ClientCache } from "src/cache/ClientCache/types";
 import {
   type ContractGetEventsArgs,
@@ -13,7 +18,13 @@ import {
   ReadWriteContract,
 } from "src/client/Contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
+import type {
+  AdapterGetEventsParams,
+  AdapterReadParams,
+  AdapterWriteParams,
+} from "src/exports";
 import type { Bytes } from "src/types";
+import { IERC20 } from "src/utils/testing/IERC20";
 import type { OptionalKeys } from "src/utils/types";
 
 export type MockContractParams<TAbi extends Abi = Abi> = Omit<
@@ -48,7 +59,10 @@ export class MockContract<
       address: this.address,
       event,
       ...options,
-    });
+    }) as SinonStub<
+      [AdapterGetEventsParams<TAbi, TEventName>],
+      Promise<ContractEvent<TAbi, TEventName>[]>
+    >;
 
   onRead = <TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     fn: TFunctionName,
@@ -61,7 +75,10 @@ export class MockContract<
       fn,
       args,
       ...options,
-    });
+    }) as SinonStub as SinonStub<
+      [AdapterReadParams<TAbi, TFunctionName>],
+      Promise<FunctionReturn<TAbi, TFunctionName>>
+    >;
 
   onSimulateWrite = <
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
@@ -76,7 +93,10 @@ export class MockContract<
       fn,
       args,
       ...options,
-    });
+    }) as SinonStub as SinonStub<
+      [AdapterWriteParams<TAbi, TFunctionName>, "abi" | "address"],
+      Promise<FunctionReturn<TAbi, TFunctionName>>
+    >;
 
   onEncodeFunctionData = <TFunctionName extends FunctionName<TAbi>>(
     fn?: TFunctionName,
@@ -111,3 +131,11 @@ export class MockContract<
       ...options,
     });
 }
+
+const foo = new MockContract({ abi: IERC20.abi });
+foo
+  .onWrite("transfer", {
+    to: "0x123",
+    value: 100n,
+  })
+  .resolves();
