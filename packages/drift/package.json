@@ -1,0 +1,60 @@
+{
+  "name": "@delvtech/drift",
+  "version": "0.0.0",
+  "license": "AGPL-3.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "default": "./dist/testing.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      ".": ["./dist/index.d.ts"],
+      "testing": ["./dist/testing.d.ts"]
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "test:watch": "vitest --reporter=verbose",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "watch": "tsup --watch"
+  },
+  "peerDependencies": {
+    "sinon": "^17.0.3"
+  },
+  "peerDependenciesMeta": {
+    "sinon": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@types/lodash.ismatch": "^4.4.9",
+    "fast-safe-stringify": "^2.1.1",
+    "lodash.ismatch": "^4.4.0",
+    "lru-cache": "^10.0.1"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "@types/sinon": "^17.0.3",
+    "abitype": "^1.0.6",
+    "fast-json-stable-stringify": "^2.1.0",
+    "sinon": "^17.0.1",
+    "tsconfig-paths": "^4.2.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.2",
+    "vite-tsconfig-paths": "^5.0.1",
+    "vitest": "^2.1.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": ["dist"]
+}
