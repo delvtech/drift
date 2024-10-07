@@ -61,17 +61,15 @@ npm install @delvtech/drift-viem
 ```typescript
 import { Drift } from "@delvtech/drift";
 import { viemAdapter } from "@delvtech/drift-viem";
-import { createPublicClient, http } from "viem";
+import { createPublicClient, createWalletClient, http } from "viem";
 
 const publicClient = createPublicClient({
   transport: http(),
-  // ...other options
 });
 
 // optionally, create a wallet client
 const walletClient = createWalletClient({
   transport: http(),
-  // ...other options
 });
 
 const drift = new Drift(viemAdapter({ publicClient, walletClient }));
@@ -206,7 +204,7 @@ export class ReadWriteVault extends ReadVault {
   declare contract: ReadWriteContract<VaultAbi>;
 
   constructor(address: string, drift: Drift<ReadWriteAdapter>) {
-    super(wallet, drift);
+    super(address, drift);
   }
 
   // Make a deposit
