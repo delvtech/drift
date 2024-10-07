@@ -19,17 +19,14 @@ import {
   type WaitForTransactionParams,
   type WriteParams,
 } from "src/client/Drift/Drift";
-import { MockStore } from "src/utils/testing/MockStore";
 import type { OptionalKeys } from "src/utils/types";
 
 export class MockDrift extends Drift<MockAdapter> {
-  mocks = new MockStore<Drift<MockAdapter>>();
-
   constructor() {
     super(new MockAdapter());
   }
 
-  reset = () => this.mocks.reset();
+  reset = () => this.adapter.reset();
 
   contract = <TAbi extends Abi, TCache extends ClientCache = ClientCache>(
     params: MockContractParams<TAbi>,
