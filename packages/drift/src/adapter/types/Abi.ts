@@ -16,6 +16,22 @@ import type {
 
 // https://docs.soliditylang.org/en/latest/abi-spec.html#json
 
+export type HexString = string;
+export type Address = HexString;
+export type Bytes = HexString;
+export type Hash = HexString;
+
+// Customize the primitive types used in `abitype`.
+declare module "abitype" {
+  export interface Register {
+    addressType: Address;
+    bytesType: {
+      inputs: Bytes;
+      outputs: Bytes;
+    };
+  }
+}
+
 export type NamedAbiParameter = AbiParameter extends infer TAbiParameter
   ? TAbiParameter extends { name: string }
     ? TAbiParameter
@@ -177,7 +193,7 @@ type NamedParametersToObject<
  *   { name: "spender", type: "address" },
  *   { name: "value", type: "uint256" }
  * ]>;
- * // -> { spender: `0x${string}`, value: bigint }
+ * // -> { spender: string, value: bigint }
  * ```
  */
 export type AbiParametersToObject<
@@ -195,7 +211,7 @@ export type AbiParametersToObject<
  * @example
  * ```ts
  * type ApproveInput = AbiArrayType<Erc20Abi, "function", "approve", "inputs">;
- * // -> [`0x${string}`, bigint]
+ * // -> [string, bigint]
  *
  * type BalanceOutput = AbiArrayType<Erc20Abi, "function", "balanceOf", "outputs">;
  * // -> [bigint]
@@ -223,7 +239,7 @@ export type AbiArrayType<
  * @example
  * ```ts
  * type ApproveArgs = AbiObjectType<Erc20Abi, "function", "approve", "inputs">;
- * // -> { spender: `0x${string}`, value: bigint }
+ * // -> { spender: string, value: bigint }
  *
  * type Balance = AbiObjectType<Erc20Abi, "function", "balanceOf", "outputs">;
  * // -> { balance: bigint }

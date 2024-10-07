@@ -1,4 +1,5 @@
 import type { Abi } from "abitype";
+import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   ContractGetEventsOptions,
   ContractReadOptions,
@@ -13,7 +14,6 @@ import type {
 } from "src/adapter/types/Function";
 import type { Network } from "src/adapter/types/Network";
 import type { TransactionReceipt } from "src/adapter/types/Transaction";
-import type { Address, Bytes, TransactionHash } from "src/types";
 import type { AnyObject, EmptyObject } from "src/utils/types";
 
 export type Adapter = ReadAdapter | ReadWriteAdapter;
@@ -56,7 +56,7 @@ export interface ReadWriteAdapter extends ReadAdapter {
   write<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: AdapterWriteParams<TAbi, TFunctionName>): Promise<TransactionHash>;
+  >(params: AdapterWriteParams<TAbi, TFunctionName>): Promise<Hash>;
 }
 
 export type AdapterArgsParam<

@@ -1,36 +1,38 @@
+import type { Address, Bytes, Hash, HexString } from "src/adapter/types/Abi";
+
 // https://github.com/ethereum/execution-apis/blob/e3d2745289bd2bb61dc8593069871be4be441952/src/schemas/transaction.yaml#L329
 export interface TransactionInfo {
-  blockHash?: `0x${string}`;
+  blockHash?: Hash;
   blockNumber?: bigint;
-  from?: `0x${string}`;
-  hash?: `0x${string}`;
+  from?: Address;
+  hash?: Hash;
   transactionIndex?: number;
 }
 
 /** Basic legacy compatible transaction */
 // https://github.com/ethereum/execution-apis/blob/e8727564bb74a1ebcd22a933b7b57eb7b71a11c3/src/schemas/transaction.yaml#L184
 export interface Transaction extends TransactionInfo {
-  type: `0x${string}`;
+  type: HexString;
   nonce: number;
   gas: bigint;
   value: bigint;
-  input: `0x${string}`;
+  input: Bytes;
   gasPrice: bigint;
   chainId?: number;
-  to?: `0x${string}` | null;
+  to?: Address | null;
 }
 
 export type MinedTransaction = Transaction & Required<TransactionInfo>;
 
 // https://github.com/ethereum/execution-apis/blob/e3d2745289bd2bb61dc8593069871be4be441952/src/schemas/receipt.yaml#L37
 export interface TransactionReceipt {
-  blockHash: `0x${string}`;
+  blockHash: Hash;
   blockNumber: bigint;
-  from: `0x${string}`;
+  from: Address;
   /**
    * Address of the receiver or `null` in a contract creation transaction.
    */
-  to: `0x${string}` | null;
+  to: Address | null;
   /**
    * The sum of gas used by this transaction and all preceding transactions in
    * the same block.
@@ -42,8 +44,8 @@ export interface TransactionReceipt {
   gasUsed: bigint;
   // TODO:
   // logs: Log[];
-  logsBloom: `0x${string}`;
-  transactionHash: `0x${string}`;
+  logsBloom: Bytes;
+  transactionHash: Hash;
   transactionIndex: number;
 
   status: "success" | "reverted";

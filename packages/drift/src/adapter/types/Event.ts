@@ -4,6 +4,8 @@ import type {
   AbiObjectType,
   AbiParameters,
   AbiParametersToObject,
+  Bytes,
+  Hash,
   NamedAbiParameter,
 } from "src/adapter/types/Abi";
 
@@ -58,7 +60,7 @@ export interface ContractEvent<
 > {
   eventName: TEventName;
   args: EventArgs<TAbi, TEventName>;
-  data?: `0x${string}`;
+  data?: Bytes;
   blockNumber?: bigint;
-  transactionHash?: `0x${string}`;
+  transactionHash?: Hash;
 }

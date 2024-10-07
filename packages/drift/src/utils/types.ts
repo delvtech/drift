@@ -107,7 +107,9 @@ export type FunctionKey<T> = Exclude<
  * argument type that satisfies all members of the function type union.
  */
 export type UnionToIntersection<T> = (
-  T extends any ? (member: T) => any : never
+  T extends any
+    ? (member: T) => any
+    : never
 ) extends (member: infer R) => any
   ? R
   : never;
@@ -176,7 +178,7 @@ export type MergeKeys<T> = UnionToIntersection<T> extends infer I
 export type Converted<T, U, V> = T extends U
   ? V
   : T extends Array<infer Inner>
-  ? Converted<Inner, U, V>[]
-  : T extends object
-  ? { [K in keyof T]: Converted<T[K], U, V> }
-  : T;
+    ? Converted<Inner, U, V>[]
+    : T extends object
+      ? { [K in keyof T]: Converted<T[K], U, V> }
+      : T;

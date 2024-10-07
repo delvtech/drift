@@ -1,4 +1,5 @@
 import type { Abi } from "abitype";
+import type { Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
   AdapterDecodeFunctionDataParams,
@@ -36,7 +37,6 @@ import {
   ReadContract,
   ReadWriteContract,
 } from "src/client/Contract/Contract";
-import type { Bytes, TransactionHash } from "src/types";
 
 export interface DriftOptions<TCache extends SimpleCache = SimpleCache>
   extends NameSpaceParam {
@@ -63,7 +63,7 @@ export class Drift<
         TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
       >(
         params: WriteParams<TAbi, TFunctionName>,
-      ) => Promise<TransactionHash>
+      ) => Promise<Hash>
     : undefined;
 
   // Implementation //

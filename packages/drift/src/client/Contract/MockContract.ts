@@ -1,6 +1,7 @@
 import type { Abi } from "abitype";
 import type { SinonStub } from "sinon";
 import { MockAdapter } from "src/adapter/MockAdapter";
+import type { Bytes } from "src/adapter/types/Abi";
 import type {
   ContractReadOptions,
   ContractWriteOptions,
@@ -23,7 +24,6 @@ import type {
   AdapterReadParams,
   AdapterWriteParams,
 } from "src/exports";
-import type { Bytes } from "src/types";
 import type { OptionalKeys } from "src/utils/types";
 
 export type MockContractParams<

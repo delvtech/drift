@@ -1,5 +1,6 @@
 import type { Abi } from "abitype";
 import isMatch from "lodash.ismatch";
+import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
   ReadAdapter,
@@ -25,7 +26,6 @@ import type {
   ReadKeyParams,
 } from "src/cache/ClientCache/types";
 import { type SimpleCache, createLruSimpleCache } from "src/exports";
-import type { Address, Bytes, TransactionHash } from "src/types";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { AnyObject, EmptyObject, MaybePromise } from "src/utils/types";
 
@@ -338,7 +338,7 @@ export class ReadWriteContract<
    */
   write = <TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">>(
     ...[fn, args, options]: ContractWriteArgs<TAbi, TFunctionName>
-  ): Promise<TransactionHash> => {
+  ): Promise<Hash> => {
     return this.adapter.write({
       // TODO: Cleanup type casting required due to an incompatibility between
       // distributive types and the conditional args param.

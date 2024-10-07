@@ -21,7 +21,6 @@ import { createSimulateContractParameters } from "src/utils/createSimulateContra
 import { outputToFriendly } from "src/utils/outputToFriendly";
 import {
   type Abi,
-  type Address,
   type GetBalanceParameters,
   type GetBlockParameters,
   type Hash,
@@ -67,7 +66,7 @@ export class ViemReadAdapter implements ReadAdapter {
     blockHash,
   }: NetworkGetBalanceParams) => {
     const parameters: Partial<GetBalanceParameters> = {
-      address: address as Address,
+      address,
     };
 
     if (blockNumber) {
@@ -77,7 +76,7 @@ export class ViemReadAdapter implements ReadAdapter {
     } else if (blockHash) {
       return this.getBlock({ blockHash }).then((block) => {
         return this.publicClient.getBalance({
-          address: address as Address,
+          address,
           blockNumber: block?.blockNumber ?? undefined,
         });
       });
@@ -143,7 +142,7 @@ export class ViemReadAdapter implements ReadAdapter {
   }: AdapterGetEventsParams<TAbi, TEventName>) => {
     return this.publicClient
       .getContractEvents({
-        address: address as Address,
+        address,
         abi: abi as Abi,
         eventName: event as string,
         fromBlock: fromBlock ?? "earliest",
@@ -194,7 +193,7 @@ export class ViemReadAdapter implements ReadAdapter {
     return this.publicClient
       .readContract({
         abi: abi as Abi,
-        address: address as Address,
+        address,
         functionName: fn,
         args: argsArray,
         blockNumber: typeof block === "bigint" ? block : undefined,

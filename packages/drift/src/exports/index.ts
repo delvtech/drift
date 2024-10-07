@@ -8,6 +8,10 @@ export type {
   AbiObjectType,
   AbiParameters,
   AbiParametersToObject,
+  Address,
+  Bytes,
+  Hash,
+  HexString,
   NamedAbiParameter,
 } from "src/adapter/types/Abi";
 export type {
@@ -22,10 +26,7 @@ export type {
   ReadAdapter,
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
-export type {
-  Block,
-  BlockTag,
-} from "src/adapter/types/Block";
+export type { Block, BlockTag } from "src/adapter/types/Block";
 export type {
   ContractGetEventsOptions,
   ContractReadOptions,
@@ -140,6 +141,5 @@ export { extendInstance } from "src/utils/extendInstance";
 
 // ...rest //
 
-export type { Address, Bytes, HexString, TransactionHash } from "src/types";
 export { ZERO_ADDRESS } from "src/constants";
 export { DriftError } from "src/error";

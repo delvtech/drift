@@ -8,7 +8,7 @@ import type {
 } from "@delvtech/drift";
 import { ViemReadAdapter } from "src/ReadAdapter";
 import { erc20 } from "src/utils/testing/erc20";
-import { http, type Address, createPublicClient } from "viem";
+import { http, createPublicClient } from "viem";
 import { describe, expect, it } from "vitest";
 
 const { VITE_RPC_URL = "", VITE_TOKEN_ADDRESS = "" } = process.env;
@@ -137,7 +137,7 @@ describe("ViemReadAdapter", () => {
         address: VITE_TOKEN_ADDRESS,
         fn: "balanceOf",
         args: {
-          account: VITE_TOKEN_ADDRESS as Address,
+          account: VITE_TOKEN_ADDRESS,
         },
       });
       expect(balance).toBeTypeOf("bigint");
@@ -152,7 +152,7 @@ describe("ViemReadAdapter", () => {
       fn: "transfer",
       args: {
         amount: 1n,
-        to: VITE_TOKEN_ADDRESS as Address,
+        to: VITE_TOKEN_ADDRESS,
       },
     });
     expect(balance).toBeTypeOf("boolean");
@@ -165,7 +165,7 @@ describe("ViemReadAdapter", () => {
       fn: "transfer",
       args: {
         amount: 123n,
-        to: VITE_TOKEN_ADDRESS as Address,
+        to: VITE_TOKEN_ADDRESS,
       },
     });
     expect(encoded).toBeTypeOf("string");
@@ -175,7 +175,7 @@ describe("ViemReadAdapter", () => {
     const adapter = new ViemReadAdapter({ publicClient });
     const args: FunctionArgs<typeof erc20.abi, "transfer"> = {
       amount: 123n,
-      to: VITE_TOKEN_ADDRESS as Address,
+      to: VITE_TOKEN_ADDRESS,
     };
     const decoded = adapter.decodeFunctionData({
       abi: erc20.abi,

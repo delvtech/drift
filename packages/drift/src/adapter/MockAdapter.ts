@@ -1,4 +1,5 @@
 import type { Abi } from "abitype";
+import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   AdapterDecodeFunctionDataParams,
   AdapterEncodeFunctionDataParams,
@@ -25,7 +26,6 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
-import type { Address, Bytes, TransactionHash } from "src/types";
 import { MockStore } from "src/utils/testing/MockStore";
 import type { OptionalKeys } from "src/utils/types";
 
@@ -338,13 +338,11 @@ export class MockAdapter implements ReadWriteAdapter {
     >,
   ) {
     return this.mocks
-      .get<[AdapterWriteParams<TAbi, TFunctionName>], Promise<TransactionHash>>(
-        {
-          method: "write",
-          key: params.fn,
-          create: (mock) => mock.resolves("0x0"),
-        },
-      )
+      .get<[AdapterWriteParams<TAbi, TFunctionName>], Promise<Hash>>({
+        method: "write",
+        key: params.fn,
+        create: (mock) => mock.resolves("0x0"),
+      })
       .withArgs(params as Partial<AdapterWriteParams<TAbi, TFunctionName>>);
   }
 
@@ -353,10 +351,7 @@ export class MockAdapter implements ReadWriteAdapter {
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(params: AdapterWriteParams<TAbi, TFunctionName>) {
     const writePromise = Promise.resolve(
-      this.mocks.get<
-        [AdapterWriteParams<TAbi, TFunctionName>],
-        Promise<TransactionHash>
-      >({
+      this.mocks.get<[AdapterWriteParams<TAbi, TFunctionName>], Promise<Hash>>({
         method: "write",
         key: params.fn,
         create: (mock) => mock.resolves("0x0"),

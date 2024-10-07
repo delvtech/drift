@@ -1,4 +1,5 @@
 import type { Abi } from "abitype";
+import type { Address, Hash } from "src/adapter/types/Abi";
 import type {
   AdapterGetEventsParams,
   AdapterReadParams,
@@ -9,7 +10,6 @@ import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
 import type { NetworkGetBlockParams } from "src/adapter/types/Network";
 import type { Transaction } from "src/adapter/types/Transaction";
 import type { SimpleCache } from "src/cache/SimpleCache/types";
-import type { Address, TransactionHash } from "src/types";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { MaybePromise, DeepPartial as Partial } from "src/utils/types";
 
@@ -88,9 +88,7 @@ export type ClientCache<T extends SimpleCache = SimpleCache> = T & {
   invalidateReadsMatching<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >(
-    params: Partial<ReadKeyParams<TAbi, TFunctionName>>,
-  ): MaybePromise<void>;
+  >(params: Partial<ReadKeyParams<TAbi, TFunctionName>>): MaybePromise<void>;
 
   readKey<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
     params: ReadKeyParams<TAbi, TFunctionName>,
@@ -118,7 +116,7 @@ export type BalanceKeyParams = BlockKeyParams & {
 };
 
 export interface TransactionKeyParams extends NameSpaceParam {
-  hash: TransactionHash;
+  hash: Hash;
 }
 
 export type ReadKeyParams<

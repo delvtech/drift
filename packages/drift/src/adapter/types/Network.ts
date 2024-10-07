@@ -1,9 +1,9 @@
+import type { Address, Hash, HexString } from "src/adapter/types/Abi";
 import type { Block, BlockTag } from "src/adapter/types/Block";
 import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
-import type { Address, HexString, TransactionHash } from "src/types";
 
 // https://ethereum.github.io/execution-apis/api-documentation/
 
@@ -66,7 +66,7 @@ export type NetworkGetBalanceParams = {
 export type NetworkGetBlockParams = NetworkGetBlockOptions;
 
 export interface NetworkGetTransactionParams {
-  hash: TransactionHash;
+  hash: Hash;
 }
 
 export interface NetworkWaitForTransactionParams
