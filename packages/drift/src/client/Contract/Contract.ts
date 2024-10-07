@@ -3,6 +3,7 @@ import isMatch from "lodash.ismatch";
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
+  OnMinedParam,
   ReadAdapter,
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
@@ -387,18 +388,18 @@ export type ContractWriteArgs<
   ? [
       functionName: TFunctionName,
       args?: AnyObject,
-      options?: ContractWriteOptions,
+      options?: ContractWriteOptions & OnMinedParam,
     ]
   : FunctionArgs<TAbi, TFunctionName> extends EmptyObject
     ? [
         functionName: TFunctionName,
         args?: EmptyObject,
-        options?: ContractWriteOptions,
+        options?: ContractWriteOptions & OnMinedParam,
       ]
     : [
         functionName: TFunctionName,
         args: FunctionArgs<TAbi, TFunctionName>,
-        options?: ContractWriteOptions,
+        options?: ContractWriteOptions & OnMinedParam,
       ];
 
 export type ContractEncodeFunctionDataArgs<
