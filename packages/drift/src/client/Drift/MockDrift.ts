@@ -30,7 +30,11 @@ export class MockDrift extends Drift<MockAdapter> {
 
   contract = <TAbi extends Abi, TCache extends ClientCache = ClientCache>(
     params: MockContractParams<TAbi>,
-  ): MockContract<TAbi, TCache> => new MockContract(params);
+  ): MockContract<TAbi, TCache> =>
+    new MockContract({
+      ...params,
+      adapter: this.adapter,
+    });
 
   onGetChainId = () => this.adapter.onGetChainId();
 

@@ -27,23 +27,28 @@ import type { Bytes } from "src/types";
 import { IERC20 } from "src/utils/testing/IERC20";
 import type { OptionalKeys } from "src/utils/types";
 
-export type MockContractParams<TAbi extends Abi = Abi> = Omit<
-  OptionalKeys<ContractParams<TAbi, MockAdapter>, "address">,
-  "adapter" | "cache"
+export type MockContractParams<
+  TAbi extends Abi = Abi,
+  TAdapter extends MockAdapter = MockAdapter,
+> = Omit<
+  OptionalKeys<ContractParams<TAbi, TAdapter>, "address" | "adapter">,
+  "cache"
 >;
 
 export class MockContract<
   TAbi extends Abi = Abi,
   TCache extends ClientCache = ClientCache,
-> extends ReadWriteContract<TAbi, MockAdapter, TCache> {
+  TAdapter extends MockAdapter = MockAdapter,
+> extends ReadWriteContract<TAbi, TAdapter, TCache> {
   constructor({
     abi,
+    adapter = new MockAdapter() as TAdapter,
     address = ZERO_ADDRESS,
     cacheNamespace,
-  }: MockContractParams<TAbi>) {
+  }: MockContractParams<TAbi, TAdapter>) {
     super({
       abi,
-      adapter: new MockAdapter(),
+      adapter,
       address,
       cacheNamespace,
     });
