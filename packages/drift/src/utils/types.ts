@@ -29,10 +29,6 @@ export type AutocompleteKey<T extends PropertyKey> =
   | (number & {})
   | (symbol & {});
 
-type Color = "red" | "green" | "blue";
-
-const color1: AutocompleteKey<Color> = "green";
-
 /**
  * Combines members of an intersection into a readable type.
  * @see https://x.com/mattpocockuk/status/1622730173446557697?s=20&t=NdpAcmEFXY01xkqU3KO0Mg
