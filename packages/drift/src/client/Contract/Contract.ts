@@ -3,7 +3,8 @@ import isMatch from "lodash.ismatch";
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
-  OnMinedParam, ReadWriteAdapter
+  OnMinedParam,
+  ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
 import type {
   ContractGetEventsOptions,
@@ -28,18 +29,25 @@ import type {
 import { createLruSimpleCache } from "src/cache/SimpleCache/createLruSimpleCache";
 import type { SimpleCache } from "src/cache/SimpleCache/types";
 import type { SerializableKey } from "src/utils/createSerializableKey";
-import type { AnyObject, EmptyObject, MaybePromise } from "src/utils/types";
+import type {
+  AnyObject,
+  EmptyObject,
+  MaybePromise,
+  Pretty,
+} from "src/utils/types";
 
-export interface ContractParams<
+export type ContractParams<
   TAbi extends Abi = Abi,
   TAdapter extends Adapter = Adapter,
   TCache extends SimpleCache = SimpleCache,
-> extends NameSpaceParam {
-  abi: TAbi;
-  adapter: TAdapter;
-  address: Address;
-  cache?: TCache;
-}
+> = Pretty<
+  {
+    abi: TAbi;
+    adapter: TAdapter;
+    address: Address;
+    cache?: TCache;
+  } & NameSpaceParam
+>;
 
 export class Contract<
   TAbi extends Abi = Abi,

@@ -109,11 +109,11 @@ export interface NameSpaceParam {
 
 export interface ChainIdKeyParams extends NameSpaceParam {}
 
-export type BlockKeyParams = NameSpaceParam & NetworkGetBlockParams;
+export type BlockKeyParams = NetworkGetBlockParams & NameSpaceParam;
 
-export type BalanceKeyParams = BlockKeyParams & {
+export type BalanceKeyParams = {
   address: Address;
-};
+} & BlockKeyParams;
 
 export interface TransactionKeyParams extends NameSpaceParam {
   hash: Hash;
@@ -122,9 +122,9 @@ export interface TransactionKeyParams extends NameSpaceParam {
 export type ReadKeyParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = NameSpaceParam & AdapterReadParams<TAbi, TFunctionName>;
+> = AdapterReadParams<TAbi, TFunctionName> & NameSpaceParam;
 
 export type EventsKeyParams<
   TAbi extends Abi = Abi,
   TEventName extends EventName<TAbi> = EventName<TAbi>,
-> = NameSpaceParam & AdapterGetEventsParams<TAbi, TEventName>;
+> = AdapterGetEventsParams<TAbi, TEventName> & NameSpaceParam;

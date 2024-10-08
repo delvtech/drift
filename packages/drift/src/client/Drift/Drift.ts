@@ -33,11 +33,13 @@ import type {
 } from "src/cache/ClientCache/types";
 import type { SimpleCache } from "src/cache/SimpleCache/types";
 import { Contract, type ContractParams } from "src/client/contract/Contract";
+import type { Pretty } from "src/utils/types";
 
-export interface DriftOptions<TCache extends SimpleCache = SimpleCache>
-  extends NameSpaceParam {
-  cache?: TCache;
-}
+export type DriftOptions<TCache extends SimpleCache = SimpleCache> = Pretty<
+  {
+    cache?: TCache;
+  } & NameSpaceParam
+>;
 
 export class Drift<
   TAdapter extends Adapter = Adapter,
@@ -265,17 +267,17 @@ export class Drift<
   };
 }
 
-export interface GetChainIdParams extends ChainIdKeyParams {}
+export type GetChainIdParams = Pretty<ChainIdKeyParams>;
 
-export type GetBlockParams = BlockKeyParams;
+export type GetBlockParams = Pretty<BlockKeyParams>;
 
-export type GetBalanceParams = BalanceKeyParams;
+export type GetBalanceParams = Pretty<BalanceKeyParams>;
 
-export interface GetTransactionParams extends TransactionKeyParams {}
+export type GetTransactionParams = Pretty<TransactionKeyParams>;
 
-export interface WaitForTransactionParams
-  extends TransactionKeyParams,
-    NetworkWaitForTransactionParams {}
+export type WaitForTransactionParams = Pretty<
+  TransactionKeyParams & NetworkWaitForTransactionParams
+>;
 
 export type ReadParams<
   TAbi extends Abi = Abi,
@@ -303,7 +305,7 @@ export type WriteParams<
 export type GetEventsParams<
   TAbi extends Abi = Abi,
   TEventName extends EventName<TAbi> = EventName<TAbi>,
-> = EventsKeyParams<TAbi, TEventName>;
+> = Pretty<EventsKeyParams<TAbi, TEventName>>;
 
 export type EncodeFunctionDataParams<
   TAbi extends Abi = Abi,
@@ -313,4 +315,4 @@ export type EncodeFunctionDataParams<
 export type DecodeFunctionDataParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = AdapterDecodeFunctionDataParams<TAbi, TFunctionName>;
+> = Pretty<AdapterDecodeFunctionDataParams<TAbi, TFunctionName>>;
