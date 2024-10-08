@@ -1,4 +1,4 @@
-import type { AnyObject, ReplaceProps } from "src/exports";
+import type { AnyObject, ReplaceProps } from "src/utils/types";
 
 /**
  * Extends an object instance with additional properties, returning a new object

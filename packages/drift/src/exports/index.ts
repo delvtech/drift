@@ -66,6 +66,7 @@ export {
   AbiEntryNotFoundError,
   getAbiEntry,
 } from "src/adapter/utils/getAbiEntry";
+export { isReadWriteAdapter } from "src/adapter/utils/isReadWriteAdapter";
 export { objectToArray } from "src/adapter/utils/objectToArray";
 
 // cache //
@@ -88,17 +89,13 @@ export { createLruSimpleCache } from "src/cache/SimpleCache/createLruSimpleCache
 // clients //
 
 export {
-  type Contract,
+  Contract,
   type ContractEncodeFunctionDataArgs,
   type ContractGetEventsArgs,
   type ContractParams,
   type ContractReadArgs,
   type ContractWriteArgs,
-  type ReadContractParams,
-  type ReadWriteContractParams,
-  ReadContract,
-  ReadWriteContract,
-} from "src/client/Contract/Contract";
+} from "src/client/contract/Contract";
 
 export {
   type DecodeFunctionDataParams,
@@ -114,7 +111,7 @@ export {
   type WaitForTransactionParams,
   type WriteParams,
   Drift,
-} from "src/client/Drift/Drift";
+} from "src/client/drift/Drift";
 
 // utils //
 

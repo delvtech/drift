@@ -3,9 +3,7 @@ import isMatch from "lodash.ismatch";
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
-  OnMinedParam,
-  ReadAdapter,
-  ReadWriteAdapter,
+  OnMinedParam, ReadWriteAdapter
 } from "src/adapter/types/Adapter";
 import type {
   ContractGetEventsOptions,
@@ -19,6 +17,7 @@ import type {
   FunctionName,
   FunctionReturn,
 } from "src/adapter/types/Function";
+import { isReadWriteAdapter } from "src/adapter/utils/isReadWriteAdapter";
 import { createClientCache } from "src/cache/ClientCache/createClientCache";
 import type {
   ClientCache,
@@ -26,7 +25,8 @@ import type {
   NameSpaceParam,
   ReadKeyParams,
 } from "src/cache/ClientCache/types";
-import { type SimpleCache, createLruSimpleCache } from "src/exports";
+import { createLruSimpleCache } from "src/cache/SimpleCache/createLruSimpleCache";
+import type { SimpleCache } from "src/cache/SimpleCache/types";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { AnyObject, EmptyObject, MaybePromise } from "src/utils/types";
 
@@ -41,27 +41,9 @@ export interface ContractParams<
   cache?: TCache;
 }
 
-export type Contract<
+export class Contract<
   TAbi extends Abi = Abi,
   TAdapter extends Adapter = Adapter,
-  TCache extends SimpleCache = SimpleCache,
-> = TAdapter extends ReadWriteAdapter
-  ? ReadWriteContract<TAbi, TAdapter, TCache>
-  : ReadContract<TAbi, TAdapter, TCache>;
-
-export interface ReadContractParams<
-  TAbi extends Abi = Abi,
-  TAdapter extends ReadAdapter = ReadAdapter,
-  TCache extends SimpleCache = SimpleCache,
-> extends ContractParams<TAbi, TAdapter, TCache> {}
-
-/**
- * Interface representing a readable contract with specified ABI. Provides type
- * safe methods to read and simulate write operations on the contract.
- */
-export class ReadContract<
-  TAbi extends Abi = Abi,
-  TAdapter extends ReadAdapter = ReadAdapter,
   TCache extends SimpleCache = SimpleCache,
 > {
   abi: TAbi;
@@ -70,19 +52,69 @@ export class ReadContract<
   cache: ClientCache<TCache>;
   cacheNamespace?: PropertyKey;
 
+  // Write-only property definitions //
+
+  /**
+   * Get the address of the signer for this contract.
+   */
+  getSignerAddress: TAdapter extends ReadWriteAdapter
+    ? () => Promise<Address>
+    : undefined;
+
+  /**
+   * Writes to a specified function on the contract.
+   * @returns The transaction hash of the submitted transaction.
+   */
+  write: TAdapter extends ReadWriteAdapter
+    ? <TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">>(
+        ...[fn, args, options]: ContractWriteArgs<TAbi, TFunctionName>
+      ) => Promise<Hash>
+    : undefined;
+
+  // Implementation //
+
   constructor({
     abi,
     adapter,
     address,
     cache = createLruSimpleCache({ max: 500 }) as TCache,
     cacheNamespace,
-  }: ReadContractParams<TAbi, TAdapter, TCache>) {
+  }: ContractParams<TAbi, TAdapter, TCache>) {
     this.abi = abi;
     this.adapter = adapter;
     this.address = address;
     this.cache = createClientCache(cache);
     this.cacheNamespace = cacheNamespace;
+
+    // Write-only property assignment //
+
+    const isReadWrite = this.isReadWrite();
+
+    this.getSignerAddress = isReadWrite
+      ? () => this.adapter.getSignerAddress()
+      : (undefined as any);
+
+    this.write = isReadWrite
+      ? async (...[fn, args, options]) => {
+          return this.adapter.write({
+            // TODO: Cleanup type casting required due to an incompatibility between
+            // distributive types and the conditional args param.
+            abi: this.abi as Abi,
+            address: this.address,
+            fn,
+            args,
+            ...options,
+          });
+        }
+      : (undefined as any);
   }
+
+  // The following functions are defined as arrow function properties rather
+  // than typical class methods to ensure they maintain the correct `this`
+  // context when passed as callbacks.
+
+  isReadWrite = (): this is Contract<TAbi, ReadWriteAdapter, TCache> =>
+    isReadWriteAdapter(this.adapter);
 
   // Events //
 
@@ -110,10 +142,7 @@ export class ReadContract<
   };
 
   preloadEvents = <TEventName extends EventName<TAbi>>(
-    params: Omit<
-      EventsKeyParams<TAbi, TEventName>,
-      keyof ReadContractParams
-    > & {
+    params: Omit<EventsKeyParams<TAbi, TEventName>, keyof ContractParams> & {
       value: readonly ContractEvent<TAbi, TEventName>[];
     },
   ): MaybePromise<void> => {
@@ -168,10 +197,7 @@ export class ReadContract<
   };
 
   preloadRead = <TFunctionName extends FunctionName<TAbi>>(
-    params: Omit<
-      ReadKeyParams<TAbi, TFunctionName>,
-      keyof ReadContractParams
-    > & {
+    params: Omit<ReadKeyParams<TAbi, TFunctionName>, keyof ContractParams> & {
       value: FunctionReturn<TAbi, TFunctionName>;
     },
   ): MaybePromise<void> => {
@@ -307,47 +333,6 @@ export class ReadContract<
     return this.adapter.decodeFunctionData({
       abi: this.abi,
       data,
-    });
-  };
-}
-
-export type ReadWriteContractParams<
-  TAbi extends Abi = Abi,
-  TAdapter extends ReadWriteAdapter = ReadWriteAdapter,
-  TCache extends ClientCache = ClientCache,
-> = ReadContractParams<TAbi, TAdapter, TCache>;
-
-/**
- * Interface representing a writable contract with specified ABI. Extends
- * IReadContract to also include write operations.
- */
-export class ReadWriteContract<
-  TAbi extends Abi = Abi,
-  TAdapter extends ReadWriteAdapter = ReadWriteAdapter,
-  TCache extends SimpleCache = SimpleCache,
-> extends ReadContract<TAbi, TAdapter, TCache> {
-  /**
-   * Get the address of the signer for this contract.
-   */
-  getSignerAddress = (): Promise<Address> => {
-    return this.adapter.getSignerAddress();
-  };
-
-  /**
-   * Writes to a specified function on the contract.
-   * @returns The transaction hash of the submitted transaction.
-   */
-  write = <TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">>(
-    ...[fn, args, options]: ContractWriteArgs<TAbi, TFunctionName>
-  ): Promise<Hash> => {
-    return this.adapter.write({
-      // TODO: Cleanup type casting required due to an incompatibility between
-      // distributive types and the conditional args param.
-      abi: this.abi as Abi,
-      address: this.address,
-      fn,
-      args,
-      ...options,
     });
   };
 }

@@ -19,6 +19,7 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
+import { isReadWriteAdapter } from "src/adapter/utils/isReadWriteAdapter";
 import { createClientCache } from "src/cache/ClientCache/createClientCache";
 import type {
   BalanceKeyParams,
@@ -31,12 +32,7 @@ import type {
   TransactionKeyParams,
 } from "src/cache/ClientCache/types";
 import type { SimpleCache } from "src/cache/SimpleCache/types";
-import {
-  type Contract,
-  type ContractParams,
-  ReadContract,
-  ReadWriteContract,
-} from "src/client/Contract/Contract";
+import { Contract, type ContractParams } from "src/client/contract/Contract";
 
 export interface DriftOptions<TCache extends SimpleCache = SimpleCache>
   extends NameSpaceParam {
@@ -107,34 +103,19 @@ export class Drift<
   isReadWrite = (): this is Drift<ReadWriteAdapter, TCache> =>
     isReadWriteAdapter(this.adapter);
 
-  contract = <TAbi extends Abi, TCache extends ClientCache = ClientCache>({
+  contract = <TAbi extends Abi, TContractCache extends SimpleCache = TCache>({
     abi,
     address,
-    cache = this.cache,
+    cache = this.cache.store as SimpleCache as TContractCache,
     cacheNamespace = this.cacheNamespace,
-  }: Omit<ContractParams<TAbi>, "adapter">): Contract<
-    TAbi,
-    TAdapter,
-    TCache
-  > => {
-    return (
-      this.isReadWrite()
-        ? new ReadWriteContract({
-            abi,
-            adapter: this.adapter,
-            address,
-            cache,
-            cacheNamespace,
-          })
-        : new ReadContract({
-            abi,
-            adapter: this.adapter,
-            address,
-            cache,
-            cacheNamespace,
-          })
-    ) as Contract<TAbi, TAdapter, TCache>;
-  };
+  }: Omit<ContractParams<TAbi, TAdapter, TContractCache>, "adapter">) =>
+    new Contract({
+      abi,
+      adapter: this.adapter,
+      address,
+      cache,
+      cacheNamespace,
+    });
 
   /**
    * Get the chain ID of the network.
@@ -333,7 +314,3 @@ export type DecodeFunctionDataParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 > = AdapterDecodeFunctionDataParams<TAbi, TFunctionName>;
-
-function isReadWriteAdapter(adapter: Adapter): adapter is ReadWriteAdapter {
-  return "write" in adapter;
-}

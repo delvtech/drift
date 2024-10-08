@@ -2,14 +2,15 @@ import type { Abi } from "abitype";
 import { MockAdapter } from "src/adapter/MockAdapter";
 import type { EventName } from "src/adapter/types/Event";
 import type { FunctionName } from "src/adapter/types/Function";
-import type { ClientCache } from "src/cache/ClientCache/types";
+import type { SimpleCache } from "src/cache/SimpleCache/types";
 import {
   MockContract,
   type MockContractParams,
-} from "src/client/Contract/MockContract";
+} from "src/client/contract/MockContract";
 import {
   type DecodeFunctionDataParams,
   Drift,
+  type DriftOptions,
   type EncodeFunctionDataParams,
   type GetBalanceParams,
   type GetBlockParams,
@@ -18,23 +19,29 @@ import {
   type ReadParams,
   type WaitForTransactionParams,
   type WriteParams,
-} from "src/client/Drift/Drift";
+} from "src/client/drift/Drift";
 import type { OptionalKeys } from "src/utils/types";
 
-export class MockDrift extends Drift<MockAdapter> {
-  constructor() {
-    super(new MockAdapter());
+export interface MockDriftParams extends DriftOptions {}
+
+export class MockDrift<
+  TAdapter extends MockAdapter = MockAdapter,
+  TCache extends SimpleCache = SimpleCache,
+> extends Drift<TAdapter, TCache> {
+  constructor(adapter: TAdapter = new MockAdapter() as TAdapter) {
+    super(adapter);
   }
 
   reset = () => this.adapter.reset();
 
-  contract = <TAbi extends Abi, TCache extends ClientCache = ClientCache>(
-    params: MockContractParams<TAbi>,
-  ): MockContract<TAbi, TCache> =>
-    new MockContract({
-      ...params,
+  contract = <TAbi extends Abi, TContractCache extends SimpleCache = TCache>(
+    params: Omit<MockContractParams<TAbi, TAdapter, TContractCache>, "adapter">,
+  ) => {
+    return new MockContract({
       adapter: this.adapter,
+      ...params,
     });
+  };
 
   onGetChainId = () => this.adapter.onGetChainId();
 
@@ -53,16 +60,9 @@ export class MockDrift extends Drift<MockAdapter> {
   onEncodeFunctionData = <
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >({
-    abi,
-    fn,
-    args,
-  }: OptionalKeys<EncodeFunctionDataParams<TAbi, TFunctionName>, "args">) =>
-    this.adapter.onEncodeFunctionData({
-      abi,
-      fn,
-      args,
-    });
+  >(
+    params: OptionalKeys<EncodeFunctionDataParams<TAbi, TFunctionName>, "args">,
+  ) => this.adapter.onEncodeFunctionData(params);
 
   onDecodeFunctionData = <
     TAbi extends Abi,
