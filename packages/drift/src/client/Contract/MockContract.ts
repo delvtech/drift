@@ -25,7 +25,7 @@ export type MockContractParams<
   TAbi extends Abi = Abi,
   TAdapter extends MockAdapter = MockAdapter,
   TCache extends SimpleCache = SimpleCache,
-> = OptionalKeys<ContractParams<TAbi, TAdapter, TCache>, "address" | "adapter">;
+> = Partial<ContractParams<TAbi, TAdapter, TCache>>;
 
 export class MockContract<
   TAbi extends Abi = Abi,
@@ -33,12 +33,12 @@ export class MockContract<
   TCache extends SimpleCache = SimpleCache,
 > extends Contract<TAbi, TAdapter, TCache> {
   constructor({
-    abi,
+    abi = [] as unknown as TAbi,
     adapter = new MockAdapter() as TAdapter,
     address = ZERO_ADDRESS,
     cache,
     cacheNamespace,
-  }: MockContractParams<TAbi, TAdapter, TCache>) {
+  }: MockContractParams<TAbi, TAdapter, TCache> = {}) {
     super({
       abi,
       adapter,
