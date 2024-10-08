@@ -343,10 +343,10 @@ test("getUserAssetValue should return the total asset value for a user", async (
   });
 
   // Stub the vault's return values
-  mockContract.onRead("balanceOf", { account: "0xUserAddress" }).returns(
+  mockContract.onRead("balanceOf", { account: "0xUserAddress" }).resolves(
     BigInt(100e18), // User has 100 vault shares
   );
-  mockContract.onRead("convertToAssets", { shares: BigInt(100e18) }).returns(
+  mockContract.onRead("convertToAssets", { shares: BigInt(100e18) }).resolves(
     BigInt(150e18), // 100 vault shares are worth 150 in assets
   );
 
