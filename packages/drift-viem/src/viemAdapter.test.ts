@@ -1,5 +1,5 @@
-import { ViemReadAdapter } from "src/ReadAdapter";
-import { ViemReadWriteAdapter } from "src/ReadWriteAdapter";
+import { ViemReadAdapter } from "src/ViemReadAdapter";
+import { ViemReadWriteAdapter } from "src/ViemReadWriteAdapter";
 import { viemAdapter } from "src/viemAdapter";
 import { http, createPublicClient, createWalletClient } from "viem";
 import { describe, expect, it } from "vitest";

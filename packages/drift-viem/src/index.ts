@@ -1,6 +1,6 @@
-export { type ViemReadAdapterParams, ViemReadAdapter } from "./ReadAdapter";
+export { type ViemReadAdapterParams, ViemReadAdapter } from "./ViemReadAdapter";
 export {
   type ViemReadWriteAdapterParams,
   ViemReadWriteAdapter,
-} from "./ReadWriteAdapter";
+} from "./ViemReadWriteAdapter";
 export { viemAdapter } from "./viemAdapter";

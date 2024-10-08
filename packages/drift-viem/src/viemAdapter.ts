@@ -1,5 +1,5 @@
-import { ViemReadAdapter } from "src/ReadAdapter";
-import { ViemReadWriteAdapter } from "src/ReadWriteAdapter";
+import { ViemReadAdapter } from "src/ViemReadAdapter";
+import { ViemReadWriteAdapter } from "src/ViemReadWriteAdapter";
 import type { PublicClient, WalletClient } from "viem";
 
 export interface ViemAdapterParams<

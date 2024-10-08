@@ -6,7 +6,7 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "@delvtech/drift";
-import { ViemReadAdapter } from "src/ReadAdapter";
+import { ViemReadAdapter } from "src/ViemReadAdapter";
 import { http, createPublicClient, erc20Abi } from "viem";
 import { describe, expect, it } from "vitest";
 

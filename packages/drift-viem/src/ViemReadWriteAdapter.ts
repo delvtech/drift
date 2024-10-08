@@ -4,7 +4,7 @@ import type {
   FunctionReturn,
   ReadWriteAdapter,
 } from "@delvtech/drift";
-import { ViemReadAdapter, type ViemReadAdapterParams } from "src/ReadAdapter";
+import { ViemReadAdapter, type ViemReadAdapterParams } from "src/ViemReadAdapter";
 import { createSimulateContractParameters } from "src/utils/createSimulateContractParameters";
 import { outputToFriendly } from "src/utils/outputToFriendly";
 import type { Abi, WalletClient, WriteContractParameters } from "viem";
