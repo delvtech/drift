@@ -1,5 +1,13 @@
 # @delvtech/drift-viem
 
+## 0.0.1-beta.5
+
+### Patch Changes
+
+- a9f4e67: Added `ReadContract` and `ReadWriteContract` types + misc. type patches and polish.
+- Updated dependencies [a9f4e67]
+  - @delvtech/drift@0.0.1-beta.5
+
 ## 0.0.1-beta.4
 
 ### Patch Changes

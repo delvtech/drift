@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.1-beta.5
+
+### Patch Changes
+
+- a9f4e67: Added `ReadContract` and `ReadWriteContract` types + misc. type patches and polish.
+
 ## 0.0.1-beta.4
 
 ### Patch Changes
