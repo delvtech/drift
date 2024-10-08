@@ -9,7 +9,7 @@ import { extendInstance } from "src/utils/extendInstance";
  * Extends a {@linkcode SimpleCache} with additional API methods for use with
  * Drift clients.
  */
-// TODO: Consider using a similar pattern as the `MockStore` for the cache or
+// TODO: Consider using a similar pattern as the `StubStore` for the cache or
 // implement a generalized plugins/hooks layer that can be used by the cache,
 // store, and other plugins.
 export function createClientCache<T extends SimpleCache>(
