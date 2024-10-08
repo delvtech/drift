@@ -101,7 +101,7 @@ export function createClientCache<T extends SimpleCache>(
     invalidateReadsMatching(params) {
       const matchKey = this.partialReadKey(params);
 
-      for (const [key] of cache.entries) {
+      for (const [key] of cache.entries()) {
         if (key === matchKey) {
           cache.delete(key);
           continue;

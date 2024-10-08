@@ -249,7 +249,7 @@ export class Contract<
       ...options,
     });
 
-    for (const [key] of this.cache.entries) {
+    for (const [key] of this.cache.entries()) {
       if (key === matchKey) {
         this.cache.delete(key);
         continue;
