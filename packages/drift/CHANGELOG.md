@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.1-beta.3
+
+### Patch Changes
+
+- 0a288a2: Unified `ReadContract` and `ReadWriteContract` into a single `Contract` client similar to the `Drift` client.
+
 ## 0.0.1-beta.2
 
 ### Patch Changes
