@@ -58,7 +58,7 @@ export class Contract<
   adapter: TAdapter;
   address: Address;
   cache: ClientCache<TCache>;
-  cacheNamespace?: PropertyKey;
+  cacheNamespace?: NameSpaceParam["cacheNamespace"];
 
   // Write-only property definitions //
 
