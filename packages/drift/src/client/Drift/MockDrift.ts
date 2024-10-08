@@ -39,6 +39,8 @@ export class MockDrift<
   ) => {
     return new MockContract({
       adapter: this.adapter,
+      cache: this.cache as SimpleCache as TContractCache,
+      cacheNamespace: this.cacheNamespace,
       ...params,
     });
   };

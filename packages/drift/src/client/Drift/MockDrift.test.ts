@@ -69,6 +69,23 @@ describe("MockDrift", () => {
         }),
       ).toBe("Vault Token");
     });
+
+    it("Creates contracts that share cache values", async () => {
+      const mockDrift = new MockDrift();
+      const contract = mockDrift.contract({
+        abi: erc20.abi,
+        address: "0xVaultAddress",
+      });
+
+      mockDrift.cache.preloadRead({
+        abi: erc20.abi,
+        address: "0xVaultAddress",
+        fn: "symbol",
+        value: "VAULT",
+      });
+
+      expect(await contract.read("symbol")).toBe("VAULT");
+    });
   });
 
   describe("getChainId", () => {
