@@ -1,9 +1,9 @@
 export type EmptyObject = Record<PropertyKey, never>;
 export type AnyObject = Record<PropertyKey, any>;
 
-export type MaybePromise<T> = T | Promise<T>;
-
 export type AnyFunction = (...args: any) => any;
+
+export type MaybePromise<T> = T | Promise<T>;
 
 /**
  * A property key that can be auto-completed to a specific value. A useful
