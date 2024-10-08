@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.1-beta.6
+
+### Patch Changes
+
+- 7d5196f: Fixed MockDrift to pass it's cache to the contracts it creates via `.contract`
+
 ## 0.0.1-beta.5
 
 ### Patch Changes
