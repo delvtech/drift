@@ -10,8 +10,9 @@
     "@repo/typescript-config": "0.0.0"
   },
   "changesets": [
-    "flat-rocks-worry",
+    "flat-peas-drum",
+    "shaggy-clouds-cheat",
     "nasty-pillows-wave",
-    "shaggy-clouds-cheat"
+    "flat-rocks-worry"
   ]
 }

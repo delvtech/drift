@@ -1,5 +1,13 @@
 # @delvtech/drift-viem
 
+## 0.0.1-beta.4
+
+### Patch Changes
+
+- 7bd87cf: Add `Register` type inspired by abitype, change default types back to `0x${string}`
+- Updated dependencies [7bd87cf]
+  - @delvtech/drift@0.0.1-beta.4
+
 ## 0.0.1-beta.3
 
 ### Patch Changes

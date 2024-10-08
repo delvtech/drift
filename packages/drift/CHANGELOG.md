@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.1-beta.4
+
+### Patch Changes
+
+- 7bd87cf: Add `Register` type inspired by abitype, change default types back to `0x${string}`
+
 ## 0.0.1-beta.3
 
 ### Patch Changes
