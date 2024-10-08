@@ -96,6 +96,8 @@ export {
   type ContractParams,
   type ContractReadArgs,
   type ContractWriteArgs,
+  type ReadContract,
+  type ReadWriteContract,
 } from "src/client/contract/Contract";
 
 export {

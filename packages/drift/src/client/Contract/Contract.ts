@@ -4,6 +4,7 @@ import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
   OnMinedParam,
+  ReadAdapter,
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
 import type {
@@ -344,6 +345,18 @@ export class Contract<
     });
   };
 }
+
+export type ReadContract<
+  TAbi extends Abi = Abi,
+  TAdapter extends ReadAdapter = ReadAdapter,
+  TCache extends SimpleCache = SimpleCache,
+> = Contract<TAbi, TAdapter, TCache>;
+
+export type ReadWriteContract<
+  TAbi extends Abi = Abi,
+  TAdapter extends ReadWriteAdapter = ReadWriteAdapter,
+  TCache extends SimpleCache = SimpleCache,
+> = Contract<TAbi, TAdapter, TCache>;
 
 export type ContractGetEventsArgs<
   TAbi extends Abi = Abi,
