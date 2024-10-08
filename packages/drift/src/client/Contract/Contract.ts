@@ -1,5 +1,4 @@
 import type { Abi } from "abitype";
-import isMatch from "lodash.ismatch";
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
@@ -240,7 +239,7 @@ export class Contract<
     args?: FunctionArgs<TAbi, TFunctionName>,
     options?: ContractReadOptions,
   ): MaybePromise<void> => {
-    const matchKey = this.cache.partialReadKey({
+    return this.cache.invalidateReadsMatching({
       cacheNamespace: this.cacheNamespace,
       abi: this.abi,
       address: this.address,
@@ -248,20 +247,6 @@ export class Contract<
       args,
       ...options,
     });
-
-    for (const [key] of this.cache.entries()) {
-      if (key === matchKey) {
-        this.cache.delete(key);
-        continue;
-      }
-      if (
-        typeof key === "object" &&
-        typeof matchKey === "object" &&
-        isMatch(key, matchKey)
-      ) {
-        this.cache.delete(key);
-      }
-    }
   };
 
   readKey = <TFunctionName extends FunctionName<TAbi>>(
