@@ -1,17 +1,17 @@
 import { objectToArray } from "src/adapter/utils/objectToArray";
-import { IERC20 } from "src/utils/testing/IERC20";
+import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
 
 describe("objectToArray", () => {
   it("correctly converts objects into arrays", async () => {
     const transferArgsArray = objectToArray({
-      abi: IERC20.abi,
+      abi: erc20.abi,
       type: "function",
       name: "transfer",
       kind: "inputs",
       value: {
         to: "0x123",
-        value: 123n,
+        amount: 123n,
       },
     });
     expect(transferArgsArray).toEqual(["0x123", 123n]);
@@ -31,7 +31,7 @@ describe("objectToArray", () => {
   });
 
   const emptyArray = objectToArray({
-    abi: IERC20.abi,
+    abi: erc20.abi,
     type: "function",
     name: "symbol",
     kind: "inputs",
@@ -40,7 +40,7 @@ describe("objectToArray", () => {
   expect(emptyArray).toEqual([]);
 
   const emptyArrayFromUndefined = objectToArray({
-    abi: IERC20.abi,
+    abi: erc20.abi,
     type: "function",
     name: "symbol",
     kind: "inputs",

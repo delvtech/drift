@@ -13,8 +13,10 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
-import { IERC20 } from "src/utils/testing/IERC20";
+import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
+
+type Erc20Abi = typeof erc20.abi;
 
 describe("MockAdapter", () => {
   describe("getChainId", () => {
@@ -194,47 +196,41 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       expect(
         adapter.encodeFunctionData({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           fn: "balanceOf",
-          args: { owner: "0x" },
+          args: { account: "0x" },
         }),
       ).toBeTypeOf("string");
     });
 
     it("Can be stubbed", async () => {
       const adapter = new MockAdapter();
-      adapter
+      const foo = adapter
         .onEncodeFunctionData({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           fn: "balanceOf",
-          args: { owner: "0x" },
+          args: { account: "0x" },
         })
         .returns("0x123");
       expect(
         adapter.encodeFunctionData({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           fn: "balanceOf",
-          args: { owner: "0x" },
+          args: { account: "0x" },
         }),
       ).toBe("0x123");
     });
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const params1: AdapterEncodeFunctionDataParams<
-        typeof IERC20.abi,
-        "balanceOf"
-      > = {
-        abi: IERC20.abi,
+      const params1: AdapterEncodeFunctionDataParams<Erc20Abi, "balanceOf"> = {
+        abi: erc20.abi,
         fn: "balanceOf",
-        args: { owner: "0x1" },
+        args: { account: "0x1" },
       };
-      const params2: AdapterEncodeFunctionDataParams<
-        typeof IERC20.abi,
-        "balanceOf"
-      > = {
+      const params2: AdapterEncodeFunctionDataParams<Erc20Abi, "balanceOf"> = {
         ...params1,
-        args: { owner: "0x2" },
+        args: { account: "0x2" },
       };
       adapter.onEncodeFunctionData(params1).returns("0x1");
       adapter.onEncodeFunctionData(params2).returns("0x2");
@@ -249,7 +245,7 @@ describe("MockAdapter", () => {
       let error: unknown;
       try {
         adapter.decodeFunctionData({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           fn: "balanceOf",
           data: "0x",
         });
@@ -261,20 +257,20 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed", async () => {
       const adapter = new MockAdapter();
-      const decoded: DecodedFunctionData<typeof IERC20.abi, "balanceOf"> = {
+      const decoded: DecodedFunctionData<Erc20Abi, "balanceOf"> = {
         functionName: "balanceOf",
-        args: { owner: "0x1" },
+        args: { account: "0x1" },
       };
       adapter
         .onDecodeFunctionData({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           fn: "balanceOf",
           data: "0x",
         })
         .returns(decoded);
       expect(
         adapter.decodeFunctionData({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           fn: "balanceOf",
           data: "0x",
         }),
@@ -283,28 +279,22 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const params1: AdapterDecodeFunctionDataParams<
-        typeof IERC20.abi,
-        "balanceOf"
-      > = {
-        abi: IERC20.abi,
+      const params1: AdapterDecodeFunctionDataParams<Erc20Abi, "balanceOf"> = {
+        abi: erc20.abi,
         fn: "balanceOf",
         data: "0x1",
       };
-      const return1: DecodedFunctionData<typeof IERC20.abi, "balanceOf"> = {
+      const return1: DecodedFunctionData<Erc20Abi, "balanceOf"> = {
         functionName: "balanceOf",
-        args: { owner: "0x1" },
+        args: { account: "0x1" },
       };
-      const params2: AdapterDecodeFunctionDataParams<
-        typeof IERC20.abi,
-        "balanceOf"
-      > = {
+      const params2: AdapterDecodeFunctionDataParams<Erc20Abi, "balanceOf"> = {
         ...params1,
         data: "0x2",
       };
-      const return2: DecodedFunctionData<typeof IERC20.abi, "balanceOf"> = {
+      const return2: DecodedFunctionData<Erc20Abi, "balanceOf"> = {
         functionName: "balanceOf",
-        args: { owner: "0x2" },
+        args: { account: "0x2" },
       };
       adapter.onDecodeFunctionData(params1).returns(return1);
       adapter.onDecodeFunctionData(params2).returns(return2);
@@ -319,7 +309,7 @@ describe("MockAdapter", () => {
       let error: unknown;
       try {
         await adapter.getEvents({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           event: "Transfer",
         });
@@ -331,7 +321,7 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed", async () => {
       const adapter = new MockAdapter();
-      const events: ContractEvent<typeof IERC20.abi, "Transfer">[] = [
+      const events: ContractEvent<Erc20Abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -343,14 +333,14 @@ describe("MockAdapter", () => {
       ];
       adapter
         .onGetEvents({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           event: "Transfer",
         })
         .resolves(events);
       expect(
         await adapter.getEvents({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           event: "Transfer",
         }),
@@ -359,17 +349,17 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const params1: AdapterGetEventsParams<typeof IERC20.abi, "Transfer"> = {
-        abi: IERC20.abi,
+      const params1: AdapterGetEventsParams<Erc20Abi, "Transfer"> = {
+        abi: erc20.abi,
         address: "0x1",
         event: "Transfer",
         filter: { from: "0x1" },
       };
-      const params2: AdapterGetEventsParams<typeof IERC20.abi, "Transfer"> = {
+      const params2: AdapterGetEventsParams<Erc20Abi, "Transfer"> = {
         ...params1,
         filter: { from: "0x2" },
       };
-      const events1: ContractEvent<typeof IERC20.abi, "Transfer">[] = [
+      const events1: ContractEvent<Erc20Abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -379,7 +369,7 @@ describe("MockAdapter", () => {
           },
         },
       ];
-      const events2: ContractEvent<typeof IERC20.abi, "Transfer">[] = [
+      const events2: ContractEvent<Erc20Abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -402,7 +392,7 @@ describe("MockAdapter", () => {
       let error: unknown;
       try {
         await adapter.read({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "symbol",
         });
@@ -416,14 +406,14 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       adapter
         .onRead({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "symbol",
         })
         .resolves("ABC");
       expect(
         await adapter.read({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "symbol",
         }),
@@ -432,13 +422,13 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const params1: AdapterReadParams<typeof IERC20.abi, "allowance"> = {
-        abi: IERC20.abi,
+      const params1: AdapterReadParams<Erc20Abi, "allowance"> = {
+        abi: erc20.abi,
         address: "0x1",
         fn: "allowance",
         args: { owner: "0x1", spender: "0x1" },
       };
-      const params2: AdapterReadParams<typeof IERC20.abi, "allowance"> = {
+      const params2: AdapterReadParams<Erc20Abi, "allowance"> = {
         ...params1,
         args: { owner: "0x2", spender: "0x2" },
       };
@@ -452,17 +442,17 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       adapter
         .onRead({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "balanceOf",
         })
         .resolves(123n);
       expect(
         await adapter.read({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "balanceOf",
-          args: { owner: "0x" },
+          args: { account: "0x" },
         }),
       ).toBe(123n);
     });
@@ -474,10 +464,10 @@ describe("MockAdapter", () => {
       let error: unknown;
       try {
         await adapter.simulateWrite({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "transfer",
-          args: { to: "0x", value: 123n },
+          args: { to: "0x", amount: 123n },
         });
       } catch (e) {
         error = e;
@@ -489,33 +479,33 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       adapter
         .onSimulateWrite({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "transfer",
-          args: { to: "0x", value: 123n },
+          args: { to: "0x", amount: 123n },
         })
         .resolves(true);
       expect(
         await adapter.simulateWrite({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "transfer",
-          args: { to: "0x", value: 123n },
+          args: { to: "0x", amount: 123n },
         }),
       ).toBe(true);
     });
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const params1: AdapterWriteParams<typeof IERC20.abi, "transfer"> = {
-        abi: IERC20.abi,
+      const params1: AdapterWriteParams<Erc20Abi, "transfer"> = {
+        abi: erc20.abi,
         address: "0x1",
         fn: "transfer",
-        args: { to: "0x1", value: 123n },
+        args: { to: "0x1", amount: 123n },
       };
-      const params2: AdapterWriteParams<typeof IERC20.abi, "transfer"> = {
+      const params2: AdapterWriteParams<Erc20Abi, "transfer"> = {
         ...params1,
-        args: { to: "0x2", value: 123n },
+        args: { to: "0x2", amount: 123n },
       };
       adapter.onSimulateWrite(params1).resolves(true);
       adapter.onSimulateWrite(params2).resolves(false);
@@ -529,10 +519,10 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       expect(
         await adapter.write({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "transfer",
-          args: { to: "0x", value: 123n },
+          args: { to: "0x", amount: 123n },
         }),
       ).toBeTypeOf("string");
     });
@@ -541,33 +531,33 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       adapter
         .onWrite({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "transfer",
-          args: { to: "0x", value: 123n },
+          args: { to: "0x", amount: 123n },
         })
         .resolves("0x123");
       expect(
         await adapter.write({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "transfer",
-          args: { to: "0x", value: 123n },
+          args: { to: "0x", amount: 123n },
         }),
       ).toBe("0x123");
     });
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const params1: AdapterWriteParams<typeof IERC20.abi, "transfer"> = {
-        abi: IERC20.abi,
+      const params1: AdapterWriteParams<Erc20Abi, "transfer"> = {
+        abi: erc20.abi,
         address: "0x",
         fn: "transfer",
-        args: { to: "0x1", value: 123n },
+        args: { to: "0x1", amount: 123n },
       };
-      const params2: AdapterWriteParams<typeof IERC20.abi, "transfer"> = {
+      const params2: AdapterWriteParams<Erc20Abi, "transfer"> = {
         ...params1,
-        args: { to: "0x2", value: 123n },
+        args: { to: "0x2", amount: 123n },
       };
       adapter.onWrite(params1).resolves("0x1");
       adapter.onWrite(params2).resolves("0x2");

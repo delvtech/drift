@@ -1,11 +1,11 @@
 import { arrayToFriendly } from "src/adapter/utils/arrayToFriendly";
-import { IERC20 } from "src/utils/testing/IERC20";
+import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
 
 describe("arrayToFriendly", () => {
   it("correctly converts arrays with multiple items into objects", async () => {
     const transferArgsObject = arrayToFriendly({
-      abi: IERC20.abi,
+      abi: erc20.abi,
       type: "function",
       name: "transfer",
       kind: "inputs",
@@ -13,7 +13,7 @@ describe("arrayToFriendly", () => {
     });
     expect(transferArgsObject).toEqual({
       to: "0x123",
-      value: 123n,
+      amount: 123n,
     });
 
     // empty parameter names (index keys)
@@ -32,7 +32,7 @@ describe("arrayToFriendly", () => {
 
   it("returns the item from arrays with a single item", async () => {
     const balanceInput = arrayToFriendly({
-      abi: IERC20.abi,
+      abi: erc20.abi,
       type: "function",
       name: "balanceOf",
       kind: "inputs",
@@ -43,7 +43,7 @@ describe("arrayToFriendly", () => {
 
   it("Converts an empty arrays into undefined", async () => {
     const notDefined = arrayToFriendly({
-      abi: IERC20.abi,
+      abi: erc20.abi,
       type: "function",
       name: "symbol",
       kind: "inputs",

@@ -11,31 +11,33 @@ import type {
   GetEventsParams,
   ReadParams,
   WriteParams,
-} from "src/client/Drift/Drift";
-import { MockDrift } from "src/client/Drift/MockDrift";
-import { IERC20 } from "src/utils/testing/IERC20";
+} from "src/client/drift/Drift";
+import { MockDrift } from "src/client/drift/MockDrift";
+import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
+
+type Erc20Abi = typeof erc20.abi;
 
 describe("MockDrift", () => {
   describe("contract", () => {
     it("Creates mock read-write contracts", async () => {
       const mockDrift = new MockDrift();
       const mockContract = mockDrift.contract({
-        abi: IERC20.abi,
+        abi: erc20.abi,
         address: "0xVaultAddress",
       });
 
       mockContract
         .onWrite("approve", {
           spender: "0x1",
-          value: 100n,
+          amount: 100n,
         })
         .resolves("0xHash");
 
       expect(
         await mockContract.write("approve", {
           spender: "0x1",
-          value: 100n,
+          amount: 100n,
         }),
       ).toBe("0xHash");
     });
@@ -43,13 +45,13 @@ describe("MockDrift", () => {
     it("Creates contracts that share mock values", async () => {
       const mockDrift = new MockDrift();
       const contract = mockDrift.contract({
-        abi: IERC20.abi,
+        abi: erc20.abi,
         address: "0xVaultAddress",
       });
 
       mockDrift
         .onRead({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0xVaultAddress",
           fn: "symbol",
         })
@@ -61,7 +63,7 @@ describe("MockDrift", () => {
 
       expect(
         await mockDrift.read({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0xVaultAddress",
           fn: "name",
         }),
@@ -244,9 +246,9 @@ describe("MockDrift", () => {
       const drift = new MockDrift();
       expect(
         drift.encodeFunctionData({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           fn: "balanceOf",
-          args: { owner: "0x" },
+          args: { account: "0x" },
         }),
       ).toBeTypeOf("string");
     });
@@ -255,33 +257,31 @@ describe("MockDrift", () => {
       const drift = new MockDrift();
       drift
         .onEncodeFunctionData({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           fn: "balanceOf",
-          args: { owner: "0x" },
+          args: { account: "0x" },
         })
         .returns("0x123");
       expect(
         drift.encodeFunctionData({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           fn: "balanceOf",
-          args: { owner: "0x" },
+          args: { account: "0x" },
         }),
       ).toBe("0x123");
     });
 
     it("Can be stubbed with specific args", async () => {
       const drift = new MockDrift();
-      const params1: EncodeFunctionDataParams<typeof IERC20.abi, "balanceOf"> =
-        {
-          abi: IERC20.abi,
-          fn: "balanceOf",
-          args: { owner: "0x1" },
-        };
-      const params2: EncodeFunctionDataParams<typeof IERC20.abi, "balanceOf"> =
-        {
-          ...params1,
-          args: { owner: "0x2" },
-        };
+      const params1: EncodeFunctionDataParams<Erc20Abi, "balanceOf"> = {
+        abi: erc20.abi,
+        fn: "balanceOf",
+        args: { account: "0x1" },
+      };
+      const params2: EncodeFunctionDataParams<Erc20Abi, "balanceOf"> = {
+        ...params1,
+        args: { account: "0x2" },
+      };
       drift.onEncodeFunctionData(params1).returns("0x1");
       drift.onEncodeFunctionData(params2).returns("0x2");
       expect(drift.encodeFunctionData(params1)).toBe("0x1");
@@ -295,7 +295,7 @@ describe("MockDrift", () => {
       let error: unknown;
       try {
         drift.decodeFunctionData({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           fn: "balanceOf",
           data: "0x",
         });
@@ -307,20 +307,20 @@ describe("MockDrift", () => {
 
     it("Can be stubbed", async () => {
       const drift = new MockDrift();
-      const decoded: DecodedFunctionData<typeof IERC20.abi, "balanceOf"> = {
+      const decoded: DecodedFunctionData<Erc20Abi, "balanceOf"> = {
         functionName: "balanceOf",
-        args: { owner: "0x1" },
+        args: { account: "0x1" },
       };
       drift
         .onDecodeFunctionData({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           fn: "balanceOf",
           data: "0x",
         })
         .returns(decoded);
       expect(
         drift.decodeFunctionData({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           fn: "balanceOf",
           data: "0x",
         }),
@@ -329,24 +329,22 @@ describe("MockDrift", () => {
 
     it("Can be stubbed with specific args", async () => {
       const drift = new MockDrift();
-      const params1: DecodeFunctionDataParams<typeof IERC20.abi, "balanceOf"> =
-        {
-          abi: IERC20.abi,
-          fn: "balanceOf",
-          data: "0x1",
-        };
-      const return1: DecodedFunctionData<typeof IERC20.abi, "balanceOf"> = {
-        functionName: "balanceOf",
-        args: { owner: "0x1" },
+      const params1: DecodeFunctionDataParams<Erc20Abi, "balanceOf"> = {
+        abi: erc20.abi,
+        fn: "balanceOf",
+        data: "0x1",
       };
-      const params2: DecodeFunctionDataParams<typeof IERC20.abi, "balanceOf"> =
-        {
-          ...params1,
-          data: "0x2",
-        };
-      const return2: DecodedFunctionData<typeof IERC20.abi, "balanceOf"> = {
+      const return1: DecodedFunctionData<Erc20Abi, "balanceOf"> = {
         functionName: "balanceOf",
-        args: { owner: "0x2" },
+        args: { account: "0x1" },
+      };
+      const params2: DecodeFunctionDataParams<Erc20Abi, "balanceOf"> = {
+        ...params1,
+        data: "0x2",
+      };
+      const return2: DecodedFunctionData<Erc20Abi, "balanceOf"> = {
+        functionName: "balanceOf",
+        args: { account: "0x2" },
       };
       drift.onDecodeFunctionData(params1).returns(return1);
       drift.onDecodeFunctionData(params2).returns(return2);
@@ -361,7 +359,7 @@ describe("MockDrift", () => {
       let error: unknown;
       try {
         await drift.getEvents({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           event: "Transfer",
         });
@@ -373,7 +371,7 @@ describe("MockDrift", () => {
 
     it("Can be stubbed", async () => {
       const drift = new MockDrift();
-      const events: ContractEvent<typeof IERC20.abi, "Transfer">[] = [
+      const events: ContractEvent<Erc20Abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -385,14 +383,14 @@ describe("MockDrift", () => {
       ];
       drift
         .onGetEvents({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           event: "Transfer",
         })
         .resolves(events);
       expect(
         await drift.getEvents({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           event: "Transfer",
         }),
@@ -401,17 +399,17 @@ describe("MockDrift", () => {
 
     it("Can be stubbed with specific args", async () => {
       const drift = new MockDrift();
-      const params1: GetEventsParams<typeof IERC20.abi, "Transfer"> = {
-        abi: IERC20.abi,
+      const params1: GetEventsParams<Erc20Abi, "Transfer"> = {
+        abi: erc20.abi,
         address: "0x1",
         event: "Transfer",
         filter: { from: "0x1" },
       };
-      const params2: GetEventsParams<typeof IERC20.abi, "Transfer"> = {
+      const params2: GetEventsParams<Erc20Abi, "Transfer"> = {
         ...params1,
         filter: { from: "0x2" },
       };
-      const events1: ContractEvent<typeof IERC20.abi, "Transfer">[] = [
+      const events1: ContractEvent<Erc20Abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -421,7 +419,7 @@ describe("MockDrift", () => {
           },
         },
       ];
-      const events2: ContractEvent<typeof IERC20.abi, "Transfer">[] = [
+      const events2: ContractEvent<Erc20Abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -444,7 +442,7 @@ describe("MockDrift", () => {
       let error: unknown;
       try {
         await drift.read({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "symbol",
         });
@@ -458,14 +456,14 @@ describe("MockDrift", () => {
       const drift = new MockDrift();
       drift
         .onRead({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "symbol",
         })
         .resolves("ABC");
       expect(
         await drift.read({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "symbol",
         }),
@@ -474,13 +472,13 @@ describe("MockDrift", () => {
 
     it("Can be stubbed with specific args", async () => {
       const drift = new MockDrift();
-      const params1: ReadParams<typeof IERC20.abi, "allowance"> = {
-        abi: IERC20.abi,
+      const params1: ReadParams<Erc20Abi, "allowance"> = {
+        abi: erc20.abi,
         address: "0x1",
         fn: "allowance",
         args: { owner: "0x1", spender: "0x1" },
       };
-      const params2: ReadParams<typeof IERC20.abi, "allowance"> = {
+      const params2: ReadParams<Erc20Abi, "allowance"> = {
         ...params1,
         args: { owner: "0x2", spender: "0x2" },
       };
@@ -494,17 +492,17 @@ describe("MockDrift", () => {
       const drift = new MockDrift();
       drift
         .onRead({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "balanceOf",
         })
         .resolves(123n);
       expect(
         await drift.read({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "balanceOf",
-          args: { owner: "0x" },
+          args: { account: "0x" },
         }),
       ).toBe(123n);
     });
@@ -516,10 +514,10 @@ describe("MockDrift", () => {
       let error: unknown;
       try {
         await drift.simulateWrite({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "transfer",
-          args: { to: "0x", value: 123n },
+          args: { to: "0x", amount: 123n },
         });
       } catch (e) {
         error = e;
@@ -531,33 +529,33 @@ describe("MockDrift", () => {
       const drift = new MockDrift();
       drift
         .onSimulateWrite({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "transfer",
-          args: { to: "0x", value: 123n },
+          args: { to: "0x", amount: 123n },
         })
         .resolves(true);
       expect(
         await drift.simulateWrite({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "transfer",
-          args: { to: "0x", value: 123n },
+          args: { to: "0x", amount: 123n },
         }),
       ).toBe(true);
     });
 
     it("Can be stubbed with specific args", async () => {
       const drift = new MockDrift();
-      const params1: WriteParams<typeof IERC20.abi, "transfer"> = {
-        abi: IERC20.abi,
+      const params1: WriteParams<Erc20Abi, "transfer"> = {
+        abi: erc20.abi,
         address: "0x1",
         fn: "transfer",
-        args: { to: "0x1", value: 123n },
+        args: { to: "0x1", amount: 123n },
       };
-      const params2: WriteParams<typeof IERC20.abi, "transfer"> = {
+      const params2: WriteParams<Erc20Abi, "transfer"> = {
         ...params1,
-        args: { to: "0x2", value: 123n },
+        args: { to: "0x2", amount: 123n },
       };
       drift.onSimulateWrite(params1).resolves(true);
       drift.onSimulateWrite(params2).resolves(false);
@@ -571,10 +569,10 @@ describe("MockDrift", () => {
       const drift = new MockDrift();
       expect(
         await drift.write({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "transfer",
-          args: { to: "0x", value: 123n },
+          args: { to: "0x", amount: 123n },
         }),
       ).toBeTypeOf("string");
     });
@@ -583,33 +581,33 @@ describe("MockDrift", () => {
       const drift = new MockDrift();
       drift
         .onWrite({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "transfer",
-          args: { to: "0x", value: 123n },
+          args: { to: "0x", amount: 123n },
         })
         .resolves("0x123");
       expect(
         await drift.write({
-          abi: IERC20.abi,
+          abi: erc20.abi,
           address: "0x",
           fn: "transfer",
-          args: { to: "0x", value: 123n },
+          args: { to: "0x", amount: 123n },
         }),
       ).toBe("0x123");
     });
 
     it("Can be stubbed with specific args", async () => {
       const drift = new MockDrift();
-      const params1: WriteParams<typeof IERC20.abi, "transfer"> = {
-        abi: IERC20.abi,
+      const params1: WriteParams<Erc20Abi, "transfer"> = {
+        abi: erc20.abi,
         address: "0x",
         fn: "transfer",
-        args: { to: "0x1", value: 123n },
+        args: { to: "0x1", amount: 123n },
       };
-      const params2: WriteParams<typeof IERC20.abi, "transfer"> = {
+      const params2: WriteParams<Erc20Abi, "transfer"> = {
         ...params1,
-        args: { to: "0x2", value: 123n },
+        args: { to: "0x2", amount: 123n },
       };
       drift.onWrite(params1).resolves("0x1");
       drift.onWrite(params2).resolves("0x2");

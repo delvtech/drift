@@ -7,8 +7,7 @@ import type {
   TransactionReceipt,
 } from "@delvtech/drift";
 import { ViemReadAdapter } from "src/ReadAdapter";
-import { erc20 } from "src/utils/testing/erc20";
-import { http, createPublicClient } from "viem";
+import { http, createPublicClient, erc20Abi } from "viem";
 import { describe, expect, it } from "vitest";
 
 const { VITE_RPC_URL = "", VITE_TOKEN_ADDRESS = "" } = process.env;
@@ -103,7 +102,7 @@ describe("ViemReadAdapter", () => {
     const adapter = new ViemReadAdapter({ publicClient });
     const currentBlock = await publicClient.getBlockNumber();
     const events = await adapter.getEvents({
-      abi: erc20.abi,
+      abi: erc20Abi,
       address: VITE_TOKEN_ADDRESS,
       event: "Transfer",
       fromBlock: currentBlock - 100n,
@@ -115,7 +114,7 @@ describe("ViemReadAdapter", () => {
         blockNumber: expect.any(BigInt),
         data: expect.any(String),
         transactionHash: expect.any(String),
-      } as ContractEvent<typeof erc20.abi, "Transfer">),
+      } as ContractEvent<typeof erc20Abi, "Transfer">),
     );
   });
 
@@ -123,7 +122,7 @@ describe("ViemReadAdapter", () => {
     it("reads from contracts", async () => {
       const adapter = new ViemReadAdapter({ publicClient });
       const symbol = await adapter.read({
-        abi: erc20.abi,
+        abi: erc20Abi,
         address: VITE_TOKEN_ADDRESS,
         fn: "symbol",
       });
@@ -133,7 +132,7 @@ describe("ViemReadAdapter", () => {
     it("reads from contracts with args", async () => {
       const adapter = new ViemReadAdapter({ publicClient });
       const balance = await adapter.read({
-        abi: erc20.abi,
+        abi: erc20Abi,
         address: VITE_TOKEN_ADDRESS,
         fn: "balanceOf",
         args: {
@@ -147,12 +146,12 @@ describe("ViemReadAdapter", () => {
   it("simulates writes to a contracts", async () => {
     const adapter = new ViemReadAdapter({ publicClient });
     const balance = await adapter.simulateWrite({
-      abi: erc20.abi,
+      abi: erc20Abi,
       address: VITE_TOKEN_ADDRESS,
       fn: "transfer",
       args: {
         amount: 1n,
-        to: VITE_TOKEN_ADDRESS,
+        recipient: VITE_TOKEN_ADDRESS,
       },
     });
     expect(balance).toBeTypeOf("boolean");
@@ -161,11 +160,11 @@ describe("ViemReadAdapter", () => {
   it("encodes function data", async () => {
     const adapter = new ViemReadAdapter({ publicClient });
     const encoded = adapter.encodeFunctionData({
-      abi: erc20.abi,
+      abi: erc20Abi,
       fn: "transfer",
       args: {
         amount: 123n,
-        to: VITE_TOKEN_ADDRESS,
+        recipient: VITE_TOKEN_ADDRESS,
       },
     });
     expect(encoded).toBeTypeOf("string");
@@ -173,15 +172,15 @@ describe("ViemReadAdapter", () => {
 
   it("decodes function data", async () => {
     const adapter = new ViemReadAdapter({ publicClient });
-    const args: FunctionArgs<typeof erc20.abi, "transfer"> = {
+    const args: FunctionArgs<typeof erc20Abi, "transfer"> = {
       amount: 123n,
-      to: VITE_TOKEN_ADDRESS,
+      recipient: VITE_TOKEN_ADDRESS,
     };
     const decoded = adapter.decodeFunctionData({
-      abi: erc20.abi,
+      abi: erc20Abi,
       fn: "transfer",
       data: adapter.encodeFunctionData({
-        abi: erc20.abi,
+        abi: erc20Abi,
         fn: "transfer",
         args,
       }),
@@ -189,6 +188,6 @@ describe("ViemReadAdapter", () => {
     expect(decoded).toEqual({
       args,
       functionName: "transfer",
-    } as DecodedFunctionData<typeof erc20.abi, "transfer">);
+    } as DecodedFunctionData<typeof erc20Abi, "transfer">);
   });
 });

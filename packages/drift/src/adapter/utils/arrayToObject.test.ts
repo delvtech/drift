@@ -1,11 +1,11 @@
 import { arrayToObject } from "src/adapter/utils/arrayToObject";
-import { IERC20 } from "src/utils/testing/IERC20";
+import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
 
 describe("arrayToObject", () => {
   it("correctly converts arrays into objects", async () => {
     const transferArgsObject = arrayToObject({
-      abi: IERC20.abi,
+      abi: erc20.abi,
       type: "function",
       name: "transfer",
       kind: "inputs",
@@ -13,7 +13,7 @@ describe("arrayToObject", () => {
     });
     expect(transferArgsObject).toEqual({
       to: "0x123",
-      value: 123n,
+      amount: 123n,
     });
 
     // empty parameter names (index keys)
@@ -30,13 +30,13 @@ describe("arrayToObject", () => {
     });
 
     const balanceInput = arrayToObject({
-      abi: IERC20.abi,
+      abi: erc20.abi,
       type: "function",
       name: "balanceOf",
       kind: "inputs",
       values: ["0x123"],
     });
-    expect(balanceInput).toEqual({ owner: "0x123" });
+    expect(balanceInput).toEqual({ account: "0x123" });
   });
 });
 

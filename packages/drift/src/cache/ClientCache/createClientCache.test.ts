@@ -1,12 +1,12 @@
 import { createClientCache } from "src/cache/ClientCache/createClientCache";
-import { IERC20 } from "src/utils/testing/IERC20";
+import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
 
 describe("createClientCache", () => {
   it("Invalidates reads by their read key", () => {
     const cache = createClientCache();
     const params = {
-      abi: IERC20.abi,
+      abi: erc20.abi,
       address: "0xContract",
       fn: "allowance",
       args: {
@@ -27,7 +27,7 @@ describe("createClientCache", () => {
   it("Invalidates reads matching a partial read key", () => {
     const cache = createClientCache();
     const params = {
-      abi: IERC20.abi,
+      abi: erc20.abi,
       address: "0xContract",
       fn: "allowance",
       args: {
@@ -48,7 +48,7 @@ describe("createClientCache", () => {
   it("Preloads reads by their key", async () => {
     const cache = createClientCache();
     const params = {
-      abi: IERC20.abi,
+      abi: erc20.abi,
       address: "0xContract",
       fn: "allowance",
       args: {
@@ -66,7 +66,7 @@ describe("createClientCache", () => {
   it("Preloads events by their key", async () => {
     const cache = createClientCache();
     const params = {
-      abi: IERC20.abi,
+      abi: erc20.abi,
       address: "0xContract",
       event: "Approval",
     } as const;
