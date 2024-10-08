@@ -16,12 +16,39 @@ import type {
 
 // https://docs.soliditylang.org/en/latest/abi-spec.html#json
 
-export type HexString = string;
-export type Address = HexString;
-export type Bytes = HexString;
-export type Hash = HexString;
+/**
+ * An interface of common types that might be typed differently in different
+ * implementations. Defining these types in an interface makes it possible to
+ * override them via [`declaration
+ * merging`](https://www.typescriptlang.org/docs/handbook/declaration-merging.html).
+ *
+ * @example
+ * ```ts
+ * declare module "@delvtech/drift" {
+ *   export interface Register {
+ *     addressType: string;
+ *     bytesType: string;
+ *     hashType: string;
+ *     hexStringType: string;
+ *   }
+ * }
+ * ```
+ *
+ * @see https://abitype.dev/config#overview
+ */
+export interface Register {
+  addressType: `0x${string}`;
+  bytesType: `0x${string}`;
+  hashType: `0x${string}`;
+  hexStringType: `0x${string}`;
+}
 
-// Customize the primitive types used in `abitype`.
+export type HexString = Register["hexStringType"];
+export type Address = Register["addressType"];
+export type Bytes = Register["bytesType"];
+export type Hash = Register["hashType"];
+
+// Override the types in `abitype`.
 declare module "abitype" {
   export interface Register {
     addressType: Address;
