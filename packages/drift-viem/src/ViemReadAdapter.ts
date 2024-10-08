@@ -23,8 +23,6 @@ import {
   type Abi,
   type GetBalanceParameters,
   type GetBlockParameters,
-  type Hash,
-  type Hex,
   type PublicClient,
   decodeFunctionData,
   encodeFunctionData,
@@ -87,9 +85,7 @@ export class ViemReadAdapter implements ReadAdapter {
 
   getTransaction = ({ hash }: NetworkGetTransactionParams) => {
     return this.publicClient
-      .getTransaction({
-        hash: hash as Hash,
-      })
+      .getTransaction({ hash })
       .then(
         ({
           gas,
@@ -126,10 +122,7 @@ export class ViemReadAdapter implements ReadAdapter {
   };
 
   waitForTransaction = ({ hash, timeout }: NetworkWaitForTransactionParams) => {
-    return this.publicClient.waitForTransactionReceipt({
-      hash: hash as Hash,
-      timeout,
-    });
+    return this.publicClient.waitForTransactionReceipt({ hash, timeout });
   };
 
   getEvents = <TAbi extends Abi, TEventName extends EventName<TAbi>>({
@@ -256,11 +249,7 @@ export class ViemReadAdapter implements ReadAdapter {
     data,
     fn,
   }: AdapterDecodeFunctionDataParams<TAbi, TFunctionName>) => {
-    const { args, functionName } = decodeFunctionData({
-      abi: abi,
-      data: data as Hex,
-    });
-
+    const { args, functionName } = decodeFunctionData({ abi, data });
     const arrayArgs = Array.isArray(args) ? args : [args];
 
     return {
