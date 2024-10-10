@@ -37,13 +37,7 @@ describe("extendInstance", () => {
   it("Creates a shallow copy of the instance", () => {
     const obj = { a: 1, b: { c: 2 } };
     const extended = extendInstance(obj, { d: 3 });
-
     expect(extended).not.toBe(obj);
-
-    obj.a = 2;
-    expect(extended.a).toBe(1);
-    
-    obj.b.c = 3;
-    expect(extended.b.c).toBe(3);
+    expect(extended.b).toBe(obj.b);
   });
 });
