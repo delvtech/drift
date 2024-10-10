@@ -51,15 +51,3 @@ export function createSimulateContractParameters<
     ...gasPriceOptions,
   } as SimulateContractParameters;
 }
-
-// type SimulateContractParameters = {
-//   accessList?: ContractWriteOptions["accessList"];
-//   account?: `0x${string}`;
-//   gas?: bigint;
-//   nonce?: number;
-//   value?: bigint;
-// } & (
-//   | { gasPrice?: bigint }
-//   | { maxFeePerGas?: bigint }
-//   | { maxPriorityFeePerGas?: bigint }
-// );
