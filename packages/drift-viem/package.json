@@ -30,12 +30,8 @@
   },
   "typesVersions": {
     "*": {
-      ".": [
-        "./dist/index.d.ts"
-      ],
-      "testing": [
-        "./dist/testing.d.ts"
-      ]
+      ".": ["./dist/index.d.ts"],
+      "testing": ["./dist/testing.d.ts"]
     }
   },
   "scripts": {
@@ -46,6 +42,7 @@
     "watch": "tsup --watch"
   },
   "peerDependencies": {
+    "@delvtech/drift": "0.0.1-beta.6",
     "sinon": "^17.0.3",
     "viem": "^2"
   },
@@ -54,10 +51,8 @@
       "optional": true
     }
   },
-  "dependencies": {
-    "@delvtech/drift": "0.0.1-beta.6"
-  },
   "devDependencies": {
+    "@delvtech/drift": "0.0.1-beta.6",
     "@repo/typescript-config": "*",
     "@types/sinon": "^17.0.3",
     "tsconfig-paths": "^4.2.0",
@@ -77,7 +72,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist"
-  ]
+  "files": ["dist"]
 }
