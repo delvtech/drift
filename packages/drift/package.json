@@ -30,12 +30,8 @@
   },
   "typesVersions": {
     "*": {
-      ".": [
-        "./dist/index.d.ts"
-      ],
-      "testing": [
-        "./dist/testing.d.ts"
-      ]
+      ".": ["./dist/index.d.ts"],
+      "testing": ["./dist/testing.d.ts"]
     }
   },
   "scripts": {
@@ -54,13 +50,13 @@
     }
   },
   "dependencies": {
-    "@types/lodash.ismatch": "^4.4.9",
     "fast-safe-stringify": "^2.1.1",
     "lodash.ismatch": "^4.4.0",
     "lru-cache": "^10.0.1"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
+    "@types/lodash.ismatch": "^4.4.9",
     "@types/sinon": "^17.0.3",
     "abitype": "^1.0.6",
     "fast-json-stable-stringify": "^2.1.0",
@@ -81,7 +77,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist"
-  ]
+  "files": ["dist"]
 }
