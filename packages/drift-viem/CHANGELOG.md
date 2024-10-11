@@ -1,5 +1,13 @@
 # @delvtech/drift-viem
 
+## 0.0.1-beta.7
+
+### Patch Changes
+
+- a5d6b68: Moved `@devltech/drift` dep to peer deps.
+- Updated dependencies [1cf3f2a]
+  - @delvtech/drift@0.0.1-beta.7
+
 ## 0.0.1-beta.6
 
 ### Patch Changes
