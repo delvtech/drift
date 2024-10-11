@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.1-beta.7
+
+### Patch Changes
+
+- 1cf3f2a: Moved types dep to dev deps.
+
 ## 0.0.1-beta.6
 
 ### Patch Changes

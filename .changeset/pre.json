@@ -10,9 +10,11 @@
     "@repo/typescript-config": "0.0.0"
   },
   "changesets": [
+    "empty-lies-smile",
     "flat-peas-drum",
     "flat-rocks-worry",
     "large-ducks-whisper",
+    "lemon-seas-pretend",
     "light-chefs-push",
     "nasty-pillows-wave",
     "shaggy-clouds-cheat"
