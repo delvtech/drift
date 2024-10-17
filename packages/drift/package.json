@@ -36,10 +36,10 @@
   },
   "scripts": {
     "build": "tsup",
-    "test:watch": "vitest --reporter=verbose",
+    "watch": "tsup --watch",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
-    "watch": "tsup --watch"
+    "test:watch": "vitest --reporter=verbose",
+    "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
     "sinon": "^17.0.3"
