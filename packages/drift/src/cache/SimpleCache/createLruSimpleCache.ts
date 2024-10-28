@@ -1,5 +1,5 @@
-import stringify from "fast-json-stable-stringify";
 import { LRUCache } from "lru-cache";
+import stringify from "safe-stable-stringify";
 import type { SimpleCache } from "src/cache/SimpleCache/types";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 

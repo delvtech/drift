@@ -1,4 +1,4 @@
-import stringify from "fast-json-stable-stringify";
+import stringify from "safe-stable-stringify";
 import { type SinonStub, stub as sinonStub } from "sinon";
 import { DriftError } from "src/error";
 import type { SerializableKey } from "src/utils/createSerializableKey";
