@@ -144,8 +144,6 @@ type WithDefaultNames<TParameters extends readonly AbiParameter[]> = {
     : never;
 };
 
-type foo = Exclude<unknown, unknown>;
-
 /**
  * Convert an array or tuple of named abi parameters to an object type with the
  * parameter names as keys and their primitive types as values. If a parameter
