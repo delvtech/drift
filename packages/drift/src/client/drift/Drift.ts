@@ -1,5 +1,5 @@
 import type { Abi } from "abitype";
-import type { Bytes, Hash } from "src/adapter/types/Abi";
+import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
   AdapterDecodeFunctionDataParams,
@@ -52,7 +52,7 @@ export class Drift<
   // Write-only property definitions //
 
   getSignerAddress: TAdapter extends ReadWriteAdapter
-    ? () => Promise<string>
+    ? () => Promise<Address>
     : undefined;
 
   write: TAdapter extends ReadWriteAdapter
