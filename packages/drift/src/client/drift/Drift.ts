@@ -108,7 +108,7 @@ export class Drift<
   contract = <TAbi extends Abi, TContractCache extends SimpleCache = TCache>({
     abi,
     address,
-    cache = this.cache.store as SimpleCache as TContractCache,
+    cache = this.cache as SimpleCache as TContractCache,
     cacheNamespace = this.cacheNamespace,
   }: Omit<ContractParams<TAbi, TAdapter, TContractCache>, "adapter">) =>
     new Contract({
