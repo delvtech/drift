@@ -79,7 +79,7 @@ export class Drift<
     const isReadWrite = this.isReadWrite();
 
     this.getSignerAddress = isReadWrite
-      ? () => this.adapter.getSignerAddress()
+      ? async () => this.adapter.getSignerAddress()
       : (undefined as any);
 
     this.write = isReadWrite
@@ -165,7 +165,7 @@ export class Drift<
   /**
    * Get a transaction from a transaction hash.
    */
-  getTransaction = (
+  getTransaction = async (
     params: GetTransactionParams,
   ): Promise<Transaction | undefined> => {
     const key = this.cache.transactionKey(params);
@@ -181,7 +181,7 @@ export class Drift<
   /**
    * Wait for a transaction to be mined.
    */
-  waitForTransaction = (
+  waitForTransaction = async (
     params: WaitForTransactionParams,
   ): Promise<TransactionReceipt | undefined> => {
     const key = this.cache.transactionKey(params);

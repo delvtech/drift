@@ -179,7 +179,7 @@ export class Contract<
   /**
    * Reads a specified function from the contract.
    */
-  read = <TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
+  read = async <TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ): Promise<FunctionReturn<TAbi, TFunctionName>> => {
     const key = this.readKey(
@@ -284,7 +284,7 @@ export class Contract<
   /**
    * Simulates a write operation on a specified function of the contract.
    */
-  simulateWrite = <
+  simulateWrite = async <
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
     ...[fn, args, options]: ContractWriteArgs<TAbi, TFunctionName>
