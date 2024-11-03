@@ -1,0 +1,22 @@
+{
+  "name": "example",
+  "version": "0.0.0",
+  "main": "index.js",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "tsx -r dotenv/config src/index.ts",
+    "dev:watch": "tsx -r dotenv/config --watch src/index.ts"
+  },
+  "dependencies": {
+    "@delvtech/drift": "^0.0.1-beta.6",
+    "@delvtech/drift-viem": "^0.0.1-beta.6",
+    "viem": "^2.21.37"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "dotenv": "^16.4.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

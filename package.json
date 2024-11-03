@@ -2,6 +2,7 @@
   "name": "drift",
   "license": "AGPL-3.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "cli": "yarn workspace @delvtech/drift-cli dev",
     "build:packages": "turbo build --filter=./packages/*",
@@ -25,7 +26,8 @@
     "node": ">=18"
   },
   "resolutions": {
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "viem": "^2.21.37"
   },
   "packageManager": "yarn@1.22.21",
   "workspaces": ["apps/*", "packages/*"]
