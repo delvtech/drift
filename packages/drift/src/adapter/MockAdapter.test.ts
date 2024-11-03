@@ -20,9 +20,15 @@ type Erc20Abi = typeof erc20.abi;
 
 describe("MockAdapter", () => {
   describe("getChainId", () => {
-    it("Resolves to a default value", async () => {
+    it("Throws an error by default", async () => {
       const adapter = new MockAdapter();
-      expect(await adapter.getChainId()).toBeTypeOf("number");
+      let error: unknown;
+      try {
+        await adapter.getChainId();
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {
@@ -33,12 +39,16 @@ describe("MockAdapter", () => {
   });
 
   describe("getBlock", () => {
-    it("Resolves to a default value", async () => {
+    it("Throws an error by default", async () => {
       const adapter = new MockAdapter();
-      expect(adapter.getBlock()).resolves.toEqual({
-        blockNumber: expect.any(BigInt),
-        timestamp: expect.any(BigInt),
-      });
+      let error: unknown;
+      try {
+        await adapter.getBlock();
+      } catch (e) {
+        error = e;
+      }
+      console.log("ERROR", error);
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {
@@ -53,14 +63,13 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const { blockNumber, timestamp = 0n } = (await adapter.getBlock()) ?? {};
       const block1: Block = {
-        blockNumber: blockNumber ?? 0n + 1n,
-        timestamp: timestamp + 1n,
+        blockNumber: 1n,
+        timestamp: 1n,
       };
       const block2: Block = {
-        blockNumber: blockNumber ?? 0n + 2n,
-        timestamp: timestamp + 2n,
+        blockNumber: 2n,
+        timestamp: 2n,
       };
       adapter.onGetBlock({ blockNumber: 1n }).resolves(block1);
       adapter.onGetBlock({ blockNumber: 2n }).resolves(block2);
@@ -70,9 +79,15 @@ describe("MockAdapter", () => {
   });
 
   describe("getBalance", () => {
-    it("Resolves to a default value", async () => {
+    it("Throws an error by default", async () => {
       const adapter = new MockAdapter();
-      expect(await adapter.getBalance({ address: "0x" })).toBeTypeOf("bigint");
+      let error: unknown;
+      try {
+        await adapter.getBalance({ address: "0x" });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {
@@ -83,15 +98,10 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const defaultValue = await adapter.getBalance({ address: "0x" });
-      adapter.onGetBalance({ address: "0xAlice" }).resolves(defaultValue + 1n);
-      adapter.onGetBalance({ address: "0xBob" }).resolves(defaultValue + 2n);
-      expect(await adapter.getBalance({ address: "0xAlice" })).toBe(
-        defaultValue + 1n,
-      );
-      expect(await adapter.getBalance({ address: "0xBob" })).toBe(
-        defaultValue + 2n,
-      );
+      adapter.onGetBalance({ address: "0xAlice" }).resolves(1n);
+      adapter.onGetBalance({ address: "0xBob" }).resolves(2n);
+      expect(await adapter.getBalance({ address: "0xAlice" })).toBe(1n);
+      expect(await adapter.getBalance({ address: "0xBob" })).toBe(2n);
     });
   });
 
@@ -192,15 +202,19 @@ describe("MockAdapter", () => {
   });
 
   describe("encodeFunctionData", () => {
-    it("Returns a default value", async () => {
+    it("Throws an error by default", async () => {
       const adapter = new MockAdapter();
-      expect(
-        adapter.encodeFunctionData({
+      let error: unknown;
+      try {
+        await adapter.encodeFunctionData({
           abi: erc20.abi,
           fn: "balanceOf",
           args: { account: "0x" },
-        }),
-      ).toBeTypeOf("string");
+        });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {
@@ -515,16 +529,20 @@ describe("MockAdapter", () => {
   });
 
   describe("write", () => {
-    it("Returns a default value", async () => {
+    it("Throws an error by default", async () => {
       const adapter = new MockAdapter();
-      expect(
+      let error: unknown;
+      try {
         await adapter.write({
           abi: erc20.abi,
           address: "0x",
           fn: "transfer",
           args: { to: "0x", amount: 123n },
-        }),
-      ).toBeTypeOf("string");
+        });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {
@@ -567,9 +585,15 @@ describe("MockAdapter", () => {
   });
 
   describe("getSignerAddress", () => {
-    it("Returns a default value", async () => {
+    it("Throws an error by default", async () => {
       const adapter = new MockAdapter();
-      expect(await adapter.getSignerAddress()).toBeTypeOf("string");
+      let error: unknown;
+      try {
+        await adapter.getSignerAddress();
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {

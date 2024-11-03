@@ -9,7 +9,7 @@ type Erc20Abi = typeof abi;
 
 describe("MockContract", () => {
   describe("getEvents", async () => {
-    it("Rejects with an error by default", async () => {
+    it("Throws an error by default", async () => {
       const contract = new MockContract({ abi });
       let error: unknown;
       try {
@@ -96,7 +96,7 @@ describe("MockContract", () => {
   });
 
   describe("read", () => {
-    it("Rejects with an error by default", async () => {
+    it("Throws an error by default", async () => {
       const contract = new MockContract({ abi });
       let error: unknown;
       try {
@@ -149,7 +149,7 @@ describe("MockContract", () => {
   });
 
   describe("simulateWrite", () => {
-    it("Rejects with an error by default", async () => {
+    it("Throws an error by default", async () => {
       const contract = new MockContract({ abi });
       let error: unknown;
       try {
@@ -203,11 +203,15 @@ describe("MockContract", () => {
   });
 
   describe("encodeFunctionData", () => {
-    it("Returns a default value", async () => {
+    it("Throws an error by default", async () => {
       const contract = new MockContract({ abi });
-      expect(
-        contract.encodeFunctionData("balanceOf", { account: "0x" }),
-      ).toBeTypeOf("string");
+      let error: unknown;
+      try {
+        contract.encodeFunctionData("balanceOf", { account: "0x" });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {
@@ -277,9 +281,15 @@ describe("MockContract", () => {
   });
 
   describe("getSignerAddress", () => {
-    it("Returns a default value", async () => {
+    it("Throws an error by default", async () => {
       const contract = new MockContract({ abi });
-      expect(await contract.getSignerAddress()).toBeTypeOf("string");
+      let error: unknown;
+      try {
+        await contract.getSignerAddress();
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {
@@ -290,11 +300,15 @@ describe("MockContract", () => {
   });
 
   describe("write", () => {
-    it("Returns a default value", async () => {
+    it("Throws an error by default", async () => {
       const contract = new MockContract({ abi });
-      expect(
-        await contract.write("transfer", { to: "0x", amount: 123n }),
-      ).toBeTypeOf("string");
+      let error: unknown;
+      try {
+        await contract.write("transfer", { to: "0x", amount: 123n });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {

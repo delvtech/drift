@@ -89,9 +89,15 @@ describe("MockDrift", () => {
   });
 
   describe("getChainId", () => {
-    it("Resolves to a default value", async () => {
+    it("Throws an error by default", async () => {
       const drift = new MockDrift();
-      expect(await drift.getChainId()).toBeTypeOf("number");
+      let error: unknown;
+      try {
+        await drift.getChainId();
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {
@@ -102,12 +108,15 @@ describe("MockDrift", () => {
   });
 
   describe("getBlock", () => {
-    it("Resolves to a default value", async () => {
+    it("Throws an error by default", async () => {
       const drift = new MockDrift();
-      expect(drift.getBlock()).resolves.toEqual({
-        blockNumber: expect.any(BigInt),
-        timestamp: expect.any(BigInt),
-      });
+      let error: unknown;
+      try {
+        await drift.getBlock();
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {
@@ -122,14 +131,13 @@ describe("MockDrift", () => {
 
     it("Can be stubbed with specific args", async () => {
       const drift = new MockDrift();
-      const { blockNumber, timestamp = 0n } = (await drift.getBlock()) ?? {};
       const block1: Block = {
-        blockNumber: blockNumber ?? 0n + 1n,
-        timestamp: timestamp + 1n,
+        blockNumber: 1n,
+        timestamp: 1n,
       };
       const block2: Block = {
-        blockNumber: blockNumber ?? 0n + 2n,
-        timestamp: timestamp + 2n,
+        blockNumber: 2n,
+        timestamp: 2n,
       };
       drift.onGetBlock({ blockNumber: 1n }).resolves(block1);
       drift.onGetBlock({ blockNumber: 2n }).resolves(block2);
@@ -139,9 +147,15 @@ describe("MockDrift", () => {
   });
 
   describe("getBalance", () => {
-    it("Resolves to a default value", async () => {
+    it("Throws an error by default", async () => {
       const drift = new MockDrift();
-      expect(await drift.getBalance({ address: "0x" })).toBeTypeOf("bigint");
+      let error: unknown;
+      try {
+        await drift.getBalance({ address: "0x" });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {
@@ -152,15 +166,10 @@ describe("MockDrift", () => {
 
     it("Can be stubbed with specific args", async () => {
       const drift = new MockDrift();
-      const defaultValue = await drift.getBalance({ address: "0x" });
-      drift.onGetBalance({ address: "0xAlice" }).resolves(defaultValue + 1n);
-      drift.onGetBalance({ address: "0xBob" }).resolves(defaultValue + 2n);
-      expect(await drift.getBalance({ address: "0xAlice" })).toBe(
-        defaultValue + 1n,
-      );
-      expect(await drift.getBalance({ address: "0xBob" })).toBe(
-        defaultValue + 2n,
-      );
+      drift.onGetBalance({ address: "0xAlice" }).resolves(1n);
+      drift.onGetBalance({ address: "0xBob" }).resolves(2n);
+      expect(await drift.getBalance({ address: "0xAlice" })).toBe(1n);
+      expect(await drift.getBalance({ address: "0xBob" })).toBe(2n);
     });
   });
 
@@ -259,15 +268,19 @@ describe("MockDrift", () => {
   });
 
   describe("encodeFunctionData", () => {
-    it("Returns a default value", async () => {
+    it("Throws an error by default", async () => {
       const drift = new MockDrift();
-      expect(
+      let error: unknown;
+      try {
         drift.encodeFunctionData({
           abi: erc20.abi,
           fn: "balanceOf",
           args: { account: "0x" },
-        }),
-      ).toBeTypeOf("string");
+        });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {
@@ -371,7 +384,7 @@ describe("MockDrift", () => {
   });
 
   describe("getEvents", () => {
-    it("Rejects with an error by default", async () => {
+    it("Throws an error by default", async () => {
       const drift = new MockDrift();
       let error: unknown;
       try {
@@ -454,7 +467,7 @@ describe("MockDrift", () => {
   });
 
   describe("read", () => {
-    it("Rejects with an error by default", async () => {
+    it("Throws an error by default", async () => {
       const drift = new MockDrift();
       let error: unknown;
       try {
@@ -526,7 +539,7 @@ describe("MockDrift", () => {
   });
 
   describe("simulateWrite", () => {
-    it("Rejects with an error by default", async () => {
+    it("Throws an error by default", async () => {
       const drift = new MockDrift();
       let error: unknown;
       try {
@@ -582,16 +595,20 @@ describe("MockDrift", () => {
   });
 
   describe("write", () => {
-    it("Returns a default value", async () => {
+    it("Throws an error by default", async () => {
       const drift = new MockDrift();
-      expect(
+      let error: unknown;
+      try {
         await drift.write({
           abi: erc20.abi,
           address: "0x",
           fn: "transfer",
           args: { to: "0x", amount: 123n },
-        }),
-      ).toBeTypeOf("string");
+        });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {
@@ -634,9 +651,15 @@ describe("MockDrift", () => {
   });
 
   describe("getSignerAddress", () => {
-    it("Returns a default value", async () => {
+    it("Throws an error by default", async () => {
       const drift = new MockDrift();
-      expect(await drift.getSignerAddress()).toBeTypeOf("string");
+      let error: unknown;
+      try {
+        await drift.getSignerAddress();
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
     });
 
     it("Can be stubbed", async () => {

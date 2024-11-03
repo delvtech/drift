@@ -29,7 +29,6 @@ import type {
 import { StubStore } from "src/utils/testing/StubStore";
 import type { OptionalKeys } from "src/utils/types";
 
-// TODO: Allow configuration of error throwing/default return value behavior
 export class MockAdapter implements ReadWriteAdapter {
   stubs = new StubStore<ReadWriteAdapter>();
 
@@ -40,14 +39,12 @@ export class MockAdapter implements ReadWriteAdapter {
   onGetChainId() {
     return this.stubs.get<[], number>({
       method: "getChainId",
-      create: (stub) => stub.resolves(96024),
     });
   }
 
   async getChainId() {
     return this.stubs.get<[], number>({
       method: "getChainId",
-      create: (stub) => stub.resolves(96024),
     })();
   }
 
@@ -57,11 +54,6 @@ export class MockAdapter implements ReadWriteAdapter {
     return this.stubs
       .get<[NetworkGetBlockParams?], Promise<Block | undefined>>({
         method: "getBlock",
-        create: (stub) =>
-          stub.resolves({
-            blockNumber: 0n,
-            timestamp: 0n,
-          }),
       })
       .withArgs(params);
   }
@@ -70,11 +62,6 @@ export class MockAdapter implements ReadWriteAdapter {
     return this.stubs.get<[NetworkGetBlockParams?], Promise<Block | undefined>>(
       {
         method: "getBlock",
-        create: (stub) =>
-          stub.resolves({
-            blockNumber: 0n,
-            timestamp: 0n,
-          }),
       },
     )(params);
   }
@@ -84,7 +71,6 @@ export class MockAdapter implements ReadWriteAdapter {
   onGetBalance(params?: Partial<NetworkGetBalanceParams>) {
     let stub = this.stubs.get<[NetworkGetBalanceParams], Promise<bigint>>({
       method: "getBalance",
-      create: (stub) => stub.resolves(0n),
     });
     if (params) {
       stub = stub.withArgs(params);
@@ -95,7 +81,6 @@ export class MockAdapter implements ReadWriteAdapter {
   async getBalance(params: NetworkGetBalanceParams) {
     return this.stubs.get<[NetworkGetBalanceParams], Promise<bigint>>({
       method: "getBalance",
-      create: (stub) => stub.resolves(0n),
     })(params);
   }
 
@@ -165,7 +150,6 @@ export class MockAdapter implements ReadWriteAdapter {
     return this.stubs
       .get<[AdapterEncodeFunctionDataParams<TAbi, TFunctionName>], Bytes>({
         method: "encodeFunctionData",
-        create: (stub) => stub.returns("0x0"),
       })
       .withArgs(
         params as Partial<AdapterEncodeFunctionDataParams<TAbi, TFunctionName>>,
@@ -181,7 +165,6 @@ export class MockAdapter implements ReadWriteAdapter {
       Bytes
     >({
       method: "encodeFunctionData",
-      create: (stub) => stub.returns("0x0"),
     })(params);
   }
 
@@ -350,7 +333,6 @@ export class MockAdapter implements ReadWriteAdapter {
       .get<[AdapterWriteParams<TAbi, TFunctionName>], Promise<Hash>>({
         method: "write",
         key: params.fn,
-        create: (stub) => stub.resolves("0x0"),
       })
       .withArgs(params as Partial<AdapterWriteParams<TAbi, TFunctionName>>);
   }
@@ -363,7 +345,6 @@ export class MockAdapter implements ReadWriteAdapter {
       this.stubs.get<[AdapterWriteParams<TAbi, TFunctionName>], Promise<Hash>>({
         method: "write",
         key: params.fn,
-        create: (stub) => stub.resolves("0x0"),
       })(params),
     );
 
@@ -383,14 +364,12 @@ export class MockAdapter implements ReadWriteAdapter {
   onGetSignerAddress() {
     return this.stubs.get<[], Address>({
       method: "getSignerAddress",
-      create: (stub) => stub.resolves("0xMockSigner"),
     });
   }
 
   async getSignerAddress() {
     return this.stubs.get<[], Address>({
       method: "getSignerAddress",
-      create: (stub) => stub.resolves("0xMockSigner"),
     })();
   }
 }
