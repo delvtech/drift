@@ -26,7 +26,6 @@ import type {
   NameSpaceParam,
   ReadKeyParams,
 } from "src/cache/ClientCache/types";
-import { createLruSimpleCache } from "src/cache/SimpleCache/createLruSimpleCache";
 import type { SimpleCache } from "src/cache/SimpleCache/types";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 import type {
@@ -85,7 +84,7 @@ export class Contract<
     abi,
     adapter,
     address,
-    cache = createLruSimpleCache({ max: 500 }) as TCache,
+    cache,
     cacheNamespace,
   }: ContractParams<TAbi, TAdapter, TCache>) {
     this.abi = abi;
