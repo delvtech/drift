@@ -34,14 +34,18 @@ export class MockDrift<
 
   reset = () => this.adapter.reset();
 
-  contract = <TAbi extends Abi, TContractCache extends SimpleCache = TCache>(
-    params: Omit<MockContractParams<TAbi, TAdapter, TContractCache>, "adapter">,
-  ) => {
+  contract = <TAbi extends Abi, TContractCache extends SimpleCache = TCache>({
+    abi,
+    address,
+    cache = this.cache as SimpleCache as TContractCache,
+    cacheNamespace = this.cacheNamespace,
+  }: Omit<MockContractParams<TAbi, TAdapter, TContractCache>, "adapter">) => {
     return new MockContract({
+      abi,
       adapter: this.adapter,
-      cache: this.cache as SimpleCache as TContractCache,
-      cacheNamespace: this.cacheNamespace,
-      ...params,
+      address,
+      cache,
+      cacheNamespace,
     });
   };
 
