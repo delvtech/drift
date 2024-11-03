@@ -1,5 +1,5 @@
 {
-  "prettier.configPath": ".prettierrc.js",
+  "prettier.configPath": ".prettierrc.cjs",
   "[javascript]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
