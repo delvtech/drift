@@ -29,9 +29,9 @@ export type {
 } from "src/adapter/types/Adapter";
 export type { Block, BlockTag } from "src/adapter/types/Block";
 export type {
+  ContractWriteOptions as AdapterContractWriteOptions,
   ContractGetEventsOptions,
   ContractReadOptions,
-  ContractWriteOptions,
 } from "src/adapter/types/Contract";
 export type {
   ContractEvent,
@@ -72,6 +72,7 @@ export { objectToArray } from "src/adapter/utils/objectToArray";
 
 // cache //
 
+export { createClientCache } from "src/cache/ClientCache/createClientCache";
 export type {
   BalanceKeyParams,
   BlockKeyParams,
@@ -82,10 +83,9 @@ export type {
   ReadKeyParams,
   TransactionKeyParams,
 } from "src/cache/ClientCache/types";
-export { createClientCache } from "src/cache/ClientCache/createClientCache";
 
-export type { SimpleCache } from "src/cache/SimpleCache/types";
 export { createLruSimpleCache } from "src/cache/SimpleCache/createLruSimpleCache";
+export type { SimpleCache } from "src/cache/SimpleCache/types";
 
 // clients //
 
@@ -96,11 +96,13 @@ export {
   type ContractParams,
   type ContractReadArgs,
   type ContractWriteArgs,
+  type ContractWriteOptions,
   type ReadContract,
   type ReadWriteContract,
 } from "src/client/contract/Contract";
 
 export {
+  Drift,
   type DecodeFunctionDataParams,
   type DriftOptions,
   type EncodeFunctionDataParams,
@@ -113,11 +115,15 @@ export {
   type SimulateWriteParams,
   type WaitForTransactionParams,
   type WriteParams,
-  Drift,
 } from "src/client/drift/Drift";
 
 // utils //
 
+export {
+  createSerializableKey,
+  type SerializableKey,
+} from "src/utils/createSerializableKey";
+export { extendInstance } from "src/utils/extendInstance";
 export type {
   AnyFunction,
   AnyObject,
@@ -134,11 +140,6 @@ export type {
   RequiredKeys,
   UnionToIntersection,
 } from "src/utils/types";
-export {
-  type SerializableKey,
-  createSerializableKey,
-} from "src/utils/createSerializableKey";
-export { extendInstance } from "src/utils/extendInstance";
 
 // ...rest //
 

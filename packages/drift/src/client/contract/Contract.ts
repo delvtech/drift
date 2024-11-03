@@ -7,9 +7,9 @@ import type {
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
 import type {
+  ContractWriteOptions as BaseContractWriteOptions,
   ContractGetEventsOptions,
   ContractReadOptions,
-  ContractWriteOptions,
 } from "src/adapter/types/Contract";
 import type { ContractEvent, EventName } from "src/adapter/types/Event";
 import type {
@@ -105,8 +105,8 @@ export class Contract<
     this.write = isReadWrite
       ? async (...[fn, args, options]) => {
           return this.adapter.write({
-            // TODO: Cleanup type casting required due to an incompatibility between
-            // distributive types and the conditional args param.
+            // TODO: Cleanup type casting required due to an incompatibility
+            // between distributive types and the conditional args param.
             abi: this.abi as Abi,
             address: this.address,
             fn,
@@ -369,6 +369,10 @@ export type ContractReadArgs<
         options?: ContractReadOptions,
       ];
 
+export interface ContractWriteOptions
+  extends BaseContractWriteOptions,
+    OnMinedParam {}
+
 export type ContractWriteArgs<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<
@@ -379,18 +383,18 @@ export type ContractWriteArgs<
   ? [
       functionName: TFunctionName,
       args?: AnyObject,
-      options?: ContractWriteOptions & OnMinedParam,
+      options?: ContractWriteOptions,
     ]
   : FunctionArgs<TAbi, TFunctionName> extends EmptyObject
     ? [
         functionName: TFunctionName,
         args?: EmptyObject,
-        options?: ContractWriteOptions & OnMinedParam,
+        options?: ContractWriteOptions,
       ]
     : [
         functionName: TFunctionName,
         args: FunctionArgs<TAbi, TFunctionName>,
-        options?: ContractWriteOptions & OnMinedParam,
+        options?: ContractWriteOptions,
       ];
 
 export type ContractEncodeFunctionDataArgs<
