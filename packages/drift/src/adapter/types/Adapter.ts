@@ -96,11 +96,7 @@ export interface AdapterGetEventsParams<
   event: TEventName;
 }
 
-export interface OnMinedParam {
-  onMined?: (receipt?: TransactionReceipt) => void;
-}
-
-export type AdapterWriteParams<
+export type AdapterSimulateWriteParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<
     TAbi,
@@ -111,8 +107,19 @@ export type AdapterWriteParams<
   address: Address;
   fn: TFunctionName;
 } & AdapterArgsParam<TAbi, TFunctionName> &
-  ContractWriteOptions &
-  OnMinedParam;
+  ContractWriteOptions;
+
+export interface OnMinedParam {
+  onMined?: (receipt?: TransactionReceipt) => void;
+}
+
+export type AdapterWriteParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<
+    TAbi,
+    "nonpayable" | "payable"
+  > = FunctionName<TAbi, "nonpayable" | "payable">,
+> = AdapterSimulateWriteParams<TAbi, TFunctionName> & OnMinedParam;
 
 export type AdapterEncodeFunctionDataParams<
   TAbi extends Abi = Abi,
