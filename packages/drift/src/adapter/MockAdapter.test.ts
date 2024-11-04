@@ -47,7 +47,6 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      console.log("ERROR", error);
       expect(error).toBeInstanceOf(Error);
     });
 
@@ -59,6 +58,7 @@ describe("MockAdapter", () => {
       };
       adapter.onGetBlock().resolves(block);
       expect(await adapter.getBlock()).toBe(block);
+      expect(await adapter.getBlock({ blockNumber: 123n })).toBe(block);
     });
 
     it("Can be stubbed with specific args", async () => {
@@ -219,13 +219,7 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed", async () => {
       const adapter = new MockAdapter();
-      const foo = adapter
-        .onEncodeFunctionData({
-          abi: erc20.abi,
-          fn: "balanceOf",
-          args: { account: "0x" },
-        })
-        .returns("0x123");
+      adapter.onEncodeFunctionData().returns("0x123");
       expect(
         adapter.encodeFunctionData({
           abi: erc20.abi,

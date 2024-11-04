@@ -51,11 +51,16 @@ export class MockAdapter implements ReadWriteAdapter {
   // getBlock //
 
   onGetBlock(params?: Partial<NetworkGetBlockParams>) {
-    return this.stubs
-      .get<[NetworkGetBlockParams?], Promise<Block | undefined>>({
-        method: "getBlock",
-      })
-      .withArgs(params);
+    let stub = this.stubs.get<
+      [NetworkGetBlockParams?],
+      Promise<Block | undefined>
+    >({
+      method: "getBlock",
+    });
+    if (params) {
+      stub = stub.withArgs(params);
+    }
+    return stub;
   }
 
   async getBlock(params?: NetworkGetBlockParams) {
@@ -142,18 +147,24 @@ export class MockAdapter implements ReadWriteAdapter {
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
   >(
-    params: OptionalKeys<
+    params?: OptionalKeys<
       AdapterEncodeFunctionDataParams<TAbi, TFunctionName>,
       "args"
     >,
   ) {
-    return this.stubs
-      .get<[AdapterEncodeFunctionDataParams<TAbi, TFunctionName>], Bytes>({
-        method: "encodeFunctionData",
-      })
-      .withArgs(
+    let stub = this.stubs.get<
+      [AdapterEncodeFunctionDataParams<TAbi, TFunctionName>],
+      Bytes
+    >({
+      method: "encodeFunctionData",
+    });
+
+    if (params) {
+      stub = stub.withArgs(
         params as Partial<AdapterEncodeFunctionDataParams<TAbi, TFunctionName>>,
       );
+    }
+    return stub;
   }
 
   encodeFunctionData<
