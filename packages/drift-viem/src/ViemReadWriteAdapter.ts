@@ -4,7 +4,10 @@ import type {
   FunctionReturn,
   ReadWriteAdapter,
 } from "@delvtech/drift";
-import { ViemReadAdapter, type ViemReadAdapterParams } from "src/ViemReadAdapter";
+import {
+  ViemReadAdapter,
+  type ViemReadAdapterParams,
+} from "src/ViemReadAdapter";
 import { createSimulateContractParameters } from "src/utils/createSimulateContractParameters";
 import { outputToFriendly } from "src/utils/outputToFriendly";
 import type { Abi, WalletClient, WriteContractParameters } from "viem";
@@ -57,7 +60,7 @@ export class ViemReadWriteAdapter
   >(
     params: AdapterWriteParams<TAbi, TFunctionName>,
   ) => {
-    return this.getSignerAddress().then((from) => {
+    const writePromise = this.getSignerAddress().then((from) => {
       const viemParams = createSimulateContractParameters(
         Object.assign({}, params, { from }),
       );
@@ -67,5 +70,14 @@ export class ViemReadWriteAdapter
           this.walletClient.writeContract(request as WriteContractParameters),
         );
     });
+
+    if (params.onMined) {
+      writePromise.then((hash) => {
+        this.waitForTransaction({ hash }).then(params.onMined);
+        return hash;
+      });
+    }
+
+    return writePromise;
   };
 }
