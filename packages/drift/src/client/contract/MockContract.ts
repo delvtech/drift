@@ -115,7 +115,7 @@ export class MockContract<
   onWrite = <
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
-    fn: TFunctionName,
+    fn?: TFunctionName,
     args?: FunctionArgs<TAbi, TFunctionName>,
     options?: ContractWriteOptions,
   ) =>

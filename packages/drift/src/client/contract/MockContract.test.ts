@@ -20,22 +20,6 @@ describe("MockContract", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const contract = new MockContract({ abi });
-      const events: ContractEvent<Erc20Abi, "Transfer">[] = [
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0x",
-            to: "0x",
-            value: 123n,
-          },
-        },
-      ];
-      contract.onGetEvents("Transfer").resolves(events);
-      expect(await contract.getEvents("Transfer")).toBe(events);
-    });
-
     it("Can be stubbed with specific args", async () => {
       const contract = new MockContract({ abi });
       const events1: ContractEvent<Erc20Abi, "Transfer">[] = [
@@ -107,12 +91,6 @@ describe("MockContract", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const contract = new MockContract({ abi });
-      contract.onRead("symbol").resolves("ABC");
-      expect(await contract.read("symbol")).toBe("ABC");
-    });
-
     it("Can be stubbed with specific args", async () => {
       const contract = new MockContract({ abi });
       contract
@@ -160,16 +138,6 @@ describe("MockContract", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const contract = new MockContract({ abi });
-      contract
-        .onSimulateWrite("transfer", { to: "0x", amount: 123n })
-        .resolves(true);
-      expect(
-        await contract.simulateWrite("transfer", { to: "0x", amount: 123n }),
-      ).toBe(true);
-    });
-
     it("Can be stubbed with specific args", async () => {
       const contract = new MockContract({ abi });
       contract
@@ -214,16 +182,6 @@ describe("MockContract", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const contract = new MockContract({ abi });
-      contract
-        .onEncodeFunctionData("balanceOf", { account: "0x" })
-        .returns("0x123");
-      expect(contract.encodeFunctionData("balanceOf", { account: "0x" })).toBe(
-        "0x123",
-      );
-    });
-
     it("Can be stubbed with specific args", async () => {
       const contract = new MockContract({ abi });
       contract
@@ -239,6 +197,17 @@ describe("MockContract", () => {
         "0x2",
       );
     });
+
+    it.todo(
+      "Can be called with args after being stubbed with no args",
+      async () => {
+        const contract = new MockContract({ abi });
+        contract.onEncodeFunctionData().returns("0x123");
+        expect(
+          contract.encodeFunctionData("balanceOf", { account: "0x" }),
+        ).toBe("0x123");
+      },
+    );
   });
 
   describe("decodeFunctionData", () => {
@@ -251,16 +220,6 @@ describe("MockContract", () => {
         error = e;
       }
       expect(error).toBeInstanceOf(Error);
-    });
-
-    it("Can be stubbed", async () => {
-      const contract = new MockContract({ abi });
-      const decoded: DecodedFunctionData<Erc20Abi, "balanceOf"> = {
-        functionName: "balanceOf",
-        args: { account: "0x" },
-      };
-      contract.onDecodeFunctionData("0x").returns(decoded);
-      expect(contract.decodeFunctionData("0x")).toBe(decoded);
     });
 
     it("Can be stubbed with specific args", async () => {
@@ -311,16 +270,6 @@ describe("MockContract", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const contract = new MockContract({ abi });
-      contract
-        .onWrite("transfer", { to: "0x", amount: 123n })
-        .resolves("0x123");
-      expect(await contract.write("transfer", { to: "0x", amount: 123n })).toBe(
-        "0x123",
-      );
-    });
-
     it("Can be stubbed with specific args", async () => {
       const contract = new MockContract({ abi });
       contract.onWrite("transfer", { to: "0x1", amount: 123n }).resolves("0x1");
@@ -332,5 +281,16 @@ describe("MockContract", () => {
         await contract.write("transfer", { to: "0x2", amount: 123n }),
       ).toBe("0x2");
     });
+
+    it.todo(
+      "Can be called with args after being stubbed with no arguments",
+      async () => {
+        const contract = new MockContract({ abi });
+        contract.onWrite().resolves("0x123");
+        expect(
+          await contract.write("transfer", { to: "0x", amount: 123n }),
+        ).toBe("0x123");
+      },
+    );
   });
 });
