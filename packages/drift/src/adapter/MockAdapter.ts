@@ -58,17 +58,36 @@ export class MockAdapter implements ReadWriteAdapter {
       method: "getBlock",
     });
     if (params) {
-      stub = stub.withArgs(params);
+      // TODO: Destructuring each property here and in `getBlock` helps ensure
+      // non-existent properties are set to `undefined` so that `{}` is the same
+      // as `{ blockNumber: undefined }`. However, this feels like it could be
+      // the source of some confusing bugs if not done consistently in every
+      // method and kept in sync with the actual param types. This should be
+      // reconsidered when implementing support for partial params.
+      const { blockHash, blockNumber, blockTag } = params;
+      stub = stub.withArgs({
+        blockHash,
+        blockNumber,
+        blockTag,
+      } as NetworkGetBlockParams);
     }
     return stub;
   }
 
-  async getBlock(params?: NetworkGetBlockParams) {
+  async getBlock({
+    blockHash,
+    blockNumber,
+    blockTag,
+  }: NetworkGetBlockParams = {}) {
     return this.stubs.get<[NetworkGetBlockParams?], Promise<Block | undefined>>(
       {
         method: "getBlock",
       },
-    )(params);
+    )({
+      blockHash,
+      blockNumber,
+      blockTag,
+    } as NetworkGetBlockParams);
   }
 
   // getBalance //
@@ -78,15 +97,31 @@ export class MockAdapter implements ReadWriteAdapter {
       method: "getBalance",
     });
     if (params) {
-      stub = stub.withArgs(params);
+      const { address, blockHash, blockNumber, blockTag } = params;
+      stub = stub.withArgs({
+        address,
+        blockHash,
+        blockNumber,
+        blockTag,
+      } as NetworkGetBalanceParams);
     }
     return stub;
   }
 
-  async getBalance(params: NetworkGetBalanceParams) {
+  async getBalance({
+    address,
+    blockHash,
+    blockNumber,
+    blockTag,
+  }: NetworkGetBalanceParams) {
     return this.stubs.get<[NetworkGetBalanceParams], Promise<bigint>>({
       method: "getBalance",
-    })(params);
+    })({
+      address,
+      blockHash,
+      blockNumber,
+      blockTag,
+    } as NetworkGetBalanceParams);
   }
 
   // getTransaction //
@@ -335,17 +370,24 @@ export class MockAdapter implements ReadWriteAdapter {
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
-    params: OptionalKeys<
+    params?: OptionalKeys<
       AdapterWriteParams<TAbi, TFunctionName>,
       "args" | "address"
     >,
   ) {
-    return this.stubs
-      .get<[AdapterWriteParams<TAbi, TFunctionName>], Promise<Hash>>({
-        method: "write",
-        key: params.fn,
-      })
-      .withArgs(params as Partial<AdapterWriteParams<TAbi, TFunctionName>>);
+    let stub = this.stubs.get<
+      [AdapterWriteParams<TAbi, TFunctionName>],
+      Promise<Hash>
+    >({
+      method: "write",
+    });
+    if (params) {
+      stub = stub.withArgs(
+        params as Partial<AdapterWriteParams<TAbi, TFunctionName>>,
+      );
+    }
+
+    return stub;
   }
 
   async write<
@@ -355,7 +397,6 @@ export class MockAdapter implements ReadWriteAdapter {
     const writePromise = Promise.resolve(
       this.stubs.get<[AdapterWriteParams<TAbi, TFunctionName>], Promise<Hash>>({
         method: "write",
-        key: params.fn,
       })(params),
     );
 

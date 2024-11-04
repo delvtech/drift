@@ -50,19 +50,12 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
+    it("Can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
-      const block: Block = {
-        blockNumber: 123n,
-        timestamp: 123n,
+      const block0: Block = {
+        blockNumber: 0n,
+        timestamp: 0n,
       };
-      adapter.onGetBlock().resolves(block);
-      expect(await adapter.getBlock()).toBe(block);
-      expect(await adapter.getBlock({ blockNumber: 123n })).toBe(block);
-    });
-
-    it("Can be stubbed with specific args", async () => {
-      const adapter = new MockAdapter();
       const block1: Block = {
         blockNumber: 1n,
         timestamp: 1n,
@@ -71,10 +64,22 @@ describe("MockAdapter", () => {
         blockNumber: 2n,
         timestamp: 2n,
       };
+      adapter.onGetBlock().resolves(block0);
       adapter.onGetBlock({ blockNumber: 1n }).resolves(block1);
       adapter.onGetBlock({ blockNumber: 2n }).resolves(block2);
+      expect(await adapter.getBlock()).toBe(block0);
       expect(await adapter.getBlock({ blockNumber: 1n })).toBe(block1);
       expect(await adapter.getBlock({ blockNumber: 2n })).toBe(block2);
+    });
+
+    it("Can be called with params after being stubbed with no arguments", async () => {
+      const adapter = new MockAdapter();
+      const block: Block = {
+        blockNumber: 123n,
+        timestamp: 123n,
+      };
+      adapter.onGetBlock().resolves(block);
+      expect(await adapter.getBlock({ blockNumber: 123n })).toBe(block);
     });
   });
 
@@ -90,18 +95,18 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const adapter = new MockAdapter();
-      adapter.onGetBalance().resolves(123n);
-      expect(await adapter.getBalance({ address: "0x" })).toBe(123n);
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
       adapter.onGetBalance({ address: "0xAlice" }).resolves(1n);
       adapter.onGetBalance({ address: "0xBob" }).resolves(2n);
       expect(await adapter.getBalance({ address: "0xAlice" })).toBe(1n);
       expect(await adapter.getBalance({ address: "0xBob" })).toBe(2n);
+    });
+
+    it("Can be called with params after being stubbed with no args", async () => {
+      const adapter = new MockAdapter();
+      adapter.onGetBalance().resolves(123n);
+      expect(await adapter.getBalance({ address: "0x" })).toBe(123n);
     });
   });
 
@@ -111,22 +116,7 @@ describe("MockAdapter", () => {
       expect(await adapter.getTransaction({ hash: "0x" })).toBeUndefined();
     });
 
-    it("Can be stubbed", async () => {
-      const adapter = new MockAdapter();
-      const transaction: Transaction = {
-        blockNumber: 123n,
-        gas: 123n,
-        gasPrice: 123n,
-        input: "0x",
-        nonce: 123,
-        type: "0x123",
-        value: 123n,
-      };
-      adapter.onGetTransaction().resolves(transaction);
-      expect(await adapter.getTransaction({ hash: "0x" })).toBe(transaction);
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
       const transaction1: Transaction = {
         input: "0x1",
@@ -146,6 +136,21 @@ describe("MockAdapter", () => {
       expect(await adapter.getTransaction({ hash: "0x1" })).toBe(transaction1);
       expect(await adapter.getTransaction({ hash: "0x2" })).toBe(transaction2);
     });
+
+    it("Can be called with params after being stubbed with no args", async () => {
+      const adapter = new MockAdapter();
+      const transaction: Transaction = {
+        blockNumber: 123n,
+        gas: 123n,
+        gasPrice: 123n,
+        input: "0x",
+        nonce: 123,
+        type: "0x123",
+        value: 123n,
+      };
+      adapter.onGetTransaction().resolves(transaction);
+      expect(await adapter.getTransaction({ hash: "0x" })).toBe(transaction);
+    });
   });
 
   describe("waitForTransaction", () => {
@@ -156,26 +161,7 @@ describe("MockAdapter", () => {
       ).resolves.toBeUndefined();
     });
 
-    it("Can be stubbed", async () => {
-      const adapter = new MockAdapter();
-      const receipt: TransactionReceipt = {
-        blockNumber: 123n,
-        blockHash: "0x",
-        cumulativeGasUsed: 123n,
-        effectiveGasPrice: 123n,
-        from: "0x",
-        gasUsed: 123n,
-        logsBloom: "0x",
-        status: "success",
-        to: "0x",
-        transactionHash: "0x",
-        transactionIndex: 123,
-      };
-      adapter.onWaitForTransaction().resolves(receipt);
-      expect(await adapter.waitForTransaction({ hash: "0x" })).toBe(receipt);
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
       const receipt1: TransactionReceipt = {
         transactionHash: "0x1",
@@ -199,6 +185,25 @@ describe("MockAdapter", () => {
       expect(await adapter.waitForTransaction({ hash: "0x1" })).toBe(receipt1);
       expect(await adapter.waitForTransaction({ hash: "0x2" })).toBe(receipt2);
     });
+
+    it("Can be called with params after being stubbed with no args", async () => {
+      const adapter = new MockAdapter();
+      const receipt: TransactionReceipt = {
+        blockNumber: 123n,
+        blockHash: "0x",
+        cumulativeGasUsed: 123n,
+        effectiveGasPrice: 123n,
+        from: "0x",
+        gasUsed: 123n,
+        logsBloom: "0x",
+        status: "success",
+        to: "0x",
+        transactionHash: "0x",
+        transactionIndex: 123,
+      };
+      adapter.onWaitForTransaction().resolves(receipt);
+      expect(await adapter.waitForTransaction({ hash: "0x" })).toBe(receipt);
+    });
   });
 
   describe("encodeFunctionData", () => {
@@ -217,19 +222,7 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const adapter = new MockAdapter();
-      adapter.onEncodeFunctionData().returns("0x123");
-      expect(
-        adapter.encodeFunctionData({
-          abi: erc20.abi,
-          fn: "balanceOf",
-          args: { account: "0x" },
-        }),
-      ).toBe("0x123");
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
       const params1: AdapterEncodeFunctionDataParams<Erc20Abi, "balanceOf"> = {
         abi: erc20.abi,
@@ -244,6 +237,18 @@ describe("MockAdapter", () => {
       adapter.onEncodeFunctionData(params2).returns("0x2");
       expect(adapter.encodeFunctionData(params1)).toBe("0x1");
       expect(adapter.encodeFunctionData(params2)).toBe("0x2");
+    });
+
+    it("Can be called with params after being stubbed with no args", async () => {
+      const adapter = new MockAdapter();
+      adapter.onEncodeFunctionData().returns("0x123");
+      expect(
+        adapter.encodeFunctionData({
+          abi: erc20.abi,
+          fn: "balanceOf",
+          args: { account: "0x" },
+        }),
+      ).toBe("0x123");
     });
   });
 
@@ -263,29 +268,7 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const adapter = new MockAdapter();
-      const decoded: DecodedFunctionData<Erc20Abi, "balanceOf"> = {
-        functionName: "balanceOf",
-        args: { account: "0x1" },
-      };
-      adapter
-        .onDecodeFunctionData({
-          abi: erc20.abi,
-          fn: "balanceOf",
-          data: "0x",
-        })
-        .returns(decoded);
-      expect(
-        adapter.decodeFunctionData({
-          abi: erc20.abi,
-          fn: "balanceOf",
-          data: "0x",
-        }),
-      ).toBe(decoded);
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
       const params1: AdapterDecodeFunctionDataParams<Erc20Abi, "balanceOf"> = {
         abi: erc20.abi,
@@ -327,35 +310,7 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const adapter = new MockAdapter();
-      const events: ContractEvent<Erc20Abi, "Transfer">[] = [
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0x",
-            to: "0x",
-            value: 123n,
-          },
-        },
-      ];
-      adapter
-        .onGetEvents({
-          abi: erc20.abi,
-          address: "0x",
-          event: "Transfer",
-        })
-        .resolves(events);
-      expect(
-        await adapter.getEvents({
-          abi: erc20.abi,
-          address: "0x",
-          event: "Transfer",
-        }),
-      ).toBe(events);
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
       const params1: AdapterGetEventsParams<Erc20Abi, "Transfer"> = {
         abi: erc20.abi,
@@ -410,25 +365,7 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const adapter = new MockAdapter();
-      adapter
-        .onRead({
-          abi: erc20.abi,
-          address: "0x",
-          fn: "symbol",
-        })
-        .resolves("ABC");
-      expect(
-        await adapter.read({
-          abi: erc20.abi,
-          address: "0x",
-          fn: "symbol",
-        }),
-      ).toBe("ABC");
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
       const params1: AdapterReadParams<Erc20Abi, "allowance"> = {
         abi: erc20.abi,
@@ -483,26 +420,6 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const adapter = new MockAdapter();
-      adapter
-        .onSimulateWrite({
-          abi: erc20.abi,
-          address: "0x",
-          fn: "transfer",
-          args: { to: "0x", amount: 123n },
-        })
-        .resolves(true);
-      expect(
-        await adapter.simulateWrite({
-          abi: erc20.abi,
-          address: "0x",
-          fn: "transfer",
-          args: { to: "0x", amount: 123n },
-        }),
-      ).toBe(true);
-    });
-
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
       const params1: AdapterWriteParams<Erc20Abi, "transfer"> = {
@@ -539,26 +456,6 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const adapter = new MockAdapter();
-      adapter
-        .onWrite({
-          abi: erc20.abi,
-          address: "0x",
-          fn: "transfer",
-          args: { to: "0x", amount: 123n },
-        })
-        .resolves("0x123");
-      expect(
-        await adapter.write({
-          abi: erc20.abi,
-          address: "0x",
-          fn: "transfer",
-          args: { to: "0x", amount: 123n },
-        }),
-      ).toBe("0x123");
-    });
-
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
       const params1: AdapterWriteParams<Erc20Abi, "transfer"> = {
@@ -575,6 +472,19 @@ describe("MockAdapter", () => {
       adapter.onWrite(params2).resolves("0x2");
       expect(await adapter.write(params1)).toBe("0x1");
       expect(await adapter.write(params2)).toBe("0x2");
+    });
+
+    it("Can be called with params after being stubbed with no arguments", async () => {
+      const adapter = new MockAdapter();
+      adapter.onWrite().resolves("0x123");
+      expect(
+        await adapter.write({
+          abi: erc20.abi,
+          address: "0x",
+          fn: "transfer",
+          args: { to: "0x", amount: 123n },
+        }),
+      ).toBe("0x123");
     });
   });
 
