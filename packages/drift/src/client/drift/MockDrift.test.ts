@@ -119,17 +119,7 @@ describe("MockDrift", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const drift = new MockDrift();
-      const block: Block = {
-        blockNumber: 123n,
-        timestamp: 123n,
-      };
-      drift.onGetBlock().resolves(block);
-      expect(await drift.getBlock()).toBe(block);
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const drift = new MockDrift();
       const block1: Block = {
         blockNumber: 1n,
@@ -143,6 +133,16 @@ describe("MockDrift", () => {
       drift.onGetBlock({ blockNumber: 2n }).resolves(block2);
       expect(await drift.getBlock({ blockNumber: 1n })).toBe(block1);
       expect(await drift.getBlock({ blockNumber: 2n })).toBe(block2);
+    });
+
+    it("Can be called with params after being stubbed with no arguments", async () => {
+      const drift = new MockDrift();
+      const block: Block = {
+        blockNumber: 123n,
+        timestamp: 123n,
+      };
+      drift.onGetBlock().resolves(block);
+      expect(await drift.getBlock({ blockNumber: 123n })).toBe(block);
     });
   });
 
@@ -158,18 +158,18 @@ describe("MockDrift", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const drift = new MockDrift();
-      drift.onGetBalance().resolves(123n);
-      expect(await drift.getBalance({ address: "0x" })).toBe(123n);
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const drift = new MockDrift();
       drift.onGetBalance({ address: "0xAlice" }).resolves(1n);
       drift.onGetBalance({ address: "0xBob" }).resolves(2n);
       expect(await drift.getBalance({ address: "0xAlice" })).toBe(1n);
       expect(await drift.getBalance({ address: "0xBob" })).toBe(2n);
+    });
+
+    it("Can be called with params after being stubbed with no args", async () => {
+      const drift = new MockDrift();
+      drift.onGetBalance().resolves(123n);
+      expect(await drift.getBalance({ address: "0x" })).toBe(123n);
     });
   });
 
@@ -179,22 +179,7 @@ describe("MockDrift", () => {
       expect(await drift.getTransaction({ hash: "0x" })).toBeUndefined();
     });
 
-    it("Can be stubbed", async () => {
-      const drift = new MockDrift();
-      const transaction: Transaction = {
-        blockNumber: 123n,
-        gas: 123n,
-        gasPrice: 123n,
-        input: "0x",
-        nonce: 123,
-        type: "0x123",
-        value: 123n,
-      };
-      drift.onGetTransaction().resolves(transaction);
-      expect(await drift.getTransaction({ hash: "0x" })).toBe(transaction);
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const drift = new MockDrift();
       const transaction1: Transaction = {
         input: "0x1",
@@ -214,6 +199,21 @@ describe("MockDrift", () => {
       expect(await drift.getTransaction({ hash: "0x1" })).toBe(transaction1);
       expect(await drift.getTransaction({ hash: "0x2" })).toBe(transaction2);
     });
+
+    it("Can be called with params after being stubbed with no args", async () => {
+      const drift = new MockDrift();
+      const transaction: Transaction = {
+        blockNumber: 123n,
+        gas: 123n,
+        gasPrice: 123n,
+        input: "0x",
+        nonce: 123,
+        type: "0x123",
+        value: 123n,
+      };
+      drift.onGetTransaction().resolves(transaction);
+      expect(await drift.getTransaction({ hash: "0x" })).toBe(transaction);
+    });
   });
 
   describe("waitForTransaction", () => {
@@ -222,26 +222,7 @@ describe("MockDrift", () => {
       expect(drift.waitForTransaction({ hash: "0x" })).resolves.toBeUndefined();
     });
 
-    it("Can be stubbed", async () => {
-      const drift = new MockDrift();
-      const receipt: TransactionReceipt = {
-        blockNumber: 123n,
-        blockHash: "0x",
-        cumulativeGasUsed: 123n,
-        effectiveGasPrice: 123n,
-        from: "0x",
-        gasUsed: 123n,
-        logsBloom: "0x",
-        status: "success",
-        to: "0x",
-        transactionHash: "0x",
-        transactionIndex: 123,
-      };
-      drift.onWaitForTransaction().resolves(receipt);
-      expect(await drift.waitForTransaction({ hash: "0x" })).toBe(receipt);
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const drift = new MockDrift();
       const receipt1: TransactionReceipt = {
         transactionHash: "0x1",
@@ -265,6 +246,25 @@ describe("MockDrift", () => {
       expect(await drift.waitForTransaction({ hash: "0x1" })).toBe(receipt1);
       expect(await drift.waitForTransaction({ hash: "0x2" })).toBe(receipt2);
     });
+
+    it("Can be called with params after being stubbed with no args", async () => {
+      const drift = new MockDrift();
+      const receipt: TransactionReceipt = {
+        blockNumber: 123n,
+        blockHash: "0x",
+        cumulativeGasUsed: 123n,
+        effectiveGasPrice: 123n,
+        from: "0x",
+        gasUsed: 123n,
+        logsBloom: "0x",
+        status: "success",
+        to: "0x",
+        transactionHash: "0x",
+        transactionIndex: 123,
+      };
+      drift.onWaitForTransaction().resolves(receipt);
+      expect(await drift.waitForTransaction({ hash: "0x" })).toBe(receipt);
+    });
   });
 
   describe("encodeFunctionData", () => {
@@ -283,25 +283,7 @@ describe("MockDrift", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const drift = new MockDrift();
-      drift
-        .onEncodeFunctionData({
-          abi: erc20.abi,
-          fn: "balanceOf",
-          args: { account: "0x" },
-        })
-        .returns("0x123");
-      expect(
-        drift.encodeFunctionData({
-          abi: erc20.abi,
-          fn: "balanceOf",
-          args: { account: "0x" },
-        }),
-      ).toBe("0x123");
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const drift = new MockDrift();
       const params1: EncodeFunctionDataParams<Erc20Abi, "balanceOf"> = {
         abi: erc20.abi,
@@ -316,6 +298,18 @@ describe("MockDrift", () => {
       drift.onEncodeFunctionData(params2).returns("0x2");
       expect(drift.encodeFunctionData(params1)).toBe("0x1");
       expect(drift.encodeFunctionData(params2)).toBe("0x2");
+    });
+
+    it("Can be called with params after being stubbed with no args", async () => {
+      const drift = new MockDrift();
+      drift.onEncodeFunctionData().returns("0x123");
+      expect(
+        drift.encodeFunctionData({
+          abi: erc20.abi,
+          fn: "balanceOf",
+          args: { account: "0x" },
+        }),
+      ).toBe("0x123");
     });
   });
 
@@ -335,29 +329,7 @@ describe("MockDrift", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const drift = new MockDrift();
-      const decoded: DecodedFunctionData<Erc20Abi, "balanceOf"> = {
-        functionName: "balanceOf",
-        args: { account: "0x1" },
-      };
-      drift
-        .onDecodeFunctionData({
-          abi: erc20.abi,
-          fn: "balanceOf",
-          data: "0x",
-        })
-        .returns(decoded);
-      expect(
-        drift.decodeFunctionData({
-          abi: erc20.abi,
-          fn: "balanceOf",
-          data: "0x",
-        }),
-      ).toBe(decoded);
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const drift = new MockDrift();
       const params1: DecodeFunctionDataParams<Erc20Abi, "balanceOf"> = {
         abi: erc20.abi,
@@ -399,35 +371,7 @@ describe("MockDrift", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const drift = new MockDrift();
-      const events: ContractEvent<Erc20Abi, "Transfer">[] = [
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0x",
-            to: "0x",
-            value: 123n,
-          },
-        },
-      ];
-      drift
-        .onGetEvents({
-          abi: erc20.abi,
-          address: "0x",
-          event: "Transfer",
-        })
-        .resolves(events);
-      expect(
-        await drift.getEvents({
-          abi: erc20.abi,
-          address: "0x",
-          event: "Transfer",
-        }),
-      ).toBe(events);
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const drift = new MockDrift();
       const params1: GetEventsParams<Erc20Abi, "Transfer"> = {
         abi: erc20.abi,
@@ -482,25 +426,7 @@ describe("MockDrift", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const drift = new MockDrift();
-      drift
-        .onRead({
-          abi: erc20.abi,
-          address: "0x",
-          fn: "symbol",
-        })
-        .resolves("ABC");
-      expect(
-        await drift.read({
-          abi: erc20.abi,
-          address: "0x",
-          fn: "symbol",
-        }),
-      ).toBe("ABC");
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const drift = new MockDrift();
       const params1: ReadParams<Erc20Abi, "allowance"> = {
         abi: erc20.abi,
@@ -516,25 +442,6 @@ describe("MockDrift", () => {
       drift.onRead(params2).resolves(2n);
       expect(await drift.read(params1)).toBe(1n);
       expect(await drift.read(params2)).toBe(2n);
-    });
-
-    it.todo("Can be stubbed with partial args", async () => {
-      const drift = new MockDrift();
-      drift
-        .onRead({
-          abi: erc20.abi,
-          address: "0x",
-          fn: "balanceOf",
-        })
-        .resolves(123n);
-      expect(
-        await drift.read({
-          abi: erc20.abi,
-          address: "0x",
-          fn: "balanceOf",
-          args: { account: "0x" },
-        }),
-      ).toBe(123n);
     });
   });
 
@@ -555,27 +462,7 @@ describe("MockDrift", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const drift = new MockDrift();
-      drift
-        .onSimulateWrite({
-          abi: erc20.abi,
-          address: "0x",
-          fn: "transfer",
-          args: { to: "0x", amount: 123n },
-        })
-        .resolves(true);
-      expect(
-        await drift.simulateWrite({
-          abi: erc20.abi,
-          address: "0x",
-          fn: "transfer",
-          args: { to: "0x", amount: 123n },
-        }),
-      ).toBe(true);
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const drift = new MockDrift();
       const params1: WriteParams<Erc20Abi, "transfer"> = {
         abi: erc20.abi,
@@ -611,27 +498,7 @@ describe("MockDrift", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
-      const drift = new MockDrift();
-      drift
-        .onWrite({
-          abi: erc20.abi,
-          address: "0x",
-          fn: "transfer",
-          args: { to: "0x", amount: 123n },
-        })
-        .resolves("0x123");
-      expect(
-        await drift.write({
-          abi: erc20.abi,
-          address: "0x",
-          fn: "transfer",
-          args: { to: "0x", amount: 123n },
-        }),
-      ).toBe("0x123");
-    });
-
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with specific params", async () => {
       const drift = new MockDrift();
       const params1: WriteParams<Erc20Abi, "transfer"> = {
         abi: erc20.abi,
@@ -647,6 +514,19 @@ describe("MockDrift", () => {
       drift.onWrite(params2).resolves("0x2");
       expect(await drift.write(params1)).toBe("0x1");
       expect(await drift.write(params2)).toBe("0x2");
+    });
+
+    it("Can be called with params after being stubbed with no arguments", async () => {
+      const drift = new MockDrift();
+      drift.onWrite().resolves("0x123");
+      expect(
+        await drift.write({
+          abi: erc20.abi,
+          address: "0x",
+          fn: "transfer",
+          args: { to: "0x", amount: 123n },
+        }),
+      ).toBe("0x123");
     });
   });
 

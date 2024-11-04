@@ -67,7 +67,7 @@ export class MockDrift<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
   >(
-    params: OptionalKeys<EncodeFunctionDataParams<TAbi, TFunctionName>, "args">,
+    params?: OptionalKeys<EncodeFunctionDataParams<TAbi, TFunctionName>, "args">,
   ) => this.adapter.onEncodeFunctionData(params);
 
   onDecodeFunctionData = <
@@ -99,7 +99,7 @@ export class MockDrift<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
-    params: OptionalKeys<WriteParams<TAbi, TFunctionName>, "args" | "address">,
+    params?: OptionalKeys<WriteParams<TAbi, TFunctionName>, "args" | "address">,
   ) => this.adapter.onWrite(params);
 
   onGetSignerAddress = () => this.adapter.onGetSignerAddress();
