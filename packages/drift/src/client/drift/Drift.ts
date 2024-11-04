@@ -298,9 +298,7 @@ export type WriteParams<
     TAbi,
     "nonpayable" | "payable"
   > = FunctionName<TAbi, "nonpayable" | "payable">,
-> = AdapterWriteParams<TAbi, TFunctionName> & {
-  onMined?: (receipt?: TransactionReceipt) => void;
-};
+> = AdapterWriteParams<TAbi, TFunctionName>;
 
 export type GetEventsParams<
   TAbi extends Abi = Abi,
