@@ -108,6 +108,17 @@ describe("MockAdapter", () => {
       adapter.onGetBalance().resolves(123n);
       expect(await adapter.getBalance({ address: "0x" })).toBe(123n);
     });
+
+    it("Can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      adapter.onGetBalance({ address: "0xAlice" }).resolves(1n);
+      expect(
+        await adapter.getBalance({ address: "0xAlice", blockTag: "latest" }),
+      ).toBe(1n);
+      expect(
+        await adapter.getBalance({ address: "0xAlice", blockNumber: 123n }),
+      ).toBe(1n);
+    });
   });
 
   describe("getTransaction", () => {

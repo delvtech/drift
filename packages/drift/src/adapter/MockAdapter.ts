@@ -26,6 +26,7 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
+import { createSerializableKey } from "src/exports";
 import { StubStore } from "src/utils/testing/StubStore";
 import type { OptionalKeys } from "src/utils/types";
 
@@ -93,35 +94,18 @@ export class MockAdapter implements ReadWriteAdapter {
   // getBalance //
 
   onGetBalance(params?: Partial<NetworkGetBalanceParams>) {
-    let stub = this.stubs.get<[NetworkGetBalanceParams], Promise<bigint>>({
+    const stub = this.stubs.get<[NetworkGetBalanceParams], Promise<bigint>>({
       method: "getBalance",
+      key: createSerializableKey(params || {}),
     });
-    if (params) {
-      const { address, blockHash, blockNumber, blockTag } = params;
-      stub = stub.withArgs({
-        address,
-        blockHash,
-        blockNumber,
-        blockTag,
-      } as NetworkGetBalanceParams);
-    }
     return stub;
   }
 
-  async getBalance({
-    address,
-    blockHash,
-    blockNumber,
-    blockTag,
-  }: NetworkGetBalanceParams) {
+  async getBalance(params: NetworkGetBalanceParams) {
     return this.stubs.get<[NetworkGetBalanceParams], Promise<bigint>>({
       method: "getBalance",
-    })({
-      address,
-      blockHash,
-      blockNumber,
-      blockTag,
-    } as NetworkGetBalanceParams);
+      key: createSerializableKey(params),
+    })(params as NetworkGetBalanceParams);
   }
 
   // getTransaction //
