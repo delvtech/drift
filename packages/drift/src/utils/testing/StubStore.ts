@@ -5,78 +5,142 @@ import { DriftError } from "src/error";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { FunctionKey } from "src/utils/types";
 
-export class StubStore<T> {
-  // TODO: Split by method name to avoid iterating over all stubs while
-  // searching for a partial match.
-  protected stubs = new Map<string, SinonStub>();
+export interface GetStubParams<T, TArgs extends any[], TReturnType> {
+  /**
+   * The method to get a stub for.
+   */
+  method: FunctionKey<T>;
 
+  /**
+   * A key to distinguish the stub from others for the same method.
+   *
+   * @example
+   * ```ts
+   * const aliceBalanceStub = mock.stubs.get<[NetworkGetBalanceParams], Promise<bigint>>({
+   *   method: "getBalance",
+   *   key: { address: "alice" },
+   * });
+   *
+   * const bobBalanceStub = mock.stubs.get<[NetworkGetBalanceParams], Promise<bigint>>({
+   *   method: "getBalance",
+   *   key: { address: "bob" },
+   * });
+   * ```
+   */
+  key?: SerializableKey;
+
+  /**
+   * Whether to allow partial matching of the key. If `true`, the first stub
+   * with a key that is a partial match of the given key will be returned. This
+   * has no effect if `key` is not provided.
+   */
+  matchPartial?: boolean;
+
+  /**
+   * A function to create the stub if it doesn't exist.
+   */
+  create?: (stub: SinonStub<TArgs, TReturnType>) => SinonStub;
+}
+
+/**
+ * A store for stubs that can be used to mock methods on an object, `T`.
+ */
+export class StubStore<T> {
+  protected methodStores = new Map<
+    FunctionKey<T>,
+    {
+      defaultStub: SinonStub;
+      keyedStubs: Map<string, SinonStub>;
+    }
+  >();
+
+  reset() {
+    this.methodStores.clear();
+  }
+
+  /**
+   * Get a typed stub for a method on the object, `T`.
+   */
   get<TArgs extends any[], TReturnType = any>({
     method,
     key,
+    matchPartial,
     create,
-  }: {
-    method: FunctionKey<T>;
-    key?: SerializableKey;
-    create?: (stub: SinonStub<TArgs, TReturnType>) => SinonStub;
-  }): SinonStub<TArgs, TReturnType> {
-    const methodString = String(method);
-    let stubKey = methodString;
-    if (key) {
-      stubKey += `:${stringify(key)}`;
-    }
+  }: GetStubParams<T, TArgs, TReturnType>): SinonStub<TArgs, TReturnType> {
+    let methodStore = this.methodStores.get(method);
 
-    // If a stub matching the key exists, return it
-    if (this.stubs.has(stubKey)) {
-      return this.stubs.get(stubKey) as any;
-    }
+    // Create a new method store if one doesn't exist
+    if (!methodStore) {
+      methodStore = {
+        defaultStub: sinonStub().throws(
+          new NotImplementedError({
+            method: String(method),
+          }),
+        ),
+        keyedStubs: new Map(),
+      };
+      this.methodStores.set(method, methodStore);
 
-    // Otherwise, search for a partial match
-    const isObjectKey = typeof key === "object";
-    let fallbackStub: SinonStub<TArgs, TReturnType> | undefined;
-    for (const [storedKey, storedStub] of this.stubs) {
-      // If the keys are partial matches, return the stub
-      const [, storedKeyData] = storedKey.split(/^\w+:/);
-      if (storedKeyData && isObjectKey) {
-        const storedKeyParsed = JSON.parse(storedKeyData);
-        if (isMatch(key, storedKeyParsed)) {
-          return storedStub as any;
-        }
-      }
-
-      // If the key is only the method name, save it as a fallback
-      if (storedKey === methodString) {
-        fallbackStub = storedStub as any;
+      // Apply the create function to the default stub and return early if no
+      // key is provided or if partial matching is enabled.
+      if (create && (!key || matchPartial)) {
+        methodStore.defaultStub = create(methodStore.defaultStub as any);
+        return methodStore.defaultStub as any;
       }
     }
 
-    // If a fallback stub exists, return it
-    if (fallbackStub) {
-      return fallbackStub;
+    if (!key) {
+      return methodStore.defaultStub as any;
     }
 
-    // Otherwise, create a new stub that throws a NotImplementedError by default
-    let stub = sinonStub().throws(
+    const stubKey = stringify(key);
+
+    if (methodStore.keyedStubs.has(stubKey)) {
+      return methodStore.keyedStubs.get(stubKey) as any;
+    }
+
+    if (matchPartial) {
+      // Try to compare the keys to find a partial match
+      switch (typeof key) {
+        case "string":
+          for (const [storedKey, storedStub] of methodStore.keyedStubs) {
+            if (storedKey.startsWith(key)) {
+              return storedStub as any;
+            }
+          }
+          break;
+        case "object":
+          for (const [storedKey, storedStub] of methodStore.keyedStubs) {
+            const storedKeyData = JSON.parse(storedKey);
+            if (isMatch(key, storedKeyData)) {
+              return storedStub as any;
+            }
+          }
+      }
+
+      return methodStore.defaultStub as any;
+    }
+
+    let newStub = sinonStub().throws(
       new NotImplementedError({
         method: String(method),
-        stubKey,
+        key: stubKey,
       }),
     );
-    if (create) {
-      stub = create(stub as any);
-    }
-    this.stubs.set(stubKey, stub);
-    return stub as any;
-  }
 
-  reset() {
-    this.stubs.clear();
+    if (create) {
+      newStub = create(newStub as any);
+    }
+
+    methodStore.keyedStubs.set(stubKey, newStub);
+    return newStub as any;
   }
 }
 
 export class NotImplementedError extends DriftError {
-  constructor({ method, stubKey }: { method: string; stubKey: string }) {
+  constructor({ method, key }: { method: string; key?: string }) {
     super(
-      `No stub found with key "${stubKey}". Called \`.${method}\` on a Mock without a return value. The value must be stubbed first:
+      `No stub found for method ${method}${key ? ` with key "${key}"` : ""}. The value must be stubbed first:
     mock.on${method.replace(/^./, (c) => c.toUpperCase())}(...args).resolves(value)`,
     );
     this.name = "NotImplementedError";
