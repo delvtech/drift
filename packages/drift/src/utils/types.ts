@@ -6,30 +6,6 @@ export type AnyFunction = (...args: any) => any;
 export type MaybePromise<T> = T | Promise<T>;
 
 /**
- * A property key that can be auto-completed to a specific value. A useful
- * alternative to `T | string` when you want to retain the auto-completion from
- * `T` but also allow arbitrary keys.
- *
- * @example
- * ```ts
- * type Color = "red" | "green" | "blue";
- *
- * const color: AutocompleteKey<Color> = "red";
- * // "red"
- *
- * const color2: AutocompleteKey<Color> = "yellow";
- * // "yellow"
- * ```
- *
- * @see https://x.com/mattpocockuk/status/1822917967316676787
- */
-export type AutocompleteKey<T extends PropertyKey> =
-  | T
-  | (string & {})
-  | (number & {})
-  | (symbol & {});
-
-/**
  * Combines members of an intersection into a readable type.
  * @see https://x.com/mattpocockuk/status/1622730173446557697?s=20&t=NdpAcmEFXY01xkqU3KO0Mg
  */

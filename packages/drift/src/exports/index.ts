@@ -127,7 +127,6 @@ export { extendInstance } from "src/utils/extendInstance";
 export type {
   AnyFunction,
   AnyObject,
-  AutocompleteKey,
   Converted,
   DeepPartial,
   EmptyObject,
