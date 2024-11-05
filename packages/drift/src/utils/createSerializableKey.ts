@@ -36,10 +36,15 @@ export function createSerializableKey(
         );
       }
 
+      const objectKeys = Object.keys(rawKey);
+      if (objectKeys.length === 0) {
+        return {};
+      }
+
       const processedObject: Record<string, SerializableKey> = {};
 
       // sort keys to ensure consistent key generation
-      for (const key of Object.keys(rawKey).sort()) {
+      for (const key of objectKeys.sort()) {
         const value = rawKey[key];
 
         // ignore properties with undefined or null values
