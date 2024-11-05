@@ -12,7 +12,6 @@ import type { Block } from "src/adapter/types/Block";
 import type { ContractEvent, EventName } from "src/adapter/types/Event";
 import type {
   DecodedFunctionData,
-  FunctionArgs,
   FunctionName,
   FunctionReturn,
 } from "src/adapter/types/Function";
@@ -52,43 +51,22 @@ export class MockAdapter implements ReadWriteAdapter {
   // getBlock //
 
   onGetBlock(params?: Partial<NetworkGetBlockParams>) {
-    let stub = this.stubs.get<
-      [NetworkGetBlockParams?],
-      Promise<Block | undefined>
-    >({
-      method: "getBlock",
-    });
-    if (params) {
-      // TODO: Destructuring each property here and in `getBlock` helps ensure
-      // non-existent properties are set to `undefined` so that `{}` is the same
-      // as `{ blockNumber: undefined }`. However, this feels like it could be
-      // the source of some confusing bugs if not done consistently in every
-      // method and kept in sync with the actual param types. This should be
-      // reconsidered when implementing support for partial params.
-      const { blockHash, blockNumber, blockTag } = params;
-      stub = stub.withArgs({
-        blockHash,
-        blockNumber,
-        blockTag,
-      } as NetworkGetBlockParams);
-    }
-    return stub;
-  }
-
-  async getBlock({
-    blockHash,
-    blockNumber,
-    blockTag,
-  }: NetworkGetBlockParams = {}) {
     return this.stubs.get<[NetworkGetBlockParams?], Promise<Block | undefined>>(
       {
         method: "getBlock",
+        key: params ? createSerializableKey(params) : undefined,
       },
-    )({
-      blockHash,
-      blockNumber,
-      blockTag,
-    } as NetworkGetBlockParams);
+    );
+  }
+
+  async getBlock(params?: NetworkGetBlockParams) {
+    return this.stubs.get<[NetworkGetBlockParams?], Promise<Block | undefined>>(
+      {
+        method: "getBlock",
+        key: params ? createSerializableKey(params) : undefined,
+        matchPartial: true,
+      },
+    )(params);
   }
 
   // getBalance //
@@ -96,7 +74,7 @@ export class MockAdapter implements ReadWriteAdapter {
   onGetBalance(params?: Partial<NetworkGetBalanceParams>) {
     const stub = this.stubs.get<[NetworkGetBalanceParams], Promise<bigint>>({
       method: "getBalance",
-      key: createSerializableKey(params || {}),
+      key: params ? createSerializableKey(params) : undefined,
     });
     return stub;
   }
@@ -105,23 +83,21 @@ export class MockAdapter implements ReadWriteAdapter {
     return this.stubs.get<[NetworkGetBalanceParams], Promise<bigint>>({
       method: "getBalance",
       key: createSerializableKey(params),
+      matchPartial: true,
     })(params as NetworkGetBalanceParams);
   }
 
   // getTransaction //
 
   onGetTransaction(params?: Partial<NetworkGetTransactionParams>) {
-    let stub = this.stubs.get<
+    return this.stubs.get<
       [NetworkGetTransactionParams],
       Promise<Transaction | undefined>
     >({
       method: "getTransaction",
+      key: params ? createSerializableKey(params) : undefined,
       create: (stub) => stub.resolves(undefined),
     });
-    if (params) {
-      stub = stub.withArgs(params);
-    }
-    return stub;
   }
 
   async getTransaction(params: NetworkGetTransactionParams) {
@@ -130,6 +106,8 @@ export class MockAdapter implements ReadWriteAdapter {
       Promise<Transaction | undefined>
     >({
       method: "getTransaction",
+      key: createSerializableKey(params),
+      matchPartial: true,
       create: (stub) => stub.resolves(undefined),
     })(params);
   }
@@ -137,17 +115,14 @@ export class MockAdapter implements ReadWriteAdapter {
   // waitForTransaction //
 
   onWaitForTransaction(params?: Partial<NetworkWaitForTransactionParams>) {
-    let stub = this.stubs.get<
+    return this.stubs.get<
       [NetworkWaitForTransactionParams],
       Promise<TransactionReceipt | undefined>
     >({
       method: "waitForTransaction",
+      key: params ? createSerializableKey(params) : undefined,
       create: (stub) => stub.resolves(undefined),
     });
-    if (params) {
-      stub = stub.withArgs(params);
-    }
-    return stub;
   }
 
   async waitForTransaction(params: NetworkWaitForTransactionParams) {
@@ -156,6 +131,8 @@ export class MockAdapter implements ReadWriteAdapter {
       Promise<TransactionReceipt | undefined>
     >({
       method: "waitForTransaction",
+      key: createSerializableKey(params),
+      matchPartial: true,
       create: (stub) => stub.resolves(undefined),
     })(params);
   }
@@ -171,19 +148,13 @@ export class MockAdapter implements ReadWriteAdapter {
       "args"
     >,
   ) {
-    let stub = this.stubs.get<
+    return this.stubs.get<
       [AdapterEncodeFunctionDataParams<TAbi, TFunctionName>],
       Bytes
     >({
       method: "encodeFunctionData",
+      key: params ? createSerializableKey(params) : undefined,
     });
-
-    if (params) {
-      stub = stub.withArgs(
-        params as Partial<AdapterEncodeFunctionDataParams<TAbi, TFunctionName>>,
-      );
-    }
-    return stub;
   }
 
   encodeFunctionData<
@@ -195,6 +166,8 @@ export class MockAdapter implements ReadWriteAdapter {
       Bytes
     >({
       method: "encodeFunctionData",
+      key: createSerializableKey(params),
+      matchPartial: true,
     })(params);
   }
 
@@ -209,15 +182,13 @@ export class MockAdapter implements ReadWriteAdapter {
       "data"
     >,
   ) {
-    return this.stubs
-      .get<
-        [AdapterDecodeFunctionDataParams<TAbi, TFunctionName>],
-        DecodedFunctionData<TAbi, TFunctionName>
-      >({
-        method: "decodeFunctionData",
-        key: params.fn,
-      })
-      .withArgs(params);
+    return this.stubs.get<
+      [AdapterDecodeFunctionDataParams<TAbi, TFunctionName>],
+      DecodedFunctionData<TAbi, TFunctionName>
+    >({
+      method: "decodeFunctionData",
+      key: createSerializableKey(params),
+    });
   }
 
   decodeFunctionData<
@@ -229,9 +200,8 @@ export class MockAdapter implements ReadWriteAdapter {
       DecodedFunctionData<TAbi, TFunctionName>
     >({
       method: "decodeFunctionData",
-      // TODO: This should be specific to the abi to ensure the correct return
-      // type.
-      key: params.fn,
+      key: createSerializableKey(params),
+      matchPartial: true,
     })(params as AdapterDecodeFunctionDataParams<TAbi, TFunctionName>);
   }
 
@@ -240,15 +210,13 @@ export class MockAdapter implements ReadWriteAdapter {
   onGetEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
     params: OptionalKeys<AdapterGetEventsParams<TAbi, TEventName>, "address">,
   ) {
-    return this.stubs
-      .get<
-        [AdapterGetEventsParams<TAbi, TEventName>],
-        Promise<ContractEvent<TAbi, TEventName>[]>
-      >({
-        method: "getEvents",
-        key: params.event,
-      })
-      .withArgs(params);
+    return this.stubs.get<
+      [AdapterGetEventsParams<TAbi, TEventName>],
+      Promise<ContractEvent<TAbi, TEventName>[]>
+    >({
+      method: "getEvents",
+      key: createSerializableKey(params),
+    });
   }
 
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
@@ -259,58 +227,43 @@ export class MockAdapter implements ReadWriteAdapter {
       Promise<ContractEvent<TAbi, TEventName>[]>
     >({
       method: "getEvents",
-      key: params.event,
+      key: createSerializableKey(params),
+      matchPartial: true,
     })(params);
   }
 
   // read //
 
-  // FIXME: Partial args in `on` methods is not working as expected. Currently,
-  // you must stub the method with all expected args.
   onRead<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >({
-    abi,
-    address,
-    fn,
-    args,
-    block,
-  }: OptionalKeys<AdapterReadParams<TAbi, TFunctionName>, "args" | "address">) {
-    return this.stubs
-      .get<
-        [AdapterReadParams<TAbi, TFunctionName>],
-        Promise<FunctionReturn<TAbi, TFunctionName>>
-      >({
-        method: "read",
-        key: fn,
-      })
-      .withArgs({
-        abi,
-        address,
-        fn,
-        args,
-        block,
-      } as Partial<AdapterReadParams<TAbi, TFunctionName>>);
-  }
-
-  async read<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >({ abi, address, fn, args, block }: AdapterReadParams<TAbi, TFunctionName>) {
+  >(
+    params: OptionalKeys<
+      AdapterReadParams<TAbi, TFunctionName>,
+      "args" | "address"
+    >,
+  ) {
     return this.stubs.get<
       [AdapterReadParams<TAbi, TFunctionName>],
       Promise<FunctionReturn<TAbi, TFunctionName>>
     >({
       method: "read",
-      key: fn,
-    })({
-      abi,
-      address: address,
-      fn: fn,
-      args: args as FunctionArgs<TAbi, TFunctionName>,
-      block: block,
+      key: createSerializableKey(params),
     });
+  }
+
+  async read<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
+  >(params: AdapterReadParams<TAbi, TFunctionName>) {
+    return this.stubs.get<
+      [AdapterReadParams<TAbi, TFunctionName>],
+      Promise<FunctionReturn<TAbi, TFunctionName>>
+    >({
+      method: "read",
+      key: createSerializableKey(params),
+      matchPartial: true,
+    })(params);
   }
 
   // simulateWrite //
@@ -324,15 +277,13 @@ export class MockAdapter implements ReadWriteAdapter {
       "args" | "address"
     >,
   ) {
-    return this.stubs
-      .get<
-        [AdapterWriteParams<TAbi, TFunctionName>],
-        Promise<FunctionReturn<TAbi, TFunctionName>>
-      >({
-        method: "simulateWrite",
-        key: params.fn,
-      })
-      .withArgs(params as Partial<AdapterWriteParams<TAbi, TFunctionName>>);
+    return this.stubs.get<
+      [AdapterWriteParams<TAbi, TFunctionName>],
+      Promise<FunctionReturn<TAbi, TFunctionName>>
+    >({
+      method: "simulateWrite",
+      key: createSerializableKey(params),
+    });
   }
 
   async simulateWrite<
@@ -344,7 +295,8 @@ export class MockAdapter implements ReadWriteAdapter {
       Promise<FunctionReturn<TAbi, TFunctionName>>
     >({
       method: "simulateWrite",
-      key: params.fn,
+      key: createSerializableKey(params),
+      matchPartial: true,
     })(params);
   }
 
@@ -359,19 +311,13 @@ export class MockAdapter implements ReadWriteAdapter {
       "args" | "address"
     >,
   ) {
-    let stub = this.stubs.get<
+    return this.stubs.get<
       [AdapterWriteParams<TAbi, TFunctionName>],
       Promise<Hash>
     >({
       method: "write",
+      key: params ? createSerializableKey(params) : undefined,
     });
-    if (params) {
-      stub = stub.withArgs(
-        params as Partial<AdapterWriteParams<TAbi, TFunctionName>>,
-      );
-    }
-
-    return stub;
   }
 
   async write<
@@ -381,6 +327,8 @@ export class MockAdapter implements ReadWriteAdapter {
     const writePromise = Promise.resolve(
       this.stubs.get<[AdapterWriteParams<TAbi, TFunctionName>], Promise<Hash>>({
         method: "write",
+        key: createSerializableKey(params),
+        matchPartial: true,
       })(params),
     );
 
