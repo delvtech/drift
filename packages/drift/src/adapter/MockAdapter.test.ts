@@ -72,7 +72,17 @@ describe("MockAdapter", () => {
       expect(await adapter.getBlock({ blockNumber: 2n })).toBe(block2);
     });
 
-    it("Can be called with params after being stubbed with no arguments", async () => {
+    it("Can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      const block: Block = {
+        blockNumber: 123n,
+        timestamp: 123n,
+      };
+      adapter.onGetBlock({}).resolves(block);
+      expect(await adapter.getBlock({ blockNumber: 123n })).toBe(block);
+    });
+
+    it("Can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       const block: Block = {
         blockNumber: 123n,
@@ -103,12 +113,6 @@ describe("MockAdapter", () => {
       expect(await adapter.getBalance({ address: "0xBob" })).toBe(2n);
     });
 
-    it("Can be called with params after being stubbed with no args", async () => {
-      const adapter = new MockAdapter();
-      adapter.onGetBalance().resolves(123n);
-      expect(await adapter.getBalance({ address: "0x" })).toBe(123n);
-    });
-
     it("Can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       adapter.onGetBalance({ address: "0xAlice" }).resolves(1n);
@@ -118,6 +122,12 @@ describe("MockAdapter", () => {
       expect(
         await adapter.getBalance({ address: "0xAlice", blockNumber: 123n }),
       ).toBe(1n);
+    });
+
+    it("Can be called with args after being stubbed with no args", async () => {
+      const adapter = new MockAdapter();
+      adapter.onGetBalance().resolves(123n);
+      expect(await adapter.getBalance({ address: "0x" })).toBe(123n);
     });
   });
 
@@ -148,7 +158,22 @@ describe("MockAdapter", () => {
       expect(await adapter.getTransaction({ hash: "0x2" })).toBe(transaction2);
     });
 
-    it("Can be called with params after being stubbed with no args", async () => {
+    it("Can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      const transaction: Transaction = {
+        blockNumber: 123n,
+        gas: 123n,
+        gasPrice: 123n,
+        input: "0x",
+        nonce: 123,
+        type: "0x123",
+        value: 123n,
+      };
+      adapter.onGetTransaction({}).resolves(transaction);
+      expect(await adapter.getTransaction({ hash: "0x" })).toBe(transaction);
+    });
+
+    it("Can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       const transaction: Transaction = {
         blockNumber: 123n,
@@ -197,7 +222,28 @@ describe("MockAdapter", () => {
       expect(await adapter.waitForTransaction({ hash: "0x2" })).toBe(receipt2);
     });
 
-    it("Can be called with params after being stubbed with no args", async () => {
+    it("Can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      const receipt: TransactionReceipt = {
+        blockNumber: 123n,
+        blockHash: "0x",
+        cumulativeGasUsed: 123n,
+        effectiveGasPrice: 123n,
+        from: "0x",
+        gasUsed: 123n,
+        logsBloom: "0x",
+        status: "success",
+        to: "0x",
+        transactionHash: "0x",
+        transactionIndex: 123,
+      };
+      adapter.onWaitForTransaction({ hash: "0x" }).resolves(receipt);
+      expect(
+        await adapter.waitForTransaction({ hash: "0x", timeout: 10_000 }),
+      ).toBe(receipt);
+    });
+
+    it("Can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       const receipt: TransactionReceipt = {
         blockNumber: 123n,
@@ -250,7 +296,24 @@ describe("MockAdapter", () => {
       expect(adapter.encodeFunctionData(params2)).toBe("0x2");
     });
 
-    it("Can be called with params after being stubbed with no args", async () => {
+    it("Can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onEncodeFunctionData({
+          abi: erc20.abi,
+          fn: "balanceOf",
+        })
+        .returns("0x123");
+      expect(
+        adapter.encodeFunctionData({
+          abi: erc20.abi,
+          fn: "balanceOf",
+          args: { account: "0x" },
+        }),
+      ).toBe("0x123");
+    });
+
+    it("Can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       adapter.onEncodeFunctionData().returns("0x123");
       expect(
@@ -302,6 +365,27 @@ describe("MockAdapter", () => {
       adapter.onDecodeFunctionData(params2).returns(return2);
       expect(adapter.decodeFunctionData(params1)).toBe(return1);
       expect(adapter.decodeFunctionData(params2)).toBe(return2);
+    });
+
+    it("Can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      const decoded: DecodedFunctionData<Erc20Abi, "balanceOf"> = {
+        functionName: "balanceOf",
+        args: { account: "0x1" },
+      };
+      adapter
+        .onDecodeFunctionData({
+          abi: erc20.abi,
+          fn: "balanceOf",
+        })
+        .returns(decoded);
+      expect(
+        adapter.decodeFunctionData({
+          abi: erc20.abi,
+          fn: "balanceOf",
+          data: "0x1",
+        }),
+      ).toBe(decoded);
     });
   });
 
@@ -358,6 +442,34 @@ describe("MockAdapter", () => {
       expect(await adapter.getEvents(params1)).toBe(events1);
       expect(await adapter.getEvents(params2)).toBe(events2);
     });
+
+    it("Can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      const events: ContractEvent<Erc20Abi, "Transfer">[] = [
+        {
+          eventName: "Transfer",
+          args: {
+            from: "0x1",
+            to: "0x1",
+            value: 123n,
+          },
+        },
+      ];
+      adapter
+        .onGetEvents({
+          abi: erc20.abi,
+          event: "Transfer",
+        })
+        .resolves(events);
+      expect(
+        await adapter.getEvents({
+          abi: erc20.abi,
+          address: "0x1",
+          event: "Transfer",
+          filter: { from: "0x1" },
+        }),
+      ).toBe(events);
+    });
   });
 
   describe("read", () => {
@@ -394,12 +506,11 @@ describe("MockAdapter", () => {
       expect(await adapter.read(params2)).toBe(2n);
     });
 
-    it.todo("Can be stubbed with partial args", async () => {
+    it("Can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       adapter
         .onRead({
           abi: erc20.abi,
-          address: "0x",
           fn: "balanceOf",
         })
         .resolves(123n);
@@ -448,6 +559,24 @@ describe("MockAdapter", () => {
       expect(await adapter.simulateWrite(params1)).toBe(true);
       expect(await adapter.simulateWrite(params2)).toBe(false);
     });
+
+    it("Can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onSimulateWrite({
+          abi: erc20.abi,
+          fn: "transfer",
+        })
+        .resolves(true);
+      expect(
+        await adapter.simulateWrite({
+          abi: erc20.abi,
+          address: "0x1",
+          fn: "transfer",
+          args: { to: "0x1", amount: 123n },
+        }),
+      ).toBe(true);
+    });
   });
 
   describe("write", () => {
@@ -485,7 +614,25 @@ describe("MockAdapter", () => {
       expect(await adapter.write(params2)).toBe("0x2");
     });
 
-    it("Can be called with params after being stubbed with no arguments", async () => {
+    it("Can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onWrite({
+          abi: erc20.abi,
+          fn: "transfer",
+        })
+        .resolves("0x123");
+      expect(
+        await adapter.write({
+          abi: erc20.abi,
+          address: "0x",
+          fn: "transfer",
+          args: { to: "0x", amount: 123n },
+        }),
+      ).toBe("0x123");
+    });
+
+    it("Can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       adapter.onWrite().resolves("0x123");
       expect(
