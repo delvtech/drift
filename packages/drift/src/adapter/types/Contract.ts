@@ -6,9 +6,6 @@ import type { EventFilter, EventName } from "src/adapter/types/Event";
 
 // https://github.com/ethereum/execution-apis/blob/main/src/eth/execute.yaml#L1
 export interface ContractReadOptions {
-  /**
-   * @default 'latest'
-   */
   block?: BlockTag | bigint;
 }
 
