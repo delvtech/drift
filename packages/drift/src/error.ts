@@ -1,12 +1,36 @@
-export interface DriftErrorOptions {
-  cause?: unknown;
+export interface DriftErrorOptions extends ErrorOptions {
+  /**
+   * A custom prefix to use in place of {@linkcode DriftError.prefix}.
+   */
+  prefix?: string;
 }
 
+/**
+ * An error thrown by Drift.
+ *
+ * This error is designed to ensure clean stack trace formatting even when
+ * minified and can be extended to create other error types with the same
+ * behavior.
+ *
+ * @example
+ * ```ts
+ * class MySdkError extends DriftError {
+ *   constructor(message: string, options?: ErrorOptions) {
+ *     super(message, { ...options, prefix: "🚨 " });
+ *     this.name = "SDK Error";
+ *   }
+ * }
+ *
+ * throw new MySdkError("Something went wrong");
+ * // 🚨 SDK Error: Something went wrong
+ * //     at ...
+ * ```
+ */
 export class DriftError extends Error {
-  static prefix = "✖ ";
+  static prefix = "✖ " as const;
 
   constructor(error: any, options?: DriftErrorOptions) {
-    // Try to coerce the error to a string, which o
+    // Try to coerce the error to a string for the message.
     let message: string;
     try {
       message = error?.message ?? String(error);
@@ -45,7 +69,7 @@ export class DriftError extends Error {
     // subclassing and changing the name).
     Object.defineProperty(this, "stack", {
       get(): string {
-        let stack = `${DriftError.prefix}${this.name}`;
+        let stack = `${options?.prefix ?? DriftError.prefix}${this.name}`;
 
         if (customName) {
           stack += ` [${customName}]`;
