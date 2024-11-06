@@ -1,5 +1,11 @@
 # @delvtech/drift-viem
 
+## 0.0.1-beta.9
+
+### Patch Changes
+
+- 1a67fd8: Remove default `getEvents` block tags in viem adapter
+
 ## 0.0.1-beta.8
 
 ### Patch Changes
