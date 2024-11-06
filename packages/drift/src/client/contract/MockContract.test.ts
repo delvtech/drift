@@ -199,7 +199,7 @@ describe("MockContract", () => {
       ).toBe(2n);
     });
 
-    it.todo("Can be stubbed with partial args", async () => {
+    it("Can be stubbed with partial args", async () => {
       const contract = new MockContract({ abi });
       contract.onRead("balanceOf").resolves(123n);
       expect(await contract.read("balanceOf", { account: "0x" })).toBe(123n);
