@@ -34,7 +34,9 @@ export function getAbiEntry<
 
 export class AbiEntryNotFoundError extends DriftError {
   constructor({ type, name }: { type: AbiItemType; name?: string }) {
-    super(`No ${type}${name ? ` with name ${name}` : ""} found in ABI.`);
-    this.name = "AbiEntryNotFoundError";
+    super({
+      name: "AbiEntryNotFoundError",
+      message: `No ${type}${name ? ` with name ${name}` : ""} found in ABI.`,
+    });
   }
 }

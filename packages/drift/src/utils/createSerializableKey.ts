@@ -1,3 +1,4 @@
+import { DriftError } from "src/error/DriftError";
 import type { AnyObject } from "src/utils/types";
 
 /**
@@ -60,7 +61,9 @@ export function createSerializableKey(
       try {
         return rawKey.toString();
       } catch (err) {
-        throw new Error(`Unable to process cache key value: ${String(rawKey)}`);
+        throw new DriftError(
+          `Unable to process cache key value: ${String(rawKey)}`,
+        );
       }
   }
 }
