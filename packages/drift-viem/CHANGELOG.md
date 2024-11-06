@@ -1,5 +1,11 @@
 # @delvtech/drift-viem
 
+## 0.0.1-beta.8
+
+### Patch Changes
+
+- d582c0a: Add `ViemAdapterParams` to exports
+
 ## 0.0.1-beta.7
 
 ### Patch Changes
