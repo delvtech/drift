@@ -138,8 +138,8 @@ export class ViemReadAdapter implements ReadAdapter {
         address,
         abi: abi as Abi,
         eventName: event as string,
-        fromBlock: fromBlock ?? "earliest",
-        toBlock: toBlock ?? "latest",
+        fromBlock,
+        toBlock,
         args: filter,
       })
       .then((events) => {
