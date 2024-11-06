@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.1-beta.9
+
+### Patch Changes
+
+- 19aa433: Cleanup errors
+
 ## 0.0.1-beta.8
 
 ### Patch Changes
