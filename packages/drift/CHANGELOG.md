@@ -1,5 +1,17 @@
 # @delvtech/drift
 
+## 0.0.1-beta.7
+
+### Patch Changes
+
+- 24bb35a: Improve `DriftError` formatting, support minification
+- 119724d: Remove unused `AutocompleteKey` type
+- cd1d206: Removed default values from MockAdapter functions
+- 119724d: Add support for stubbing functions with partial params and arguments in Mock classes.
+- 1cf3f2a: Moved types dep to dev deps.
+- 3525e4f: Added `onMined` to `ContractWriteOptions`
+- 79107a6: Fix deps, switch to `safe-stable-stringify`
+
 ## 0.0.1-beta.6
 
 ### Patch Changes

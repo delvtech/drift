@@ -7,14 +7,23 @@
     "@delvtech/evm-client": "0.5.1",
     "@delvtech/evm-client-ethers": "0.5.1",
     "@delvtech/evm-client-viem": "0.6.3",
-    "@repo/typescript-config": "0.0.0"
+    "@repo/typescript-config": "0.0.0",
+    "example": "0.0.0"
   },
   "changesets": [
+    "beige-years-visit",
+    "chatty-meals-vanish",
+    "eight-islands-turn",
+    "empty-lies-smile",
     "flat-peas-drum",
     "flat-rocks-worry",
+    "great-pumpkins-clap",
     "large-ducks-whisper",
+    "lemon-seas-pretend",
     "light-chefs-push",
     "nasty-pillows-wave",
-    "shaggy-clouds-cheat"
+    "shaggy-clouds-cheat",
+    "small-birds-impress",
+    "small-ducks-switch"
   ]
 }
