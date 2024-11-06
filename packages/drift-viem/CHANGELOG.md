@@ -1,5 +1,13 @@
 # @delvtech/drift-viem
 
+## 0.0.1-beta.10
+
+### Patch Changes
+
+- Updated dependencies [e55910e]
+- Updated dependencies [2c91009]
+  - @delvtech/drift@0.0.1-beta.8
+
 ## 0.0.1-beta.9
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @delvtech/drift
 
+## 0.0.1-beta.8
+
+### Patch Changes
+
+- e55910e: Add `name` option to `DriftError`
+- 2c91009: Add `prefix` option and doc comments to `DriftError`
+
 ## 0.0.1-beta.7
 
 ### Patch Changes
