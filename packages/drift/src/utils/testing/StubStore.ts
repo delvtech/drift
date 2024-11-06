@@ -1,7 +1,7 @@
 import isMatch from "lodash.ismatch";
 import stringify from "safe-stable-stringify";
 import { type SinonStub, stub as sinonStub } from "sinon";
-import { DriftError } from "src/error";
+import { DriftError } from "src/error/DriftError";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { FunctionKey } from "src/utils/types";
 

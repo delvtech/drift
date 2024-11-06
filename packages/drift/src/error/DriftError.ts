@@ -3,6 +3,11 @@ export interface DriftErrorOptions extends ErrorOptions {
    * A custom prefix to use in place of {@linkcode DriftError.prefix}.
    */
   prefix?: string;
+
+  /**
+   * A custom name to use in place of {@linkcode DriftError.name}.
+   */
+  name?: string;
 }
 
 /**
@@ -16,8 +21,11 @@ export interface DriftErrorOptions extends ErrorOptions {
  * ```ts
  * class MySdkError extends DriftError {
  *   constructor(message: string, options?: ErrorOptions) {
- *     super(message, { ...options, prefix: "🚨 " });
- *     this.name = "SDK Error";
+ *     super(message, {
+ *       ...options,
+ *       prefix: "🚨 ",
+ *       name: "SDK Error",
+ *     });
  *   }
  * }
  *
@@ -28,6 +36,7 @@ export interface DriftErrorOptions extends ErrorOptions {
  */
 export class DriftError extends Error {
   static prefix = "✖ " as const;
+  static name = "Drift Error" as const;
 
   constructor(error: any, options?: DriftErrorOptions) {
     // Try to coerce the error to a string for the message.
@@ -39,7 +48,7 @@ export class DriftError extends Error {
     }
 
     super(message);
-    this.name = "Drift Error";
+    this.name = options?.name ?? DriftError.name;
 
     // Minification can mangle the stack traces of custom errors by obfuscating
     // the class name and including large chunks of minified code in the output.

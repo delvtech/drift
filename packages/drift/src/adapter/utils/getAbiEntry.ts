@@ -1,6 +1,6 @@
 import type { Abi, AbiItemType } from "abitype";
 import type { AbiEntry, AbiEntryName } from "src/adapter/types/Abi";
-import { DriftError } from "src/error";
+import { DriftError } from "src/error/DriftError";
 
 /**
  * Get an entry from an ABI by type and name.

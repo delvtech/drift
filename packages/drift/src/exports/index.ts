@@ -117,6 +117,10 @@ export {
   type WriteParams,
 } from "src/client/drift/Drift";
 
+// error //
+
+export { DriftError, type DriftErrorOptions } from "src/error/DriftError";
+
 // utils //
 
 export {
@@ -143,4 +147,3 @@ export type {
 // ...rest //
 
 export { ZERO_ADDRESS } from "src/constants";
-export { DriftError } from "src/error";
