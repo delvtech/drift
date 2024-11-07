@@ -22,14 +22,15 @@ import {
 } from "src/client/drift/Drift";
 import type { OptionalKeys } from "src/utils/types";
 
-export interface MockDriftParams extends DriftOptions {}
-
 export class MockDrift<
   TAdapter extends MockAdapter = MockAdapter,
   TCache extends SimpleCache = SimpleCache,
 > extends Drift<TAdapter, TCache> {
-  constructor(adapter: TAdapter = new MockAdapter() as TAdapter) {
-    super(adapter);
+  constructor(
+    adapter: TAdapter = new MockAdapter() as TAdapter,
+    options?: DriftOptions<TCache>,
+  ) {
+    super(adapter, options);
   }
 
   reset = () => this.adapter.reset();
@@ -67,7 +68,10 @@ export class MockDrift<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
   >(
-    params?: OptionalKeys<EncodeFunctionDataParams<TAbi, TFunctionName>, "args">,
+    params?: OptionalKeys<
+      EncodeFunctionDataParams<TAbi, TFunctionName>,
+      "args"
+    >,
   ) => this.adapter.onEncodeFunctionData(params);
 
   onDecodeFunctionData = <
