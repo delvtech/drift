@@ -50,6 +50,18 @@ export class MockDrift<
     });
   };
 
+  protected async initCacheNamespace(): Promise<PropertyKey> {
+    return (
+      this.cacheNamespace ??
+      this.getChainId()
+        .then((id) => {
+          this.cacheNamespace = id;
+          return id;
+        })
+        .catch(() => "__mock__")
+    );
+  }
+
   onGetChainId = () => this.adapter.onGetChainId();
 
   onGetBlock = (params?: Partial<GetBlockParams>) =>

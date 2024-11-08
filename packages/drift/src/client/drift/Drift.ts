@@ -119,14 +119,29 @@ export class Drift<
       cacheNamespace,
     });
 
+  protected async initCacheNamespace(): Promise<PropertyKey> {
+    return (
+      this.cacheNamespace ??
+      this.getChainId().then((id) => {
+        this.cacheNamespace = id;
+        return id;
+      })
+    );
+  }
+
   /**
    * Get the chain ID of the network.
    */
   getChainId = async (params?: GetChainIdParams): Promise<number> => {
-    const key = this.cache.chainIdKey(params);
+    const key = this.cache.chainIdKey({
+      cacheNamespace: this.cacheNamespace,
+      ...params,
+    });
+
     if (this.cache.has(key)) {
       return this.cache.get(key);
     }
+
     return this.adapter.getChainId().then((id) => {
       this.cache.set(key, id);
       return id;
@@ -138,10 +153,21 @@ export class Drift<
    * the latest block is returned.
    */
   getBlock = async (params?: GetBlockParams): Promise<Block | undefined> => {
-    const key = this.cache.blockKey(params);
+    const cacheNamespace =
+      params?.cacheNamespace ??
+      this.cacheNamespace ??
+      // Only await the async init fn if no value is already set.
+      (await this.initCacheNamespace());
+
+    const key = this.cache.blockKey({
+      cacheNamespace,
+      ...params,
+    });
+
     if (this.cache.has(key)) {
       return this.cache.get(key);
     }
+
     return this.adapter.getBlock(params).then((block) => {
       this.cache.set(key, block);
       return block;
@@ -152,10 +178,21 @@ export class Drift<
    * Get the balance of native currency for an account.
    */
   getBalance = async (params: GetBalanceParams): Promise<bigint> => {
-    const key = this.cache.balanceKey(params);
+    const cacheNamespace =
+      params?.cacheNamespace ??
+      this.cacheNamespace ??
+      // Only await the async init fn if no value is already set.
+      (await this.initCacheNamespace());
+
+    const key = this.cache.balanceKey({
+      cacheNamespace,
+      ...params,
+    });
+
     if (this.cache.has(key)) {
       return this.cache.get(key);
     }
+
     return this.adapter.getBalance(params).then((balance) => {
       this.cache.set(key, balance);
       return balance;
@@ -168,10 +205,21 @@ export class Drift<
   getTransaction = async (
     params: GetTransactionParams,
   ): Promise<Transaction | undefined> => {
-    const key = this.cache.transactionKey(params);
+    const cacheNamespace =
+      params?.cacheNamespace ??
+      this.cacheNamespace ??
+      // Only await the async init fn if no value is already set.
+      (await this.initCacheNamespace());
+
+    const key = this.cache.transactionKey({
+      cacheNamespace,
+      ...params,
+    });
+
     if (this.cache.has(key)) {
       return this.cache.get(key);
     }
+
     return this.adapter.getTransaction(params).then((tx) => {
       this.cache.set(key, tx);
       return tx;
@@ -184,10 +232,21 @@ export class Drift<
   waitForTransaction = async (
     params: WaitForTransactionParams,
   ): Promise<TransactionReceipt | undefined> => {
-    const key = this.cache.transactionKey(params);
+    const cacheNamespace =
+      params?.cacheNamespace ??
+      this.cacheNamespace ??
+      // Only await the async init fn if no value is already set.
+      (await this.initCacheNamespace());
+
+    const key = this.cache.transactionKey({
+      cacheNamespace,
+      ...params,
+    });
+
     if (this.cache.has(key)) {
       return this.cache.get(key);
     }
+
     return this.adapter.waitForTransaction(params).then((tx) => {
       this.cache.set(key, tx);
       return tx;
@@ -200,10 +259,21 @@ export class Drift<
   getEvents = async <TAbi extends Abi, TEventName extends EventName<TAbi>>(
     params: GetEventsParams<TAbi, TEventName>,
   ): Promise<ContractEvent<TAbi, TEventName>[]> => {
-    const key = this.cache.eventsKey(params);
+    const cacheNamespace =
+      params?.cacheNamespace ??
+      this.cacheNamespace ??
+      // Only await the async init fn if no value is already set.
+      (await this.initCacheNamespace());
+
+    const key = this.cache.eventsKey({
+      cacheNamespace,
+      ...params,
+    });
+
     if (this.cache.has(key)) {
       return this.cache.get(key);
     }
+
     return this.adapter.getEvents(params).then((result) => {
       this.cache.set(key, result);
       return result;
@@ -219,10 +289,21 @@ export class Drift<
   >(
     params: ReadParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>> => {
-    const key = this.cache.readKey(params);
+    const cacheNamespace =
+      params?.cacheNamespace ??
+      this.cacheNamespace ??
+      // Only await the async init fn if no value is already set.
+      (await this.initCacheNamespace());
+
+    const key = this.cache.readKey({
+      cacheNamespace,
+      ...params,
+    });
+
     if (this.cache.has(key)) {
       return this.cache.get(key);
     }
+
     return this.adapter.read(params).then((result) => {
       this.cache.set(key, result);
       return result;
