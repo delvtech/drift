@@ -25,14 +25,19 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
-import { createSerializableKey } from "src/exports";
+import { createSerializableKey } from "src/utils/createSerializableKey";
 import { StubStore } from "src/utils/testing/StubStore";
-import type { OptionalKeys } from "src/utils/types";
+import type { AnyObject, OptionalKeys } from "src/utils/types";
 
 export class MockAdapter implements ReadWriteAdapter {
   stubs = new StubStore<ReadWriteAdapter>();
 
   reset = () => this.stubs.reset();
+
+  // Remove the abi from the key
+  protected createKey({ abi, ...params }: AnyObject) {
+    return createSerializableKey(params);
+  }
 
   // getChainId //
 
@@ -54,7 +59,7 @@ export class MockAdapter implements ReadWriteAdapter {
     return this.stubs.get<[NetworkGetBlockParams?], Promise<Block | undefined>>(
       {
         method: "getBlock",
-        key: params ? createSerializableKey(params) : undefined,
+        key: params ? this.createKey(params) : undefined,
       },
     );
   }
@@ -63,7 +68,7 @@ export class MockAdapter implements ReadWriteAdapter {
     return this.stubs.get<[NetworkGetBlockParams?], Promise<Block | undefined>>(
       {
         method: "getBlock",
-        key: params ? createSerializableKey(params) : undefined,
+        key: params ? this.createKey(params) : undefined,
         matchPartial: true,
       },
     )(params);
@@ -74,7 +79,7 @@ export class MockAdapter implements ReadWriteAdapter {
   onGetBalance(params?: Partial<NetworkGetBalanceParams>) {
     const stub = this.stubs.get<[NetworkGetBalanceParams], Promise<bigint>>({
       method: "getBalance",
-      key: params ? createSerializableKey(params) : undefined,
+      key: params ? this.createKey(params) : undefined,
     });
     return stub;
   }
@@ -82,7 +87,7 @@ export class MockAdapter implements ReadWriteAdapter {
   async getBalance(params: NetworkGetBalanceParams) {
     return this.stubs.get<[NetworkGetBalanceParams], Promise<bigint>>({
       method: "getBalance",
-      key: createSerializableKey(params),
+      key: this.createKey(params),
       matchPartial: true,
     })(params as NetworkGetBalanceParams);
   }
@@ -95,7 +100,7 @@ export class MockAdapter implements ReadWriteAdapter {
       Promise<Transaction | undefined>
     >({
       method: "getTransaction",
-      key: params ? createSerializableKey(params) : undefined,
+      key: params ? this.createKey(params) : undefined,
       create: (stub) => stub.resolves(undefined),
     });
   }
@@ -106,7 +111,7 @@ export class MockAdapter implements ReadWriteAdapter {
       Promise<Transaction | undefined>
     >({
       method: "getTransaction",
-      key: createSerializableKey(params),
+      key: this.createKey(params),
       matchPartial: true,
       create: (stub) => stub.resolves(undefined),
     })(params);
@@ -120,7 +125,7 @@ export class MockAdapter implements ReadWriteAdapter {
       Promise<TransactionReceipt | undefined>
     >({
       method: "waitForTransaction",
-      key: params ? createSerializableKey(params) : undefined,
+      key: params ? this.createKey(params) : undefined,
       create: (stub) => stub.resolves(undefined),
     });
   }
@@ -131,7 +136,7 @@ export class MockAdapter implements ReadWriteAdapter {
       Promise<TransactionReceipt | undefined>
     >({
       method: "waitForTransaction",
-      key: createSerializableKey(params),
+      key: this.createKey(params),
       matchPartial: true,
       create: (stub) => stub.resolves(undefined),
     })(params);
@@ -153,7 +158,7 @@ export class MockAdapter implements ReadWriteAdapter {
       Bytes
     >({
       method: "encodeFunctionData",
-      key: params ? createSerializableKey(params) : undefined,
+      key: params ? this.createKey(params) : undefined,
     });
   }
 
@@ -166,7 +171,7 @@ export class MockAdapter implements ReadWriteAdapter {
       Bytes
     >({
       method: "encodeFunctionData",
-      key: createSerializableKey(params),
+      key: this.createKey(params),
       matchPartial: true,
     })(params);
   }
@@ -187,7 +192,7 @@ export class MockAdapter implements ReadWriteAdapter {
       DecodedFunctionData<TAbi, TFunctionName>
     >({
       method: "decodeFunctionData",
-      key: createSerializableKey(params),
+      key: this.createKey(params),
     });
   }
 
@@ -200,7 +205,7 @@ export class MockAdapter implements ReadWriteAdapter {
       DecodedFunctionData<TAbi, TFunctionName>
     >({
       method: "decodeFunctionData",
-      key: createSerializableKey(params),
+      key: this.createKey(params),
       matchPartial: true,
     })(params as AdapterDecodeFunctionDataParams<TAbi, TFunctionName>);
   }
@@ -215,7 +220,7 @@ export class MockAdapter implements ReadWriteAdapter {
       Promise<ContractEvent<TAbi, TEventName>[]>
     >({
       method: "getEvents",
-      key: createSerializableKey(params),
+      key: this.createKey(params),
     });
   }
 
@@ -227,7 +232,7 @@ export class MockAdapter implements ReadWriteAdapter {
       Promise<ContractEvent<TAbi, TEventName>[]>
     >({
       method: "getEvents",
-      key: createSerializableKey(params),
+      key: this.createKey(params),
       matchPartial: true,
     })(params);
   }
@@ -248,7 +253,7 @@ export class MockAdapter implements ReadWriteAdapter {
       Promise<FunctionReturn<TAbi, TFunctionName>>
     >({
       method: "read",
-      key: createSerializableKey(params),
+      key: this.createKey(params),
     });
   }
 
@@ -261,7 +266,7 @@ export class MockAdapter implements ReadWriteAdapter {
       Promise<FunctionReturn<TAbi, TFunctionName>>
     >({
       method: "read",
-      key: createSerializableKey(params),
+      key: this.createKey(params),
       matchPartial: true,
     })(params);
   }
@@ -282,7 +287,7 @@ export class MockAdapter implements ReadWriteAdapter {
       Promise<FunctionReturn<TAbi, TFunctionName>>
     >({
       method: "simulateWrite",
-      key: createSerializableKey(params),
+      key: this.createKey(params),
     });
   }
 
@@ -295,7 +300,7 @@ export class MockAdapter implements ReadWriteAdapter {
       Promise<FunctionReturn<TAbi, TFunctionName>>
     >({
       method: "simulateWrite",
-      key: createSerializableKey(params),
+      key: this.createKey(params),
       matchPartial: true,
     })(params);
   }
@@ -316,7 +321,7 @@ export class MockAdapter implements ReadWriteAdapter {
       Promise<Hash>
     >({
       method: "write",
-      key: params ? createSerializableKey(params) : undefined,
+      key: params ? this.createKey(params) : undefined,
     });
   }
 
@@ -327,7 +332,7 @@ export class MockAdapter implements ReadWriteAdapter {
     const writePromise = Promise.resolve(
       this.stubs.get<[AdapterWriteParams<TAbi, TFunctionName>], Promise<Hash>>({
         method: "write",
-        key: createSerializableKey(params),
+        key: this.createKey(params),
         matchPartial: true,
       })(params),
     );
