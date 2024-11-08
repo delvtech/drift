@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.1-beta.10
+
+### Patch Changes
+
+- af1d24f: Fix Drift to ensure it uses the cache namespace given to it in it's options or fallback to fetching the chainId.
+
 ## 0.0.1-beta.9
 
 ### Patch Changes
