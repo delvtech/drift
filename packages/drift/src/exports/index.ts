@@ -137,6 +137,7 @@ export type {
   FunctionKey,
   MaybePromise,
   MergeKeys,
+  OneOf,
   OptionalKeys,
   Pretty,
   ReplaceProps,
