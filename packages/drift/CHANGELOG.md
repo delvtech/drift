@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.1-beta.11
+
+### Patch Changes
+
+- a92bcf3: Remove abi from mock keys
+
 ## 0.0.1-beta.10
 
 ### Patch Changes
