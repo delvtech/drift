@@ -35,11 +35,10 @@ import type { SimpleCache } from "src/cache/SimpleCache/types";
 import { Contract, type ContractParams } from "src/client/contract/Contract";
 import type { Pretty } from "src/utils/types";
 
-export type DriftOptions<TCache extends SimpleCache = SimpleCache> = Pretty<
-  {
-    cache?: TCache;
-  } & NameSpaceParam
->;
+export interface DriftOptions<TCache extends SimpleCache = SimpleCache>
+  extends NameSpaceParam {
+  cache?: TCache;
+}
 
 export class Drift<
   TAdapter extends Adapter = Adapter,

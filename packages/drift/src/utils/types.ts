@@ -14,7 +14,7 @@ export type Pretty<T> = { [K in keyof T]: T[K] } & {};
 /**
  * Replace properties in `T` with properties in `U`.
  */
-export type ReplaceProps<T, U> = Pretty<Omit<T, keyof U> & U>;
+export type ReplaceProps<T, U> = Omit<T, keyof U> & U;
 
 /**
  * Make all properties in `T` whose keys are in the union `K` required and
