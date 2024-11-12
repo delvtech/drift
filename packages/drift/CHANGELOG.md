@@ -1,5 +1,15 @@
 # @delvtech/drift
 
+## 0.0.1-beta.12
+
+### Patch Changes
+
+- c9f8d8f: Added an `OxAdapter` so that drift clients can be instantiated without a web3 client lib already installed.
+- 4194108: Add `OneOf` type
+- f3e9259: Add support for overloaded functions
+- c9f8d8f: Patched types
+- fe64d49: Remove `Pretty` from `ReplaceProps` type
+
 ## 0.0.1-beta.11
 
 ### Patch Changes

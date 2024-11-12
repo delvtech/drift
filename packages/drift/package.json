@@ -1,6 +1,6 @@
 {
   "name": "@delvtech/drift",
-  "version": "0.0.1-beta.11",
+  "version": "0.0.1-beta.12",
   "license": "AGPL-3.0",
   "type": "module",
   "main": "dist/index.cjs",
@@ -30,8 +30,12 @@
   },
   "typesVersions": {
     "*": {
-      ".": ["./dist/index.d.ts"],
-      "testing": ["./dist/testing.d.ts"]
+      ".": [
+        "./dist/index.d.ts"
+      ],
+      "testing": [
+        "./dist/testing.d.ts"
+      ]
     }
   },
   "scripts": {
@@ -78,5 +82,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": ["dist"]
+  "files": [
+    "dist"
+  ]
 }
