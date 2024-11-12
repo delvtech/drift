@@ -61,7 +61,11 @@ export type {
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
 
-export { OxReadAdapter, type OxReadAdapterParams } from "src/adapter/OxAdapter";
+export {
+  OxReadAdapter,
+  OxReadWriteAdapter,
+  type OxAdapterParams,
+} from "src/adapter/OxAdapter";
 
 export { isReadWriteAdapter } from "src/adapter/utils/isReadWriteAdapter";
 export { objectToArray } from "src/adapter/utils/objectToArray";

@@ -4,6 +4,7 @@ import {
   AbiFunction,
   type AbiItem,
   AbiParameters,
+  Address,
   Hex,
   Provider,
   RpcTransport,
@@ -15,7 +16,8 @@ import type {
   AdapterGetEventsParams,
   AdapterReadParams,
   AdapterWriteParams,
-  ReadAdapter
+  ReadAdapter,
+  ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
 import type { Block, BlockTag } from "src/adapter/types/Block";
 import type { EventArgs, EventName } from "src/adapter/types/Event";
@@ -35,7 +37,7 @@ import type { TransactionReceipt } from "src/adapter/types/Transaction";
 import { objectToArray } from "src/adapter/utils/objectToArray";
 import { DriftError } from "src/error/DriftError";
 
-export interface OxReadAdapterParams {
+export interface OxAdapterParams {
   rpcUrl?: string;
   /**
    * Polling frequency in milliseconds
@@ -48,7 +50,7 @@ export class OxReadAdapter implements ReadAdapter {
   provider: Provider.Provider;
   pollingInterval: number;
 
-  constructor({ rpcUrl, pollingInterval = 4_000 }: OxReadAdapterParams) {
+  constructor({ rpcUrl, pollingInterval = 4_000 }: OxAdapterParams) {
     this.provider = Provider.from(
       rpcUrl ? RpcTransport.fromHttp(rpcUrl) : window.ethereum,
     );
@@ -301,66 +303,48 @@ export class OxReadAdapter implements ReadAdapter {
   simulateWrite = <
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >({
-    abi,
-    address,
-    fn,
-    args,
-    accessList,
-    chainId,
-    from,
-    gas,
-    gasPrice,
-    input,
-    maxFeePerGas,
-    maxPriorityFeePerGas,
-    nonce,
-    to,
-    type,
-    value,
-  }: AdapterWriteParams<TAbi, TFunctionName>) => {
-    const argsArray = objectToArray({
-      abi,
-      type: "function",
-      name: fn,
-      kind: "inputs",
-      value: args as FunctionArgs<TAbi, TFunctionName>,
-    });
-    const abiFn = AbiFunction.fromAbi(
-      abi,
-      fn as any,
-      {
-        args: argsArray,
-      } as AbiItem.fromAbi.Options,
-    );
+  >(
+    adapterParams: AdapterWriteParams<TAbi, TFunctionName>,
+  ) => {
+    const { abiFn, params } = writeParams(adapterParams);
     return this.provider
       .request({
         method: "eth_call",
-        params: [
-          {
-            to: to ?? address,
-            data: AbiFunction.encodeData(abiFn, argsArray),
-            accessList,
-            chainId: chainId ? `0x${chainId.toString(16)}` : undefined,
-            from,
-            gas: gas ? `0x${gas.toString(16)}` : undefined,
-            gasPrice: gasPrice ? `0x${gasPrice.toString(16)}` : undefined,
-            input,
-            maxFeePerGas: maxFeePerGas
-              ? `0x${maxFeePerGas.toString(16)}`
-              : undefined,
-            maxPriorityFeePerGas: maxPriorityFeePerGas
-              ? `0x${maxPriorityFeePerGas.toString(16)}`
-              : undefined,
-            nonce: nonce ? `0x${nonce.toString(16)}` : undefined,
-            type,
-            value: value ? `0x${value.toString(16)}` : undefined,
-          },
-        ],
+        params: params as any,
       })
       .then((data) => AbiFunction.decodeResult(abiFn, data)) as Promise<
       FunctionReturn<TAbi, TFunctionName>
     >;
+  };
+}
+
+export class OxReadWriteAdapter
+  extends OxReadAdapter
+  implements ReadWriteAdapter
+{
+  getSignerAddress = async () => {
+    const [address] = await this.provider.request({ method: "eth_accounts" });
+    if (!address) throw new DriftError("No signer address found");
+    return Address.checksum(address);
+  };
+
+  write = async <
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(
+    adapterParams: AdapterWriteParams<TAbi, TFunctionName>,
+  ) => {
+    const { params } = writeParams(adapterParams);
+    const from = params[0].from ?? (await this.getSignerAddress());
+    return this.provider.request({
+      method: "eth_sendTransaction",
+      params: [
+        {
+          ...params[0],
+          from,
+        },
+      ],
+    });
   };
 }
 
@@ -372,6 +356,65 @@ function getBlockParam(block?: BlockTag | bigint): HexString | BlockTag {
     return `0x${block.toString(16)}`;
   }
   return block;
+}
+
+function writeParams<
+  TAbi extends Abi,
+  TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+>({
+  abi,
+  address,
+  args,
+  chainId,
+  fn,
+  gas,
+  gasPrice,
+  maxFeePerGas,
+  maxPriorityFeePerGas,
+  nonce,
+  to,
+  value,
+  ...rest
+}: AdapterWriteParams<TAbi, TFunctionName>) {
+  const argsArray = objectToArray({
+    abi,
+    type: "function",
+    name: fn,
+    kind: "inputs",
+    value: args as FunctionArgs<TAbi, TFunctionName>,
+  });
+  const abiFn = AbiFunction.fromAbi(
+    abi,
+    fn as any,
+    {
+      args: argsArray,
+    } as AbiItem.fromAbi.Options,
+  );
+  return {
+    abiFn,
+    params: [
+      {
+        ...rest,
+        chainId: chainId
+          ? (`0x${chainId.toString(16)}` as HexString)
+          : undefined,
+        data: AbiFunction.encodeData(abiFn, argsArray),
+        gas: gas ? (`0x${gas.toString(16)}` as HexString) : undefined,
+        gasPrice: gasPrice
+          ? (`0x${gasPrice.toString(16)}` as HexString)
+          : undefined,
+        maxFeePerGas: maxFeePerGas
+          ? (`0x${maxFeePerGas.toString(16)}` as HexString)
+          : undefined,
+        maxPriorityFeePerGas: maxPriorityFeePerGas
+          ? (`0x${maxPriorityFeePerGas.toString(16)}` as HexString)
+          : undefined,
+        nonce: nonce ? (`0x${nonce.toString(16)}` as HexString) : undefined,
+        to: to ?? address,
+        value: value ? (`0x${value.toString(16)}` as HexString) : undefined,
+      },
+    ] as const,
+  };
 }
 
 declare global {
