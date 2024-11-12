@@ -48,7 +48,7 @@ export type DriftParams<
 >;
 
 export class Drift<
-  TAdapter extends Adapter = ReadWriteAdapter,
+  TAdapter extends Adapter = Adapter,
   TCache extends SimpleCache = SimpleCache,
 > {
   adapter: TAdapter;

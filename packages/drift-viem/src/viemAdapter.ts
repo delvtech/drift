@@ -4,7 +4,7 @@ import type { PublicClient, WalletClient } from "viem";
 
 export interface ViemAdapterParams<
   TPublicClient extends PublicClient = PublicClient,
-  TWalletClient extends WalletClient | undefined = undefined,
+  TWalletClient extends WalletClient | undefined = WalletClient | undefined,
 > {
   publicClient: TPublicClient;
   walletClient?: TWalletClient;

@@ -52,7 +52,7 @@ export type ContractParams<
 
 export class Contract<
   TAbi extends Abi = Abi,
-  TAdapter extends Adapter = ReadWriteAdapter,
+  TAdapter extends Adapter = Adapter,
   TCache extends SimpleCache = SimpleCache,
 > {
   abi: TAbi;
