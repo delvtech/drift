@@ -24,6 +24,7 @@ import {
   type GetBalanceParameters,
   type GetBlockParameters,
   type PublicClient,
+  decodeEventLog,
   decodeFunctionData,
   encodeFunctionData,
   rpcTransactionType,
@@ -42,6 +43,8 @@ export class ViemReadAdapter implements ReadAdapter {
 
   getChainId = () => this.publicClient.getChainId();
 
+  getBlockNumber = () => this.publicClient.getBlockNumber();
+
   getBlock = (params: NetworkGetBlockParams = {}) => {
     return this.publicClient
       .getBlock(params as GetBlockParameters)
@@ -57,30 +60,12 @@ export class ViemReadAdapter implements ReadAdapter {
       });
   };
 
-  getBalance = ({
-    address,
-    blockNumber,
-    blockTag,
-    blockHash,
-  }: NetworkGetBalanceParams) => {
-    const parameters: Partial<GetBalanceParameters> = {
+  getBalance = ({ address, block }: NetworkGetBalanceParams) => {
+    return this.publicClient.getBalance({
       address,
-    };
-
-    if (blockNumber) {
-      parameters.blockNumber = blockNumber;
-    } else if (blockTag) {
-      parameters.blockTag = blockHash;
-    } else if (blockHash) {
-      return this.getBlock({ blockHash }).then((block) => {
-        return this.publicClient.getBalance({
-          address,
-          blockNumber: block?.blockNumber ?? undefined,
-        });
-      });
-    }
-
-    return this.publicClient.getBalance(parameters as GetBalanceParameters);
+      blockNumber: typeof block === "bigint" ? block : undefined,
+      blockTag: typeof block === "string" ? block : undefined,
+    } as GetBalanceParameters);
   };
 
   getTransaction = ({ hash }: NetworkGetTransactionParams) => {
@@ -143,25 +128,28 @@ export class ViemReadAdapter implements ReadAdapter {
         args: filter,
       })
       .then((events) => {
-        return events.map(({ args, blockNumber, data, transactionHash }) => {
-          const objectArgs = Array.isArray(args)
-            ? arrayToObject({
-                abi: abi as Abi,
-                type: "event",
-                name: event,
-                kind: "inputs",
-                values: args,
-              })
-            : (args as AbiObjectType<TAbi, "event", typeof event, "inputs">);
+        return events.map(
+          ({ args, blockNumber, data, transactionHash, topics }) => {
+            const objectArgs = (
+              Array.isArray(args)
+                ? decodeEventLog({
+                    abi,
+                    eventName: event as any,
+                    data,
+                    topics,
+                  }).args
+                : args
+            ) as AbiObjectType<TAbi, "event", typeof event, "inputs">;
 
-          return {
-            args: objectArgs,
-            blockNumber: blockNumber ?? undefined,
-            data,
-            eventName: event,
-            transactionHash: transactionHash ?? undefined,
-          };
-        });
+            return {
+              args: objectArgs,
+              blockNumber: blockNumber ?? undefined,
+              data,
+              eventName: event,
+              transactionHash: transactionHash ?? undefined,
+            };
+          },
+        );
       });
   };
 
@@ -256,9 +244,7 @@ export class ViemReadAdapter implements ReadAdapter {
       args: arrayToObject({
         // Cast to allow any array type for values
         abi: abi as Abi,
-        type: "function",
         name: functionName,
-        kind: "inputs",
         values: arrayArgs,
       }),
       functionName,
