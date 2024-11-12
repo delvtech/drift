@@ -67,6 +67,7 @@ export {
 } from "src/adapter/OxAdapter";
 
 export { isReadWriteAdapter } from "src/adapter/utils/isReadWriteAdapter";
+export { arrayToObject } from "src/adapter/utils/arrayToObject";
 export { objectToArray } from "src/adapter/utils/objectToArray";
 
 // cache //

@@ -1,9 +1,10 @@
-import type { Abi, AbiItemType, AbiParameter, AbiParameterKind } from "abitype";
+import type { Abi, AbiItemType, AbiParameterKind } from "abitype";
 import type {
   AbiArrayType,
   AbiEntryName,
   AbiObjectType,
 } from "src/adapter/types/Abi";
+import type { WithOptionalFields } from "src/adapter/utils/types";
 import type { AnyObject } from "src/utils/types";
 
 /**
@@ -84,7 +85,7 @@ export function objectToArray<
 
   if (matches.length === 1) {
     const match = matches[0] as WithOptionalFields<TAbi>[number];
-    return match.inputs?.map(
+    return (match.inputs || []).map(
       ({ name }, i) => value?.[name || i],
     ) as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
   }
@@ -119,8 +120,3 @@ export function objectToArray<
 
   return arrayArgs as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
 }
-
-type WithOptionalFields<T extends Abi> = (T[number] & {
-  name?: string;
-  inputs?: AbiParameter[];
-})[];
