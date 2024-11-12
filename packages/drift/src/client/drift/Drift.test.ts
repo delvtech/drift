@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 describe("Drift", () => {
   it("Should use the cache namespace if provided", () => {
-    const drift = new MockDrift(undefined, {
+    const drift = new MockDrift({
       cacheNamespace: "test",
     });
 

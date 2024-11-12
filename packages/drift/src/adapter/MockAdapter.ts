@@ -42,14 +42,28 @@ export class MockAdapter implements ReadWriteAdapter {
   // getChainId //
 
   onGetChainId() {
-    return this.stubs.get<[], number>({
+    return this.stubs.get<[], Promise<number>>({
       method: "getChainId",
     });
   }
 
   async getChainId() {
-    return this.stubs.get<[], number>({
+    return this.stubs.get<[], Promise<number>>({
       method: "getChainId",
+    })();
+  }
+
+  // getBlockNumber //
+
+  onGetBlockNumber() {
+    return this.stubs.get<[], Promise<bigint>>({
+      method: "getBlockNumber",
+    });
+  }
+
+  async getBlockNumber() {
+    return this.stubs.get<[], Promise<bigint>>({
+      method: "getBlockNumber",
     })();
   }
 

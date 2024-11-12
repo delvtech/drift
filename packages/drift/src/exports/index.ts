@@ -26,6 +26,7 @@ export type {
   OnMinedParam,
   ReadAdapter,
   ReadWriteAdapter,
+  AdapterSimulateWriteParams,
 } from "src/adapter/types/Adapter";
 export type { Block, BlockTag } from "src/adapter/types/Block";
 export type {
@@ -60,12 +61,8 @@ export type {
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
 
-export { arrayToFriendly } from "src/adapter/utils/arrayToFriendly";
-export { arrayToObject } from "src/adapter/utils/arrayToObject";
-export {
-  AbiEntryNotFoundError,
-  getAbiEntry,
-} from "src/adapter/utils/getAbiEntry";
+export { OxReadAdapter, type OxReadAdapterParams } from "src/adapter/OxAdapter";
+
 export { isReadWriteAdapter } from "src/adapter/utils/isReadWriteAdapter";
 export { objectToArray } from "src/adapter/utils/objectToArray";
 
@@ -88,6 +85,8 @@ export type { SimpleCache } from "src/cache/SimpleCache/types";
 
 // clients //
 
+export type { AdapterParam } from "src/client/types";
+
 export {
   Contract,
   type ContractEncodeFunctionDataArgs,
@@ -103,7 +102,7 @@ export {
 export {
   Drift,
   type DecodeFunctionDataParams,
-  type DriftOptions,
+  type DriftParams,
   type EncodeFunctionDataParams,
   type GetBalanceParams,
   type GetBlockParams,

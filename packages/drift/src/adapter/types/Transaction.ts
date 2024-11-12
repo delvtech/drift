@@ -9,7 +9,8 @@ export interface TransactionInfo {
   transactionIndex?: number;
 }
 
-/** Basic legacy compatible transaction */
+/** Legacy + EIP-1559 compatible transaction */
+// https://github.com/ethereum/execution-apis/blob/e8727564bb74a1ebcd22a933b7b57eb7b71a11c3/src/schemas/transaction.yaml#L78
 // https://github.com/ethereum/execution-apis/blob/e8727564bb74a1ebcd22a933b7b57eb7b71a11c3/src/schemas/transaction.yaml#L184
 export interface Transaction extends TransactionInfo {
   type: HexString;
@@ -17,7 +18,7 @@ export interface Transaction extends TransactionInfo {
   gas: bigint;
   value: bigint;
   input: Bytes;
-  gasPrice: bigint;
+  gasPrice?: bigint;
   chainId?: number;
   to?: Address | null;
 }

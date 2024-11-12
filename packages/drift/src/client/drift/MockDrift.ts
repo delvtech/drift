@@ -10,7 +10,7 @@ import {
 import {
   type DecodeFunctionDataParams,
   Drift,
-  type DriftOptions,
+  type DriftParams,
   type EncodeFunctionDataParams,
   type GetBalanceParams,
   type GetBlockParams,
@@ -26,11 +26,11 @@ export class MockDrift<
   TAdapter extends MockAdapter = MockAdapter,
   TCache extends SimpleCache = SimpleCache,
 > extends Drift<TAdapter, TCache> {
-  constructor(
-    adapter: TAdapter = new MockAdapter() as TAdapter,
-    options?: DriftOptions<TCache>,
-  ) {
-    super(adapter, options);
+  constructor({
+    adapter = new MockAdapter() as TAdapter,
+    ...rest
+  }: { adapter?: TAdapter } & DriftParams<MockAdapter, TCache> = {}) {
+    super({ ...rest, adapter });
   }
 
   reset = () => this.adapter.reset();
@@ -63,6 +63,8 @@ export class MockDrift<
   }
 
   onGetChainId = () => this.adapter.onGetChainId();
+
+  onGetBlockNumber = () => this.adapter.onGetBlockNumber();
 
   onGetBlock = (params?: Partial<GetBlockParams>) =>
     this.adapter.onGetBlock(params);

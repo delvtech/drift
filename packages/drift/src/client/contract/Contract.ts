@@ -1,4 +1,5 @@
 import type { Abi } from "abitype";
+import { OxReadAdapter } from "src/adapter/OxAdapter";
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
@@ -27,6 +28,7 @@ import type {
   ReadKeyParams,
 } from "src/cache/ClientCache/types";
 import type { SimpleCache } from "src/cache/SimpleCache/types";
+import type { AdapterParam } from "src/client/types";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 import type {
   AnyObject,
@@ -42,10 +44,10 @@ export type ContractParams<
 > = Pretty<
   {
     abi: TAbi;
-    adapter: TAdapter;
     address: Address;
     cache?: TCache;
-  } & NameSpaceParam
+  } & NameSpaceParam &
+    AdapterParam<TAdapter>
 >;
 
 export class Contract<
@@ -82,16 +84,19 @@ export class Contract<
 
   constructor({
     abi,
-    adapter,
     address,
     cache,
     cacheNamespace,
+    ...rest
   }: ContractParams<TAbi, TAdapter, TCache>) {
     this.abi = abi;
-    this.adapter = adapter;
     this.address = address;
     this.cache = createClientCache(cache);
     this.cacheNamespace = cacheNamespace;
+    this.adapter =
+      "adapter" in rest
+        ? rest.adapter
+        : (new OxReadAdapter(rest) as ReadAdapter as TAdapter);
 
     // Write-only property assignment //
 

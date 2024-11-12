@@ -1,10 +1,12 @@
 import type { Abi } from "abitype";
+import { OxReadAdapter } from "src/adapter/OxAdapter";
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
   AdapterDecodeFunctionDataParams,
   AdapterEncodeFunctionDataParams,
   AdapterWriteParams,
+  ReadAdapter,
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
 import type { Block } from "src/adapter/types/Block";
@@ -33,12 +35,18 @@ import type {
 } from "src/cache/ClientCache/types";
 import type { SimpleCache } from "src/cache/SimpleCache/types";
 import { Contract, type ContractParams } from "src/client/contract/Contract";
+import type { AdapterParam } from "src/client/types";
 import type { Pretty } from "src/utils/types";
 
-export interface DriftOptions<TCache extends SimpleCache = SimpleCache>
-  extends NameSpaceParam {
-  cache?: TCache;
-}
+export type DriftParams<
+  TAdapter extends Adapter = Adapter,
+  TCache extends SimpleCache = SimpleCache,
+> = Pretty<
+  {
+    cache?: TCache;
+  } & NameSpaceParam &
+    AdapterParam<TAdapter>
+>;
 
 export class Drift<
   TAdapter extends Adapter = Adapter,
@@ -65,13 +73,17 @@ export class Drift<
 
   // Implementation //
 
-  constructor(
-    adapter: TAdapter,
-    { cache, cacheNamespace }: DriftOptions<TCache> = {},
-  ) {
-    this.adapter = adapter;
+  constructor({
+    cache,
+    cacheNamespace,
+    ...rest
+  }: DriftParams<TAdapter, TCache> = {}) {
     this.cache = createClientCache(cache);
     this.cacheNamespace = cacheNamespace;
+    this.adapter =
+      "adapter" in rest
+        ? rest.adapter
+        : (new OxReadAdapter(rest) as ReadAdapter as TAdapter);
 
     // Write-only property assignment //
 
@@ -146,6 +158,11 @@ export class Drift<
       return id;
     });
   };
+
+  /**
+   * Get the current block number.
+   */
+  getBlockNumber = async (): Promise<bigint> => this.adapter.getBlockNumber();
 
   /**
    * Get a block from a block tag, number, or hash. If no argument is provided,

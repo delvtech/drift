@@ -107,6 +107,25 @@ describe("MockDrift", () => {
     });
   });
 
+  describe("getBlockNumber", () => {
+    it("Throws an error by default", async () => {
+      const drift = new MockDrift();
+      let error: unknown;
+      try {
+        await drift.getBlockNumber();
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
+    });
+
+    it("Can be stubbed", async () => {
+      const drift = new MockDrift();
+      drift.onGetBlockNumber().resolves(123n);
+      expect(await drift.getBlockNumber()).toBe(123n);
+    });
+  });
+
   describe("getBlock", () => {
     it("Throws an error by default", async () => {
       const drift = new MockDrift();

@@ -4,7 +4,7 @@ import type {
   AbiEntryName,
   AbiObjectType,
 } from "src/adapter/types/Abi";
-import { getAbiEntry } from "src/adapter/utils/getAbiEntry";
+import type { AnyObject } from "src/utils/types";
 
 /**
  * Converts an object into an array of input or output values, ensuring the the
@@ -56,7 +56,7 @@ export function objectToArray<
   TParameterKind extends AbiParameterKind,
   TValue extends AbiObjectType<TAbi, TItemType, TName, TParameterKind>,
 >({
-  abi,
+  abi: _abi,
   type,
   name,
   kind,
@@ -68,22 +68,59 @@ export function objectToArray<
   type: TItemType;
   value?: Abi extends TAbi ? Record<string, unknown> : TValue;
 }): AbiArrayType<TAbi, TItemType, TName, TParameterKind> {
-  const abiEntry = getAbiEntry({ abi, type, name });
+  const abi = _abi as unknown as WithOptionalFields<TAbi>;
+  const matches = abi.filter((item) => {
+    if (item.type !== type) return false;
+    if (item.name !== name) return false;
+    if (kind === "inputs" && !("inputs" in item)) return false;
+    if (kind === "outputs" && !("outputs" in item)) return false;
+    if (value && !("inputs" in item) && !("outputs" in item)) return false;
+    return true;
+  });
 
-  let parameters: AbiParameter[] = [];
-  if (kind in abiEntry) {
-    parameters = (abiEntry as any)[kind];
-  }
-
-  // No parameters
-  if (!parameters.length) {
+  if (matches.length === 0) {
     return [] as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
   }
 
-  const valueObject: Record<string, unknown> =
-    value && typeof value === "object" ? value : {};
+  if (matches.length === 1) {
+    const match = matches[0] as WithOptionalFields<TAbi>[number];
+    return match.inputs?.map(
+      ({ name }, i) => value?.[name || i],
+    ) as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
+  }
 
-  const array = parameters.map(({ name }, i) => valueObject[name || i]);
+  const argsCount = value ? Object.keys(value).length : 0;
+  let arrayArgs: any[] = [];
+  let keyMatchCount = 0;
 
-  return array as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
+  for (const entry of matches) {
+    if (!entry.inputs?.length) {
+      if (!argsCount) {
+        return [] as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
+      }
+      continue;
+    }
+
+    const args: AnyObject = value || {};
+    const potentialArrayArgs: any[] = [];
+    let potentialKeyMatchCount = 0;
+
+    for (const [i, input] of entry.inputs.entries()) {
+      const key = input.name || i;
+      if ("key" in args) potentialKeyMatchCount++;
+      arrayArgs.push(args[key]);
+    }
+
+    if (potentialKeyMatchCount > keyMatchCount) {
+      arrayArgs = potentialArrayArgs;
+      keyMatchCount = potentialKeyMatchCount;
+    }
+  }
+
+  return arrayArgs as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
 }
+
+type WithOptionalFields<T extends Abi> = (T[number] & {
+  name?: string;
+  inputs?: AbiParameter[];
+})[];

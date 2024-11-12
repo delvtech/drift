@@ -17,6 +17,11 @@ export interface Network {
   getChainId(): Promise<number>;
 
   /**
+   * Get the current block number.
+   */
+  getBlockNumber(): Promise<bigint>;
+
+  /**
    * Get a block from a block tag, number, or hash. If no argument is provided,
    * the latest block is returned.
    */
