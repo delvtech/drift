@@ -28,7 +28,13 @@ export type {
   ReadWriteAdapter,
   AdapterSimulateWriteParams,
 } from "src/adapter/types/Adapter";
-export type { Block, BlockTag } from "src/adapter/types/Block";
+export type {
+  BaseBlockProps,
+  Block,
+  BlockTag,
+  MinedBlock,
+  PendingBlock,
+} from "src/adapter/types/Block";
 export type {
   ContractWriteOptions as AdapterContractWriteOptions,
   ContractGetEventsOptions,

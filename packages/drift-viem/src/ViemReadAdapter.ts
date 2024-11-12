@@ -5,6 +5,7 @@ import {
   type AdapterGetEventsParams,
   type AdapterReadParams,
   type AdapterWriteParams,
+  type Block,
   type DecodedFunctionData,
   type EventName,
   type FunctionName,
@@ -20,14 +21,11 @@ import {
 import { createSimulateContractParameters } from "src/utils/createSimulateContractParameters";
 import { outputToFriendly } from "src/utils/outputToFriendly";
 import {
-  type Abi,
-  type GetBalanceParameters,
+  type Abi, type GetBalanceParameters,
   type GetBlockParameters,
   type PublicClient,
   decodeEventLog,
-  decodeFunctionData,
-  encodeFunctionData,
-  rpcTransactionType,
+  decodeFunctionData, encodeFunctionData, rpcTransactionType
 } from "viem";
 
 export interface ViemReadAdapterParams {
@@ -46,18 +44,16 @@ export class ViemReadAdapter implements ReadAdapter {
   getBlockNumber = () => this.publicClient.getBlockNumber();
 
   getBlock = (params: NetworkGetBlockParams = {}) => {
-    return this.publicClient
-      .getBlock(params as GetBlockParameters)
-      .then((block) => {
-        if (!block) {
-          return undefined;
-        }
-
-        return {
-          blockNumber: block.number,
-          timestamp: block.timestamp,
-        };
-      });
+    return this.publicClient.getBlock(params as GetBlockParameters).then(
+      (block) =>
+        ({
+          ...block,
+          hash: block.hash ?? undefined,
+          logsBloom: block.logsBloom ?? undefined,
+          nonce: block.nonce ?? undefined,
+          number: block.number ?? undefined,
+        }) as Block,
+    );
   };
 
   getBalance = ({ address, block }: NetworkGetBalanceParams) => {
@@ -91,7 +87,7 @@ export class ViemReadAdapter implements ReadAdapter {
             gas,
             gasPrice: gasPrice as bigint,
             input,
-            nonce,
+            nonce: BigInt(nonce),
             type: rpcTransactionType[type],
             value,
             blockHash: blockHash ?? undefined,
@@ -244,6 +240,7 @@ export class ViemReadAdapter implements ReadAdapter {
       args: arrayToObject({
         // Cast to allow any array type for values
         abi: abi as Abi,
+        kind: "inputs",
         name: functionName,
         values: arrayArgs,
       }),

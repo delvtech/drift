@@ -27,10 +27,10 @@ describe("ViemReadAdapter", () => {
   it("fetches the current block", async () => {
     const adapter = new ViemReadAdapter({ publicClient });
     const block = await adapter.getBlock();
-    expect(block).toEqual({
-      blockNumber: expect.any(BigInt),
+    expect(block).toMatchObject({
+      number: expect.any(BigInt),
       timestamp: expect.any(BigInt),
-    } as Block);
+    } as Partial<Block>);
   });
 
   it("fetches account balances", async () => {
@@ -56,7 +56,7 @@ describe("ViemReadAdapter", () => {
         gas: expect.any(BigInt),
         gasPrice: expect.any(BigInt),
         input: expect.any(String),
-        nonce: expect.any(Number),
+        nonce: expect.any(BigInt),
         type: expect.any(String),
         value: expect.any(BigInt),
         blockHash: expect.any(String),

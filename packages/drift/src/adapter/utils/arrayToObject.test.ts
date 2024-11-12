@@ -7,6 +7,7 @@ describe("arrayToObject", () => {
     const transferArgsObject = arrayToObject({
       abi: erc20.abi,
       name: "transfer",
+      kind: "inputs",
       values: ["0x123", 123n],
     });
     expect(transferArgsObject).toEqual({
@@ -18,6 +19,7 @@ describe("arrayToObject", () => {
     const votesArgsObject = arrayToObject({
       abi: exampleAbi,
       name: "votes",
+      kind: "inputs",
       values: ["0x123", 0n],
     });
     expect(votesArgsObject).toEqual({
@@ -28,6 +30,7 @@ describe("arrayToObject", () => {
     const balanceInput = arrayToObject({
       abi: erc20.abi,
       name: "balanceOf",
+      kind: "inputs",
       values: ["0x123"],
     });
     expect(balanceInput).toEqual({ account: "0x123" });

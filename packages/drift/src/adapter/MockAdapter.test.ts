@@ -144,7 +144,7 @@ describe("MockAdapter", () => {
         blockNumber: 123n,
         gas: 123n,
         gasPrice: 123n,
-        nonce: 123,
+        nonce: 123n,
         type: "0x123",
         value: 123n,
       };
@@ -165,7 +165,7 @@ describe("MockAdapter", () => {
         gas: 123n,
         gasPrice: 123n,
         input: "0x",
-        nonce: 123,
+        nonce: 123n,
         type: "0x123",
         value: 123n,
       };
@@ -180,7 +180,7 @@ describe("MockAdapter", () => {
         gas: 123n,
         gasPrice: 123n,
         input: "0x",
-        nonce: 123,
+        nonce: 123n,
         type: "0x123",
         value: 123n,
       };

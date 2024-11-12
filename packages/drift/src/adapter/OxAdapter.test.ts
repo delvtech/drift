@@ -27,7 +27,7 @@ describe("OxAdapter", () => {
   it("fetches the current block", async () => {
     const adapter = new OxAdapter({ rpcUrl });
     const block = await adapter.getBlock();
-    expect(block).toEqual({
+    expect(block).toMatchObject({
       timestamp: expect.any(BigInt),
       extraData: expect.any(String),
       gasLimit: expect.any(BigInt),

@@ -1,17 +1,20 @@
 import {
+  type FunctionName,
   type FunctionReturn,
-  arrayToFriendly,
-  getAbiEntry,
+  arrayToObject,
 } from "@delvtech/drift";
 import type { Abi } from "viem";
 
-export function outputToFriendly<TAbi extends Abi>({
+export function outputToFriendly<
+  TAbi extends Abi,
+  TFunctionName extends FunctionName<TAbi> & {} = FunctionName<TAbi> & {},
+>({
   abi,
   functionName,
   output,
 }: {
   abi: TAbi;
-  functionName: string;
+  functionName: TFunctionName;
   output: unknown;
 }) {
   // Viem automatically returns a single value if the function has only one
@@ -19,20 +22,16 @@ export function outputToFriendly<TAbi extends Abi>({
   // check the ABI to determine the number of output parameters vs. checking
   // if the output is an array because the outputs could be a single array
   // (tuple) parameter.
-  const abiEntry = getAbiEntry({
-    abi,
-    type: "function",
-    name: functionName,
-  });
-  if (abiEntry.outputs.length === 1) {
-    return output as FunctionReturn<TAbi, typeof functionName>;
-  }
-
-  return arrayToFriendly({
+  const objectArgs = arrayToObject({
     abi: abi as Abi,
-    type: "function",
     name: functionName,
     kind: "outputs",
-    values: output as unknown[],
-  }) as FunctionReturn<TAbi, typeof functionName>;
+    values: Array.isArray(output) ? output : [output],
+  });
+
+  if (Object.keys(objectArgs).length === 1) {
+    return output as FunctionReturn<TAbi, TFunctionName>;
+  }
+
+  return objectArgs as unknown as FunctionReturn<TAbi, TFunctionName>;
 }

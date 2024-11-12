@@ -1,4 +1,8 @@
-import type { Abi, AbiItemType, AbiParameterKind } from "abitype";
+import type {
+  Abi,
+  AbiFunction,
+  AbiItemType, AbiParameterKind
+} from "abitype";
 import { AbiItem } from "ox";
 import type {
   AbiArrayType,
@@ -57,10 +61,12 @@ export function arrayToObject<
 >({
   abi,
   name,
+  kind,
   values,
 }: {
   abi: TAbi;
   name: TName;
+  kind: TParameterKind;
   values?: Abi extends TAbi
     ? readonly unknown[] // <- fallback for unknown ABI type
     : Partial<AbiArrayType<TAbi, TItemType, TName, TParameterKind>>;
@@ -69,11 +75,11 @@ export function arrayToObject<
     args: values,
   });
 
-  if (!item || !("inputs" in item)) {
+  if (!item || !(kind in item)) {
     return {} as AbiObjectType<TAbi, TItemType, TName, TParameterKind>;
   }
 
   return Object.fromEntries(
-    item.inputs.map(({ name }, i) => [name || i, values?.[i]]),
+    (item as AbiFunction)[kind].map(({ name }, i) => [name || i, values?.[i]]),
   ) as AbiObjectType<TAbi, TItemType, TName, TParameterKind>;
 }
