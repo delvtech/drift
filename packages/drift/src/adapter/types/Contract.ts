@@ -1,4 +1,5 @@
 import type { Abi } from "abitype";
+import type { Address, Bytes, HexString } from "src/adapter/types/Abi";
 import type { BlockTag } from "src/adapter/types/Block";
 import type { EventFilter, EventName } from "src/adapter/types/Event";
 
@@ -22,14 +23,14 @@ export interface ContractGetEventsOptions<
 export interface ContractWriteOptions {
   type?: string;
   nonce?: bigint;
-  to?: string;
-  from?: string;
+  to?: Address;
+  from?: Address;
   /**
    * Gas limit
    */
   gas?: bigint;
   value?: bigint;
-  input?: string;
+  input?: Bytes;
   /**
    * The gas price willing to be paid by the sender in wei
    */
@@ -47,8 +48,8 @@ export interface ContractWriteOptions {
    * EIP-2930 access list
    */
   accessList?: {
-    address: string;
-    storageKeys: string[];
+    address: Address;
+    storageKeys: HexString[];
   }[];
   /**
    * Chain ID that this transaction is valid on.
