@@ -1,10 +1,14 @@
-import { ReadVault } from "src/vault-client";
-import { publicClient } from "./viem";
+import { Contract } from "@delvtech/drift";
+import { erc20 } from "@delvtech/drift/testing";
 
-const vaultAddress = "0xAc37729B76db6438CE62042AE1270ee574CA7571";
+const contract = new Contract({
+  abi: erc20.abi,
+  address: "0xAc37729B76db6438CE62042AE1270ee574CA7571",
+  rpcUrl: process.env.RPC_URL,
+});
 
-const vault = new ReadVault(vaultAddress, publicClient);
+const balance = await contract.read("balanceOf", {
+  account: contract.address,
+});
 
-const assetBalance = await vault.assetBalanceOf(vaultAddress);
-
-console.log("Asset balance:", assetBalance);
+console.log("Balance:", balance);

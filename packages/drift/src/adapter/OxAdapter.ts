@@ -7,9 +7,10 @@ import {
   Address,
   Block,
   Hex,
-  Provider, RpcTransport,
+  Provider,
+  RpcTransport,
   Transaction,
-  TransactionReceipt
+  TransactionReceipt,
 } from "ox";
 import type { HexString } from "src/adapter/types/Abi";
 import type {
@@ -52,7 +53,6 @@ export class OxAdapter implements ReadWriteAdapter {
   pollingInterval: number;
 
   static DEFAULT_POLLING_INTERVAL = 4_000;
-  static DEFAULT_RPC_URL = "https://localhost:8545";
   static DEFAULT_TIMEOUT = 60_000; // 1 minute
 
   constructor({
@@ -64,7 +64,7 @@ export class OxAdapter implements ReadWriteAdapter {
         ? RpcTransport.fromHttp(rpcUrl)
         : "window" in globalThis
           ? window.ethereum
-          : RpcTransport.fromHttp(OxAdapter.DEFAULT_RPC_URL),
+          : undefined,
     );
     this.pollingInterval = pollingInterval;
   }
