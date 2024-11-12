@@ -49,7 +49,6 @@ export type {
 export type {
   Network,
   NetworkGetBalanceParams,
-  NetworkGetBlockOptions,
   NetworkGetBlockParams,
   NetworkGetTransactionParams,
   NetworkWaitForTransactionParams,

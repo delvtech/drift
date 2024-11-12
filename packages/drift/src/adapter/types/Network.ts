@@ -42,7 +42,12 @@ export interface Network {
   ): Promise<TransactionReceipt | undefined>;
 }
 
-export type NetworkGetBlockOptions =
+export interface NetworkGetBalanceParams {
+  address: Address;
+  block?: BlockTag | bigint;
+}
+
+export type NetworkGetBlockParams =
   | {
       blockHash?: HexString;
       blockNumber?: never;
@@ -58,12 +63,6 @@ export type NetworkGetBlockOptions =
       blockNumber?: never;
       blockTag?: BlockTag;
     };
-
-export type NetworkGetBalanceParams = {
-  address: Address;
-} & NetworkGetBlockOptions;
-
-export type NetworkGetBlockParams = NetworkGetBlockOptions;
 
 export interface NetworkGetTransactionParams {
   hash: Hash;
