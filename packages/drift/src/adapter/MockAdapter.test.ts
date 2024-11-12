@@ -52,18 +52,18 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
-      const block0: Block = {
-        blockNumber: 0n,
+      const block0 = {
+        number: 0n,
         timestamp: 0n,
-      };
-      const block1: Block = {
-        blockNumber: 1n,
+      } as Block;
+      const block1 = {
+        number: 1n,
         timestamp: 1n,
-      };
-      const block2: Block = {
-        blockNumber: 2n,
+      } as Block;
+      const block2 = {
+        number: 2n,
         timestamp: 2n,
-      };
+      } as Block;
       adapter.onGetBlock().resolves(block0);
       adapter.onGetBlock({ blockNumber: 1n }).resolves(block1);
       adapter.onGetBlock({ blockNumber: 2n }).resolves(block2);
@@ -74,20 +74,20 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
-      const block: Block = {
-        blockNumber: 123n,
+      const block = {
+        number: 123n,
         timestamp: 123n,
-      };
+      } as Block;
       adapter.onGetBlock({}).resolves(block);
       expect(await adapter.getBlock({ blockNumber: 123n })).toBe(block);
     });
 
     it("Can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
-      const block: Block = {
-        blockNumber: 123n,
+      const block = {
+        number: 123n,
         timestamp: 123n,
-      };
+      } as Block;
       adapter.onGetBlock().resolves(block);
       expect(await adapter.getBlock({ blockNumber: 123n })).toBe(block);
     });
@@ -117,10 +117,10 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       adapter.onGetBalance({ address: "0xAlice" }).resolves(1n);
       expect(
-        await adapter.getBalance({ address: "0xAlice", blockTag: "latest" }),
+        await adapter.getBalance({ address: "0xAlice", block: "latest" }),
       ).toBe(1n);
       expect(
-        await adapter.getBalance({ address: "0xAlice", blockNumber: 123n }),
+        await adapter.getBalance({ address: "0xAlice", block: 123n }),
       ).toBe(1n);
     });
 

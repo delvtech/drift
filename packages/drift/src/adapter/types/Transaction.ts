@@ -1,4 +1,4 @@
-import type { Address, Bytes, Hash, HexString } from "src/adapter/types/Abi";
+import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 
 // https://github.com/ethereum/execution-apis/blob/e3d2745289bd2bb61dc8593069871be4be441952/src/schemas/transaction.yaml#L329
 export interface TransactionInfo {
@@ -13,8 +13,8 @@ export interface TransactionInfo {
 // https://github.com/ethereum/execution-apis/blob/e8727564bb74a1ebcd22a933b7b57eb7b71a11c3/src/schemas/transaction.yaml#L78
 // https://github.com/ethereum/execution-apis/blob/e8727564bb74a1ebcd22a933b7b57eb7b71a11c3/src/schemas/transaction.yaml#L184
 export interface Transaction extends TransactionInfo {
-  type: HexString;
-  nonce: number;
+  type: string;
+  nonce: bigint;
   gas: bigint;
   value: bigint;
   input: Bytes;

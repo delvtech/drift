@@ -140,18 +140,18 @@ describe("MockDrift", () => {
 
     it("Can be stubbed with specific params", async () => {
       const drift = new MockDrift();
-      const block0: Block = {
-        blockNumber: 0n,
+      const block0 = {
+        number: 0n,
         timestamp: 0n,
-      };
-      const block1: Block = {
-        blockNumber: 1n,
+      } as Block;
+      const block1 = {
+        number: 1n,
         timestamp: 1n,
-      };
-      const block2: Block = {
-        blockNumber: 2n,
+      } as Block;
+      const block2 = {
+        number: 2n,
         timestamp: 2n,
-      };
+      } as Block;
       drift.onGetBlock().resolves(block0);
       drift.onGetBlock({ blockNumber: 1n }).resolves(block1);
       drift.onGetBlock({ blockNumber: 2n }).resolves(block2);
@@ -162,20 +162,20 @@ describe("MockDrift", () => {
 
     it("Can be stubbed with partial params", async () => {
       const drift = new MockDrift();
-      const block: Block = {
-        blockNumber: 123n,
+      const block = {
+        number: 123n,
         timestamp: 123n,
-      };
+      } as Block;
       drift.onGetBlock({}).resolves(block);
       expect(await drift.getBlock({ blockNumber: 123n })).toBe(block);
     });
 
     it("Can be called with args after being stubbed with no args", async () => {
       const drift = new MockDrift();
-      const block: Block = {
-        blockNumber: 123n,
+      const block = {
+        number: 123n,
         timestamp: 123n,
-      };
+      } as Block;
       drift.onGetBlock().resolves(block);
       expect(await drift.getBlock({ blockNumber: 123n })).toBe(block);
     });

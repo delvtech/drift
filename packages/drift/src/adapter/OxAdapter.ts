@@ -5,9 +5,11 @@ import {
   type AbiItem,
   AbiParameters,
   Address,
+  Block,
   Hex,
-  Provider,
-  RpcTransport,
+  Provider, RpcTransport,
+  Transaction,
+  TransactionReceipt
 } from "ox";
 import type { HexString } from "src/adapter/types/Abi";
 import type {
@@ -18,7 +20,7 @@ import type {
   AdapterWriteParams,
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
-import type { Block, BlockTag } from "src/adapter/types/Block";
+import type { BlockTag, Block as BlockType } from "src/adapter/types/Block";
 import type { EventArgs, EventName } from "src/adapter/types/Event";
 import type {
   DecodedFunctionData,
@@ -32,7 +34,7 @@ import type {
   NetworkGetTransactionParams,
   NetworkWaitForTransactionParams,
 } from "src/adapter/types/Network";
-import type { TransactionReceipt } from "src/adapter/types/Transaction";
+import type { TransactionReceipt as TransactionReceiptType } from "src/adapter/types/Transaction";
 import { objectToArray } from "src/adapter/utils/objectToArray";
 import { DriftError } from "src/error/DriftError";
 
@@ -51,11 +53,12 @@ export class OxAdapter implements ReadWriteAdapter {
 
   static DEFAULT_POLLING_INTERVAL = 4_000;
   static DEFAULT_RPC_URL = "https://localhost:8545";
+  static DEFAULT_TIMEOUT = 60_000; // 1 minute
 
   constructor({
     rpcUrl,
     pollingInterval = OxAdapter.DEFAULT_POLLING_INTERVAL,
-  }: OxAdapterParams) {
+  }: OxAdapterParams = {}) {
     this.provider = Provider.from(
       rpcUrl
         ? RpcTransport.fromHttp(rpcUrl)
@@ -82,7 +85,9 @@ export class OxAdapter implements ReadWriteAdapter {
       .then(BigInt);
   };
 
-  getBlock = (params?: NetworkGetBlockParams): Promise<Block | undefined> => {
+  getBlock = (
+    params?: NetworkGetBlockParams,
+  ): Promise<BlockType | undefined> => {
     return this.provider
       .request({
         method: params?.blockHash
@@ -94,11 +99,13 @@ export class OxAdapter implements ReadWriteAdapter {
           false,
         ],
       })
+      .then(Block.fromRpc)
       .then((block) =>
         block
           ? {
-              blockNumber: BigInt(block.number),
-              timestamp: BigInt(block.timestamp),
+              ...block,
+              nonce: BigInt(block.nonce),
+              transactions: block.transactions.slice(),
             }
           : undefined,
       );
@@ -165,62 +172,40 @@ export class OxAdapter implements ReadWriteAdapter {
         method: "eth_getTransactionByHash",
         params: [hash],
       })
-      .then((tx) =>
-        tx
-          ? {
-              blockHash: tx.blockHash,
-              blockNumber: tx.blockNumber && BigInt(tx.blockNumber),
-              chainId: Number(tx.chainId),
-              from: tx.from,
-              gas: BigInt(tx.gas),
-              gasPrice: tx.gasPrice && BigInt(tx.gasPrice),
-              hash: tx.hash,
-              input: tx.input,
-              nonce: Number(tx.gasPrice),
-              to: tx.to,
-              transactionIndex:
-                tx.transactionIndex && Number(tx.transactionIndex),
-              type: tx.type,
-              value: BigInt(tx.value),
-            }
-          : undefined,
-      );
+      .then(Transaction.fromRpc)
+      .then((tx) => tx ?? undefined);
   };
 
-  waitForTransaction = ({ hash, timeout }: NetworkWaitForTransactionParams) => {
-    return new Promise<TransactionReceipt | undefined>((resolve, reject) => {
-      const interval = setInterval(() => {
-        this.provider
-          .request({
-            method: "eth_getTransactionReceipt",
-            params: [hash],
-          })
-          .then((receipt) => {
-            if (receipt?.blockNumber) {
-              clearInterval(interval);
-              resolve({
-                blockHash: receipt.blockHash,
-                blockNumber: BigInt(receipt.blockNumber),
-                from: receipt.from,
-                cumulativeGasUsed: BigInt(receipt.cumulativeGasUsed),
-                gasUsed: BigInt(receipt.gasUsed),
-                effectiveGasPrice: BigInt(receipt.effectiveGasPrice),
-                logsBloom: receipt.logsBloom,
-                status: receipt.status === "0x1" ? "success" : "reverted",
-                to: receipt.to,
-                transactionHash: receipt.transactionHash,
-                transactionIndex: Number(receipt.transactionIndex),
-              });
-            }
-          })
-          .catch(reject);
-      }, this.pollingInterval);
+  waitForTransaction = ({
+    hash,
+    timeout = OxAdapter.DEFAULT_TIMEOUT,
+  }: NetworkWaitForTransactionParams) => {
+    return new Promise<TransactionReceiptType | undefined>(
+      (resolve, reject) => {
+        console.log("Waiting for transaction:", hash);
+        const interval = setInterval(() => {
+          this.provider
+            .request({
+              method: "eth_getTransactionReceipt",
+              params: [hash],
+            })
+            .then(TransactionReceipt.fromRpc)
+            .then((receipt) => {
+              if (receipt) {
+                clearInterval(interval);
+                resolve(receipt);
+              }
+            })
+            .catch(reject);
+        }, this.pollingInterval);
 
-      setTimeout(() => {
-        clearInterval(interval);
-        resolve(undefined);
-      }, timeout);
-    });
+        setTimeout(() => {
+          console.log("Timeout reached. Clearing interval.");
+          clearInterval(interval);
+          resolve(undefined);
+        }, timeout);
+      },
+    );
   };
 
   getEvents = <TAbi extends Abi, TEventName extends EventName<TAbi>>({
