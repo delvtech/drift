@@ -1,9 +1,9 @@
-import { MockDrift } from "src/exports/testing";
+import { Drift } from "src/client/drift/Drift";
 import { describe, expect, it } from "vitest";
 
 describe("Drift", () => {
   it("Should use the cache namespace if provided", () => {
-    const drift = new MockDrift({
+    const drift = new Drift({
       cacheNamespace: "test",
     });
 

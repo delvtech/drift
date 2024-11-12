@@ -62,8 +62,7 @@ export type {
 } from "src/adapter/types/Transaction";
 
 export {
-  OxReadAdapter,
-  OxReadWriteAdapter,
+  OxAdapter,
   type OxAdapterParams,
 } from "src/adapter/OxAdapter";
 

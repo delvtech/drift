@@ -16,7 +16,6 @@ import type {
   AdapterGetEventsParams,
   AdapterReadParams,
   AdapterWriteParams,
-  ReadAdapter,
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
 import type { Block, BlockTag } from "src/adapter/types/Block";
@@ -46,13 +45,23 @@ export interface OxAdapterParams {
   pollingInterval?: number;
 }
 
-export class OxReadAdapter implements ReadAdapter {
+export class OxAdapter implements ReadWriteAdapter {
   provider: Provider.Provider;
   pollingInterval: number;
 
-  constructor({ rpcUrl, pollingInterval = 4_000 }: OxAdapterParams) {
+  static DEFAULT_POLLING_INTERVAL = 4_000;
+  static DEFAULT_RPC_URL = "https://localhost:8545";
+
+  constructor({
+    rpcUrl,
+    pollingInterval = OxAdapter.DEFAULT_POLLING_INTERVAL,
+  }: OxAdapterParams) {
     this.provider = Provider.from(
-      rpcUrl ? RpcTransport.fromHttp(rpcUrl) : window.ethereum,
+      rpcUrl
+        ? RpcTransport.fromHttp(rpcUrl)
+        : "window" in globalThis
+          ? window.ethereum
+          : RpcTransport.fromHttp(OxAdapter.DEFAULT_RPC_URL),
     );
     this.pollingInterval = pollingInterval;
   }
@@ -316,12 +325,7 @@ export class OxReadAdapter implements ReadAdapter {
       FunctionReturn<TAbi, TFunctionName>
     >;
   };
-}
 
-export class OxReadWriteAdapter
-  extends OxReadAdapter
-  implements ReadWriteAdapter
-{
   getSignerAddress = async () => {
     const [address] = await this.provider.request({ method: "eth_accounts" });
     if (!address) throw new DriftError("No signer address found");
@@ -335,7 +339,7 @@ export class OxReadWriteAdapter
     adapterParams: AdapterWriteParams<TAbi, TFunctionName>,
   ) => {
     const { params } = writeParams(adapterParams);
-    const from = params[0].from ?? (await this.getSignerAddress());
+    const from = params[0].from || (await this.getSignerAddress());
     return this.provider.request({
       method: "eth_sendTransaction",
       params: [

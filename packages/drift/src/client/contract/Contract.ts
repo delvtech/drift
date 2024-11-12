@@ -1,5 +1,5 @@
 import type { Abi } from "abitype";
-import { OxReadAdapter } from "src/adapter/OxAdapter";
+import { OxAdapter } from "src/adapter/OxAdapter";
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
@@ -52,7 +52,7 @@ export type ContractParams<
 
 export class Contract<
   TAbi extends Abi = Abi,
-  TAdapter extends Adapter = Adapter,
+  TAdapter extends Adapter = ReadWriteAdapter,
   TCache extends SimpleCache = SimpleCache,
 > {
   abi: TAbi;
@@ -96,7 +96,7 @@ export class Contract<
     this.adapter =
       "adapter" in rest
         ? rest.adapter
-        : (new OxReadAdapter(rest) as ReadAdapter as TAdapter);
+        : (new OxAdapter(rest) as Adapter as TAdapter);
 
     // Write-only property assignment //
 
