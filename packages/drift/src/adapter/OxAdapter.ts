@@ -182,7 +182,6 @@ export class OxAdapter implements ReadWriteAdapter {
   }: NetworkWaitForTransactionParams) => {
     return new Promise<TransactionReceiptType | undefined>(
       (resolve, reject) => {
-        console.log("Waiting for transaction:", hash);
         const interval = setInterval(() => {
           this.provider
             .request({
@@ -200,7 +199,6 @@ export class OxAdapter implements ReadWriteAdapter {
         }, this.pollingInterval);
 
         setTimeout(() => {
-          console.log("Timeout reached. Clearing interval.");
           clearInterval(interval);
           resolve(undefined);
         }, timeout);
