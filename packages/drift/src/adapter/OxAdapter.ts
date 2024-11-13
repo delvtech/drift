@@ -95,7 +95,7 @@ export class OxAdapter implements ReadWriteAdapter {
           : "eth_getBlockByNumber",
         params: [
           params?.blockHash ??
-            getBlockParam(params?.blockNumber ?? params?.blockTag),
+            blockParam(params?.blockNumber ?? params?.blockTag),
           false,
         ],
       })
@@ -115,7 +115,7 @@ export class OxAdapter implements ReadWriteAdapter {
     return this.provider
       .request({
         method: "eth_getBalance",
-        params: [params.address, getBlockParam(params.block)],
+        params: [params.address, blockParam(params.block)],
       })
       .then(BigInt);
   };
@@ -233,8 +233,8 @@ export class OxAdapter implements ReadWriteAdapter {
         params: [
           {
             address,
-            fromBlock: getBlockParam(fromBlock),
-            toBlock: getBlockParam(toBlock),
+            fromBlock: blockParam(fromBlock),
+            toBlock: blockParam(toBlock),
             topics: AbiEvent.encode(abiFn, filter as any).topics,
           },
         ],
@@ -284,7 +284,7 @@ export class OxAdapter implements ReadWriteAdapter {
             to: address,
             data: AbiFunction.encodeData(abiFn, argsArray),
           },
-          getBlockParam(block),
+          blockParam(block),
         ],
       })
       .then((data) => AbiFunction.decodeResult(abiFn, data)) as Promise<
@@ -335,7 +335,7 @@ export class OxAdapter implements ReadWriteAdapter {
   };
 }
 
-function getBlockParam(block?: BlockTag | bigint): HexString | BlockTag {
+function blockParam(block?: BlockTag | bigint): HexString | BlockTag {
   if (block === undefined) {
     return "latest";
   }
