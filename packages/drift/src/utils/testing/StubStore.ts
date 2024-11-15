@@ -54,8 +54,10 @@ export class StubStore<T> {
     }
   >();
 
-  reset() {
-    this.methodStores.clear();
+  reset(method?: FunctionKey<T>) {
+    return method
+      ? this.methodStores.delete(method)
+      : this.methodStores.clear();
   }
 
   /**

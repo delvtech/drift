@@ -27,12 +27,12 @@ import type {
 } from "src/adapter/types/Transaction";
 import { createSerializableKey } from "src/utils/createSerializableKey";
 import { StubStore } from "src/utils/testing/StubStore";
-import type { AnyObject, OptionalKeys } from "src/utils/types";
+import type { AnyObject, FunctionKey, OptionalKeys } from "src/utils/types";
 
 export class MockAdapter implements ReadWriteAdapter {
   stubs = new StubStore<ReadWriteAdapter>();
 
-  reset = () => this.stubs.reset();
+  reset = (method?: FunctionKey<ReadWriteAdapter>) => this.stubs.reset(method);
 
   // Remove the abi from the key
   protected createKey({ abi, ...params }: AnyObject) {

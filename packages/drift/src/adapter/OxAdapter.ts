@@ -191,7 +191,7 @@ export class OxAdapter implements ReadWriteAdapter {
   }: NetworkWaitForTransactionParams) => {
     return new Promise<TransactionReceiptType | undefined>(
       (resolve, reject) => {
-        const getReceipt = () =>
+        const getReceipt = (): any =>
           this.provider
             .request({
               method: "eth_getTransactionReceipt",

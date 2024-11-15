@@ -5,6 +5,7 @@ import type {
   AdapterEncodeFunctionDataParams,
   AdapterReadParams,
   AdapterWriteParams,
+  ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
 import type {
   ContractReadOptions,
@@ -19,7 +20,7 @@ import {
   type ContractParams,
 } from "src/client/contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
-import type { OptionalKeys } from "src/utils/types";
+import type { FunctionKey, OptionalKeys } from "src/utils/types";
 
 export type MockContractParams<
   TAbi extends Abi = Abi,
@@ -48,7 +49,8 @@ export class MockContract<
     });
   }
 
-  reset = () => this.adapter.reset();
+  reset = (method?: FunctionKey<ReadWriteAdapter>) =>
+    this.adapter.reset(method);
 
   onGetEvents = <TEventName extends EventName<TAbi>>(
     ...[event, options]: ContractGetEventsArgs<TAbi, TEventName>

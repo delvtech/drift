@@ -1,5 +1,6 @@
 import type { Abi } from "abitype";
 import { MockAdapter } from "src/adapter/MockAdapter";
+import type { ReadWriteAdapter } from "src/adapter/types/Adapter";
 import type { EventName } from "src/adapter/types/Event";
 import type { FunctionName } from "src/adapter/types/Function";
 import type { SimpleCache } from "src/cache/SimpleCache/types";
@@ -20,7 +21,7 @@ import {
   type WaitForTransactionParams,
   type WriteParams,
 } from "src/client/drift/Drift";
-import type { OptionalKeys } from "src/utils/types";
+import type { FunctionKey, OptionalKeys } from "src/utils/types";
 
 export class MockDrift<
   TAdapter extends MockAdapter = MockAdapter,
@@ -33,7 +34,8 @@ export class MockDrift<
     super({ ...rest, adapter });
   }
 
-  reset = () => this.adapter.reset();
+  reset = (method?: FunctionKey<ReadWriteAdapter>) =>
+    this.adapter.reset(method);
 
   contract = <TAbi extends Abi, TContractCache extends SimpleCache = TCache>({
     abi,
