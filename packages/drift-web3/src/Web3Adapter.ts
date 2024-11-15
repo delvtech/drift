@@ -118,7 +118,7 @@ export class Web3Adapter implements ReadWriteAdapter {
                   transactionHash: receipt.transactionHash as Hash,
                   transactionIndex: receipt.transactionIndex,
                 })
-              : setInterval(
+              : setTimeout(
                   getReceipt,
                   this.web3.transactionReceiptPollingInterval,
                 ),
