@@ -1,0 +1,64 @@
+{
+  "name": "@delvtech/drift-web3",
+  "version": "0.0.0-beta.0",
+  "license": "AGPL-3.0",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "types": "dist/index.d.cts",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/index.d.ts",
+        "require": "./dist/index.d.cts"
+      },
+      "default": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      }
+    },
+    "./testing": {
+      "types": {
+        "import": "./dist/testing.d.ts",
+        "require": "./dist/testing.d.cts"
+      },
+      "default": {
+        "import": "./dist/testing.js",
+        "require": "./dist/testing.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test:watch": "vitest --reporter=verbose",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "watch": "tsup --watch"
+  },
+  "peerDependencies": {
+    "@delvtech/drift": "0.0.1-beta.12",
+    "web3": "^4"
+  },
+  "devDependencies": {
+    "@delvtech/drift": "0.0.1-beta.12",
+    "@repo/typescript-config": "*",
+    "abitype": "^1.0.6",
+    "tsconfig-paths": "^4.2.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3",
+    "vite-tsconfig-paths": "^5.1.2",
+    "vitest": "^2.1.5",
+    "web3": "^4.15.0"
+  },
+  "author": {
+    "name": "DELV",
+    "email": "contact@delv.tech",
+    "url": "https://github.com/delvtech"
+  },
+  "repository": "https://github.com/delvtech/drift",
+  "bugs": "https://github.com/delvtech/drift/issues",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": ["dist"]
+}
