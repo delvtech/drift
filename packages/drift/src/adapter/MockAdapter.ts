@@ -355,7 +355,6 @@ export class MockAdapter implements ReadWriteAdapter {
   >(
     params: AdapterWriteParams<TAbi, TFunctionName>,
   ) => {
-    console.log("THIS", this);
     const writePromise = Promise.resolve(
       this.stubs.get<[AdapterWriteParams<TAbi, TFunctionName>], Promise<Hash>>({
         method: "write",
