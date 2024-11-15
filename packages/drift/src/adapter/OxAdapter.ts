@@ -59,13 +59,17 @@ export class OxAdapter implements ReadWriteAdapter {
     rpcUrl,
     pollingInterval = OxAdapter.DEFAULT_POLLING_INTERVAL,
   }: OxAdapterParams = {}) {
-    this.provider = Provider.from(
-      rpcUrl
-        ? RpcTransport.fromHttp(rpcUrl)
-        : "window" in globalThis
-          ? window.ethereum
-          : undefined,
-    );
+    try {
+      this.provider = Provider.from(
+        rpcUrl
+          ? RpcTransport.fromHttp(rpcUrl)
+          : "window" in globalThis
+            ? window.ethereum
+            : undefined,
+      );
+    } catch (e) {
+      handleError(e);
+    }
     this.pollingInterval = pollingInterval;
   }
 
@@ -74,7 +78,8 @@ export class OxAdapter implements ReadWriteAdapter {
       .request({
         method: "eth_chainId",
       })
-      .then(Number);
+      .then(Number)
+      .catch(handleError);
   };
 
   getBlockNumber = () => {
@@ -82,7 +87,8 @@ export class OxAdapter implements ReadWriteAdapter {
       .request({
         method: "eth_blockNumber",
       })
-      .then(BigInt);
+      .then(BigInt)
+      .catch(handleError);
   };
 
   getBlock = (
@@ -108,7 +114,8 @@ export class OxAdapter implements ReadWriteAdapter {
               transactions: block.transactions.slice(),
             }
           : undefined,
-      );
+      )
+      .catch(handleError);
   };
 
   getBalance = (params: NetworkGetBalanceParams) => {
@@ -117,7 +124,8 @@ export class OxAdapter implements ReadWriteAdapter {
         method: "eth_getBalance",
         params: [params.address, blockParam(params.block)],
       })
-      .then(BigInt);
+      .then(BigInt)
+      .catch(handleError);
   };
 
   decodeFunctionData = <
@@ -137,8 +145,8 @@ export class OxAdapter implements ReadWriteAdapter {
           as: "Object",
         }),
       } as DecodedFunctionData<TAbi, TFunctionName>;
-    } catch (error) {
-      throw new DriftError(error);
+    } catch (e) {
+      handleError(e);
     }
   };
 
@@ -161,8 +169,8 @@ export class OxAdapter implements ReadWriteAdapter {
           value: args as FunctionArgs<TAbi, TFunctionName>,
         }),
       );
-    } catch (error) {
-      throw new DriftError(error);
+    } catch (e) {
+      handleError(e);
     }
   };
 
@@ -173,37 +181,33 @@ export class OxAdapter implements ReadWriteAdapter {
         params: [hash],
       })
       .then(Transaction.fromRpc)
-      .then((tx) => tx ?? undefined);
+      .then((tx) => tx ?? undefined)
+      .catch(handleError);
   };
 
-  waitForTransaction = ({
+  waitForTransaction = async ({
     hash,
     timeout = OxAdapter.DEFAULT_TIMEOUT,
   }: NetworkWaitForTransactionParams) => {
     return new Promise<TransactionReceiptType | undefined>(
       (resolve, reject) => {
-        const interval = setInterval(() => {
+        const getReceipt = () =>
           this.provider
             .request({
               method: "eth_getTransactionReceipt",
               params: [hash],
             })
-            .then(TransactionReceipt.fromRpc)
-            .then((receipt) => {
-              if (receipt) {
-                clearInterval(interval);
-                resolve(receipt);
-              }
-            })
+            .then((receipt) =>
+              receipt
+                ? resolve(TransactionReceipt.fromRpc(receipt))
+                : setTimeout(getReceipt, this.pollingInterval),
+            )
             .catch(reject);
-        }, this.pollingInterval);
 
-        setTimeout(() => {
-          clearInterval(interval);
-          resolve(undefined);
-        }, timeout);
+        getReceipt();
+        setTimeout(() => resolve(undefined), timeout);
       },
-    );
+    ).catch(handleError);
   };
 
   getEvents = <TAbi extends Abi, TEventName extends EventName<TAbi>>({
@@ -249,7 +253,8 @@ export class OxAdapter implements ReadWriteAdapter {
             transactionHash: log.transactionHash,
           };
         }),
-      );
+      )
+      .catch(handleError);
   };
 
   read = <
@@ -287,9 +292,13 @@ export class OxAdapter implements ReadWriteAdapter {
           blockParam(block),
         ],
       })
-      .then((data) => AbiFunction.decodeResult(abiFn, data)) as Promise<
-      FunctionReturn<TAbi, TFunctionName>
-    >;
+      .then(
+        (data) =>
+          AbiFunction.decodeResult(abiFn, data) as Promise<
+            FunctionReturn<TAbi, TFunctionName>
+          >,
+      )
+      .catch(handleError);
   };
 
   simulateWrite = <
@@ -304,13 +313,19 @@ export class OxAdapter implements ReadWriteAdapter {
         method: "eth_call",
         params: params as any,
       })
-      .then((data) => AbiFunction.decodeResult(abiFn, data)) as Promise<
-      FunctionReturn<TAbi, TFunctionName>
-    >;
+      .then(
+        (data) =>
+          AbiFunction.decodeResult(abiFn, data) as Promise<
+            FunctionReturn<TAbi, TFunctionName>
+          >,
+      )
+      .catch(handleError);
   };
 
   getSignerAddress = async () => {
-    const [address] = await this.provider.request({ method: "eth_accounts" });
+    const [address] = await this.provider
+      .request({ method: "eth_accounts" })
+      .catch(handleError);
     if (!address) throw new DriftError("No signer address found");
     return Address.checksum(address);
   };
@@ -323,16 +338,22 @@ export class OxAdapter implements ReadWriteAdapter {
   ) => {
     const { params } = writeParams(adapterParams);
     const from = params[0].from || (await this.getSignerAddress());
-    return this.provider.request({
-      method: "eth_sendTransaction",
-      params: [
-        {
-          ...params[0],
-          from,
-        },
-      ],
-    });
+    return this.provider
+      .request({
+        method: "eth_sendTransaction",
+        params: [
+          {
+            ...params[0],
+            from,
+          },
+        ],
+      })
+      .catch(handleError);
   };
+}
+
+function handleError(error: any): never {
+  throw new DriftError(error);
 }
 
 function blockParam(block?: BlockTag | bigint): HexString | BlockTag {
