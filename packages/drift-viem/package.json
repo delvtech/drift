@@ -28,12 +28,6 @@
     },
     "./package.json": "./package.json"
   },
-  "typesVersions": {
-    "*": {
-      ".": ["./dist/index.d.ts"],
-      "testing": ["./dist/testing.d.ts"]
-    }
-  },
   "scripts": {
     "build": "tsup",
     "test:watch": "vitest --reporter=verbose",
@@ -49,11 +43,11 @@
     "@delvtech/drift": "0.0.1-beta.12",
     "@repo/typescript-config": "*",
     "tsconfig-paths": "^4.2.0",
-    "tsup": "^8.3.0",
-    "typescript": "^5.6.2",
-    "viem": "^2.21.37",
-    "vite-tsconfig-paths": "^5.0.1",
-    "vitest": "^2.1.2"
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3",
+    "viem": "^2.21.45",
+    "vite-tsconfig-paths": "^5.1.2",
+    "vitest": "^2.1.5"
   },
   "author": {
     "name": "DELV",

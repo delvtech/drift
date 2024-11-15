@@ -21,11 +21,14 @@ import {
 import { createSimulateContractParameters } from "src/utils/createSimulateContractParameters";
 import { outputToFriendly } from "src/utils/outputToFriendly";
 import {
-  type Abi, type GetBalanceParameters,
+  type Abi,
+  type GetBalanceParameters,
   type GetBlockParameters,
   type PublicClient,
   decodeEventLog,
-  decodeFunctionData, encodeFunctionData, rpcTransactionType
+  decodeFunctionData,
+  encodeFunctionData,
+  rpcTransactionType,
 } from "viem";
 
 export interface ViemReadAdapterParams {
@@ -96,14 +99,24 @@ export class ViemReadAdapter implements ReadAdapter {
             chainId,
             hash,
             to,
-            transactionIndex: transactionIndex ?? undefined,
+            transactionIndex: BigInt(transactionIndex),
           };
         },
       );
   };
 
-  waitForTransaction = ({ hash, timeout }: NetworkWaitForTransactionParams) => {
-    return this.publicClient.waitForTransactionReceipt({ hash, timeout });
+  waitForTransaction = async ({
+    hash,
+    timeout,
+  }: NetworkWaitForTransactionParams) => {
+    const receipt = await this.publicClient.waitForTransactionReceipt({
+      hash,
+      timeout,
+    });
+    return {
+      ...receipt,
+      transactionIndex: BigInt(receipt.transactionIndex),
+    };
   };
 
   getEvents = <TAbi extends Abi, TEventName extends EventName<TAbi>>({

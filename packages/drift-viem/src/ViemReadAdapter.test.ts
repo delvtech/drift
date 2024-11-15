@@ -51,22 +51,20 @@ describe("ViemReadAdapter", () => {
     const tx = await adapter.getTransaction({
       hash: block.transactions[0]!,
     });
-    expect(tx).toEqual(
-      expect.objectContaining({
-        gas: expect.any(BigInt),
-        gasPrice: expect.any(BigInt),
-        input: expect.any(String),
-        nonce: expect.any(BigInt),
-        type: expect.any(String),
-        value: expect.any(BigInt),
-        blockHash: expect.any(String),
-        blockNumber: expect.any(BigInt),
-        from: expect.any(String),
-        hash: expect.any(String),
-        to: expect.any(String),
-        transactionIndex: expect.any(Number),
-      } as Transaction),
-    );
+    expect(tx).toMatchObject({
+      gas: expect.any(BigInt),
+      gasPrice: expect.any(BigInt),
+      input: expect.any(String),
+      nonce: expect.any(BigInt),
+      type: expect.any(String),
+      value: expect.any(BigInt),
+      blockHash: expect.any(String),
+      blockNumber: expect.any(BigInt),
+      from: expect.any(String),
+      hash: expect.any(String),
+      to: expect.any(String),
+      transactionIndex: expect.any(BigInt),
+    } as Transaction);
   });
 
   it("returns receipts for waited transactions", async () => {
@@ -81,21 +79,19 @@ describe("ViemReadAdapter", () => {
     const tx = await adapter.waitForTransaction({
       hash: block.transactions[0]!,
     });
-    expect(tx).toEqual(
-      expect.objectContaining({
-        blockHash: expect.any(String),
-        blockNumber: expect.any(BigInt),
-        from: expect.any(String),
-        cumulativeGasUsed: expect.any(BigInt),
-        effectiveGasPrice: expect.any(BigInt),
-        gasUsed: expect.any(BigInt),
-        logsBloom: expect.any(String),
-        status: expect.stringMatching(/^(success|reverted)$/),
-        to: expect.any(String),
-        transactionHash: expect.any(String),
-        transactionIndex: expect.any(Number),
-      } as TransactionReceipt),
-    );
+    expect(tx).toMatchObject({
+      blockHash: expect.any(String),
+      blockNumber: expect.any(BigInt),
+      from: expect.any(String),
+      cumulativeGasUsed: expect.any(BigInt),
+      effectiveGasPrice: expect.any(BigInt),
+      gasUsed: expect.any(BigInt),
+      logsBloom: expect.any(String),
+      status: expect.stringMatching(/^(success|reverted)$/),
+      to: expect.any(String),
+      transactionHash: expect.any(String),
+      transactionIndex: expect.any(BigInt),
+    } as TransactionReceipt);
   });
 
   it("fetches events", async () => {
@@ -108,14 +104,12 @@ describe("ViemReadAdapter", () => {
       fromBlock: currentBlock - 100n,
     });
     expect(events).toBeInstanceOf(Array);
-    expect(events[0]).toEqual(
-      expect.objectContaining({
-        args: expect.any(Object),
-        blockNumber: expect.any(BigInt),
-        data: expect.any(String),
-        transactionHash: expect.any(String),
-      } as ContractEvent<typeof erc20Abi, "Transfer">),
-    );
+    expect(events[0]).toMatchObject({
+      args: expect.any(Object),
+      blockNumber: expect.any(BigInt),
+      data: expect.any(String),
+      transactionHash: expect.any(String),
+    } as ContractEvent<typeof erc20Abi, "Transfer">);
   });
 
   describe("read", () => {
