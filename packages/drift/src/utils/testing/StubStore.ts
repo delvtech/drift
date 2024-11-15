@@ -142,7 +142,9 @@ export class NotImplementedError extends DriftError {
     super(
       `No stub found for method ${method}${key ? ` with key "${key}"` : ""}. The value must be stubbed first:
     mock.on${method.replace(/^./, (c) => c.toUpperCase())}(...args).resolves(value)`,
+      {
+        name: "NotImplementedError",
+      },
     );
-    this.name = "NotImplementedError";
   }
 }

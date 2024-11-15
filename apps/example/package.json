@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx -r dotenv/config src/index.ts",
-    "dev:watch": "tsx -r dotenv/config --watch src/index.ts"
+    "watch": "tsx -r dotenv/config --watch src/index.ts"
   },
   "dependencies": {
     "@delvtech/drift": "^0.0.1-beta.11"
