@@ -38,6 +38,7 @@ import type {
 import type { TransactionReceipt as TransactionReceiptType } from "src/adapter/types/Transaction";
 import { objectToArray } from "src/adapter/utils/objectToArray";
 import { DriftError } from "src/error/DriftError";
+import type { AnyObject } from "src/utils/types";
 
 export interface OxAdapterParams {
   rpcUrl?: string;
@@ -353,7 +354,27 @@ export class OxAdapter implements ReadWriteAdapter {
 }
 
 function handleError(error: any): never {
-  throw new DriftError(error);
+  if (typeof error !== "object") {
+    throw new DriftError(error);
+  }
+
+  const _error = { message: "" };
+  let details: AnyObject | undefined;
+
+  try {
+    details = JSON.parse(error.details);
+  } catch {}
+
+  if (error.shortMessage) {
+    _error.message += error.shortMessage;
+  }
+  if (details?.message) {
+    _error.message += `\n${details.message}`;
+  }
+  _error.message += `\n${error.message.replace(error.shortMessage, "").trimStart()}`;
+  _error.message = _error.message.trimStart();
+
+  throw new DriftError(_error);
 }
 
 function blockParam(block?: BlockTag | bigint): HexString | BlockTag {

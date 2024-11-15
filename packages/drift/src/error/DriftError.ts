@@ -85,15 +85,25 @@ export class DriftError extends Error {
         }
 
         if (this.message) {
-          stack += `: ${this.message}`;
+          stack += `: ${this.message.replaceAll("\n", "\n  ")}`;
         }
 
         if (stackTarget.stack) {
-          stack += `\n${stackTarget.stack.replace(/^.*\n/, "")}`;
+          const stackLines = stackTarget.stack
+            .replace(this.message, "")
+            .split("\n")
+            .slice(1)
+            .join("\n");
+          if (stackLines) {
+            stack += `\n${stackLines}`;
+          }
         }
 
         if (cause) {
-          stack += `\n  Caused by: ${cause.stack || cause}`;
+          stack += `\nCaused by: ${cause.stack || cause}`.replaceAll(
+            "\n",
+            "\n  ",
+          );
         }
 
         return stack.trim();
