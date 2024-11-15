@@ -48,7 +48,7 @@ export type DriftParams<
 >;
 
 export class Drift<
-  TAdapter extends Adapter = Adapter,
+  TAdapter extends Adapter = ReadWriteAdapter,
   TCache extends SimpleCache = SimpleCache,
 > {
   adapter: TAdapter;
@@ -86,26 +86,19 @@ export class Drift<
 
     // Write-only property assignment //
 
-    const isReadWrite = this.isReadWrite();
+    this.getSignerAddress = this.adapter
+      .getSignerAddress as this["getSignerAddress"];
+    this.write = this.adapter.write as this["write"];
+  }
 
-    this.getSignerAddress = isReadWrite
-      ? async () => this.adapter.getSignerAddress()
-      : (undefined as any);
-
-    this.write = isReadWrite
-      ? async (params) => {
-          const writePromise = this.adapter.write(params);
-
-          if (params.onMined) {
-            writePromise.then((hash) => {
-              this.adapter.waitForTransaction({ hash }).then(params.onMined);
-              return hash;
-            });
-          }
-
-          return writePromise;
-        }
-      : (undefined as any);
+  protected async initCacheNamespace(): Promise<PropertyKey> {
+    return (
+      this.cacheNamespace ??
+      this.getChainId().then((id) => {
+        this.cacheNamespace = id;
+        return id;
+      })
+    );
   }
 
   // The following functions are defined as arrow function properties rather
@@ -128,16 +121,6 @@ export class Drift<
       cache,
       cacheNamespace,
     });
-
-  protected async initCacheNamespace(): Promise<PropertyKey> {
-    return (
-      this.cacheNamespace ??
-      this.getChainId().then((id) => {
-        this.cacheNamespace = id;
-        return id;
-      })
-    );
-  }
 
   /**
    * Get the chain ID of the network.

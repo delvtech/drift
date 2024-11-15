@@ -210,7 +210,7 @@ describe("MockAdapter", () => {
         logsBloom: "0x",
         status: "success",
         to: "0x",
-        transactionIndex: 123,
+        transactionIndex: 123n,
       };
       const receipt2: TransactionReceipt = {
         ...receipt1,
@@ -235,7 +235,7 @@ describe("MockAdapter", () => {
         status: "success",
         to: "0x",
         transactionHash: "0x",
-        transactionIndex: 123,
+        transactionIndex: 123n,
       };
       adapter.onWaitForTransaction({ hash: "0x" }).resolves(receipt);
       expect(
@@ -256,7 +256,7 @@ describe("MockAdapter", () => {
         status: "success",
         to: "0x",
         transactionHash: "0x",
-        transactionIndex: 123,
+        transactionIndex: 123n,
       };
       adapter.onWaitForTransaction().resolves(receipt);
       expect(await adapter.waitForTransaction({ hash: "0x" })).toBe(receipt);

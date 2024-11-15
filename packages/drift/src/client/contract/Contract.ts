@@ -100,12 +100,10 @@ export class Contract<
 
     // Write-only property assignment //
 
+    this.getSignerAddress = this.adapter
+      .getSignerAddress as this["getSignerAddress"];
+
     const isReadWrite = this.isReadWrite();
-
-    this.getSignerAddress = isReadWrite
-      ? () => this.adapter.getSignerAddress()
-      : (undefined as any);
-
     this.write = isReadWrite
       ? async (...[fn, args, options]) => {
           return this.adapter.write({

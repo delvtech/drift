@@ -5,14 +5,14 @@ export interface TransactionInfo {
   blockHash?: Hash;
   blockNumber?: bigint;
   from?: Address;
-  hash?: Hash;
-  transactionIndex?: number;
+  transactionHash?: Hash;
+  transactionIndex?: bigint;
 }
 
 /** Legacy + EIP-1559 compatible transaction */
 // https://github.com/ethereum/execution-apis/blob/e8727564bb74a1ebcd22a933b7b57eb7b71a11c3/src/schemas/transaction.yaml#L78
 // https://github.com/ethereum/execution-apis/blob/e8727564bb74a1ebcd22a933b7b57eb7b71a11c3/src/schemas/transaction.yaml#L184
-export interface Transaction extends TransactionInfo {
+interface TransactionBase {
   type: string;
   nonce: bigint;
   gas: bigint;
@@ -23,13 +23,14 @@ export interface Transaction extends TransactionInfo {
   to?: Address | null;
 }
 
-export type MinedTransaction = Transaction & Required<TransactionInfo>;
+export interface Transaction extends TransactionBase, TransactionInfo {}
+
+export interface MinedTransaction
+  extends TransactionBase,
+    Required<TransactionInfo> {}
 
 // https://github.com/ethereum/execution-apis/blob/e3d2745289bd2bb61dc8593069871be4be441952/src/schemas/receipt.yaml#L37
-export interface TransactionReceipt {
-  blockHash: Hash;
-  blockNumber: bigint;
-  from: Address;
+export interface TransactionReceipt extends Required<TransactionInfo> {
   /**
    * Address of the receiver or `null` in a contract creation transaction.
    */
@@ -46,11 +47,7 @@ export interface TransactionReceipt {
   // TODO:
   // logs: Log[];
   logsBloom: Bytes;
-  transactionHash: Hash;
-  transactionIndex: number;
-
   status: "success" | "reverted";
-
   /**
    * The actual value per gas deducted from the sender's account. Before
    * EIP-1559, this is equal to the transaction's gas price. After, it is equal

@@ -296,7 +296,7 @@ describe("MockDrift", () => {
         logsBloom: "0x",
         status: "success",
         to: "0x",
-        transactionIndex: 123,
+        transactionIndex: 123n,
       };
       const receipt2: TransactionReceipt = {
         ...receipt1,
@@ -321,7 +321,7 @@ describe("MockDrift", () => {
         status: "success",
         to: "0x",
         transactionHash: "0x",
-        transactionIndex: 123,
+        transactionIndex: 123n,
       };
       drift.onWaitForTransaction({ hash: "0x" }).resolves(receipt);
       expect(
@@ -342,7 +342,7 @@ describe("MockDrift", () => {
         status: "success",
         to: "0x",
         transactionHash: "0x",
-        transactionIndex: 123,
+        transactionIndex: 123n,
       };
       drift.onWaitForTransaction().resolves(receipt);
       expect(await drift.waitForTransaction({ hash: "0x" })).toBe(receipt);

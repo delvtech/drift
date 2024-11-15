@@ -16,7 +16,9 @@ import type { Network } from "src/adapter/types/Network";
 import type { TransactionReceipt } from "src/adapter/types/Transaction";
 import type { AnyObject, EmptyObject } from "src/utils/types";
 
-export type Adapter = ReadAdapter | ReadWriteAdapter;
+export interface Adapter
+  extends ReadAdapter,
+    Partial<Omit<ReadWriteAdapter, keyof ReadAdapter>> {}
 
 export interface ReadAdapter extends Network {
   getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(

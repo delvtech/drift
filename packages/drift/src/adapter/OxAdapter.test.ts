@@ -79,7 +79,7 @@ describe("OxAdapter", () => {
         from: expect.any(String),
         hash: expect.any(String),
         to: expect.any(String),
-        transactionIndex: expect.any(Number),
+        transactionIndex: expect.any(BigInt),
       } as Transaction),
     );
   });
@@ -111,7 +111,7 @@ describe("OxAdapter", () => {
         status: expect.stringMatching(/^(success|reverted)$/),
         to: expect.any(String),
         transactionHash: expect.any(String),
-        transactionIndex: expect.any(Number),
+        transactionIndex: expect.any(BigInt),
       } as TransactionReceipt),
     );
   });

@@ -72,8 +72,8 @@ export class DriftError extends Error {
       customName = error.constructor.name;
     }
 
-    // Doing this in constructor prevents the need to add custom properties to
-    // the prototype, which would be displayed in the stack trace. The getter
+    // Doing this in the constructor prevents the need to add custom properties
+    // to the prototype, which would be displayed in the stack trace. The getter
     // ensures the name and message are up-to-date when accessed (e.g., after
     // subclassing and changing the name).
     Object.defineProperty(this, "stack", {

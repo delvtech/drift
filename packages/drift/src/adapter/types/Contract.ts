@@ -1,5 +1,5 @@
 import type { Abi } from "abitype";
-import type { Address, Bytes, HexString } from "src/adapter/types/Abi";
+import type { Address, HexString } from "src/adapter/types/Abi";
 import type { BlockTag } from "src/adapter/types/Block";
 import type { EventFilter, EventName } from "src/adapter/types/Event";
 
@@ -23,14 +23,12 @@ export interface ContractGetEventsOptions<
 export interface ContractWriteOptions {
   type?: string;
   nonce?: bigint;
-  to?: Address;
   from?: Address;
   /**
    * Gas limit
    */
   gas?: bigint;
   value?: bigint;
-  input?: Bytes;
   /**
    * The gas price willing to be paid by the sender in wei
    */

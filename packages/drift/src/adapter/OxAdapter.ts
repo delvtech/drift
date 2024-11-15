@@ -61,13 +61,17 @@ export class OxAdapter implements ReadWriteAdapter {
     pollingInterval = OxAdapter.DEFAULT_POLLING_INTERVAL,
   }: OxAdapterParams = {}) {
     try {
-      this.provider = Provider.from(
-        rpcUrl
-          ? RpcTransport.fromHttp(rpcUrl)
-          : "window" in globalThis
-            ? window.ethereum
-            : undefined,
-      );
+      const provider = rpcUrl
+        ? RpcTransport.fromHttp(rpcUrl)
+        : "window" in globalThis
+          ? window.ethereum
+          : undefined;
+
+      if (!provider) {
+        throw new DriftError("No provider found");
+      }
+
+      this.provider = Provider.from(provider);
     } catch (e) {
       handleError(e);
     }
@@ -175,15 +179,21 @@ export class OxAdapter implements ReadWriteAdapter {
     }
   };
 
-  getTransaction = ({ hash }: NetworkGetTransactionParams) => {
-    return this.provider
+  getTransaction = async ({ hash }: NetworkGetTransactionParams) => {
+    const tx = await this.provider
       .request({
         method: "eth_getTransactionByHash",
         params: [hash],
       })
-      .then(Transaction.fromRpc)
-      .then((tx) => tx ?? undefined)
       .catch(handleError);
+    if (tx) {
+      const parsed = Transaction.fromRpc(tx);
+      return {
+        ...parsed,
+        transactionIndex: BigInt(parsed.transactionIndex),
+      };
+    }
+    return undefined;
   };
 
   waitForTransaction = async ({
@@ -198,11 +208,17 @@ export class OxAdapter implements ReadWriteAdapter {
               method: "eth_getTransactionReceipt",
               params: [hash],
             })
-            .then((receipt) =>
-              receipt
-                ? resolve(TransactionReceipt.fromRpc(receipt))
-                : setTimeout(getReceipt, this.pollingInterval),
-            )
+            .then((receipt) => {
+              if (receipt) {
+                const parsedReceipt = TransactionReceipt.fromRpc(receipt);
+                resolve({
+                  ...parsedReceipt,
+                  transactionIndex: BigInt(parsedReceipt.transactionIndex),
+                });
+              } else {
+                setTimeout(getReceipt, this.pollingInterval);
+              }
+            })
             .catch(reject);
 
         getReceipt();
@@ -401,7 +417,6 @@ function writeParams<
   maxFeePerGas,
   maxPriorityFeePerGas,
   nonce,
-  to,
   value,
   ...rest
 }: AdapterWriteParams<TAbi, TFunctionName>) {
@@ -439,7 +454,7 @@ function writeParams<
           ? (`0x${maxPriorityFeePerGas.toString(16)}` as HexString)
           : undefined,
         nonce: nonce ? (`0x${nonce.toString(16)}` as HexString) : undefined,
-        to: to ?? address,
+        to: address,
         value: value ? (`0x${value.toString(16)}` as HexString) : undefined,
       },
     ] as const,

@@ -5,6 +5,7 @@ describe("Drift", () => {
   it("Should use the cache namespace if provided", () => {
     const drift = new Drift({
       cacheNamespace: "test",
+      rpcUrl: "test",
     });
 
     expect(drift.cacheNamespace).toEqual("test");
