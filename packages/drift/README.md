@@ -2,8 +2,9 @@
 
 **Effortless Ethereum Development Across Web3 Libraries**
 
-Write Ethereum smart contract interactions once with Drift and run them
-anywhere. Seamlessly support multiple web3 libraries like ethers.js, viem, and
+Write cached Ethereum smart contract interactions once with Drift and run them
+anywhere. Seamlessly support multiple web3 libraries like
+[viem](https://viem.sh), [web3.js](https://www.web3js.org/), and
 more—without getting locked into a single provider or rewriting code.
 
 With built-in caching, type-safe contract APIs, and easy-to-use testing mocks,
@@ -15,22 +16,19 @@ great features and user experiences.
 
 Building on Ethereum often means dealing with:
 
-- **Hard Dependency on a Specific Web3 Library:** There are several competing
-  options, like ethers.js, viem, or web3.js. Tying your business logic to a
-  specific one creates vendor lock-in and makes it harder to switch down the
-  road.
-- **Managing Multiple Hooks:** Each contract call often needs its own hook and
-  query key to prevent redundant network requests.
 - **Optimizing Network Calls:** Manually caching calls and optimizing queries to
   minimize RPC requests slows down development.
+- **Managing Multiple Hooks:** Each contract call often needs its own hook and
+  query key to prevent redundant network requests.
 - **Complex Testing:** Setting up mocks for contract interactions can be
   cumbersome and error-prone.
+- **Hard Dependency on a Specific Web3 Library:** There are several competing
+  options, like viem, web3.js, ethers.js. Tying your business logic to a
+  specific one creates vendor lock-in and makes it harder to switch down the
+  road.
 
 ## Drift Solves These Problems
 
-- 🌐 **Multi-Library Support:** Drift provides a unified interface compatible
-  with multiple web3 libraries. Write your contract logic once and use it across
-  different providers.
 - ⚡ **Optimized Performance:** Automatically reduces redundant RPC calls with
   built-in caching. No need to manage hooks or query keys for each call.
 - 🔒 **Type Safety:** Drift's type-checked APIs help catch errors at compile
@@ -38,25 +36,47 @@ Building on Ethereum often means dealing with:
 - 🧪 **Testing Made Easy:** Built-in mocks simplify testing your contract
   interactions. Drift's testing mocks are also type-safe, ensuring your tests
   are always in sync with your contracts.
+- 🌐 **Multi-Library Support:** Drift provides a unified interface compatible
+  with multiple web3 libraries. Write your contract logic once and use it across
+  different providers.
 - 🔄 **Extensibility:** Designed to grow with your project's needs, Drift allows
   you to easily extend support to new web3 libraries by creating small adapter
   packages.
 
 ## Installation
 
-Install Drift and the adapter for your preferred web3 library:
+Install Drift and an optional adapter for your preferred web3 library:
 
 ```bash
 npm install @delvtech/drift
-# For ethers.js
-npm install @delvtech/drift-ethers
+
+# Optional
 # For viem
 npm install @delvtech/drift-viem
+# For web3.js
+npm install @delvtech/drift-web3
 ```
+
+> [!TIP]
+> Drift includes a built-in adapter and can be used without installing any
+> additional packages. However, adapters will reuse clients from their
+> corresponding web3 library, which can improve performance depending on their
+> configuration. For example, the `publicClient` from Viem can automatically
+> batch requests via MultiCall.
 
 ## Start Drifting
 
-### 1. Initialize Drift with your chosen adapter
+### 1. Initialize Drift
+
+```typescript
+import { Drift } from "@delvtech/drift";
+
+const drift = new Drift({
+  rpcUrl: "[YOUR_RPC_URL]",
+});
+```
+
+**Viem adapter example:**
 
 ```typescript
 import { Drift } from "@delvtech/drift";
@@ -67,7 +87,7 @@ const publicClient = createPublicClient({
   transport: http(),
 });
 
-// optionally, create a wallet client
+// optionally create a wallet client
 const walletClient = createWalletClient({
   transport: http(),
 });
@@ -254,14 +274,13 @@ const deposits = await readVault.getDeposits("0xUserAddress");
 
 #### Benefits of This Architecture
 
-- **Modularity:** Your core logic remains untouched when switching web3
-  libraries.
 - **Reusability:** Write your business logic once and reuse it across different
-  environments.
-- **Flexibility:** Easily extend support to new web3 libraries by creating small
+  environments. Easily extend support to new web3 libraries by creating small
   adapter packages.
 - **Simplicity:** Your application code stays clean and focused on business
-  logic rather than on handling different web3 providers.
+  logic rather than on optimizing network calls or managing cache keys.
+- **Flexibility:** Your core logic remains untouched when switching web3
+  libraries.
 
 ### 3. Extend core clients for library-specific clients
 
