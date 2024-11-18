@@ -15,6 +15,7 @@ import {
   type NetworkGetTransactionParams,
   type NetworkWaitForTransactionParams,
   type ReadAdapter,
+  type TransactionReceipt,
   arrayToObject,
   objectToArray,
 } from "@delvtech/drift";
@@ -46,17 +47,29 @@ export class ViemReadAdapter implements ReadAdapter {
 
   getBlockNumber = () => this.publicClient.getBlockNumber();
 
-  getBlock = (params: NetworkGetBlockParams = {}) => {
-    return this.publicClient.getBlock(params as GetBlockParameters).then(
-      (block) =>
-        ({
-          ...block,
-          hash: block.hash ?? undefined,
-          logsBloom: block.logsBloom ?? undefined,
-          nonce: block.nonce ?? undefined,
-          number: block.number ?? undefined,
-        }) as Block,
+  getBlock = async (params: NetworkGetBlockParams = {}) => {
+    const block = await this.publicClient.getBlock(
+      params as GetBlockParameters,
     );
+    return {
+      extraData: block.extraData,
+      gasLimit: block.gasLimit,
+      gasUsed: block.gasUsed,
+      hash: block.hash ?? undefined,
+      logsBloom: block.logsBloom ?? undefined,
+      miner: block.miner,
+      mixHash: block.mixHash,
+      nonce: block.nonce ?? undefined,
+      number: block.number ?? undefined,
+      parentHash: block.parentHash,
+      receiptsRoot: block.receiptsRoot,
+      sha3Uncles: block.sha3Uncles,
+      size: block.size,
+      stateRoot: block.stateRoot,
+      timestamp: block.timestamp,
+      transactions: block.transactions,
+      transactionsRoot: block.transactionsRoot,
+    } as Block;
   };
 
   getBalance = ({ address, block }: NetworkGetBalanceParams) => {
@@ -67,42 +80,23 @@ export class ViemReadAdapter implements ReadAdapter {
     } as GetBalanceParameters);
   };
 
-  getTransaction = ({ hash }: NetworkGetTransactionParams) => {
-    return this.publicClient
-      .getTransaction({ hash })
-      .then(
-        ({
-          gas,
-          gasPrice,
-          input,
-          nonce,
-          type,
-          value,
-          blockHash,
-          blockNumber,
-          from,
-          chainId,
-          hash,
-          to,
-          transactionIndex,
-        }) => {
-          return {
-            gas,
-            gasPrice: gasPrice as bigint,
-            input,
-            nonce: BigInt(nonce),
-            type: rpcTransactionType[type],
-            value,
-            blockHash: blockHash ?? undefined,
-            blockNumber: blockNumber ?? undefined,
-            from,
-            chainId,
-            hash,
-            to,
-            transactionIndex: BigInt(transactionIndex),
-          };
-        },
-      );
+  getTransaction = async ({ hash }: NetworkGetTransactionParams) => {
+    const tx = await this.publicClient.getTransaction({ hash });
+    return {
+      gas: tx.gas,
+      gasPrice: tx.gasPrice as bigint,
+      input: tx.input,
+      nonce: BigInt(tx.nonce),
+      type: rpcTransactionType[tx.type],
+      value: tx.value,
+      blockHash: tx.blockHash ?? undefined,
+      blockNumber: tx.blockNumber ?? undefined,
+      from: tx.from,
+      chainId: tx.chainId,
+      hash: tx.hash,
+      to: tx.to,
+      transactionIndex: BigInt(tx.transactionIndex),
+    };
   };
 
   waitForTransaction = async ({
@@ -114,12 +108,21 @@ export class ViemReadAdapter implements ReadAdapter {
       timeout,
     });
     return {
-      ...receipt,
+      blockHash: receipt.blockHash,
+      blockNumber: receipt.blockNumber,
+      cumulativeGasUsed: receipt.cumulativeGasUsed,
+      effectiveGasPrice: receipt.effectiveGasPrice,
+      from: receipt.from,
+      gasUsed: receipt.gasUsed,
+      logsBloom: receipt.logsBloom,
+      status: receipt.status,
+      to: receipt.to ?? undefined,
+      transactionHash: receipt.transactionHash,
       transactionIndex: BigInt(receipt.transactionIndex),
-    };
+    } as TransactionReceipt;
   };
 
-  getEvents = <TAbi extends Abi, TEventName extends EventName<TAbi>>({
+  getEvents = async <TAbi extends Abi, TEventName extends EventName<TAbi>>({
     abi,
     address,
     event,
@@ -127,42 +130,39 @@ export class ViemReadAdapter implements ReadAdapter {
     fromBlock,
     toBlock,
   }: AdapterGetEventsParams<TAbi, TEventName>) => {
-    return this.publicClient
-      .getContractEvents({
-        address,
-        abi: abi as Abi,
-        eventName: event as string,
-        fromBlock,
-        toBlock,
-        args: filter,
-      })
-      .then((events) => {
-        return events.map(
-          ({ args, blockNumber, data, transactionHash, topics }) => {
-            const objectArgs = (
-              Array.isArray(args)
-                ? decodeEventLog({
-                    abi,
-                    eventName: event as any,
-                    data,
-                    topics,
-                  }).args
-                : args
-            ) as AbiObjectType<TAbi, "event", typeof event, "inputs">;
+    const events = await this.publicClient.getContractEvents({
+      address,
+      abi: abi as Abi,
+      eventName: event as string,
+      fromBlock,
+      toBlock,
+      args: filter,
+    });
+    return events.map(
+      ({ args, blockNumber, data, transactionHash, topics }) => {
+        const objectArgs = (
+          Array.isArray(args)
+            ? decodeEventLog({
+                abi,
+                eventName: event as any,
+                data,
+                topics,
+              }).args
+            : args
+        ) as AbiObjectType<TAbi, "event", typeof event, "inputs">;
 
-            return {
-              args: objectArgs,
-              blockNumber: blockNumber ?? undefined,
-              data,
-              eventName: event,
-              transactionHash: transactionHash ?? undefined,
-            };
-          },
-        );
-      });
+        return {
+          args: objectArgs,
+          blockNumber: blockNumber ?? undefined,
+          data,
+          eventName: event,
+          transactionHash: transactionHash ?? undefined,
+        };
+      },
+    );
   };
 
-  read = <
+  read = async <
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >({
@@ -180,39 +180,37 @@ export class ViemReadAdapter implements ReadAdapter {
       value: args,
     });
 
-    return this.publicClient
-      .readContract({
-        abi: abi as Abi,
-        address,
-        functionName: fn,
-        args: argsArray,
-        blockNumber: typeof block === "bigint" ? block : undefined,
-        blockTag: typeof block === "string" ? block : undefined,
-      })
-      .then((output) => {
-        return outputToFriendly({
-          abi,
-          functionName: fn,
-          output,
-        }) as FunctionReturn<TAbi, typeof fn>;
-      });
+    const output = await this.publicClient.readContract({
+      abi: abi as Abi,
+      address,
+      functionName: fn,
+      args: argsArray,
+      blockNumber: typeof block === "bigint" ? block : undefined,
+      blockTag: typeof block === "string" ? block : undefined,
+    });
+
+    return outputToFriendly({
+      abi,
+      functionName: fn,
+      output,
+    }) as FunctionReturn<TAbi, typeof fn>;
   };
 
-  simulateWrite = <
+  simulateWrite = async <
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
     params: AdapterWriteParams<TAbi, TFunctionName>,
   ) => {
-    return this.publicClient
-      .simulateContract(createSimulateContractParameters(params))
-      .then(({ result }) => {
-        return outputToFriendly({
-          abi: params.abi,
-          functionName: params.fn,
-          output: result,
-        }) as FunctionReturn<TAbi, TFunctionName>;
-      });
+    const { result } = await this.publicClient.simulateContract(
+      createSimulateContractParameters(params),
+    );
+
+    return outputToFriendly({
+      abi: params.abi,
+      functionName: params.fn,
+      output: result,
+    }) as FunctionReturn<TAbi, TFunctionName>;
   };
 
   encodeFunctionData = <

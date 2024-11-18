@@ -1,5 +1,6 @@
 import type {
   AdapterWriteParams,
+  Address,
   FunctionName,
   FunctionReturn,
   ReadWriteAdapter,
@@ -27,30 +28,29 @@ export class ViemReadWriteAdapter
     this.walletClient = walletClient;
   }
 
-  getSignerAddress = () => {
-    return this.walletClient.getAddresses().then(([address]) => address!);
+  getSignerAddress = async () => {
+    const [address] = await this.walletClient.getAddresses();
+    return address as Address;
   };
 
   // override to get the account from the wallet client
-  simulateWrite = <
+  simulateWrite = async <
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
     params: AdapterWriteParams<TAbi, TFunctionName>,
   ) => {
-    return this.getSignerAddress().then((from) => {
+    return this.getSignerAddress().then(async (from) => {
       const viemParams = createSimulateContractParameters(
         Object.assign({}, params, { from }),
       );
-      return this.publicClient
-        .simulateContract(viemParams)
-        .then(({ result }) => {
-          return outputToFriendly({
-            abi: params.abi,
-            functionName: params.fn,
-            output: result,
-          }) as FunctionReturn<TAbi, TFunctionName>;
-        });
+      const { result } = await this.publicClient.simulateContract(viemParams);
+      
+      return outputToFriendly({
+        abi: params.abi,
+        functionName: params.fn,
+        output: result,
+      }) as FunctionReturn<TAbi, TFunctionName>;
     });
   };
 
