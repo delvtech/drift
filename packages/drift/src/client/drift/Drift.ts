@@ -79,10 +79,7 @@ export class Drift<
   }: DriftParams<TAdapter, TCache> = {}) {
     this.cache = createClientCache(cache);
     this.cacheNamespace = cacheNamespace;
-    this.adapter =
-      "adapter" in rest
-        ? rest.adapter
-        : (new OxAdapter(rest) as Adapter as TAdapter);
+    this.adapter = rest.adapter ?? (new OxAdapter(rest) as Adapter as TAdapter);
 
     // Write-only property assignment //
 

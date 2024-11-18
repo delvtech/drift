@@ -156,12 +156,34 @@ export type Converted<T, U, V> = T extends U
       : T;
 
 /**
- * Construct a type in which only a single key of `T` can be defined at a time.
+ * Construct a type in which only a single member of `T` is valid at a time.
+ *
+ * @example
+ * ```ts
+ * type U = OneOf<
+ *   | {
+ *       a: string;
+ *     }
+ *   | {
+ *       b: string;
+ *       c: number;
+ *     }
+ * >;
+ * // {
+ * //   a: string;
+ * //   b?: never;
+ * //   c?: never;
+ * // } | {
+ * //   a?: never;
+ * //   b: string;
+ * //   c: number;
+ * // }
+ * ```
  */
-export type OneOf<T> = {
-  [K in keyof T]: {
-    [Key in K]: T[K];
-  } & {
-    [OtherKeys in Exclude<keyof T, K>]?: undefined;
-  };
-}[keyof T];
+export type OneOf<T extends AnyObject> = UnionToIntersection<T> extends infer I
+  ? T extends infer Ty
+    ? Ty & {
+        [K in Exclude<keyof I, keyof T>]?: never;
+      }
+    : never
+  : never;
