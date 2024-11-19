@@ -47,7 +47,7 @@ Building on Ethereum often means dealing with:
 
 Install Drift and an optional adapter for your preferred web3 library:
 
-```bash
+```sh
 npm install @delvtech/drift
 
 # Optional
@@ -336,6 +336,14 @@ const readVault = new ReadVault("0xYourVaultAddress", publicClient);
 Testing smart contract interactions can be complex and time-consuming. Drift
 simplifies this process by providing built-in mocks that allow you to stub
 responses and focus on testing your application logic.
+
+> [!IMPORTANT]
+> Drift's testing mocks have a peer dependency on `sinon`. Make sure to install
+> it before using the mocks.
+>
+> ```sh
+> npm install --save-dev sinon
+> ```
 
 #### Example: Testing Client Methods with Multiple RPC Calls
 

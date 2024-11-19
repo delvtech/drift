@@ -2,7 +2,7 @@
   "name": "@delvtech/drift-web3",
   "description": "Web3.js adapter for Drift",
   "version": "0.0.0-beta.2",
-  "license": "AGPL-3.0",
+  "license": "Apache-2.0",
   "type": "module",
   "main": "dist/index.cjs",
   "types": "dist/index.d.cts",
@@ -15,16 +15,6 @@
       "default": {
         "import": "./dist/index.js",
         "require": "./dist/index.cjs"
-      }
-    },
-    "./testing": {
-      "types": {
-        "import": "./dist/testing.d.ts",
-        "require": "./dist/testing.d.cts"
-      },
-      "default": {
-        "import": "./dist/testing.js",
-        "require": "./dist/testing.cjs"
       }
     },
     "./package.json": "./package.json"
