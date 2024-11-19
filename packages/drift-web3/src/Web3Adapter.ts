@@ -28,7 +28,8 @@ import type { Abi } from "abitype";
 import { type AbiFragment, default as Web3 } from "web3";
 
 export class Web3Adapter implements ReadWriteAdapter {
-  public web3;
+  web3;
+
   constructor(
     web3OrProvider: Web3 | ConstructorParameters<typeof Web3>[0] = new Web3(),
   ) {
