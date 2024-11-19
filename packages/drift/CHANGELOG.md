@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.1-beta.14
+
+### Patch Changes
+
+- 1def3fd: Update package manifests, add `sinon` guidance to README
+
 ## 0.0.1-beta.13
 
 ### Patch Changes

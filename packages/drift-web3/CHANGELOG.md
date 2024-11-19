@@ -1,5 +1,13 @@
 # @delvtech/drift-web3
 
+## 0.0.0-beta.3
+
+### Patch Changes
+
+- 1def3fd: Update package manifests, add `sinon` guidance to README
+- Updated dependencies [1def3fd]
+  - @delvtech/drift@0.0.1-beta.14
+
 ## 0.0.0-beta.2
 
 ### Patch Changes
