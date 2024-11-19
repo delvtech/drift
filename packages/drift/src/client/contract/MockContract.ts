@@ -1,5 +1,6 @@
 import type { Abi } from "abitype";
 import { MockAdapter } from "src/adapter/MockAdapter";
+import type { OxAdapterParams } from "src/adapter/OxAdapter";
 import type { Bytes } from "src/adapter/types/Abi";
 import type {
   AdapterEncodeFunctionDataParams,
@@ -26,9 +27,9 @@ export type MockContractParams<
   TAbi extends Abi = Abi,
   TAdapter extends MockAdapter = MockAdapter,
   TCache extends SimpleCache = SimpleCache,
-> = {
-  adapter?: TAdapter;
-} & Partial<ContractParams<TAbi, TAdapter, TCache>>;
+> = Partial<
+  Omit<ContractParams<TAbi, TAdapter, TCache>, keyof OxAdapterParams>
+>;
 
 export class MockContract<
   TAbi extends Abi = Abi,

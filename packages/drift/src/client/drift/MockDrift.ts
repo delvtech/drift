@@ -1,5 +1,6 @@
 import type { Abi } from "abitype";
 import { MockAdapter } from "src/adapter/MockAdapter";
+import type { OxAdapterParams } from "src/adapter/OxAdapter";
 import type { ReadWriteAdapter } from "src/adapter/types/Adapter";
 import type { EventName } from "src/adapter/types/Event";
 import type { FunctionName } from "src/adapter/types/Function";
@@ -23,6 +24,11 @@ import {
 } from "src/client/drift/Drift";
 import type { FunctionKey, OptionalKeys } from "src/utils/types";
 
+export type MockDriftParams<
+  TAdapter extends MockAdapter = MockAdapter,
+  TCache extends SimpleCache = SimpleCache,
+> = Partial<Omit<DriftParams<TAdapter, TCache>, keyof OxAdapterParams>>;
+
 export class MockDrift<
   TAdapter extends MockAdapter = MockAdapter,
   TCache extends SimpleCache = SimpleCache,
@@ -30,7 +36,7 @@ export class MockDrift<
   constructor({
     adapter = new MockAdapter() as TAdapter,
     ...rest
-  }: { adapter?: TAdapter } & DriftParams<MockAdapter, TCache> = {}) {
+  }: MockDriftParams<TAdapter, TCache> = {}) {
     super({ ...rest, adapter });
   }
 
