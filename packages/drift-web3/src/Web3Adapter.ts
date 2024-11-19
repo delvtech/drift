@@ -80,7 +80,6 @@ export class Web3Adapter implements ReadWriteAdapter {
 
   getTransaction = async ({ hash }: NetworkGetTransactionParams) => {
     const tx = await this.web3.eth.getTransaction(hash);
-    console.log("TRANSACTION TYPE", tx?.type);
     return tx
       ? ({
           blockHash: tx.blockHash as Hash | undefined,
