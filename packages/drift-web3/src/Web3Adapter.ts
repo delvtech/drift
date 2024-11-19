@@ -25,10 +25,18 @@ import {
   objectToArray,
 } from "@delvtech/drift";
 import type { Abi } from "abitype";
-import type { AbiFragment, default as Web3 } from "web3";
+import { type AbiFragment, default as Web3 } from "web3";
 
 export class Web3Adapter implements ReadWriteAdapter {
-  constructor(public web3: Web3) {}
+  public web3;
+  constructor(
+    web3OrProvider: Web3 | ConstructorParameters<typeof Web3>[0] = new Web3(),
+  ) {
+    this.web3 =
+      web3OrProvider instanceof Web3
+        ? web3OrProvider
+        : new Web3(web3OrProvider);
+  }
 
   getChainId = () => this.web3.eth.getChainId().then(Number);
 

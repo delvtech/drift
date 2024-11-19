@@ -18,6 +18,14 @@ const web3 = new Web3(VITE_RPC_URL);
 const address = VITE_TOKEN_ADDRESS as Address;
 
 describe("Web3Adapter", () => {
+  it("can be initialized with either a web3 instance or forwarded args", async () => {
+    const fromInstance = new Web3Adapter(web3);
+    expect(fromInstance.getChainId()).resolves;
+
+    const fromUrl = new Web3Adapter(VITE_RPC_URL);
+    expect(fromUrl.getChainId()).resolves;
+  });
+
   it("fetches the chain id", async () => {
     const adapter = new Web3Adapter(web3);
     const chainId = await adapter.getChainId();
