@@ -1,7 +1,7 @@
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 
 // https://github.com/ethereum/execution-apis/blob/3ae3d29fc9900e5c48924c238dff7643fdc3680e/src/schemas/block.yaml#L1
-export type Block = PendingBlock | MinedBlock;
+// export type Block = PendingBlock | MinedBlock;
 
 export interface BaseBlockProps {
   extraData?: Bytes;
@@ -19,27 +19,20 @@ export interface BaseBlockProps {
   transactionsRoot: Hash;
 }
 
-export interface PendingBlock extends BaseBlockProps {
+export interface MinedBlockProps {
   /** `undefined` if pending */
-  hash: undefined;
+  hash?: Hash;
   /** `undefined` if pending */
-  logsBloom: undefined;
+  logsBloom?: Hash;
   /** `undefined` if pending */
-  nonce: undefined;
+  nonce?: bigint;
   /** `undefined` if pending */
-  number: undefined;
+  number?: bigint;
 }
 
-export interface MinedBlock extends BaseBlockProps {
-  /** `undefined` if pending */
-  hash: Hash;
-  /** `undefined` if pending */
-  logsBloom: Hash;
-  /** `undefined` if pending */
-  nonce: bigint;
-  /** `undefined` if pending */
-  number: bigint;
-}
+export interface Block extends BaseBlockProps, MinedBlockProps {}
+
+export interface MinedBlock extends BaseBlockProps, Required<MinedBlockProps> {}
 
 // https://github.com/ethereum/execution-apis/blob/3ae3d29fc9900e5c48924c238dff7643fdc3680e/src/schemas/block.yaml#L114
 export type BlockTag = "latest" | "earliest" | "pending" | "safe" | "finalized";

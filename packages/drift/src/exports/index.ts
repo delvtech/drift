@@ -33,7 +33,7 @@ export type {
   Block,
   BlockTag,
   MinedBlock,
-  PendingBlock,
+  MinedBlockProps,
 } from "src/adapter/types/Block";
 export type {
   ContractWriteOptions as AdapterContractWriteOptions,
