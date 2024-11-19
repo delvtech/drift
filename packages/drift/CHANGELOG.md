@@ -1,5 +1,17 @@
 # @delvtech/drift
 
+## 0.0.1-beta.13
+
+### Patch Changes
+
+- a60ae6d: Added a `method` argument to the `reset` method of all mocks to reset a specific method (e.g., `read`)
+- 3bb4943: Changed the `hash` field to `transactionHash` on transaction types.
+- cd364f4: Removed `PendingBlock` type
+- 3bb4943: Removed `to` and `input` from `ContractWriteOptions`. These will be set via `address` and `args`.
+- a842e69: Changed the `OneOf` type to unions of objects
+- 3bb4943: Changed the `transactionIndex` type to `bigint`
+- b5918c6: Improved error handling for drift
+
 ## 0.0.1-beta.12
 
 ### Patch Changes

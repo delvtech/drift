@@ -1,5 +1,19 @@
 # @delvtech/drift-viem
 
+## 0.0.1-beta.15
+
+### Patch Changes
+
+- e52765b: Use the viem version from dev dependencies in peer dependencies
+- Updated dependencies [a60ae6d]
+- Updated dependencies [3bb4943]
+- Updated dependencies [cd364f4]
+- Updated dependencies [3bb4943]
+- Updated dependencies [a842e69]
+- Updated dependencies [3bb4943]
+- Updated dependencies [b5918c6]
+  - @delvtech/drift@0.0.1-beta.13
+
 ## 0.0.1-beta.14
 
 ### Patch Changes
