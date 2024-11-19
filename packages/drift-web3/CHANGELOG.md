@@ -1,5 +1,11 @@
 # @delvtech/drift-web3
 
+## 0.0.0-beta.2
+
+### Patch Changes
+
+- ac38379: Fixed `from` option in `simulateWrite` and `from` option in `write`
+
 ## 0.0.0-beta.1
 
 ### Patch Changes
