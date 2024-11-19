@@ -220,7 +220,7 @@ export class Web3Adapter implements ReadWriteAdapter {
     const methodObj = method(...arrayArgs);
     const outputObj = await methodObj.call({
       data: methodObj.encodeABI(),
-      from: address,
+      from: params.from,
       gas: params.gas ? toHex(params.gas) : undefined,
       gasPrice: params.gasPrice ? toHex(params.gasPrice) : undefined,
       maxFeePerGas: params.maxFeePerGas
@@ -286,7 +286,15 @@ export class Web3Adapter implements ReadWriteAdapter {
   >(
     params: AdapterWriteParams<TAbi, TFunctionName>,
   ) => {
-    const { abi, address, fn, args, accessList, onMined, ...rest } = params;
+    const {
+      abi,
+      address,
+      args,
+      fn,
+      from = await this.getSignerAddress(),
+      onMined,
+      ...rest
+    } = params;
 
     const arrayArgs = objectToArray({
       abi: abi as Abi,
@@ -303,8 +311,7 @@ export class Web3Adapter implements ReadWriteAdapter {
         .sendTransaction({
           ...rest,
           data: method(...arrayArgs).encodeABI(),
-          to: address,
-          accessList,
+          from,
         })
         .on("error", reject)
         .on("transactionHash", (hash) => resolve(hash as Hash));
