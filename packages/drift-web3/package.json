@@ -37,7 +37,7 @@
   },
   "peerDependencies": {
     "@delvtech/drift": "0.0.1-beta.12",
-    "web3": "^4"
+    "web3": "^4.15.0"
   },
   "devDependencies": {
     "@delvtech/drift": "0.0.1-beta.12",

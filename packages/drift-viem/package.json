@@ -37,7 +37,7 @@
   },
   "peerDependencies": {
     "@delvtech/drift": "0.0.1-beta.12",
-    "viem": "^2"
+    "viem": "^2.21.45"
   },
   "devDependencies": {
     "@delvtech/drift": "0.0.1-beta.12",
