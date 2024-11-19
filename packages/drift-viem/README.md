@@ -1,22 +1,13 @@
 # @delvtech/drift-viem
 
-Viem adapter for [@delvtech/drift](https://github.com/delvtech/evm-client/).
+[Viem](https://viem.sh) adapter for [Drift](https://github.com/delvtech/drift).
 
 ```ts
 import { Drift } from "@delvtech/drift";
 import { viemAdapter } from "@delvtech/drift-viem";
 import { createPublicClient, http } from "viem";
 
-const publicClient = createPublicClient({
-  transport: http(),
-  // ...other options
-});
-
-// optionally, create a wallet client
-const walletClient = createWalletClient({
-  transport: http(),
-  // ...other options
-});
-
+const publicClient = createPublicClient(/* ... */);
+const walletClient = createWalletClient(/* ... */); // optional
 const drift = new Drift(viemAdapter({ publicClient, walletClient }));
 ```
