@@ -108,7 +108,7 @@ export function objectToArray<
 
     for (const [i, input] of entry.inputs.entries()) {
       const key = input.name || i;
-      if ("key" in args) potentialKeyMatchCount++;
+      if (key in args) potentialKeyMatchCount++;
       arrayArgs.push(args[key]);
     }
 
