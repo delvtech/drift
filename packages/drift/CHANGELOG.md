@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.1-beta.16
+
+### Patch Changes
+
+- Bump build
+
 ## 0.0.1-beta.15
 
 ### Patch Changes

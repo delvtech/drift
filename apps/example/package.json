@@ -9,7 +9,7 @@
     "watch": "tsx -r dotenv/config --watch src/index.ts"
   },
   "dependencies": {
-    "@delvtech/drift": "^0.0.1-beta.11"
+    "@delvtech/drift": "^0.0.1-beta.16"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
