@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.1-beta.15
+
+### Patch Changes
+
+- f1cf7b4: Patch overload matching `objectToArray` type
+
 ## 0.0.1-beta.14
 
 ### Patch Changes
