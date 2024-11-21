@@ -1,5 +1,11 @@
 # @delvtech/drift-ethers
 
+## 0.0.0-beta.2
+
+### Patch Changes
+
+- 8fa67b1: Fixed adapter factory function return type to be `ReadAdapter` when no signer is given.
+
 ## 0.0.0-beta.1
 
 ### Patch Changes

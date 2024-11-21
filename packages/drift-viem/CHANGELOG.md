@@ -1,5 +1,11 @@
 # @delvtech/drift-viem
 
+## 0.0.1-beta.20
+
+### Patch Changes
+
+- 8fa67b1: Fixed adapter factory function return type to be `ReadAdapter` when no wallet client is given.
+
 ## 0.0.1-beta.19
 
 ### Patch Changes
