@@ -9,7 +9,8 @@
     "@delvtech/evm-client-viem": "0.6.3",
     "@repo/typescript-config": "0.0.0",
     "example": "0.0.0",
-    "@delvtech/drift-web3": "0.0.0-beta.0"
+    "@delvtech/drift-web3": "0.0.0-beta.0",
+    "@delvtech/drift-ethers": "0.0.0-beta.0"
   },
   "changesets": [
     "beige-years-visit",
@@ -41,15 +42,18 @@
     "shaggy-clouds-cheat",
     "silly-falcons-scream",
     "silver-pumpkins-pay",
+    "six-tools-check",
     "slimy-bottles-move",
     "small-birds-impress",
     "small-ducks-switch",
     "sour-toys-breathe",
     "strange-coats-smile",
     "strong-drinks-shout",
+    "stupid-lobsters-help",
     "tame-knives-lick",
     "thin-walls-teach",
     "thirty-buttons-sniff",
-    "three-tips-invite"
+    "three-tips-invite",
+    "yellow-balloons-search"
   ]
 }

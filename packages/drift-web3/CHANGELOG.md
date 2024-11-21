@@ -1,5 +1,13 @@
 # @delvtech/drift-web3
 
+## 0.0.0-beta.6
+
+### Patch Changes
+
+- 74eb669: Refactored arrow function properties to methods.
+- Updated dependencies [933fce5]
+  - @delvtech/drift@0.0.1-beta.17
+
 ## 0.0.0-beta.5
 
 ### Patch Changes

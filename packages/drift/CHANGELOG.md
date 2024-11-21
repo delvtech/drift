@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.1-beta.17
+
+### Patch Changes
+
+- 933fce5: Refactored arrow function properties to methods on `Drift`, `Contract`, `OxAdapter`, and mock classes.
+
 ## 0.0.1-beta.16
 
 ### Patch Changes
