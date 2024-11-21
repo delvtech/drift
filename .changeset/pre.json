@@ -4,9 +4,6 @@
   "initialVersions": {
     "@delvtech/drift": "0.0.0",
     "@delvtech/drift-viem": "0.0.0",
-    "@delvtech/evm-client": "0.5.1",
-    "@delvtech/evm-client-ethers": "0.5.1",
-    "@delvtech/evm-client-viem": "0.6.3",
     "@repo/typescript-config": "0.0.0",
     "example": "0.0.0",
     "@delvtech/drift-web3": "0.0.0-beta.0",
