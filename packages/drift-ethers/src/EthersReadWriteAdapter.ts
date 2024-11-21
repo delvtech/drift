@@ -47,7 +47,15 @@ export class EthersReadWriteAdapter
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(params: AdapterWriteParams<TAbi, TFunctionName>) {
-    const { abi, address, args, fn, onMined, ...options } = params;
+    const {
+      abi,
+      address,
+      args,
+      fn,
+      from = await this.signer.getAddress(),
+      onMined,
+      ...options
+    } = params;
     const contract = new Contract(address, abi as InterfaceAbi, this.signer);
 
     const arrayArgs = objectToArray({
@@ -61,7 +69,7 @@ export class EthersReadWriteAdapter
     const writePromise = contract.getFunction(fn)(...arrayArgs, {
       accessList: options.accessList,
       chainId: options.chainId,
-      from: options.from ?? (await this.signer.getAddress()),
+      from,
       gasLimit: options.gas,
       gasPrice: options.gasPrice,
       maxFeePerGas: options.maxFeePerGas,

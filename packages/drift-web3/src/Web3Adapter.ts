@@ -39,15 +39,19 @@ export class Web3Adapter implements ReadWriteAdapter {
         : new Web3(web3OrProvider);
   }
 
-  getChainId = () => this.web3.eth.getChainId().then(Number);
+  getChainId() {
+    return this.web3.eth.getChainId().then(Number);
+  }
 
-  getBlockNumber = () => this.web3.eth.getBlockNumber();
+  getBlockNumber() {
+    return this.web3.eth.getBlockNumber();
+  }
 
-  getBlock = async ({
+  async getBlock({
     blockHash,
     blockNumber,
     blockTag,
-  }: NetworkGetBlockParams = {}) => {
+  }: NetworkGetBlockParams = {}) {
     const block = await this.web3.eth.getBlock(
       blockHash ?? blockNumber ?? blockTag,
     );
@@ -74,12 +78,13 @@ export class Web3Adapter implements ReadWriteAdapter {
           transactionsRoot: block.transactionsRoot as Hash,
         } as Block)
       : undefined;
-  };
+  }
 
-  getBalance = ({ address, block }: NetworkGetBalanceParams) =>
-    this.web3.eth.getBalance(address, block);
+  getBalance({ address, block }: NetworkGetBalanceParams) {
+    return this.web3.eth.getBalance(address, block);
+  }
 
-  getTransaction = async ({ hash }: NetworkGetTransactionParams) => {
+  async getTransaction({ hash }: NetworkGetTransactionParams) {
     const tx = await this.web3.eth.getTransaction(hash);
     return tx
       ? ({
@@ -101,12 +106,12 @@ export class Web3Adapter implements ReadWriteAdapter {
           value: BigInt(tx.value),
         } as Transaction)
       : undefined;
-  };
+  }
 
-  waitForTransaction = async ({
+  async waitForTransaction({
     hash,
     timeout = this.web3.transactionPollingTimeout,
-  }: NetworkWaitForTransactionParams) => {
+  }: NetworkWaitForTransactionParams) {
     return new Promise<TransactionReceipt | undefined>((resolve, reject) => {
       const getReceipt = () => {
         this.web3.eth
@@ -136,16 +141,16 @@ export class Web3Adapter implements ReadWriteAdapter {
       getReceipt();
       setTimeout(() => resolve(undefined), timeout);
     });
-  };
+  }
 
-  getEvents = async <TAbi extends Abi, TEventName extends EventName<TAbi>>({
+  async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
     abi,
     address,
     event: eventName,
     filter,
     fromBlock,
     toBlock,
-  }: AdapterGetEventsParams<TAbi, TEventName>) => {
+  }: AdapterGetEventsParams<TAbi, TEventName>) {
     const contract = new this.web3.eth.Contract(
       abi as readonly AbiFragment[],
       address,
@@ -174,18 +179,12 @@ export class Web3Adapter implements ReadWriteAdapter {
         transactionHash: event.transactionHash,
       } as ContractEvent<TAbi, TEventName>;
     });
-  };
+  }
 
-  read = <
+  read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >({
-    abi,
-    address,
-    fn,
-    args,
-    block,
-  }: AdapterReadParams<TAbi, TFunctionName>) => {
+  >({ abi, address, fn, args, block }: AdapterReadParams<TAbi, TFunctionName>) {
     const argsArray = objectToArray({
       abi: abi as Abi,
       type: "function",
@@ -198,14 +197,12 @@ export class Web3Adapter implements ReadWriteAdapter {
     return method(...argsArray).call(undefined, block) as Promise<
       FunctionReturn<TAbi, TFunctionName>
     >;
-  };
+  }
 
-  simulateWrite = async <
+  async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(
-    params: AdapterWriteParams<TAbi, TFunctionName>,
-  ) => {
+  >(params: AdapterWriteParams<TAbi, TFunctionName>) {
     const { abi, address, args, fn } = params;
     const arrayArgs = objectToArray({
       abi: abi as Abi,
@@ -215,12 +212,19 @@ export class Web3Adapter implements ReadWriteAdapter {
       value: args,
     });
 
+    let from = params.from;
+    if (!from) {
+      try {
+        from = await this.getSignerAddress();
+      } catch {}
+    }
+
     const toHex = this.web3.utils.toHex;
     const { method } = this._getMethod({ abi, fn, address });
     const methodObj = method(...arrayArgs);
     const outputObj = await methodObj.call({
       data: methodObj.encodeABI(),
-      from: params.from,
+      from,
       gas: params.gas ? toHex(params.gas) : undefined,
       gasPrice: params.gasPrice ? toHex(params.gasPrice) : undefined,
       maxFeePerGas: params.maxFeePerGas
@@ -235,16 +239,12 @@ export class Web3Adapter implements ReadWriteAdapter {
     });
 
     return outputObj as FunctionReturn<TAbi, TFunctionName>;
-  };
+  }
 
-  encodeFunctionData = <
+  encodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >({
-    abi,
-    fn,
-    args,
-  }: AdapterEncodeFunctionDataParams<TAbi, TFunctionName>) => {
+  >({ abi, fn, args }: AdapterEncodeFunctionDataParams<TAbi, TFunctionName>) {
     const arrayArgs = objectToArray({
       abi: abi as Abi,
       type: "function",
@@ -255,15 +255,12 @@ export class Web3Adapter implements ReadWriteAdapter {
     const { method } = this._getMethod({ abi, fn });
 
     return method(...arrayArgs).encodeABI() as HexString;
-  };
+  }
 
-  decodeFunctionData = <
+  decodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >({
-    abi,
-    data,
-  }: AdapterDecodeFunctionDataParams<TAbi, TFunctionName>) => {
+  >({ abi, data }: AdapterDecodeFunctionDataParams<TAbi, TFunctionName>) {
     const { __method__, ...args } = new this.web3.eth.Contract(
       abi as readonly AbiFragment[],
     ).decodeMethodData(data);
@@ -272,20 +269,18 @@ export class Web3Adapter implements ReadWriteAdapter {
       args: args as AnyObject,
       functionName: __method__.split("(")[0],
     } as DecodedFunctionData<TAbi, TFunctionName>;
-  };
+  }
 
-  getSignerAddress = async () => {
+  async getSignerAddress() {
     const [address] = await this.web3.eth.getAccounts();
     if (!address) throw new DriftError("No signer address found");
     return address as Address;
-  };
+  }
 
-  write = async <
+  async write<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(
-    params: AdapterWriteParams<TAbi, TFunctionName>,
-  ) => {
+  >(params: AdapterWriteParams<TAbi, TFunctionName>) {
     const {
       abi,
       address,
@@ -334,7 +329,7 @@ export class Web3Adapter implements ReadWriteAdapter {
         });
       }
     });
-  };
+  }
 
   private _getMethod({
     abi,
