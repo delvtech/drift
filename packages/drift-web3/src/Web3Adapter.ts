@@ -253,7 +253,6 @@ export class Web3Adapter implements ReadWriteAdapter {
       value: args,
     });
     const { method } = this._getMethod({ abi, fn });
-
     return method(...arrayArgs).encodeABI() as HexString;
   }
 
