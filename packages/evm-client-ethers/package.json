@@ -1,6 +1,6 @@
 {
   "name": "@delvtech/evm-client-ethers",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
@@ -33,7 +33,7 @@
     "ethers": "^6"
   },
   "dependencies": {
-    "@delvtech/evm-client": "0.5.1"
+    "@delvtech/evm-client": "0.5.2"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",

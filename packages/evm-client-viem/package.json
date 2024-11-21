@@ -1,6 +1,6 @@
 {
   "name": "@delvtech/evm-client-viem",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
@@ -39,7 +39,7 @@
     }
   },
   "dependencies": {
-    "@delvtech/evm-client": "0.5.1"
+    "@delvtech/evm-client": "0.5.2"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
