@@ -61,7 +61,7 @@ export class EthersReadWriteAdapter
     const writePromise = contract.getFunction(fn)(...arrayArgs, {
       accessList: options.accessList,
       chainId: options.chainId,
-      from: options.from,
+      from: options.from ?? (await this.signer.getAddress()),
       gasLimit: options.gas,
       gasPrice: options.gasPrice,
       maxFeePerGas: options.maxFeePerGas,
