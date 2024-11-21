@@ -4,8 +4,9 @@
 
 Write cached Ethereum smart contract interactions once with Drift and run them
 anywhere. Seamlessly support multiple web3 libraries like
-[viem](https://viem.sh), [web3.js](https://www.web3js.org/), and
-more—without getting locked into a single provider or rewriting code.
+[viem](https://viem.sh), [web3.js](https://web3js.org), and
+[ethers](https://ethers.org)—without getting locked into a single provider or
+rewriting code.
 
 With built-in caching, type-safe contract APIs, and easy-to-use testing mocks,
 Drift lets you build efficient and reliable applications without worrying about
@@ -50,14 +51,13 @@ Install Drift and an optional adapter for your preferred web3 library:
 ```sh
 npm install @delvtech/drift
 
-# Optional
-# For viem
-npm install @delvtech/drift-viem
-# For web3.js
-npm install @delvtech/drift-web3
+npm install @delvtech/drift-viem # Optional
+npm install @delvtech/drift-web3 # Optional
+npm install @delvtech/drift-ethers # Optional
 ```
 
 > [!TIP]
+>
 > Drift includes a built-in adapter and can be used without installing any
 > additional packages. However, adapters will reuse clients from their
 > corresponding web3 library, which can improve performance depending on their
@@ -338,6 +338,7 @@ simplifies this process by providing built-in mocks that allow you to stub
 responses and focus on testing your application logic.
 
 > [!IMPORTANT]
+>
 > Drift's testing mocks have a peer dependency on `sinon`. Make sure to install
 > it before using the mocks.
 >
