@@ -40,15 +40,16 @@ export class MockDrift<
     super({ ...rest, adapter });
   }
 
-  reset = (method?: FunctionKey<ReadWriteAdapter>) =>
-    this.adapter.reset(method);
+  reset(method?: FunctionKey<ReadWriteAdapter>) {
+    return this.adapter.reset(method);
+  }
 
-  contract = <TAbi extends Abi, TContractCache extends SimpleCache = TCache>({
+  contract<TAbi extends Abi, TContractCache extends SimpleCache = TCache>({
     abi,
     address,
     cache = this.cache as SimpleCache as TContractCache,
     cacheNamespace = this.cacheNamespace,
-  }: Omit<MockContractParams<TAbi, TAdapter, TContractCache>, "adapter">) => {
+  }: Omit<MockContractParams<TAbi, TAdapter, TContractCache>, "adapter">) {
     return new MockContract({
       abi,
       adapter: this.adapter,
@@ -56,7 +57,7 @@ export class MockDrift<
       cache,
       cacheNamespace,
     });
-  };
+  }
 
   protected async initCacheNamespace(): Promise<PropertyKey> {
     return (
@@ -70,23 +71,31 @@ export class MockDrift<
     );
   }
 
-  onGetChainId = () => this.adapter.onGetChainId();
+  onGetChainId() {
+    return this.adapter.onGetChainId();
+  }
 
-  onGetBlockNumber = () => this.adapter.onGetBlockNumber();
+  onGetBlockNumber() {
+    return this.adapter.onGetBlockNumber();
+  }
 
-  onGetBlock = (params?: Partial<GetBlockParams>) =>
-    this.adapter.onGetBlock(params);
+  onGetBlock(params?: Partial<GetBlockParams>) {
+    return this.adapter.onGetBlock(params);
+  }
 
-  onGetBalance = (params?: Partial<GetBalanceParams>) =>
-    this.adapter.onGetBalance(params);
+  onGetBalance(params?: Partial<GetBalanceParams>) {
+    return this.adapter.onGetBalance(params);
+  }
 
-  onGetTransaction = (params?: Partial<GetTransactionParams>) =>
-    this.adapter.onGetTransaction(params);
+  onGetTransaction(params?: Partial<GetTransactionParams>) {
+    return this.adapter.onGetTransaction(params);
+  }
 
-  onWaitForTransaction = (params?: Partial<WaitForTransactionParams>) =>
-    this.adapter.onWaitForTransaction(params);
+  onWaitForTransaction(params?: Partial<WaitForTransactionParams>) {
+    return this.adapter.onWaitForTransaction(params);
+  }
 
-  onEncodeFunctionData = <
+  onEncodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
   >(
@@ -94,39 +103,51 @@ export class MockDrift<
       EncodeFunctionDataParams<TAbi, TFunctionName>,
       "args"
     >,
-  ) => this.adapter.onEncodeFunctionData(params);
+  ) {
+    return this.adapter.onEncodeFunctionData(params);
+  }
 
-  onDecodeFunctionData = <
+  onDecodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
   >(
     params: OptionalKeys<DecodeFunctionDataParams<TAbi, TFunctionName>, "data">,
-  ) => this.adapter.onDecodeFunctionData(params);
+  ) {
+    return this.adapter.onDecodeFunctionData(params);
+  }
 
-  onGetEvents = <TAbi extends Abi, TEventName extends EventName<TAbi>>(
+  onGetEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
     params: OptionalKeys<GetEventsParams<TAbi, TEventName>, "address">,
-  ) => this.adapter.onGetEvents(params);
+  ) {
+    return this.adapter.onGetEvents(params);
+  }
 
-  onRead = <
+  onRead<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(
-    params: OptionalKeys<ReadParams<TAbi, TFunctionName>, "args" | "address">,
-  ) => this.adapter.onRead(params);
+  >(params: OptionalKeys<ReadParams<TAbi, TFunctionName>, "args" | "address">) {
+    return this.adapter.onRead(params);
+  }
 
-  onSimulateWrite = <
+  onSimulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
     params: OptionalKeys<WriteParams<TAbi, TFunctionName>, "args" | "address">,
-  ) => this.adapter.onSimulateWrite(params);
+  ) {
+    return this.adapter.onSimulateWrite(params);
+  }
 
-  onWrite = <
+  onWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
     params?: OptionalKeys<WriteParams<TAbi, TFunctionName>, "args" | "address">,
-  ) => this.adapter.onWrite(params);
+  ) {
+    return this.adapter.onWrite(params);
+  }
 
-  onGetSignerAddress = () => this.adapter.onGetSignerAddress();
+  onGetSignerAddress() {
+    return this.adapter.onGetSignerAddress();
+  }
 }

@@ -50,25 +50,27 @@ export class MockContract<
     });
   }
 
-  reset = (method?: FunctionKey<ReadWriteAdapter>) =>
-    this.adapter.reset(method);
+  reset(method?: FunctionKey<ReadWriteAdapter>) {
+    return this.adapter.reset(method);
+  }
 
-  onGetEvents = <TEventName extends EventName<TAbi>>(
+  onGetEvents<TEventName extends EventName<TAbi>>(
     ...[event, options]: ContractGetEventsArgs<TAbi, TEventName>
-  ) =>
-    this.adapter.onGetEvents({
+  ) {
+    return this.adapter.onGetEvents({
       abi: this.abi,
       address: this.address,
       event,
       ...options,
     });
+  }
 
-  onRead = <TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
+  onRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     fn: TFunctionName,
     args?: FunctionArgs<TAbi, TFunctionName>,
     options?: ContractReadOptions,
-  ) =>
-    this.adapter.onRead({
+  ) {
+    return this.adapter.onRead({
       abi: this.abi,
       address: this.address,
       fn,
@@ -78,15 +80,16 @@ export class MockContract<
       AdapterReadParams<TAbi, TFunctionName>,
       "args" | "address"
     >);
+  }
 
-  onSimulateWrite = <
+  onSimulateWrite<
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
     fn: TFunctionName,
     args?: FunctionArgs<TAbi, TFunctionName>,
     options?: ContractWriteOptions,
-  ) =>
-    this.adapter.onSimulateWrite({
+  ) {
+    return this.adapter.onSimulateWrite({
       abi: this.abi,
       address: this.address,
       fn,
@@ -96,33 +99,36 @@ export class MockContract<
       AdapterWriteParams<TAbi, TFunctionName>,
       "args" | "address"
     >);
+  }
 
-  onEncodeFunctionData = <TFunctionName extends FunctionName<TAbi>>(
+  onEncodeFunctionData<TFunctionName extends FunctionName<TAbi>>(
     fn?: TFunctionName,
     args?: FunctionArgs<TAbi, TFunctionName>,
-  ) =>
-    this.adapter.onEncodeFunctionData({
+  ) {
+    return this.adapter.onEncodeFunctionData({
       abi: this.abi,
       fn,
       args,
     } as AdapterEncodeFunctionDataParams<TAbi, TFunctionName>);
+  }
 
-  onDecodeFunctionData = (data?: Bytes) =>
-    this.adapter.onDecodeFunctionData({
+  onDecodeFunctionData(data?: Bytes) {
+    return this.adapter.onDecodeFunctionData({
       abi: this.abi,
       data,
     });
+  }
 
-  onGetSignerAddress = () => this.adapter.onGetSignerAddress();
+  onGetSignerAddress() {
+    return this.adapter.onGetSignerAddress();
+  }
 
-  onWrite = <
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(
+  onWrite<TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">>(
     fn?: TFunctionName,
     args?: FunctionArgs<TAbi, TFunctionName>,
     options?: ContractWriteOptions,
-  ) =>
-    this.adapter.onWrite({
+  ) {
+    return this.adapter.onWrite({
       abi: this.abi,
       address: this.address,
       fn,
@@ -132,4 +138,5 @@ export class MockContract<
       AdapterWriteParams<TAbi, TFunctionName>,
       "args" | "address"
     >);
+  }
 }

@@ -35,6 +35,7 @@ import type {
 import type { SimpleCache } from "src/cache/SimpleCache/types";
 import { Contract, type ContractParams } from "src/client/contract/Contract";
 import type { AdapterParam } from "src/client/types";
+import { DriftError } from "src/error/DriftError";
 import type { Pretty } from "src/utils/types";
 
 export type DriftParams<
@@ -55,23 +56,6 @@ export class Drift<
   cache: ClientCache<TCache>;
   cacheNamespace?: PropertyKey;
 
-  // Write-only property definitions //
-
-  getSignerAddress: TAdapter extends ReadWriteAdapter
-    ? () => Promise<Address>
-    : undefined;
-
-  write: TAdapter extends ReadWriteAdapter
-    ? <
-        TAbi extends Abi,
-        TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-      >(
-        params: WriteParams<TAbi, TFunctionName>,
-      ) => Promise<Hash>
-    : undefined;
-
-  // Implementation //
-
   constructor({
     cache,
     cacheNamespace,
@@ -80,12 +64,6 @@ export class Drift<
     this.cache = createClientCache(cache);
     this.cacheNamespace = cacheNamespace;
     this.adapter = rest.adapter ?? (new OxAdapter(rest) as Adapter as TAdapter);
-
-    // Write-only property assignment //
-
-    this.getSignerAddress = this.adapter
-      .getSignerAddress as this["getSignerAddress"];
-    this.write = this.adapter.write as this["write"];
   }
 
   protected async initCacheNamespace(): Promise<PropertyKey> {
@@ -98,31 +76,29 @@ export class Drift<
     );
   }
 
-  // The following functions are defined as arrow function properties rather
-  // than typical class methods to ensure they maintain the correct `this`
-  // context when passed as callbacks.
+  isReadWrite(): this is Drift<ReadWriteAdapter, TCache> {
+    return isReadWriteAdapter(this.adapter);
+  }
 
-  isReadWrite = (): this is Drift<ReadWriteAdapter, TCache> =>
-    isReadWriteAdapter(this.adapter);
-
-  contract = <TAbi extends Abi, TContractCache extends SimpleCache = TCache>({
+  contract<TAbi extends Abi, TContractCache extends SimpleCache = TCache>({
     abi,
     address,
     cache = this.cache as SimpleCache as TContractCache,
     cacheNamespace = this.cacheNamespace,
-  }: Omit<ContractParams<TAbi, TAdapter, TContractCache>, "adapter">) =>
-    new Contract({
+  }: Omit<ContractParams<TAbi, TAdapter, TContractCache>, "adapter">) {
+    return new Contract({
       abi,
       adapter: this.adapter,
       address,
       cache,
       cacheNamespace,
     });
+  }
 
   /**
    * Get the chain ID of the network.
    */
-  getChainId = async (params?: GetChainIdParams): Promise<number> => {
+  async getChainId(params?: GetChainIdParams): Promise<number> {
     const key = this.cache.chainIdKey({
       cacheNamespace: this.cacheNamespace,
       ...params,
@@ -136,18 +112,20 @@ export class Drift<
       this.cache.set(key, id);
       return id;
     });
-  };
+  }
 
   /**
    * Get the current block number.
    */
-  getBlockNumber = async (): Promise<bigint> => this.adapter.getBlockNumber();
+  async getBlockNumber(): Promise<bigint> {
+    return this.adapter.getBlockNumber();
+  }
 
   /**
    * Get a block from a block tag, number, or hash. If no argument is provided,
    * the latest block is returned.
    */
-  getBlock = async (params?: GetBlockParams): Promise<Block | undefined> => {
+  async getBlock(params?: GetBlockParams): Promise<Block | undefined> {
     const cacheNamespace =
       params?.cacheNamespace ??
       this.cacheNamespace ??
@@ -167,12 +145,12 @@ export class Drift<
       this.cache.set(key, block);
       return block;
     });
-  };
+  }
 
   /**
    * Get the balance of native currency for an account.
    */
-  getBalance = async (params: GetBalanceParams): Promise<bigint> => {
+  async getBalance(params: GetBalanceParams): Promise<bigint> {
     const cacheNamespace =
       params?.cacheNamespace ??
       this.cacheNamespace ??
@@ -192,14 +170,14 @@ export class Drift<
       this.cache.set(key, balance);
       return balance;
     });
-  };
+  }
 
   /**
    * Get a transaction from a transaction hash.
    */
-  getTransaction = async (
+  async getTransaction(
     params: GetTransactionParams,
-  ): Promise<Transaction | undefined> => {
+  ): Promise<Transaction | undefined> {
     const cacheNamespace =
       params?.cacheNamespace ??
       this.cacheNamespace ??
@@ -219,14 +197,14 @@ export class Drift<
       this.cache.set(key, tx);
       return tx;
     });
-  };
+  }
 
   /**
    * Wait for a transaction to be mined.
    */
-  waitForTransaction = async (
+  async waitForTransaction(
     params: WaitForTransactionParams,
-  ): Promise<TransactionReceipt | undefined> => {
+  ): Promise<TransactionReceipt | undefined> {
     const cacheNamespace =
       params?.cacheNamespace ??
       this.cacheNamespace ??
@@ -246,14 +224,14 @@ export class Drift<
       this.cache.set(key, tx);
       return tx;
     });
-  };
+  }
 
   /**
    * Retrieves specified events from a contract.
    */
-  getEvents = async <TAbi extends Abi, TEventName extends EventName<TAbi>>(
+  async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
     params: GetEventsParams<TAbi, TEventName>,
-  ): Promise<ContractEvent<TAbi, TEventName>[]> => {
+  ): Promise<ContractEvent<TAbi, TEventName>[]> {
     const cacheNamespace =
       params?.cacheNamespace ??
       this.cacheNamespace ??
@@ -273,17 +251,17 @@ export class Drift<
       this.cache.set(key, result);
       return result;
     });
-  };
+  }
 
   /**
    * Reads a specified function from a contract.
    */
-  read = async <
+  async read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(
     params: ReadParams<TAbi, TFunctionName>,
-  ): Promise<FunctionReturn<TAbi, TFunctionName>> => {
+  ): Promise<FunctionReturn<TAbi, TFunctionName>> {
     const cacheNamespace =
       params?.cacheNamespace ??
       this.cacheNamespace ??
@@ -303,44 +281,74 @@ export class Drift<
       this.cache.set(key, result);
       return result;
     });
-  };
+  }
 
   /**
    * Simulates a write operation on a specified function of a contract.
    */
-  simulateWrite = async <
+  async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
     params: SimulateWriteParams<TAbi, TFunctionName>,
-  ): Promise<FunctionReturn<TAbi, TFunctionName>> => {
+  ): Promise<FunctionReturn<TAbi, TFunctionName>> {
     return this.adapter.simulateWrite(params);
-  };
+  }
 
   /**
    * Encodes a function call into calldata.
    */
-  encodeFunctionData = <
+  encodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >(
-    params: EncodeFunctionDataParams<TAbi, TFunctionName>,
-  ): Bytes => {
+  >(params: EncodeFunctionDataParams<TAbi, TFunctionName>): Bytes {
     return this.adapter.encodeFunctionData(params);
-  };
+  }
 
   /**
    * Decodes a string of function calldata into it's arguments and function
    * name.
    */
-  decodeFunctionData = <
+  decodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
   >(
     params: DecodeFunctionDataParams<TAbi, TFunctionName>,
-  ): DecodedFunctionData<TAbi, TFunctionName> => {
+  ): DecodedFunctionData<TAbi, TFunctionName> {
     return this.adapter.decodeFunctionData(params);
-  };
+  }
+
+  /**
+   * Get the address of the signer for this instance.
+   * @throws If the adapter is not a `ReadWriteAdapter`.
+   */
+  getSignerAddress(
+    ..._: TAdapter extends ReadWriteAdapter ? [] : never
+  ): TAdapter extends ReadWriteAdapter ? Promise<Address> : never {
+    if (!isReadWriteAdapter(this.adapter)) {
+      throw new DriftError("Adapter does not support read-write operations.");
+    }
+    return this.adapter.getSignerAddress() as Promise<Address> as any;
+  }
+
+  /**
+   * Writes to a specified function on a contract.
+   * @returns The transaction hash of the submitted transaction.
+   * @throws If the adapter is not a `ReadWriteAdapter`.
+   */
+  write<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(
+    ...[params]: TAdapter extends ReadWriteAdapter
+      ? [params: AdapterWriteParams<TAbi, TFunctionName>]
+      : never
+  ): TAdapter extends ReadWriteAdapter ? Promise<Hash> : never {
+    if (!isReadWriteAdapter(this.adapter)) {
+      throw new DriftError("Adapter does not support read-write operations.");
+    }
+    return this.adapter.write(params) as Promise<Hash> as any;
+  }
 }
 
 export type GetChainIdParams = Pretty<ChainIdKeyParams>;

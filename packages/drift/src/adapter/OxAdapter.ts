@@ -21,7 +21,7 @@ import type {
   AdapterWriteParams,
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
-import type { BlockTag, Block as BlockType } from "src/adapter/types/Block";
+import type { BlockTag } from "src/adapter/types/Block";
 import type { EventArgs, EventName } from "src/adapter/types/Event";
 import type {
   DecodedFunctionData,
@@ -78,27 +78,25 @@ export class OxAdapter implements ReadWriteAdapter {
     this.pollingInterval = pollingInterval;
   }
 
-  getChainId = () => {
+  getChainId() {
     return this.provider
       .request({
         method: "eth_chainId",
       })
       .then(Number)
       .catch(handleError);
-  };
+  }
 
-  getBlockNumber = () => {
+  getBlockNumber() {
     return this.provider
       .request({
         method: "eth_blockNumber",
       })
       .then(BigInt)
       .catch(handleError);
-  };
+  }
 
-  getBlock = (
-    params?: NetworkGetBlockParams,
-  ): Promise<BlockType | undefined> => {
+  getBlock(params?: NetworkGetBlockParams) {
     return this.provider
       .request({
         method: params?.blockHash
@@ -121,9 +119,9 @@ export class OxAdapter implements ReadWriteAdapter {
           : undefined,
       )
       .catch(handleError);
-  };
+  }
 
-  getBalance = (params: NetworkGetBalanceParams) => {
+  getBalance(params: NetworkGetBalanceParams) {
     return this.provider
       .request({
         method: "eth_getBalance",
@@ -131,15 +129,12 @@ export class OxAdapter implements ReadWriteAdapter {
       })
       .then(BigInt)
       .catch(handleError);
-  };
+  }
 
-  decodeFunctionData = <
+  decodeFunctionData<
     TAbi extends Abi = Abi,
     TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-  >({
-    abi,
-    data,
-  }: AdapterDecodeFunctionDataParams<TAbi, TFunctionName>) => {
+  >({ abi, data }: AdapterDecodeFunctionDataParams<TAbi, TFunctionName>) {
     try {
       const sig = Hex.slice(data, 0, 4);
       const abiFn = AbiFunction.fromAbi(abi, sig);
@@ -153,16 +148,12 @@ export class OxAdapter implements ReadWriteAdapter {
     } catch (e) {
       handleError(e);
     }
-  };
+  }
 
-  encodeFunctionData = <
+  encodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >({
-    abi,
-    fn,
-    args,
-  }: AdapterEncodeFunctionDataParams<TAbi, TFunctionName>) => {
+  >({ abi, fn, args }: AdapterEncodeFunctionDataParams<TAbi, TFunctionName>) {
     try {
       return AbiFunction.encodeData(
         AbiFunction.fromAbi(abi, fn as any),
@@ -177,9 +168,9 @@ export class OxAdapter implements ReadWriteAdapter {
     } catch (e) {
       handleError(e);
     }
-  };
+  }
 
-  getTransaction = async ({ hash }: NetworkGetTransactionParams) => {
+  async getTransaction({ hash }: NetworkGetTransactionParams) {
     const tx = await this.provider
       .request({
         method: "eth_getTransactionByHash",
@@ -194,12 +185,12 @@ export class OxAdapter implements ReadWriteAdapter {
       };
     }
     return undefined;
-  };
+  }
 
-  waitForTransaction = async ({
+  async waitForTransaction({
     hash,
     timeout = OxAdapter.DEFAULT_TIMEOUT,
-  }: NetworkWaitForTransactionParams) => {
+  }: NetworkWaitForTransactionParams) {
     return new Promise<TransactionReceiptType | undefined>(
       (resolve, reject) => {
         const getReceipt = (): any =>
@@ -225,16 +216,16 @@ export class OxAdapter implements ReadWriteAdapter {
         setTimeout(() => resolve(undefined), timeout);
       },
     ).catch(handleError);
-  };
+  }
 
-  getEvents = <TAbi extends Abi, TEventName extends EventName<TAbi>>({
+  getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
     abi,
     address,
     event,
     filter,
     fromBlock,
     toBlock,
-  }: AdapterGetEventsParams<TAbi, TEventName>) => {
+  }: AdapterGetEventsParams<TAbi, TEventName>) {
     const abiFn = AbiEvent.fromAbi(
       abi,
       event as any,
@@ -272,18 +263,12 @@ export class OxAdapter implements ReadWriteAdapter {
         }),
       )
       .catch(handleError);
-  };
+  }
 
-  read = <
+  read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >({
-    abi,
-    address,
-    fn,
-    args,
-    block,
-  }: AdapterReadParams<TAbi, TFunctionName>) => {
+  >({ abi, address, fn, args, block }: AdapterReadParams<TAbi, TFunctionName>) {
     const argsArray = objectToArray({
       abi,
       type: "function",
@@ -316,14 +301,12 @@ export class OxAdapter implements ReadWriteAdapter {
           >,
       )
       .catch(handleError);
-  };
+  }
 
-  simulateWrite = <
+  simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(
-    adapterParams: AdapterWriteParams<TAbi, TFunctionName>,
-  ) => {
+  >(adapterParams: AdapterWriteParams<TAbi, TFunctionName>) {
     const { abiFn, params } = writeParams(adapterParams);
     return this.provider
       .request({
@@ -337,22 +320,20 @@ export class OxAdapter implements ReadWriteAdapter {
           >,
       )
       .catch(handleError);
-  };
+  }
 
-  getSignerAddress = async () => {
+  async getSignerAddress() {
     const [address] = await this.provider
       .request({ method: "eth_accounts" })
       .catch(handleError);
     if (!address) throw new DriftError("No signer address found");
     return Address.checksum(address);
-  };
+  }
 
-  write = async <
+  async write<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(
-    adapterParams: AdapterWriteParams<TAbi, TFunctionName>,
-  ) => {
+  >(adapterParams: AdapterWriteParams<TAbi, TFunctionName>) {
     const { params } = writeParams(adapterParams);
     const from = params[0].from || (await this.getSignerAddress());
     return this.provider
@@ -366,7 +347,7 @@ export class OxAdapter implements ReadWriteAdapter {
         ],
       })
       .catch(handleError);
-  };
+  }
 }
 
 function handleError(error: any): never {
