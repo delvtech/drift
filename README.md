@@ -13,7 +13,7 @@ Drift lets you build efficient and reliable applications without worrying about
 call optimizations or juggling countless hooks. Focus on what matters: creating
 great features and user experiences.
 
-## Why Drift?
+## Why Drift? <!-- omit from toc -->
 
 Building on Ethereum often means dealing with:
 
@@ -28,7 +28,7 @@ Building on Ethereum often means dealing with:
   specific one creates vendor lock-in and makes it harder to switch down the
   road.
 
-## Drift Solves These Problems
+## Drift Solves These Problems <!-- omit from toc -->
 
 - ⚡ **Optimized Performance:** Automatically reduces redundant RPC calls with
   built-in caching. No need to manage hooks or query keys for each call.
@@ -43,6 +43,35 @@ Building on Ethereum often means dealing with:
 - 🔄 **Extensibility:** Designed to grow with your project's needs, Drift allows
   you to easily extend support to new web3 libraries by creating small adapter
   packages.
+
+## Table of Contents <!-- omit from toc -->
+
+- [Installation](#installation)
+- [Start Drifting](#start-drifting)
+  - [1. Initialize Drift](#1-initialize-drift)
+  - [2. Interact with your Contracts](#2-interact-with-your-contracts)
+    - [Read Operations with Caching](#read-operations-with-caching)
+    - [Write Operations](#write-operations)
+    - [Contract Instances](#contract-instances)
+- [Example: Building Vault Clients](#example-building-vault-clients)
+  - [1. Define core vault clients](#1-define-core-vault-clients)
+  - [2. Use the clients in your application](#2-use-the-clients-in-your-application)
+    - [Benefits of This Architecture](#benefits-of-this-architecture)
+  - [3. Extend core clients for library-specific clients](#3-extend-core-clients-for-library-specific-clients)
+  - [4. Test Your Clients with Drift's Built-in Mocks](#4-test-your-clients-with-drifts-built-in-mocks)
+    - [Example: Testing Client Methods with Multiple RPC Calls](#example-testing-client-methods-with-multiple-rpc-calls)
+    - [Benefits](#benefits)
+- [Simplifying React Hook Management](#simplifying-react-hook-management)
+  - [The Problem Without Drift](#the-problem-without-drift)
+  - [How Drift Helps](#how-drift-helps)
+    - [Example Using React Query](#example-using-react-query)
+- [Caching in Action](#caching-in-action)
+- [Cache Invalidation](#cache-invalidation)
+- [Advanced Usage](#advanced-usage)
+  - [Custom Cache Implementation](#custom-cache-implementation)
+  - [Extending Drift for Your Needs](#extending-drift-for-your-needs)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Installation
 
@@ -92,7 +121,9 @@ const walletClient = createWalletClient({
   transport: http(),
 });
 
-const drift = new Drift(viemAdapter({ publicClient, walletClient }));
+const drift = new Drift({
+  adapter: viemAdapter({ publicClient, walletClient }),
+});
 ```
 
 ### 2. Interact with your Contracts
@@ -195,7 +226,7 @@ type VaultAbi = typeof vaultAbi;
 export class ReadVault {
   contract: ReadContract<VaultAbi>;
 
-  constructor(address: string, drift: Drift) {
+  constructor(address: string, drift: Drift<ReadAdapter> = new Drift()) {
     this.contract = drift.contract({
       abi: vaultAbi,
       address,
@@ -222,7 +253,7 @@ export class ReadVault {
 export class ReadWriteVault extends ReadVault {
   declare contract: ReadWriteContract<VaultAbi>;
 
-  constructor(address: string, drift: Drift<ReadWriteAdapter>) {
+  constructor(address: string, drift?: Drift<ReadWriteAdapter>) {
     super(address, drift);
   }
 
@@ -260,7 +291,9 @@ const publicClient = createPublicClient({
   // ...other options
 });
 
-const drift = new Drift(viemAdapter({ publicClient }));
+const drift = new Drift({
+  adapter: viemAdapter({ publicClient }),
+});
 
 // Instantiate the ReadVault client
 const readVault = new ReadVault("0xYourVaultAddress", drift);
@@ -299,7 +332,9 @@ import { PublicClient, WalletClient } from "viem";
 
 export class ReadVault extends CoreReadVault {
   constructor(address: string, publicClient: PublicClient) {
-    const drift = new Drift(viemAdapter({ publicClient }));
+    const drift = new Drift({
+      adapter: viemAdapter({ publicClient }),
+    });
     super(address, drift);
   }
 }
@@ -310,7 +345,9 @@ export class ReadWriteVault extends CoreReadWriteVault {
     publicClient: PublicClient,
     walletClient: WalletClient,
   ) {
-    const drift = new Drift(viemAdapter({ publicClient, walletClient }));
+    const drift = new Drift({
+      adapter: viemAdapter({ publicClient, walletClient }),
+    });
     super(address, drift);
   }
 }
@@ -451,7 +488,7 @@ const balance1 = await contract.read("balanceOf", { account });
 const balance2 = await contract.read("balanceOf", { account });
 ```
 
-You can also manually invalidate the cache if needed:
+### Cache Invalidation
 
 ```typescript
 // Invalidate the cache for a specific read
@@ -459,7 +496,61 @@ contract.invalidateRead("balanceOf", { account });
 
 // Invalidate all reads matching partial arguments
 contract.invalidateReadsMatching("balanceOf");
+
+// Let it all go...
+contract.cache.clear();
 ```
+
+### Preloading Cache Data
+
+Data such as immutables from token lists can be preloaded into the cache to
+avoid network requests without changing how the data is accessed.
+
+```ts
+const drift = new Drift(/* ... */);
+const contract = drift.contract({
+  abi: erc20Abi,
+  // ...
+});
+
+// Preloading read data //
+
+// Drift
+drift.cache.preloadRead({
+  abi: erc20.abi,
+  fn: "symbol",
+  value: "DAI",
+  // ...
+});
+
+// Contract
+contract.preloadRead({ fn: "symbol", value: "DAI" });
+
+// Preloading event data //
+
+// Drift
+drift.cache.preloadEvents({
+  abi: erc20.abi,
+  event: "Transfer",
+  value: [],
+  // ...
+});
+
+// Contract
+contract.preloadEvents({
+  event: "Transfer",
+  value: [],
+  // ...
+});
+```
+
+> [!IMPORTANT]
+>
+> Preloading data affects all clients that share the same cache. Since Drift
+> passes its own cache to the contracts it creates via `Drift.contract()` by
+> default, they'll already be preloaded with the `Drift` instance's cache and
+> any data preloaded with the contract will also be preloaded for the `Drift`
+> instance.
 
 ## Advanced Usage
 
@@ -472,7 +563,9 @@ implementation:
 import { LRUCache } from "lru-cache";
 
 const customCache = new LRUCache({ max: 500 });
-const drift = new Drift(viemAdapter({ publicClient }), { cache: customCache });
+const drift = new Drift({
+  cache: customCache,
+});
 ```
 
 ### Extending Drift for Your Needs

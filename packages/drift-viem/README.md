@@ -9,5 +9,7 @@ import { createPublicClient, http } from "viem";
 
 const publicClient = createPublicClient(/* ... */);
 const walletClient = createWalletClient(/* ... */); // optional
-const drift = new Drift(viemAdapter({ publicClient, walletClient }));
+const drift = new Drift({
+  adapter: viemAdapter({ publicClient, walletClient }),
+});
 ```

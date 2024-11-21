@@ -8,6 +8,7 @@ import { Web3Adapter } from "@delvtech/drift-web3";
 import Web3 from "web3";
 
 const web3 = new Web3(/* ... */);
-const adapter = new Web3Adapter(web3);
-const drift = new Drift(adapter);
+const drift = new Drift({
+  adapter: new Web3Adapter(web3),
+});
 ```
