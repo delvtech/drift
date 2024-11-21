@@ -12,7 +12,7 @@ export interface EthersAdapterParams<
 
 export function ethersAdapter<
   TProvider extends Provider,
-  TSigner extends Signer | undefined,
+  TSigner extends Signer | undefined = undefined,
 >({
   provider,
   signer,

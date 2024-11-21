@@ -12,7 +12,7 @@ export interface ViemAdapterParams<
 
 export function viemAdapter<
   TPublicClient extends PublicClient,
-  TWalletClient extends WalletClient | undefined,
+  TWalletClient extends WalletClient | undefined = undefined,
 >({
   publicClient,
   walletClient,
