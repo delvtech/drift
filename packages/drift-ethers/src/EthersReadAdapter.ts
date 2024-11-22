@@ -47,7 +47,7 @@ export class EthersReadAdapter implements ReadAdapter {
   provider: Provider;
 
   constructor({
-    provider = "ethereum" in window
+    provider = "window" in globalThis && "ethereum" in window
       ? new BrowserProvider(window.ethereum)
       : getDefaultProvider(),
   }: EthersReadAdapterParams = {}) {
