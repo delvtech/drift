@@ -1,5 +1,14 @@
 # @delvtech/drift-ethers
 
+## 0.0.0-beta.3
+
+### Patch Changes
+
+- af4bf45: Updated README
+- 483d60a: Made `provider` optional, in which case `window.ethereum` is used.
+- Updated dependencies [af4bf45]
+  - @delvtech/drift@0.0.1-beta.18
+
 ## 0.0.0-beta.2
 
 ### Patch Changes

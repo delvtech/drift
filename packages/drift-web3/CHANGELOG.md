@@ -1,5 +1,13 @@
 # @delvtech/drift-web3
 
+## 0.0.0-beta.7
+
+### Patch Changes
+
+- af4bf45: Updated README
+- Updated dependencies [af4bf45]
+  - @delvtech/drift@0.0.1-beta.18
+
 ## 0.0.0-beta.6
 
 ### Patch Changes

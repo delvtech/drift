@@ -1,5 +1,13 @@
 # @delvtech/drift-viem
 
+## 0.0.1-beta.21
+
+### Patch Changes
+
+- af4bf45: Updated README
+- Updated dependencies [af4bf45]
+  - @delvtech/drift@0.0.1-beta.18
+
 ## 0.0.1-beta.20
 
 ### Patch Changes
