@@ -95,11 +95,10 @@ npm install @delvtech/drift-ethers-v5
 
 > [!TIP]
 >
-> Drift includes a built-in adapter and can be used without installing any
-> additional packages. However, adapters will reuse clients from their
-> corresponding web3 library, which can improve performance depending on their
-> configuration. For example, the `publicClient` from Viem can automatically
-> batch requests via MultiCall.
+> Drift can be used without an adapter, however adapters reuse clients from
+> their corresponding web3 library, which can improve performance depending on
+> their configuration. For example, the `publicClient` from Viem can
+> automatically batch requests via MultiCall.
 
 ## Start Drifting
 
