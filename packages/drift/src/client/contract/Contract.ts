@@ -33,6 +33,10 @@ import { DriftError } from "src/error/DriftError";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { AnyObject, EmptyObject, Pretty } from "src/utils/types";
 
+// TODO: Either use a Drift instance or abstract the common cache interactions
+// shared between Drift and Contract into a shared module. Initial preference
+// is to use a Drift instance.
+
 export type ContractParams<
   TAbi extends Abi = Abi,
   TAdapter extends Adapter = Adapter,
@@ -65,10 +69,10 @@ export class Contract<
     ...rest
   }: ContractParams<TAbi, TAdapter, TCache>) {
     this.abi = abi;
+    this.adapter = rest.adapter ?? (new OxAdapter(rest) as Adapter as TAdapter);
     this.address = address;
     this.cache = createClientCache(cache);
     this.cacheNamespace = cacheNamespace;
-    this.adapter = rest.adapter ?? (new OxAdapter(rest) as Adapter as TAdapter);
   }
 
   isReadWrite(): this is Contract<TAbi, ReadWriteAdapter, TCache> {
