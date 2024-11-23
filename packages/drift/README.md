@@ -76,7 +76,7 @@ Building on Ethereum often means dealing with:
 
 ## Installation
 
-Install Drift and an optional adapter for your preferred web3 library:
+Install Drift:
 
 ```sh
 npm install @delvtech/drift
