@@ -66,14 +66,15 @@ export class Drift<
     this.adapter = rest.adapter ?? (new OxAdapter(rest) as Adapter as TAdapter);
   }
 
-  protected async initCacheNamespace(): Promise<PropertyKey> {
-    return (
-      this.cacheNamespace ??
-      this.getChainId().then((id) => {
-        this.cacheNamespace = id;
-        return id;
-      })
-    );
+  protected async initNamespace(): Promise<PropertyKey> {
+    if (this.cacheNamespace) return this.cacheNamespace;
+    const id = await this.getChainId();
+    this.cacheNamespace = id;
+    this.cache.preloadChainId({
+      cacheNamespace: id,
+      value: id,
+    });
+    return id;
   }
 
   isReadWrite(): this is Drift<ReadWriteAdapter, TCache> {
@@ -128,9 +129,8 @@ export class Drift<
   async getBlock(params?: GetBlockParams): Promise<Block | undefined> {
     const cacheNamespace =
       params?.cacheNamespace ??
-      this.cacheNamespace ??
       // Only await the async init fn if no value is already set.
-      (await this.initCacheNamespace());
+      (await this.initNamespace());
 
     const key = this.cache.blockKey({
       cacheNamespace,
@@ -153,9 +153,8 @@ export class Drift<
   async getBalance(params: GetBalanceParams): Promise<bigint> {
     const cacheNamespace =
       params?.cacheNamespace ??
-      this.cacheNamespace ??
       // Only await the async init fn if no value is already set.
-      (await this.initCacheNamespace());
+      (await this.initNamespace());
 
     const key = this.cache.balanceKey({
       cacheNamespace,
@@ -180,9 +179,8 @@ export class Drift<
   ): Promise<Transaction | undefined> {
     const cacheNamespace =
       params?.cacheNamespace ??
-      this.cacheNamespace ??
       // Only await the async init fn if no value is already set.
-      (await this.initCacheNamespace());
+      (await this.initNamespace());
 
     const key = this.cache.transactionKey({
       cacheNamespace,
@@ -207,9 +205,8 @@ export class Drift<
   ): Promise<TransactionReceipt | undefined> {
     const cacheNamespace =
       params?.cacheNamespace ??
-      this.cacheNamespace ??
       // Only await the async init fn if no value is already set.
-      (await this.initCacheNamespace());
+      (await this.initNamespace());
 
     const key = this.cache.transactionKey({
       cacheNamespace,
@@ -234,9 +231,8 @@ export class Drift<
   ): Promise<ContractEvent<TAbi, TEventName>[]> {
     const cacheNamespace =
       params?.cacheNamespace ??
-      this.cacheNamespace ??
       // Only await the async init fn if no value is already set.
-      (await this.initCacheNamespace());
+      (await this.initNamespace());
 
     const key = this.cache.eventsKey({
       cacheNamespace,
@@ -264,9 +260,8 @@ export class Drift<
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
     const cacheNamespace =
       params?.cacheNamespace ??
-      this.cacheNamespace ??
       // Only await the async init fn if no value is already set.
-      (await this.initCacheNamespace());
+      (await this.initNamespace());
 
     const key = this.cache.readKey({
       cacheNamespace,

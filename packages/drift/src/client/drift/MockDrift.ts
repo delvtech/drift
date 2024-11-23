@@ -59,16 +59,18 @@ export class MockDrift<
     });
   }
 
-  protected async initCacheNamespace(): Promise<PropertyKey> {
-    return (
-      this.cacheNamespace ??
-      this.getChainId()
-        .then((id) => {
-          this.cacheNamespace = id;
-          return id;
-        })
-        .catch(() => "__mock__")
-    );
+  protected async initNamespace(): Promise<PropertyKey> {
+    if (this.cacheNamespace) return this.cacheNamespace;
+    return this.getChainId()
+      .then((id) => {
+        this.cacheNamespace = id;
+        this.cache.preloadChainId({
+          cacheNamespace: id,
+          value: id,
+        });
+        return id;
+      })
+      .catch(() => "__mock__");
   }
 
   onGetChainId() {
