@@ -7,9 +7,11 @@
     "@repo/typescript-config": "0.0.0",
     "example": "0.0.0",
     "@delvtech/drift-web3": "0.0.0-beta.0",
-    "@delvtech/drift-ethers": "0.0.0-beta.0"
+    "@delvtech/drift-ethers": "0.0.0-beta.0",
+    "@delvtech/drift-ethers-v5": "0.0.0"
   },
   "changesets": [
+    "afraid-llamas-add",
     "beige-years-visit",
     "brave-dots-lay",
     "brave-eels-scream",
@@ -20,6 +22,7 @@
     "fifty-mayflies-leave",
     "flat-peas-drum",
     "flat-rocks-worry",
+    "four-peas-tickle",
     "gold-apples-promise",
     "good-cycles-cross",
     "great-pumpkins-clap",
@@ -33,9 +36,11 @@
     "long-ducks-call",
     "many-students-roll",
     "nasty-pillows-wave",
+    "neat-houses-drop",
     "old-keys-cry",
     "olive-countries-love",
     "orange-lemons-doubt",
+    "pink-moles-marry",
     "quick-seals-exercise",
     "quiet-cheetahs-flow",
     "shaggy-clouds-cheat",
@@ -48,12 +53,14 @@
     "small-ducks-switch",
     "sour-toys-breathe",
     "strange-coats-smile",
+    "strong-bats-fetch",
     "strong-drinks-shout",
     "stupid-lobsters-help",
     "tame-knives-lick",
     "thin-walls-teach",
     "thirty-buttons-sniff",
     "three-tips-invite",
+    "warm-oranges-help",
     "yellow-balloons-search"
   ]
 }

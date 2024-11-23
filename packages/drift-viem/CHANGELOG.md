@@ -1,5 +1,14 @@
 # @delvtech/drift-viem
 
+## 0.0.1-beta.22
+
+### Patch Changes
+
+- 485bb77: Made the adapter types generic with params for the public and wallet clients.
+- Updated dependencies [c560a32]
+- Updated dependencies [041ba62]
+  - @delvtech/drift@0.0.1-beta.19
+
 ## 0.0.1-beta.21
 
 ### Patch Changes

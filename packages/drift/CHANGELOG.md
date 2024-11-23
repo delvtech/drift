@@ -1,5 +1,12 @@
 # @delvtech/drift
 
+## 0.0.1-beta.19
+
+### Patch Changes
+
+- c560a32: Add `convertType` util function
+- 041ba62: Renamed `Register` to `BaseTypes` and made it more flexible.
+
 ## 0.0.1-beta.18
 
 ### Patch Changes

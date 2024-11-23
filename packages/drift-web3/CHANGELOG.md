@@ -1,5 +1,14 @@
 # @delvtech/drift-web3
 
+## 0.0.0-beta.8
+
+### Patch Changes
+
+- 25f684c: Made the adapter type generic with a type param for the `Web3` context.
+- Updated dependencies [c560a32]
+- Updated dependencies [041ba62]
+  - @delvtech/drift@0.0.1-beta.19
+
 ## 0.0.0-beta.7
 
 ### Patch Changes

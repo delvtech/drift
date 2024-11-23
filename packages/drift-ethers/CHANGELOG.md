@@ -1,5 +1,14 @@
 # @delvtech/drift-ethers
 
+## 0.0.0-beta.4
+
+### Patch Changes
+
+- 0ef59ad: Made the `ethersAdapter` function argument optional and made the classes generic with type params for the provider and signer.
+- Updated dependencies [c560a32]
+- Updated dependencies [041ba62]
+  - @delvtech/drift@0.0.1-beta.19
+
 ## 0.0.0-beta.3
 
 ### Patch Changes
