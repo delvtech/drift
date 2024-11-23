@@ -25,7 +25,7 @@ export function createClientCache<T extends SimpleCache>(
     // Chain ID //
 
     preloadChainId({ value, ...params }) {
-      return cache.set(this.chainIdKey?.(params), value);
+      return cache.set(this.chainIdKey(params), value);
     },
 
     chainIdKey({ cacheNamespace } = {}) {
