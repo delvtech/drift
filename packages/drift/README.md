@@ -80,10 +80,17 @@ Install Drift and an optional adapter for your preferred web3 library:
 
 ```sh
 npm install @delvtech/drift
+```
 
-npm install @delvtech/drift-viem # Optional
-npm install @delvtech/drift-web3 # Optional
-npm install @delvtech/drift-ethers # Optional
+**Optional:** To use Drift with a specific web3 library, install the corresponding
+adapter:
+
+```sh
+# Install one
+npm install @delvtech/drift-viem
+npm install @delvtech/drift-web3
+npm install @delvtech/drift-ethers
+npm install @delvtech/drift-ethers-v5
 ```
 
 > [!TIP]
