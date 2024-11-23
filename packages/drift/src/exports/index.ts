@@ -131,6 +131,7 @@ export { DriftError, type DriftErrorOptions } from "src/error/DriftError";
 
 // utils //
 
+export { type Converted, convertType } from "src/utils/convertType";
 export {
   createSerializableKey,
   type SerializableKey,
@@ -139,7 +140,6 @@ export { extendInstance } from "src/utils/extendInstance";
 export type {
   AnyFunction,
   AnyObject,
-  Converted,
   DeepPartial,
   EmptyObject,
   FunctionKey,
