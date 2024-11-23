@@ -11,19 +11,33 @@ import {
 } from "src/ViemReadAdapter";
 import { createSimulateContractParameters } from "src/utils/createSimulateContractParameters";
 import { outputToFriendly } from "src/utils/outputToFriendly";
-import type { Abi, WalletClient, WriteContractParameters } from "viem";
+import type {
+  Abi,
+  PublicClient,
+  WalletClient,
+  WriteContractParameters,
+} from "viem";
 
-export interface ViemReadWriteAdapterParams extends ViemReadAdapterParams {
-  walletClient: WalletClient;
+export interface ViemReadWriteAdapterParams<
+  TPublicClient extends PublicClient = PublicClient,
+  TWalletClient extends WalletClient = WalletClient,
+> extends ViemReadAdapterParams<TPublicClient> {
+  walletClient: TWalletClient;
 }
 
-export class ViemReadWriteAdapter
-  extends ViemReadAdapter
+export class ViemReadWriteAdapter<
+    TPublicClient extends PublicClient = PublicClient,
+    TWalletClient extends WalletClient = WalletClient,
+  >
+  extends ViemReadAdapter<TPublicClient>
   implements ReadWriteAdapter
 {
-  walletClient: WalletClient;
+  walletClient: TWalletClient;
 
-  constructor({ walletClient, ...rest }: ViemReadWriteAdapterParams) {
+  constructor({
+    walletClient,
+    ...rest
+  }: ViemReadWriteAdapterParams<TPublicClient, TWalletClient>) {
     super(rest);
     this.walletClient = walletClient;
   }

@@ -22,24 +22,34 @@ import {
 import { createSimulateContractParameters } from "src/utils/createSimulateContractParameters";
 import { outputToFriendly } from "src/utils/outputToFriendly";
 import {
+  http,
   type Abi,
   type GetBalanceParameters,
   type GetBlockParameters,
   type PublicClient,
+  createPublicClient,
   decodeEventLog,
   decodeFunctionData,
   encodeFunctionData,
   rpcTransactionType,
 } from "viem";
 
-export interface ViemReadAdapterParams {
-  publicClient: PublicClient;
+export interface ViemReadAdapterParams<
+  TClient extends PublicClient = PublicClient,
+> {
+  publicClient: TClient;
 }
 
-export class ViemReadAdapter implements ReadAdapter {
-  publicClient: PublicClient;
+export class ViemReadAdapter<TClient extends PublicClient>
+  implements ReadAdapter
+{
+  publicClient: TClient;
 
-  constructor({ publicClient }: ViemReadAdapterParams) {
+  constructor({
+    publicClient = createPublicClient({
+      transport: http(),
+    }) as TClient,
+  }: ViemReadAdapterParams<TClient>) {
     this.publicClient = publicClient;
   }
 

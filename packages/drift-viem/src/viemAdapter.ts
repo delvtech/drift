@@ -19,10 +19,12 @@ export function viemAdapter<
 }: ViemAdapterParams<
   TPublicClient,
   TWalletClient
->): TWalletClient extends undefined ? ViemReadAdapter : ViemReadWriteAdapter {
+>): TWalletClient extends WalletClient
+  ? ViemReadWriteAdapter<TPublicClient, TWalletClient>
+  : ViemReadAdapter<TPublicClient> {
   return walletClient
-    ? new ViemReadWriteAdapter({ publicClient, walletClient })
+    ? (new ViemReadWriteAdapter({ publicClient, walletClient }) as any)
     : (new ViemReadAdapter({
         publicClient,
-      }) as ViemReadWriteAdapter);
+      }) as any);
 }
