@@ -27,16 +27,20 @@ import {
 import type { Abi } from "abitype";
 import { type AbiFragment, default as Web3 } from "web3";
 
-export class Web3Adapter implements ReadWriteAdapter {
-  web3;
+export class Web3Adapter<TWeb3 extends Web3 = Web3>
+  implements ReadWriteAdapter
+{
+  web3: TWeb3;
 
   constructor(
-    web3OrProvider: Web3 | ConstructorParameters<typeof Web3>[0] = new Web3(),
+    web3OrProvider:
+      | TWeb3
+      | ConstructorParameters<typeof Web3>[0] = new Web3() as TWeb3,
   ) {
     this.web3 =
       web3OrProvider instanceof Web3
         ? web3OrProvider
-        : new Web3(web3OrProvider);
+        : (new Web3(web3OrProvider as any) as TWeb3);
   }
 
   getChainId() {
@@ -89,8 +93,11 @@ export class Web3Adapter implements ReadWriteAdapter {
     return tx
       ? ({
           blockHash: tx.blockHash as Hash | undefined,
-          blockNumber: tx.blockNumber,
-          chainId: tx.chainId,
+          blockNumber:
+            typeof tx.blockNumber !== "undefined"
+              ? BigInt(tx.blockNumber)
+              : undefined,
+          chainId: Number(tx.chainId),
           from: tx.from as Address,
           gas: BigInt(tx.gas),
           gasPrice: BigInt(tx.gasPrice),
@@ -98,7 +105,10 @@ export class Web3Adapter implements ReadWriteAdapter {
           input: tx.input,
           nonce: BigInt(tx.nonce),
           to: tx.to ?? (undefined as Address | undefined),
-          transactionIndex: tx.transactionIndex,
+          transactionIndex:
+            typeof tx.transactionIndex !== "undefined"
+              ? BigInt(tx.transactionIndex)
+              : undefined,
           type:
             typeof tx.type === "string"
               ? tx.type

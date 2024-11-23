@@ -12,3 +12,5 @@ const balance = await contract.read("balanceOf", {
 });
 
 console.log("Balance:", balance);
+
+
