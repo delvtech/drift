@@ -16,12 +16,12 @@ export function ethersAdapter<
 >({
   provider,
   signer,
-}: EthersAdapterParams<TProvider, TSigner>): TSigner extends undefined
-  ? EthersReadAdapter
-  : EthersReadWriteAdapter {
+}: EthersAdapterParams<TProvider, TSigner> = {}): TSigner extends Signer
+  ? EthersReadWriteAdapter<TProvider, TSigner>
+  : EthersReadAdapter<TProvider> {
   return signer
-    ? new EthersReadWriteAdapter({ provider, signer })
+    ? (new EthersReadWriteAdapter({ provider, signer }) as any)
     : (new EthersReadAdapter({
         provider,
-      }) as EthersReadWriteAdapter);
+      }) as any);
 }

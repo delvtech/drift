@@ -6,7 +6,7 @@ import {
   objectToArray,
 } from "@delvtech/drift";
 import type { Abi } from "abitype";
-import type { Signer } from "ethers";
+import type { Provider, Signer } from "ethers";
 import { Contract } from "ethers";
 import type { InterfaceAbi } from "ethers";
 import {
@@ -14,17 +14,26 @@ import {
   type EthersReadAdapterParams,
 } from "src/EthersReadAdapter";
 
-export interface EthersReadWriteAdapterParams extends EthersReadAdapterParams {
-  signer: Signer;
+export interface EthersReadWriteAdapterParams<
+  TProvider extends Provider = Provider,
+  TSigner extends Signer = Signer,
+> extends EthersReadAdapterParams<TProvider> {
+  signer: TSigner;
 }
 
-export class EthersReadWriteAdapter
-  extends EthersReadAdapter
+export class EthersReadWriteAdapter<
+    TProvider extends Provider = Provider,
+    TSigner extends Signer = Signer,
+  >
+  extends EthersReadAdapter<TProvider>
   implements ReadWriteAdapter
 {
-  signer: Signer;
+  signer: TSigner;
 
-  constructor({ provider, signer }: EthersReadWriteAdapterParams) {
+  constructor({
+    provider,
+    signer,
+  }: EthersReadWriteAdapterParams<TProvider, TSigner>) {
     super({ provider });
     this.signer = signer;
   }

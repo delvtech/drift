@@ -36,23 +36,29 @@ import {
   getDefaultProvider,
 } from "ethers";
 
-export interface EthersReadAdapterParams {
+export interface EthersReadAdapterParams<
+  TProvider extends Provider = Provider,
+> {
   /**
    * Ethers Provider instance or RPC URL.
    */
-  provider?: Provider | string;
+  provider?: TProvider | string;
 }
 
-export class EthersReadAdapter implements ReadAdapter {
-  provider: Provider;
+export class EthersReadAdapter<TProvider extends Provider = Provider>
+  implements ReadAdapter
+{
+  provider: TProvider;
 
   constructor({
     provider = "window" in globalThis && "ethereum" in window
-      ? new BrowserProvider(window.ethereum)
-      : getDefaultProvider(),
-  }: EthersReadAdapterParams = {}) {
+      ? (new BrowserProvider(window.ethereum) as Provider as TProvider)
+      : (getDefaultProvider() as Provider as TProvider),
+  }: EthersReadAdapterParams<TProvider> = {}) {
     this.provider =
-      typeof provider === "string" ? new JsonRpcProvider(provider) : provider;
+      typeof provider === "string"
+        ? (new JsonRpcProvider(provider) as Provider as TProvider)
+        : provider;
   }
 
   async getChainId() {
@@ -290,7 +296,7 @@ declare module "@delvtech/drift" {
     /**
      * Possibly undefined in ethers.js.
      */
-    receiptsRoot: undefined | Hash;
+    receiptsRoot: Hash | undefined;
     /**
      * Unavailable in ethers.js.
      */
