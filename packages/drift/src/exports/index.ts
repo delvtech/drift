@@ -13,7 +13,7 @@ export type {
   Hash,
   HexString,
   NamedAbiParameter,
-  Register,
+  BaseTypes,
 } from "src/adapter/types/Abi";
 export type {
   Adapter,

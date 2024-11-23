@@ -15,6 +15,7 @@ import type {
 } from "src/utils/types";
 
 // https://docs.soliditylang.org/en/latest/abi-spec.html#json
+// https://github.com/ethereum/execution-apis/blob/f9cdb15b23c60342dd6f97731382358d817287e3/src/schemas/base-types.yaml
 
 /**
  * An interface of common types that might be typed differently in different
@@ -25,7 +26,7 @@ import type {
  * @example
  * ```ts
  * declare module "@delvtech/drift" {
- *   export interface Register {
+ *   export interface BaseTypes {
  *     addressType: string;
  *     bytesType: string;
  *     hashType: string;
@@ -36,17 +37,18 @@ import type {
  *
  * @see https://abitype.dev/config#overview
  */
-export interface Register {
+export interface BaseTypes extends _BaseTypes {}
+interface _BaseTypes {
   addressType: `0x${string}`;
   bytesType: `0x${string}`;
   hashType: `0x${string}`;
   hexStringType: `0x${string}`;
 }
 
-export type HexString = Register["hexStringType"];
-export type Address = Register["addressType"];
-export type Bytes = Register["bytesType"];
-export type Hash = Register["hashType"];
+export type HexString = BaseTypes["hexStringType"];
+export type Address = BaseTypes["addressType"];
+export type Bytes = BaseTypes["bytesType"];
+export type Hash = BaseTypes["hashType"];
 
 // Override the types in `abitype`.
 declare module "abitype" {
