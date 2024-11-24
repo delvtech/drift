@@ -16,9 +16,7 @@ import type { Network } from "src/adapter/types/Network";
 import type { TransactionReceipt } from "src/adapter/types/Transaction";
 import type { AnyObject, EmptyObject } from "src/utils/types";
 
-export interface Adapter
-  extends ReadAdapter,
-    Partial<Omit<ReadWriteAdapter, keyof ReadAdapter>> {}
+export interface Adapter extends ReadAdapter, Partial<WriteAdapter> {}
 
 export interface ReadAdapter extends Network {
   getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
@@ -52,7 +50,7 @@ export interface ReadAdapter extends Network {
   ): DecodedFunctionData<TAbi, TFunctionName>;
 }
 
-export interface ReadWriteAdapter extends ReadAdapter {
+export interface WriteAdapter {
   getSignerAddress(): Promise<Address>;
 
   write<
@@ -60,6 +58,8 @@ export interface ReadWriteAdapter extends ReadAdapter {
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(params: AdapterWriteParams<TAbi, TFunctionName>): Promise<Hash>;
 }
+
+export interface ReadWriteAdapter extends ReadAdapter, WriteAdapter {}
 
 export type AdapterArgsParam<
   TAbi extends Abi = Abi,

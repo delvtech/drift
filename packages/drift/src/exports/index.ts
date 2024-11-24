@@ -9,11 +9,11 @@ export type {
   AbiParameters,
   AbiParametersToObject,
   Address,
+  BaseTypes,
   Bytes,
   Hash,
   HexString,
   NamedAbiParameter,
-  BaseTypes,
 } from "src/adapter/types/Abi";
 export type {
   Adapter,
@@ -22,11 +22,12 @@ export type {
   AdapterEncodeFunctionDataParams,
   AdapterGetEventsParams,
   AdapterReadParams,
+  AdapterSimulateWriteParams,
   AdapterWriteParams,
   OnMinedParam,
   ReadAdapter,
   ReadWriteAdapter,
-  AdapterSimulateWriteParams,
+  WriteAdapter,
 } from "src/adapter/types/Adapter";
 export type {
   BaseBlockProps,
