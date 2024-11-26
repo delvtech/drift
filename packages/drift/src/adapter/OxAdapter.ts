@@ -336,7 +336,7 @@ export class OxAdapter implements ReadWriteAdapter {
   >(adapterParams: AdapterWriteParams<TAbi, TFunctionName>) {
     const { params } = writeParams(adapterParams);
     const from = params[0].from || (await this.getSignerAddress());
-    return this.provider
+    const hash = await this.provider
       .request({
         method: "eth_sendTransaction",
         params: [
@@ -347,6 +347,12 @@ export class OxAdapter implements ReadWriteAdapter {
         ],
       })
       .catch(handleError);
+
+    if (adapterParams.onMined) {
+      this.waitForTransaction({ hash }).then(adapterParams.onMined);
+    }
+
+    return hash;
   }
 }
 
