@@ -1,4 +1,4 @@
-import type { ContractEvent } from "src/adapter/types/Event";
+import type { EventLog } from "src/adapter/types/Event";
 import type { DecodedFunctionData } from "src/adapter/types/Function";
 import { MockContract } from "src/client/contract/MockContract";
 import { erc20 } from "src/utils/testing/erc20";
@@ -96,7 +96,7 @@ describe("MockContract", () => {
 
     it("Can be stubbed with specific args", async () => {
       const contract = new MockContract({ abi });
-      const events1: ContractEvent<Erc20Abi, "Transfer">[] = [
+      const events1: EventLog<Erc20Abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -106,7 +106,7 @@ describe("MockContract", () => {
           },
         },
       ];
-      const events2: ContractEvent<Erc20Abi, "Transfer">[] = [
+      const events2: EventLog<Erc20Abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -132,7 +132,7 @@ describe("MockContract", () => {
 
     it("Can be stubbed with partial args", async () => {
       const contract = new MockContract({ abi });
-      const events: ContractEvent<Erc20Abi, "Transfer">[] = [
+      const events: EventLog<Erc20Abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -148,9 +148,9 @@ describe("MockContract", () => {
       ).toBe(events);
     });
 
-    it("Inherits stubbed values from the adapter", async () => {
+    it("Inherits stubbed values from the client", async () => {
       const contract = new MockContract({ abi });
-      const events: ContractEvent<Erc20Abi, "Transfer">[] = [
+      const events: EventLog<Erc20Abi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -160,7 +160,7 @@ describe("MockContract", () => {
           },
         },
       ];
-      contract.adapter
+      contract.client
         .onGetEvents({
           abi: contract.abi,
           address: contract.address,
@@ -205,9 +205,9 @@ describe("MockContract", () => {
       expect(await contract.read("balanceOf", { account: "0x" })).toBe(123n);
     });
 
-    it("Inherits stubbed values from the adapter", async () => {
+    it("Inherits stubbed values from the client", async () => {
       const contract = new MockContract({ abi });
-      contract.adapter
+      contract.client
         .onRead({
           abi: contract.abi,
           address: contract.address,
@@ -254,9 +254,9 @@ describe("MockContract", () => {
       ).toBe(true);
     });
 
-    it("Inherits stubbed values from the adapter", async () => {
+    it("Inherits stubbed values from the client", async () => {
       const contract = new MockContract({ abi });
-      contract.adapter
+      contract.client
         .onSimulateWrite({
           abi: contract.abi,
           address: contract.address,

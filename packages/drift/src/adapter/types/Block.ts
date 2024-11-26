@@ -1,7 +1,7 @@
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 
 // https://github.com/ethereum/execution-apis/blob/3ae3d29fc9900e5c48924c238dff7643fdc3680e/src/schemas/block.yaml#L1
-export interface BaseBlockProps {
+export interface BlockBase {
   extraData?: Bytes;
   gasLimit: bigint;
   gasUsed: bigint;
@@ -28,9 +28,9 @@ export interface MinedBlockProps {
   number?: bigint;
 }
 
-export interface Block extends BaseBlockProps, MinedBlockProps {}
+export interface Block extends BlockBase, MinedBlockProps {}
 
-export interface MinedBlock extends BaseBlockProps, Required<MinedBlockProps> {}
+export interface MinedBlock extends BlockBase, Required<MinedBlockProps> {}
 
 // https://github.com/ethereum/execution-apis/blob/3ae3d29fc9900e5c48924c238dff7643fdc3680e/src/schemas/block.yaml#L114
 export type BlockTag = "latest" | "earliest" | "pending" | "safe" | "finalized";

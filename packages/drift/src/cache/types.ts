@@ -4,18 +4,26 @@ import type { SerializableKey } from "src/utils/createSerializableKey";
  * Represents a simple caching mechanism with basic operations such as
  * get, set, delete, clear, and find.
  *
- * @template V - The type of value to be stored in the cache.
  * @template K - The type of key used to access values in the cache.
+ * @template V - The type of value to be stored in the cache.
  * Must be a serializable value to ensure consistency and predictability.
  */
 export interface SimpleCache<
-  V = any,
   K extends SerializableKey = SerializableKey,
+  V = any,
 > {
   /**
    * Returns an iterable of key-value pairs for every entry in the cache.
    */
   entries: () => Iterable<[K, V]>;
+
+  /**
+   * Returns the the first value from the cache that the specified predicate
+   * matches, or undefined if no match is found.
+   *
+   * @param predicate - A function to test each key-value pair in the cache.
+   */
+  find: (predicate: (value: V, key: K) => boolean) => V | undefined;
 
   /**
    * Returns a boolean indicating whether an entry exists for the specified key.
@@ -43,12 +51,4 @@ export interface SimpleCache<
    * Removes all of the mappings from this cache.
    */
   clear: () => void;
-
-  /**
-   * Returns the the first value from the cache that the specified predicate
-   * matches, or undefined if no match is found.
-   *
-   * @param predicate - A function to test each key-value pair in the cache.
-   */
-  find: (predicate: (value: V, key: K) => boolean) => V | undefined;
 }

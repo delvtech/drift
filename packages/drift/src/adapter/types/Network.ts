@@ -4,6 +4,7 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
+import type { OneOf } from "src/utils/types";
 
 // https://ethereum.github.io/execution-apis/api-documentation/
 
@@ -25,56 +26,50 @@ export interface Network {
    * Get a block from a block tag, number, or hash. If no argument is provided,
    * the latest block is returned.
    */
-  getBlock(params?: NetworkGetBlockParams): Promise<Block | undefined>;
+  getBlock(params?: GetBlockParams): Promise<Block | undefined>;
 
   /**
    * Get the balance of native currency for an account.
    */
-  getBalance(params: NetworkGetBalanceParams): Promise<bigint>;
+  getBalance(params: GetBalanceParams): Promise<bigint>;
 
   /**
    * Get a transaction from a transaction hash.
    */
   getTransaction(
-    params: NetworkGetTransactionParams,
+    params: GetTransactionParams,
   ): Promise<Transaction | undefined>;
 
   /**
    * Wait for a transaction to be mined.
    */
   waitForTransaction(
-    params: NetworkWaitForTransactionParams,
+    params: WaitForTransactionParams,
   ): Promise<TransactionReceipt | undefined>;
 }
 
-export interface NetworkGetBalanceParams {
+export interface GetBalanceParams {
   address: Address;
   block?: BlockTag | bigint;
 }
 
-export type NetworkGetBlockParams =
+export type GetBlockParams = OneOf<
   | {
       blockHash?: HexString;
-      blockNumber?: never;
-      blockTag?: never;
     }
   | {
-      blockHash?: never;
       blockNumber?: bigint;
-      blockTag?: never;
     }
   | {
-      blockHash?: never;
-      blockNumber?: never;
       blockTag?: BlockTag;
-    };
+    }
+>;
 
-export interface NetworkGetTransactionParams {
+export interface GetTransactionParams {
   hash: Hash;
 }
 
-export interface NetworkWaitForTransactionParams
-  extends NetworkGetTransactionParams {
+export interface WaitForTransactionParams extends GetTransactionParams {
   /**
    * The number of milliseconds to wait for the transaction until rejecting
    * the promise.

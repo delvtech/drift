@@ -1,15 +1,12 @@
 import type { Abi } from "abitype";
 import type { Address, Hash } from "src/adapter/types/Abi";
-import type {
-  AdapterGetEventsParams,
-  AdapterReadParams,
-} from "src/adapter/types/Adapter";
+import type { GetEventsParams, ReadParams } from "src/adapter/types/Adapter";
 import type { Block } from "src/adapter/types/Block";
-import type { ContractEvent, EventName } from "src/adapter/types/Event";
+import type { EventLog, EventName } from "src/adapter/types/Event";
 import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
-import type { NetworkGetBlockParams } from "src/adapter/types/Network";
+import type { GetBlockParams } from "src/adapter/types/Network";
 import type { Transaction } from "src/adapter/types/Transaction";
-import type { SimpleCache } from "src/cache/SimpleCache/types";
+import type { SimpleCache } from "src/cache/types";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { MaybePromise, DeepPartial as Partial } from "src/utils/types";
 
@@ -65,7 +62,7 @@ export type ClientCache<T extends SimpleCache = SimpleCache> = T & {
 
   preloadEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
     params: EventsKeyParams<TAbi, TEventName> & {
-      value: readonly ContractEvent<TAbi, TEventName>[];
+      value: readonly EventLog<TAbi, TEventName>[];
     },
   ): MaybePromise<void>;
 
@@ -109,7 +106,7 @@ export interface NameSpaceParam {
 
 export interface ChainIdKeyParams extends NameSpaceParam {}
 
-export type BlockKeyParams = NetworkGetBlockParams & NameSpaceParam;
+export type BlockKeyParams = GetBlockParams & NameSpaceParam;
 
 export type BalanceKeyParams = BlockKeyParams & {
   address: Address;
@@ -122,10 +119,10 @@ export interface TransactionKeyParams extends NameSpaceParam {
 export type ReadKeyParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = AdapterReadParams<TAbi, TFunctionName> & NameSpaceParam;
+> = ReadParams<TAbi, TFunctionName> & NameSpaceParam;
 
 export interface EventsKeyParams<
   TAbi extends Abi = Abi,
   TEventName extends EventName<TAbi> = EventName<TAbi>,
-> extends AdapterGetEventsParams<TAbi, TEventName>,
+> extends GetEventsParams<TAbi, TEventName>,
     NameSpaceParam {}

@@ -17,32 +17,32 @@ export type {
 } from "src/adapter/types/Abi";
 export type {
   Adapter,
-  AdapterArgsParam,
-  AdapterDecodeFunctionDataParams,
-  AdapterEncodeFunctionDataParams,
-  AdapterGetEventsParams,
-  AdapterReadParams,
-  AdapterSimulateWriteParams,
-  AdapterWriteParams,
+  FunctionArgsParam,
+  DecodeFunctionDataParams,
+  EncodeFunctionDataParams,
+  GetEventsParams,
+  ReadParams,
+  SimulateWriteParams,
+  WriteParams,
   OnMinedParam,
   ReadAdapter,
   ReadWriteAdapter,
   WriteAdapter,
 } from "src/adapter/types/Adapter";
 export type {
-  BaseBlockProps,
+  BlockBase,
   Block,
   BlockTag,
   MinedBlock,
   MinedBlockProps,
 } from "src/adapter/types/Block";
 export type {
-  ContractWriteOptions as AdapterContractWriteOptions,
+  ContractWriteOptions,
   ContractGetEventsOptions,
   ContractReadOptions,
 } from "src/adapter/types/Contract";
 export type {
-  ContractEvent,
+  EventLog,
   EventArgs,
   EventFilter,
   EventName,
@@ -56,10 +56,10 @@ export type {
 } from "src/adapter/types/Function";
 export type {
   Network,
-  NetworkGetBalanceParams,
-  NetworkGetBlockParams,
-  NetworkGetTransactionParams,
-  NetworkWaitForTransactionParams,
+  GetBalanceParams,
+  GetBlockParams,
+  GetTransactionParams,
+  WaitForTransactionParams,
 } from "src/adapter/types/Network";
 export type {
   MinedTransaction,
@@ -70,61 +70,48 @@ export type {
 
 export {
   OxAdapter,
-  type OxAdapterParams,
+  type OxAdapterConfig,
 } from "src/adapter/OxAdapter";
 
-export { isReadWriteAdapter } from "src/adapter/utils/isReadWriteAdapter";
 export { arrayToObject } from "src/adapter/utils/arrayToObject";
 export { objectToArray } from "src/adapter/utils/objectToArray";
 
 // cache //
 
-export { createClientCache } from "src/cache/ClientCache/createClientCache";
-export type {
-  BalanceKeyParams,
-  BlockKeyParams,
-  ChainIdKeyParams,
-  ClientCache,
-  EventsKeyParams,
-  NameSpaceParam,
-  ReadKeyParams,
-  TransactionKeyParams,
-} from "src/cache/ClientCache/types";
-
-export { createLruSimpleCache } from "src/cache/SimpleCache/createLruSimpleCache";
-export type { SimpleCache } from "src/cache/SimpleCache/types";
+export {
+  LruSimpleCache,
+  type LruSimpleCacheConfig,
+} from "src/cache/LruSimpleCache";
+export type { SimpleCache } from "src/cache/types";
 
 // clients //
 
-export type { AdapterParam } from "src/client/types";
+export {
+  BaseClient as Client,
+  ClientError,
+  ReadonlyError,
+  type ClientAdapterOptions,
+  type ClientCacheOptions,
+  type ClientConfig,
+  type ReadClient,
+  type ReadWriteClient,
+} from "src/client/BaseClient";
 
 export {
   Contract,
   type ContractEncodeFunctionDataArgs,
   type ContractGetEventsArgs,
-  type ContractParams,
+  type ContractConfig,
   type ContractReadArgs,
   type ContractWriteArgs,
-  type ContractWriteOptions,
   type ReadContract,
   type ReadWriteContract,
+  type ContractClientOptions,
+  type ContractOptions,
+  type ContractSimulateWriteArgs,
 } from "src/client/contract/Contract";
 
-export {
-  Drift,
-  type DecodeFunctionDataParams,
-  type DriftParams,
-  type EncodeFunctionDataParams,
-  type GetBalanceParams,
-  type GetBlockParams,
-  type GetChainIdParams,
-  type GetEventsParams,
-  type GetTransactionParams,
-  type ReadParams,
-  type SimulateWriteParams,
-  type WaitForTransactionParams,
-  type WriteParams,
-} from "src/client/drift/Drift";
+export { Drift } from "src/client/drift/Drift";
 
 // error //
 

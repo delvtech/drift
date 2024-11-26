@@ -1,4 +1,4 @@
-import type { ContractEvent } from "src/adapter/types/Event";
+import type { EventLog } from "src/adapter/types/Event";
 import { MockContract } from "src/client/contract/MockContract";
 import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
@@ -10,7 +10,7 @@ describe("Contract", () => {
   it("Preloads events", async () => {
     const contract = new MockContract({ abi });
 
-    const events: ContractEvent<Erc20Abi, "Transfer">[] = [
+    const events: EventLog<Erc20Abi, "Transfer">[] = [
       {
         eventName: "Transfer",
         args: {

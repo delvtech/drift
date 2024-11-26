@@ -1,12 +1,11 @@
 import type { Abi } from "abitype";
-import { MockAdapter } from "src/adapter/MockAdapter";
-import type { OxAdapterParams } from "src/adapter/OxAdapter";
+import type { MockAdapter } from "src/adapter/MockAdapter";
 import type { Bytes } from "src/adapter/types/Abi";
 import type {
-  AdapterEncodeFunctionDataParams,
-  AdapterReadParams,
-  AdapterWriteParams,
+  EncodeFunctionDataParams,
+  ReadParams,
   ReadWriteAdapter,
+  WriteParams,
 } from "src/adapter/types/Adapter";
 import type {
   ContractReadOptions,
@@ -14,40 +13,47 @@ import type {
 } from "src/adapter/types/Contract";
 import type { EventName } from "src/adapter/types/Event";
 import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
-import type { SimpleCache } from "src/cache/SimpleCache/types";
+import type { SimpleCache } from "src/cache/types";
+import type { BaseClient, ClientCacheOptions } from "src/client/BaseClient";
+import { MockClient } from "src/client/MockClient";
 import {
   Contract,
   type ContractGetEventsArgs,
-  type ContractParams,
+  type ContractOptions,
 } from "src/client/contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
-import type { FunctionKey, OptionalKeys } from "src/utils/types";
+import type { FunctionKey, OneOf, OptionalKeys, Pretty } from "src/utils/types";
 
-export type MockContractParams<
+export type MockContractConfig<
   TAbi extends Abi = Abi,
   TAdapter extends MockAdapter = MockAdapter,
   TCache extends SimpleCache = SimpleCache,
-> = Partial<
-  Omit<ContractParams<TAbi, TAdapter, TCache>, keyof OxAdapterParams>
+  TClient extends MockClient<TAdapter, TCache> = MockClient<TAdapter, TCache>,
+> = Pretty<
+  Partial<ContractOptions<TAbi>> &
+    MockContractClientOptions<TAdapter, TCache, TClient>
 >;
 
 export class MockContract<
   TAbi extends Abi = Abi,
   TAdapter extends MockAdapter = MockAdapter,
   TCache extends SimpleCache = SimpleCache,
-> extends Contract<TAbi, TAdapter, TCache> {
+  TClient extends MockClient<TAdapter, TCache> = MockClient<TAdapter, TCache>,
+> extends Contract<TAbi, TAdapter, TCache, TClient> {
+  private adapter: TAdapter;
+
   constructor({
     abi = [] as unknown as TAbi,
-    adapter = new MockAdapter() as TAdapter,
     address = ZERO_ADDRESS,
-    ...rest
-  }: MockContractParams<TAbi, TAdapter, TCache> = {}) {
+    client,
+    ...clientOptions
+  }: MockContractConfig<TAbi, TAdapter, TCache, TClient> = {}) {
     super({
-      ...rest,
       abi,
-      adapter,
       address,
+      client: client ?? (new MockClient(clientOptions) as TClient),
     });
+    this.adapter = this.client.adapter;
   }
 
   reset(method?: FunctionKey<ReadWriteAdapter>) {
@@ -76,10 +82,7 @@ export class MockContract<
       fn,
       args,
       ...options,
-    } as OptionalKeys<
-      AdapterReadParams<TAbi, TFunctionName>,
-      "args" | "address"
-    >);
+    } as OptionalKeys<ReadParams<TAbi, TFunctionName>, "args" | "address">);
   }
 
   onSimulateWrite<
@@ -95,10 +98,7 @@ export class MockContract<
       fn,
       args,
       ...options,
-    } as OptionalKeys<
-      AdapterWriteParams<TAbi, TFunctionName>,
-      "args" | "address"
-    >);
+    } as OptionalKeys<WriteParams<TAbi, TFunctionName>, "args" | "address">);
   }
 
   onEncodeFunctionData<TFunctionName extends FunctionName<TAbi>>(
@@ -109,7 +109,7 @@ export class MockContract<
       abi: this.abi,
       fn,
       args,
-    } as AdapterEncodeFunctionDataParams<TAbi, TFunctionName>);
+    } as EncodeFunctionDataParams<TAbi, TFunctionName>);
   }
 
   onDecodeFunctionData(data?: Bytes) {
@@ -134,9 +134,19 @@ export class MockContract<
       fn,
       args,
       ...options,
-    } as OptionalKeys<
-      AdapterWriteParams<TAbi, TFunctionName>,
-      "args" | "address"
-    >);
+    } as OptionalKeys<WriteParams<TAbi, TFunctionName>, "args" | "address">);
   }
 }
+
+export type MockContractClientOptions<
+  TAdapter extends MockAdapter = MockAdapter,
+  TCache extends SimpleCache = SimpleCache,
+  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
+> = OneOf<
+  | {
+      client?: TClient;
+    }
+  | ({
+      adapter?: TAdapter;
+    } & ClientCacheOptions<TCache>)
+>;

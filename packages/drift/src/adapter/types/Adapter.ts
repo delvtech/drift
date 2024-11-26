@@ -5,7 +5,7 @@ import type {
   ContractReadOptions,
   ContractWriteOptions,
 } from "src/adapter/types/Contract";
-import type { ContractEvent, EventName } from "src/adapter/types/Event";
+import type { EventLog, EventName } from "src/adapter/types/Event";
 import type {
   DecodedFunctionData,
   FunctionArgs,
@@ -20,33 +20,33 @@ export interface Adapter extends ReadAdapter, Partial<WriteAdapter> {}
 
 export interface ReadAdapter extends Network {
   getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
-    params: AdapterGetEventsParams<TAbi, TEventName>,
-  ): Promise<ContractEvent<TAbi, TEventName>[]>;
+    params: GetEventsParams<TAbi, TEventName>,
+  ): Promise<EventLog<TAbi, TEventName>[]>;
 
   read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(
-    params: AdapterReadParams<TAbi, TFunctionName>,
+    params: ReadParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>>;
 
   simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
-    params: AdapterWriteParams<TAbi, TFunctionName>,
+    params: SimulateWriteParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>>;
 
   encodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >(params: AdapterEncodeFunctionDataParams<TAbi, TFunctionName>): Bytes;
+  >(params: EncodeFunctionDataParams<TAbi, TFunctionName>): Bytes;
 
   decodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
   >(
-    params: AdapterDecodeFunctionDataParams<TAbi, TFunctionName>,
+    params: DecodeFunctionDataParams<TAbi, TFunctionName>,
   ): DecodedFunctionData<TAbi, TFunctionName>;
 }
 
@@ -56,12 +56,12 @@ export interface WriteAdapter {
   write<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: AdapterWriteParams<TAbi, TFunctionName>): Promise<Hash>;
+  >(params: WriteParams<TAbi, TFunctionName>): Promise<Hash>;
 }
 
 export interface ReadWriteAdapter extends ReadAdapter, WriteAdapter {}
 
-export type AdapterArgsParam<
+export type FunctionArgsParam<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 > = Abi extends TAbi
@@ -76,7 +76,7 @@ export type AdapterArgsParam<
         args: FunctionArgs<TAbi, TFunctionName>;
       };
 
-export type AdapterReadParams<
+export type ReadParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi, "pure" | "view"> = FunctionName<
     TAbi,
@@ -86,10 +86,10 @@ export type AdapterReadParams<
   abi: TAbi;
   address: Address;
   fn: TFunctionName;
-} & AdapterArgsParam<TAbi, TFunctionName> &
+} & FunctionArgsParam<TAbi, TFunctionName> &
   ContractReadOptions;
 
-export interface AdapterGetEventsParams<
+export interface GetEventsParams<
   TAbi extends Abi = Abi,
   TEventName extends EventName<TAbi> = EventName<TAbi>,
 > extends ContractGetEventsOptions<TAbi, TEventName> {
@@ -98,7 +98,7 @@ export interface AdapterGetEventsParams<
   event: TEventName;
 }
 
-export type AdapterSimulateWriteParams<
+export type SimulateWriteParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<
     TAbi,
@@ -108,30 +108,30 @@ export type AdapterSimulateWriteParams<
   abi: TAbi;
   address: Address;
   fn: TFunctionName;
-} & AdapterArgsParam<TAbi, TFunctionName> &
+} & FunctionArgsParam<TAbi, TFunctionName> &
   ContractWriteOptions;
 
 export interface OnMinedParam {
   onMined?: (receipt?: TransactionReceipt) => void;
 }
 
-export type AdapterWriteParams<
+export type WriteParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<
     TAbi,
     "nonpayable" | "payable"
   > = FunctionName<TAbi, "nonpayable" | "payable">,
-> = AdapterSimulateWriteParams<TAbi, TFunctionName> & OnMinedParam;
+> = SimulateWriteParams<TAbi, TFunctionName> & OnMinedParam;
 
-export type AdapterEncodeFunctionDataParams<
+export type EncodeFunctionDataParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 > = {
   abi: TAbi;
   fn: TFunctionName;
-} & AdapterArgsParam<TAbi, TFunctionName>;
+} & FunctionArgsParam<TAbi, TFunctionName>;
 
-export interface AdapterDecodeFunctionDataParams<
+export interface DecodeFunctionDataParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 > {

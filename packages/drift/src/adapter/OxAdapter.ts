@@ -14,12 +14,13 @@ import {
 } from "ox";
 import type { HexString } from "src/adapter/types/Abi";
 import type {
-  AdapterDecodeFunctionDataParams,
-  AdapterEncodeFunctionDataParams,
-  AdapterGetEventsParams,
-  AdapterReadParams,
-  AdapterWriteParams,
+  DecodeFunctionDataParams,
+  EncodeFunctionDataParams,
+  GetEventsParams,
+  ReadParams,
   ReadWriteAdapter,
+  SimulateWriteParams,
+  WriteParams,
 } from "src/adapter/types/Adapter";
 import type { BlockTag } from "src/adapter/types/Block";
 import type { EventArgs, EventName } from "src/adapter/types/Event";
@@ -30,17 +31,17 @@ import type {
   FunctionReturn,
 } from "src/adapter/types/Function";
 import type {
-  NetworkGetBalanceParams,
-  NetworkGetBlockParams,
-  NetworkGetTransactionParams,
-  NetworkWaitForTransactionParams,
+  GetBalanceParams,
+  GetBlockParams,
+  GetTransactionParams,
+  WaitForTransactionParams,
 } from "src/adapter/types/Network";
 import type { TransactionReceipt as TransactionReceiptType } from "src/adapter/types/Transaction";
 import { objectToArray } from "src/adapter/utils/objectToArray";
 import { DriftError } from "src/error/DriftError";
 import type { AnyObject } from "src/utils/types";
 
-export interface OxAdapterParams {
+export interface OxAdapterConfig {
   rpcUrl?: string;
   /**
    * Polling frequency in milliseconds
@@ -59,7 +60,7 @@ export class OxAdapter implements ReadWriteAdapter {
   constructor({
     rpcUrl,
     pollingInterval = OxAdapter.DEFAULT_POLLING_INTERVAL,
-  }: OxAdapterParams = {}) {
+  }: OxAdapterConfig = {}) {
     try {
       const provider = rpcUrl
         ? RpcTransport.fromHttp(rpcUrl)
@@ -96,7 +97,7 @@ export class OxAdapter implements ReadWriteAdapter {
       .catch(handleError);
   }
 
-  getBlock(params?: NetworkGetBlockParams) {
+  getBlock(params?: GetBlockParams) {
     return this.provider
       .request({
         method: params?.blockHash
@@ -121,7 +122,7 @@ export class OxAdapter implements ReadWriteAdapter {
       .catch(handleError);
   }
 
-  getBalance(params: NetworkGetBalanceParams) {
+  getBalance(params: GetBalanceParams) {
     return this.provider
       .request({
         method: "eth_getBalance",
@@ -134,7 +135,7 @@ export class OxAdapter implements ReadWriteAdapter {
   decodeFunctionData<
     TAbi extends Abi = Abi,
     TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-  >({ abi, data }: AdapterDecodeFunctionDataParams<TAbi, TFunctionName>) {
+  >({ abi, data }: DecodeFunctionDataParams<TAbi, TFunctionName>) {
     try {
       const sig = Hex.slice(data, 0, 4);
       const abiFn = AbiFunction.fromAbi(abi, sig);
@@ -153,7 +154,7 @@ export class OxAdapter implements ReadWriteAdapter {
   encodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >({ abi, fn, args }: AdapterEncodeFunctionDataParams<TAbi, TFunctionName>) {
+  >({ abi, fn, args }: EncodeFunctionDataParams<TAbi, TFunctionName>) {
     try {
       return AbiFunction.encodeData(
         AbiFunction.fromAbi(abi, fn as any),
@@ -170,7 +171,7 @@ export class OxAdapter implements ReadWriteAdapter {
     }
   }
 
-  async getTransaction({ hash }: NetworkGetTransactionParams) {
+  async getTransaction({ hash }: GetTransactionParams) {
     const tx = await this.provider
       .request({
         method: "eth_getTransactionByHash",
@@ -190,7 +191,7 @@ export class OxAdapter implements ReadWriteAdapter {
   async waitForTransaction({
     hash,
     timeout = OxAdapter.DEFAULT_TIMEOUT,
-  }: NetworkWaitForTransactionParams) {
+  }: WaitForTransactionParams) {
     return new Promise<TransactionReceiptType | undefined>(
       (resolve, reject) => {
         const getReceipt = (): any =>
@@ -225,7 +226,7 @@ export class OxAdapter implements ReadWriteAdapter {
     filter,
     fromBlock,
     toBlock,
-  }: AdapterGetEventsParams<TAbi, TEventName>) {
+  }: GetEventsParams<TAbi, TEventName>) {
     const abiFn = AbiEvent.fromAbi(
       abi,
       event as any,
@@ -268,7 +269,7 @@ export class OxAdapter implements ReadWriteAdapter {
   read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >({ abi, address, fn, args, block }: AdapterReadParams<TAbi, TFunctionName>) {
+  >({ abi, address, fn, args, block }: ReadParams<TAbi, TFunctionName>) {
     const argsArray = objectToArray({
       abi,
       type: "function",
@@ -306,8 +307,8 @@ export class OxAdapter implements ReadWriteAdapter {
   simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(adapterParams: AdapterWriteParams<TAbi, TFunctionName>) {
-    const { abiFn, params } = writeParams(adapterParams);
+  >(writeParams: SimulateWriteParams<TAbi, TFunctionName>) {
+    const { abiFn, params } = prepWriteParams(writeParams);
     return this.provider
       .request({
         method: "eth_call",
@@ -333,8 +334,8 @@ export class OxAdapter implements ReadWriteAdapter {
   async write<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(adapterParams: AdapterWriteParams<TAbi, TFunctionName>) {
-    const { params } = writeParams(adapterParams);
+  >(writeParams: WriteParams<TAbi, TFunctionName>) {
+    const { params } = prepWriteParams(writeParams);
     const from = params[0].from || (await this.getSignerAddress());
     const hash = await this.provider
       .request({
@@ -348,8 +349,8 @@ export class OxAdapter implements ReadWriteAdapter {
       })
       .catch(handleError);
 
-    if (adapterParams.onMined) {
-      this.waitForTransaction({ hash }).then(adapterParams.onMined);
+    if (writeParams.onMined) {
+      this.waitForTransaction({ hash }).then(writeParams.onMined);
     }
 
     return hash;
@@ -390,7 +391,7 @@ function blockParam(block?: BlockTag | bigint): HexString | BlockTag {
   return block;
 }
 
-function writeParams<
+function prepWriteParams<
   TAbi extends Abi,
   TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
 >({
@@ -406,7 +407,7 @@ function writeParams<
   nonce,
   value,
   ...rest
-}: AdapterWriteParams<TAbi, TFunctionName>) {
+}: SimulateWriteParams<TAbi, TFunctionName>) {
   const argsArray = objectToArray({
     abi,
     type: "function",

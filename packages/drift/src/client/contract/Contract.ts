@@ -1,272 +1,81 @@
 import type { Abi } from "abitype";
-import { OxAdapter } from "src/adapter/OxAdapter";
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
+  GetEventsParams,
   OnMinedParam,
-  ReadAdapter,
+  ReadParams,
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
 import type {
-  ContractWriteOptions as BaseContractWriteOptions,
   ContractGetEventsOptions,
   ContractReadOptions,
+  ContractWriteOptions,
 } from "src/adapter/types/Contract";
-import type { ContractEvent, EventName } from "src/adapter/types/Event";
+import type { EventLog, EventName } from "src/adapter/types/Event";
 import type {
   DecodedFunctionData,
   FunctionArgs,
   FunctionName,
   FunctionReturn,
 } from "src/adapter/types/Function";
-import { isReadWriteAdapter } from "src/adapter/utils/isReadWriteAdapter";
-import { createClientCache } from "src/cache/ClientCache/createClientCache";
-import type {
-  ClientCache,
-  EventsKeyParams,
-  NameSpaceParam,
-  ReadKeyParams,
-} from "src/cache/ClientCache/types";
-import type { SimpleCache } from "src/cache/SimpleCache/types";
-import type { AdapterParam } from "src/client/types";
-import { DriftError } from "src/error/DriftError";
+import type { SimpleCache } from "src/cache/types";
+import {
+  BaseClient,
+  type ClientConfig,
+  type ReadClient,
+  type ReadWriteClient,
+  ReadonlyError,
+} from "src/client/BaseClient";
 import type { SerializableKey } from "src/utils/createSerializableKey";
-import type { AnyObject, EmptyObject, Pretty } from "src/utils/types";
+import type { AnyObject, EmptyObject, OneOf, Pretty } from "src/utils/types";
 
-// TODO: Either use a Drift instance or abstract the common cache interactions
-// shared between Drift and Contract into a shared module. Initial preference
-// is to use a Drift instance.
-
-export type ContractParams<
+export type ContractConfig<
   TAbi extends Abi = Abi,
   TAdapter extends Adapter = Adapter,
   TCache extends SimpleCache = SimpleCache,
+  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
 > = Pretty<
-  {
-    abi: TAbi;
-    address: Address;
-    cache?: TCache;
-  } & NameSpaceParam &
-    AdapterParam<TAdapter>
+  ContractOptions<TAbi> & ContractClientOptions<TAdapter, TCache, TClient>
 >;
 
 export class Contract<
   TAbi extends Abi = Abi,
   TAdapter extends Adapter = ReadWriteAdapter,
   TCache extends SimpleCache = SimpleCache,
+  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
 > {
   abi: TAbi;
-  adapter: TAdapter;
   address: Address;
-  cache: ClientCache<TCache>;
-  cacheNamespace?: NameSpaceParam["cacheNamespace"];
+  client: TClient;
 
   constructor({
     abi,
     address,
-    cache,
-    cacheNamespace,
-    ...rest
-  }: ContractParams<TAbi, TAdapter, TCache>) {
+    client,
+    ...clientConfig
+  }: ContractConfig<TAbi, TAdapter, TCache, TClient>) {
     this.abi = abi;
-    this.adapter = rest.adapter ?? (new OxAdapter(rest) as Adapter as TAdapter);
     this.address = address;
-    this.cache = createClientCache(cache);
-    this.cacheNamespace = cacheNamespace;
+    this.client = client ?? (new BaseClient(clientConfig) as TClient);
   }
 
-  isReadWrite(): this is Contract<TAbi, ReadWriteAdapter, TCache> {
-    return isReadWriteAdapter(this.adapter);
+  isReadWrite(): this is Contract<TAbi, ReadWriteClient> {
+    return this.client.isReadWrite();
   }
 
-  // Events //
-
-  /**
-   * Retrieves specified events from the contract.
-   */
-  async getEvents<TEventName extends EventName<TAbi>>(
-    ...[event, options]: ContractGetEventsArgs<TAbi, TEventName>
-  ): Promise<ContractEvent<TAbi, TEventName>[]> {
-    const key = this.eventsKey(event, options);
-    if (this.cache.has(key)) {
-      return this.cache.get(key);
-    }
-    return this.adapter
-      .getEvents({
-        abi: this.abi,
-        address: this.address,
-        event,
-        ...options,
-      })
-      .then((events) => {
-        this.cache.set(key, events);
-        return events;
-      });
-  }
-
-  preloadEvents<TEventName extends EventName<TAbi>>(
-    params: Omit<EventsKeyParams<TAbi, TEventName>, keyof ContractParams> & {
-      value: readonly ContractEvent<TAbi, TEventName>[];
-    },
-  ) {
-    return this.cache.preloadEvents({
-      cacheNamespace: this.cacheNamespace,
-      abi: this.abi,
-      address: this.address,
-      ...params,
-    });
-  }
-
-  eventsKey<TEventName extends EventName<TAbi>>(
-    ...[event, options]: ContractGetEventsArgs<TAbi, TEventName>
-  ): SerializableKey {
-    return this.cache.eventsKey({
-      cacheNamespace: this.cacheNamespace,
-      abi: this.abi,
-      address: this.address,
-      event,
-      ...options,
-    });
-  }
-
-  // read //
-
-  /**
-   * Reads a specified function from the contract.
-   */
-  async read<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
-    ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
-  ): Promise<FunctionReturn<TAbi, TFunctionName>> {
-    const key = this.readKey(
-      fn,
-      args as FunctionArgs<TAbi, TFunctionName>,
-      options,
-    );
-    if (this.cache.has(key)) {
-      return this.cache.get(key);
-    }
-    return this.adapter
-      .read({
-        abi: this.abi as Abi,
-        address: this.address,
-        fn,
-        args,
-        ...options,
-      })
-      .then((events) => {
-        this.cache.set(key, events);
-        return events;
-      });
-  }
-
-  preloadRead<TFunctionName extends FunctionName<TAbi>>(
-    params: Omit<ReadKeyParams<TAbi, TFunctionName>, keyof ContractParams> & {
-      value: FunctionReturn<TAbi, TFunctionName>;
-    },
-  ) {
-    this.cache.preloadRead({
-      cacheNamespace: this.cacheNamespace,
-      // TODO: Cleanup type casting required due to an incompatibility between
-      // `Omit` and the conditional args param.
-      abi: this.abi as Abi,
-      address: this.address,
-      ...params,
-    });
-  }
-
-  invalidateRead<TFunctionName extends FunctionName<TAbi>>(
-    ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
-  ) {
-    return this.cache.invalidateRead({
-      cacheNamespace: this.cacheNamespace,
-      // TODO: Cleanup type casting required due to an incompatibility between
-      // `Omit` and the conditional args param.
-      abi: this.abi as Abi,
-      address: this.address,
-      fn,
-      args,
-      ...options,
-    });
-  }
-
-  invalidateReadsMatching<TFunctionName extends FunctionName<TAbi>>(
-    fn?: TFunctionName,
-    args?: FunctionArgs<TAbi, TFunctionName>,
-    options?: ContractReadOptions,
-  ) {
-    return this.cache.invalidateReadsMatching({
-      cacheNamespace: this.cacheNamespace,
-      abi: this.abi,
-      address: this.address,
-      fn,
-      args,
-      ...options,
-    });
-  }
-
-  readKey<TFunctionName extends FunctionName<TAbi>>(
-    ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
-  ): SerializableKey {
-    return this.cache.readKey({
-      cacheNamespace: this.cacheNamespace,
-      // TODO: Cleanup type casting required due to an incompatibility between
-      // `Omit` and the conditional args param.
-      abi: this.abi as Abi,
-      address: this.address,
-      fn,
-      args,
-      ...options,
-    });
-  }
-
-  partialReadKey<TFunctionName extends FunctionName<TAbi>>(
-    fn?: TFunctionName,
-    args?: FunctionArgs<TAbi, TFunctionName>,
-    options?: ContractReadOptions,
-  ): SerializableKey {
-    return this.cache.partialReadKey({
-      cacheNamespace: this.cacheNamespace,
-      abi: this.abi,
-      address: this.address,
-      fn,
-      args,
-      ...options,
-    });
-  }
-
-  // ...rest //
-
-  /**
-   * Simulates a write operation on a specified function of the contract.
-   */
-  async simulateWrite<
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(
-    ...[fn, args, options]: ContractWriteArgs<TAbi, TFunctionName>
-  ): Promise<FunctionReturn<TAbi, TFunctionName>> {
-    return this.adapter.simulateWrite({
-      // TODO: Cleanup type casting required due to an incompatibility between
-      // distributive types and the conditional args param.
-      abi: this.abi as Abi,
-      address: this.address,
-      fn,
-      args,
-      ...options,
-    });
-  }
+  // Function data //
 
   /**
    * Encodes a function call into calldata.
    */
   encodeFunctionData<TFunctionName extends FunctionName<TAbi>>(
     ...[fn, args]: ContractEncodeFunctionDataArgs<TAbi, TFunctionName>
-  ): Bytes {
-    return this.adapter.encodeFunctionData({
-      // TODO: Cleanup type casting required due to an incompatibility between
-      // distributive types and the conditional args param.
-      abi: this.abi as Abi,
+  ) {
+    return this.client.encodeFunctionData({
+      abi: this.abi,
       fn,
-      args,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
     });
   }
 
@@ -277,64 +86,221 @@ export class Contract<
   decodeFunctionData<
     TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
   >(data: Bytes): DecodedFunctionData<TAbi, TFunctionName> {
-    return this.adapter.decodeFunctionData({
+    return this.client.decodeFunctionData({
       abi: this.abi,
       data,
     });
   }
 
-  // Read-Write //
+  // Events //
+
+  eventsKey<TEventName extends EventName<TAbi>>(
+    ...[event, params]: ContractGetEventsArgs<TAbi, TEventName>
+  ) {
+    return this.client.eventsKey({
+      abi: this.abi,
+      address: this.address,
+      event,
+      ...params,
+    });
+  }
+
+  preloadEvents<TEventName extends EventName<TAbi>>(
+    params: Omit<GetEventsParams<TAbi, TEventName>, "abi" | "address"> & {
+      value: readonly EventLog<TAbi, TEventName>[];
+    },
+  ) {
+    return this.client.preloadEvents({
+      abi: this.abi,
+      address: this.address,
+      ...params,
+    });
+  }
 
   /**
-   * Get the address of the signer for this contract.
-   * @throws If the adapter is not a `ReadWriteAdapter`.
+   * Retrieves specified events from the contract.
    */
-  getSignerAddress(
-    ..._: TAdapter extends ReadWriteAdapter ? [] : never
-  ): TAdapter extends ReadWriteAdapter ? Promise<Address> : never {
-    if (!isReadWriteAdapter(this.adapter)) {
-      throw new DriftError("Adapter does not support read-write operations.");
-    }
-    return this.adapter.getSignerAddress() as Promise<Address> as any;
+  getEvents<TEventName extends EventName<TAbi>>(
+    ...[event, params]: ContractGetEventsArgs<TAbi, TEventName>
+  ): Promise<EventLog<TAbi, TEventName>[]> {
+    return this.client.getEvents({
+      abi: this.abi,
+      address: this.address,
+      event,
+      ...params,
+    });
+  }
+
+  // read //
+
+  partialReadKey<TFunctionName extends FunctionName<TAbi>>(
+    fn?: TFunctionName,
+    args?: FunctionArgs<TAbi, TFunctionName>,
+    params?: ContractReadOptions,
+  ): Promise<SerializableKey> {
+    return this.client.partialReadKey({
+      abi: this.abi,
+      address: this.address,
+      fn,
+      args,
+      ...params,
+    });
+  }
+
+  readKey<TFunctionName extends FunctionName<TAbi>>(
+    ...[fn, args, params]: ContractReadArgs<TAbi, TFunctionName>
+  ): Promise<SerializableKey> {
+    return this.client.readKey({
+      abi: this.abi,
+      address: this.address,
+      fn,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
+      ...params,
+    });
+  }
+
+  preloadRead<TFunctionName extends FunctionName<TAbi>>(
+    params: Omit<ReadParams<TAbi, TFunctionName>, keyof ContractConfig> & {
+      value: FunctionReturn<TAbi, TFunctionName>;
+    },
+  ) {
+    this.client.preloadRead({
+      abi: this.abi as Abi,
+      address: this.address,
+      ...params,
+    });
+  }
+
+  /**
+   * Reads a specified function from the contract.
+   */
+  read<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
+    ...[fn, args, params]: ContractReadArgs<TAbi, TFunctionName>
+  ): Promise<FunctionReturn<TAbi, TFunctionName>> {
+    return this.client.read({
+      abi: this.abi,
+      address: this.address,
+      fn,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
+      ...params,
+    });
+  }
+
+  invalidateRead<TFunctionName extends FunctionName<TAbi>>(
+    ...[fn, args, params]: ContractReadArgs<TAbi, TFunctionName>
+  ) {
+    return this.client.invalidateRead({
+      abi: this.abi,
+      address: this.address,
+      fn,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
+      ...params,
+    });
+  }
+
+  invalidateReadsMatching<TFunctionName extends FunctionName<TAbi>>(
+    fn?: TFunctionName,
+    args?: FunctionArgs<TAbi, TFunctionName>,
+    params?: ContractReadOptions,
+  ) {
+    return this.client.invalidateReadsMatching({
+      abi: this.abi,
+      address: this.address,
+      fn,
+      args,
+      ...params,
+    });
+  }
+
+  // Write //
+
+  /**
+   * Simulates a write operation on a specified function of the contract.
+   */
+  simulateWrite<
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(
+    ...[fn, args, params]: ContractWriteArgs<TAbi, TFunctionName>
+  ): Promise<FunctionReturn<TAbi, TFunctionName>> {
+    return this.client.simulateWrite({
+      abi: this.abi,
+      address: this.address,
+      fn,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
+      ...params,
+    });
   }
 
   /**
    * Writes to a specified function on the contract.
    * @returns The transaction hash of the submitted transaction.
-   * @throws If the adapter is not a `ReadWriteAdapter`.
+   * @throws A {@linkcode ReadonlyError} if not connected to a signer.
    */
   write<TFunctionName extends FunctionName<TAbi, "payable" | "nonpayable">>(
-    ...params: TAdapter extends ReadWriteAdapter
+    ...[fn, args, params]: TClient extends ReadWriteClient
       ? ContractWriteArgs<TAbi, TFunctionName>
       : never
-  ): TAdapter extends ReadWriteAdapter ? Promise<Hash> : never {
-    if (!isReadWriteAdapter(this.adapter)) {
-      throw new DriftError("Adapter does not support read-write operations.");
+  ): TClient extends ReadWriteClient ? Promise<Hash> : never {
+    if (!this.client.isReadWrite()) {
+      throw new ReadonlyError();
     }
-    const [fn, args, options] = params;
-    return this.adapter.write({
-      // TODO: Cleanup type casting required due to an incompatibility
-      // between distributive types and the conditional args param.
-      abi: this.abi as Abi,
+    return this.client.write({
+      abi: this.abi,
       address: this.address,
       fn,
-      args,
-      ...options,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
+      ...params,
     }) as Promise<Hash> as any;
+  }
+
+  /**
+   * Get the address of the signer for this contract.
+   * @throws A {@linkcode ReadonlyError} if not connected to a signer.
+   */
+  getSignerAddress(
+    ..._: TClient extends ReadWriteClient ? [] : never
+  ): TClient extends ReadWriteClient ? Promise<Address> : never {
+    if (!this.client.isReadWrite()) {
+      throw new ReadonlyError();
+    }
+    return this.client.getSignerAddress() as Promise<Address> as any;
   }
 }
 
 export type ReadContract<
   TAbi extends Abi = Abi,
-  TAdapter extends ReadAdapter = ReadAdapter,
-  TCache extends SimpleCache = SimpleCache,
-> = Contract<TAbi, TAdapter, TCache>;
+  TClient extends ReadClient = ReadClient,
+> = Contract<TAbi, TClient>;
 
 export type ReadWriteContract<
   TAbi extends Abi = Abi,
-  TAdapter extends ReadWriteAdapter = ReadWriteAdapter,
+  TClient extends ReadWriteClient = ReadWriteClient,
+> = Contract<TAbi, TClient>;
+
+export interface ContractOptions<TAbi extends Abi = Abi> {
+  abi: TAbi;
+  address: Address;
+}
+
+export type ContractClientOptions<
+  TAdapter extends Adapter = Adapter,
   TCache extends SimpleCache = SimpleCache,
-> = Contract<TAbi, TAdapter, TCache>;
+  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
+> = OneOf<
+  | {
+      client?: TClient;
+    }
+  | ClientConfig<TAdapter, TCache>
+>;
+
+export type ContractEncodeFunctionDataArgs<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+> = Abi extends TAbi
+  ? [functionName: TFunctionName, args?: AnyObject]
+  : FunctionArgs<TAbi, TFunctionName> extends EmptyObject
+    ? [functionName: TFunctionName, args?: EmptyObject]
+    : [functionName: TFunctionName, args: FunctionArgs<TAbi, TFunctionName>];
 
 export type ContractGetEventsArgs<
   TAbi extends Abi = Abi,
@@ -362,11 +328,7 @@ export type ContractReadArgs<
         options?: ContractReadOptions,
       ];
 
-export interface ContractWriteOptions
-  extends BaseContractWriteOptions,
-    OnMinedParam {}
-
-export type ContractWriteArgs<
+export type ContractSimulateWriteArgs<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<
     TAbi,
@@ -390,11 +352,38 @@ export type ContractWriteArgs<
         options?: ContractWriteOptions,
       ];
 
-export type ContractEncodeFunctionDataArgs<
+export type ContractWriteArgs<
   TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+  TFunctionName extends FunctionName<
+    TAbi,
+    "nonpayable" | "payable"
+  > = FunctionName<TAbi, "nonpayable" | "payable">,
 > = Abi extends TAbi
-  ? [functionName: TFunctionName, args?: AnyObject]
+  ? [
+      functionName: TFunctionName,
+      args?: AnyObject,
+      options?: ContractWriteOptions & OnMinedParam,
+    ]
   : FunctionArgs<TAbi, TFunctionName> extends EmptyObject
-    ? [functionName: TFunctionName, args?: EmptyObject]
-    : [functionName: TFunctionName, args: FunctionArgs<TAbi, TFunctionName>];
+    ? [
+        functionName: TFunctionName,
+        args?: EmptyObject,
+        options?: ContractWriteOptions & OnMinedParam,
+      ]
+    : [
+        functionName: TFunctionName,
+        args: FunctionArgs<TAbi, TFunctionName>,
+        options?: ContractWriteOptions & OnMinedParam,
+      ];
+
+function foo(bar: Contract<Abi, Adapter>) {
+  if (bar.isReadWrite()) {
+    bar.write(
+      "foo",
+      { a: 1, b: 2 },
+      {
+        maxFeePerGas: 1n,
+      },
+    );
+  }
+}

@@ -1,7 +1,7 @@
 import isMatch from "lodash.ismatch";
 import type { ClientCache, ReadKeyParams } from "src/cache/ClientCache/types";
-import { createLruSimpleCache } from "src/cache/SimpleCache/createLruSimpleCache";
-import type { SimpleCache } from "src/cache/SimpleCache/types";
+import { LruSimpleCache } from "src/cache/LruSimpleCache";
+import type { SimpleCache } from "src/cache/types";
 import { createSerializableKey } from "src/utils/createSerializableKey";
 import { extendInstance } from "src/utils/extendInstance";
 
@@ -13,7 +13,7 @@ import { extendInstance } from "src/utils/extendInstance";
 // implement a generalized plugins/hooks layer that can be used by the cache,
 // store, and other plugins.
 export function createClientCache<T extends SimpleCache>(
-  cache: T = createLruSimpleCache({ max: 500 }) as T,
+  cache: T = new LruSimpleCache({ max: 500 }) as SimpleCache as T,
 ): ClientCache<T> {
   if (isClientCache(cache)) {
     return cache;

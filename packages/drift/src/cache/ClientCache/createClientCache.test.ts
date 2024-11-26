@@ -1,5 +1,5 @@
 import { createClientCache } from "src/cache/ClientCache/createClientCache";
-import { createLruSimpleCache } from "src/cache/SimpleCache/createLruSimpleCache";
+import { LruSimpleCache } from "src/cache/LruSimpleCache";
 import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
 
@@ -88,7 +88,7 @@ describe("createClientCache", () => {
   });
 
   it("Maintains original cache reference", () => {
-    const simpleCache = createLruSimpleCache({ max: 500 });
+    const simpleCache = new LruSimpleCache({ max: 500 });
     const clientCache = createClientCache(simpleCache);
 
     expect(clientCache.store).toBe(simpleCache);
