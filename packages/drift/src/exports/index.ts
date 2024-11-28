@@ -83,15 +83,20 @@ export {
   type LruSimpleCacheConfig,
 } from "src/cache/LruSimpleCache";
 export type { SimpleCache } from "src/cache/types";
+export {
+  ClientCache,
+  ClientCacheError,
+  type ClientCacheConfig,
+} from "src/cache/ClientCache";
 
 // clients //
 
 export {
-  BaseClient as Client,
+  BaseClient,
   ClientError,
   ReadonlyError,
   type ClientAdapterOptions,
-  type ClientCacheOptions,
+  type ClientOptions,
   type ClientConfig,
   type ReadClient,
   type ReadWriteClient,
@@ -125,6 +130,7 @@ export {
   type SerializableKey,
 } from "src/utils/createSerializableKey";
 export { extendInstance } from "src/utils/extendInstance";
+export { getRandomHex } from "src/utils/getRandomHex";
 export type {
   AnyFunction,
   AnyObject,

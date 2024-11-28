@@ -1,6 +1,5 @@
 import type {
   Block,
-  ContractEvent,
   DecodedFunctionData,
   FunctionArgs,
   Transaction,
@@ -8,6 +7,7 @@ import type {
 } from "@delvtech/drift";
 import { OxAdapter } from "src/adapter/OxAdapter";
 import type { Address as AddressType } from "src/adapter/types/Abi";
+import type { EventLog } from "src/adapter/types/Event";
 import { ZERO_ADDRESS } from "src/constants";
 import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
@@ -132,7 +132,7 @@ describe("OxAdapter", () => {
         blockNumber: expect.any(BigInt),
         data: expect.any(String),
         transactionHash: expect.any(String),
-      } as ContractEvent<typeof erc20.abi, "Transfer">),
+      } as EventLog<typeof erc20.abi, "Transfer">),
     );
   });
 

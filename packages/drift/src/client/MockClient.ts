@@ -33,20 +33,15 @@ export class MockClient<
 > extends BaseClient<TAdapter, TCache> {
   constructor({
     adapter = new MockAdapter() as TAdapter,
+    chainId,
     ...rest
   }: MockClientConfig<TAdapter, TCache> = {}) {
-    super({ ...rest, adapter });
+    super({ adapter, chainId, ...rest });
+    this.adapter.onGetChainId().resolves(chainId ?? 0);
   }
 
   reset(method?: FunctionKey<ReadWriteAdapter>) {
     return this.adapter.reset(method);
-  }
-
-  async getId() {
-    return super.getId().catch(() => {
-      this._id = "__mock__";
-      return this._id;
-    });
   }
 
   onGetChainId() {

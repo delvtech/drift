@@ -1,5 +1,4 @@
 import { DriftError } from "src/error/DriftError";
-import type { AnyObject } from "src/utils/types";
 
 /**
  * Converts a given raw key into a `SerializableKey``.
@@ -17,9 +16,7 @@ import type { AnyObject } from "src/utils/types";
  * @returns A standardized key suitable for consistent referencing within a
  * cache.
  */
-export function createSerializableKey(
-  rawKey: string | number | boolean | symbol | AnyObject,
-): SerializableKey {
+export function createSerializableKey(rawKey: RawKey): SerializableKey {
   switch (typeof rawKey) {
     case "string":
     case "number":
@@ -67,6 +64,8 @@ export function createSerializableKey(
       }
   }
 }
+
+export type RawKey = NonNullable<any>;
 
 /**
  * Represents possible serializable key types.

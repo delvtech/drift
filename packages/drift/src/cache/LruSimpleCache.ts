@@ -21,48 +21,39 @@ export class LruSimpleCache<
   V extends NonNullable<unknown> = NonNullable<unknown>,
 > implements SimpleCache<K, V>
 {
-  private cache: LRUCache<string, V, unknown>;
+  private lru: LRUCache<string, V, unknown>;
 
   constructor(config: LruSimpleCacheConfig<V>) {
-    this.cache = new LRUCache(config);
+    this.lru = new LRUCache(config);
   }
 
-  private *entriesGenerator(
-    originalGenerator: Generator<[K, V]>,
-  ): Generator<[K, V]> {
-    for (const [key, value] of originalGenerator) {
-      // Modify the entry here before yielding it
-      const modifiedEntry = [JSON.parse(key as string), value];
-      yield modifiedEntry as [K, V];
+  *entries() {
+    for (const [key, value] of this.lru.entries()) {
+      yield [JSON.parse(key), value] as [K, V];
     }
   }
 
-  entries(): Iterable<[K, V]> {
-    // Keys need to be returned in the same format as they were given to the cache
-    return this.entriesGenerator(this.cache.entries() as Generator<[K, V]>);
+  find(predicate: (value: V, key: K) => boolean) {
+    return this.lru.find((value, key) => predicate(value, JSON.parse(key)));
   }
 
-  find(predicate: (value: V, key: K) => boolean): V | undefined {
-    return this.cache.find((value, key) => predicate(value, JSON.parse(key)));
+  has(key: K) {
+    return this.lru.has(stringify(key));
   }
 
-  has(key: K): boolean {
-    return this.cache.has(stringify(key));
+  get(key: K) {
+    return this.lru.get(stringify(key));
   }
 
-  get(key: K): V | undefined {
-    return this.cache.get(stringify(key));
+  set(key: K, value: V) {
+    this.lru.set(stringify(key), value);
   }
 
-  set(key: K, value: V): void {
-    this.cache.set(stringify(key), value);
-  }
-
-  delete(key: K): void {
-    this.cache.delete(stringify(key));
+  delete(key: K) {
+    this.lru.delete(stringify(key));
   }
 
   clear() {
-    this.cache.clear();
+    this.lru.clear();
   }
 }

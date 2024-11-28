@@ -20,17 +20,6 @@ type Erc20Abi = typeof erc20.abi;
 
 describe("MockClient", () => {
   describe("getChainId", () => {
-    it("Throws an error by default", async () => {
-      const client = new MockClient();
-      let error: unknown;
-      try {
-        await client.getChainId();
-      } catch (e) {
-        error = e;
-      }
-      expect(error).toBeInstanceOf(Error);
-    });
-
     it("Can be stubbed", async () => {
       const client = new MockClient();
       client.onGetChainId().resolves(123);

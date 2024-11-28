@@ -61,7 +61,7 @@ describe("MockDrift", () => {
         address: "0xVaultAddress",
       });
 
-      mockDrift.preloadRead({
+      mockDrift.cache.preloadRead({
         abi: erc20.abi,
         address: "0xVaultAddress",
         fn: "symbol",

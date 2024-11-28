@@ -60,6 +60,14 @@ export class Contract<
     this.client = client ?? (new BaseClient(clientConfig) as TClient);
   }
 
+  get adapter() {
+    return this.client.adapter;
+  }
+
+  get cache() {
+    return this.client.cache;
+  }
+
   isReadWrite(): this is Contract<TAbi, ReadWriteClient> {
     return this.client.isReadWrite();
   }
@@ -97,7 +105,7 @@ export class Contract<
   eventsKey<TEventName extends EventName<TAbi>>(
     ...[event, params]: ContractGetEventsArgs<TAbi, TEventName>
   ) {
-    return this.client.eventsKey({
+    return this.client.cache.eventsKey({
       abi: this.abi,
       address: this.address,
       event,
@@ -110,7 +118,7 @@ export class Contract<
       value: readonly EventLog<TAbi, TEventName>[];
     },
   ) {
-    return this.client.preloadEvents({
+    return this.client.cache.preloadEvents({
       abi: this.abi,
       address: this.address,
       ...params,
@@ -138,7 +146,7 @@ export class Contract<
     args?: FunctionArgs<TAbi, TFunctionName>,
     params?: ContractReadOptions,
   ): Promise<SerializableKey> {
-    return this.client.partialReadKey({
+    return this.cache.partialReadKey({
       abi: this.abi,
       address: this.address,
       fn,
@@ -150,7 +158,7 @@ export class Contract<
   readKey<TFunctionName extends FunctionName<TAbi>>(
     ...[fn, args, params]: ContractReadArgs<TAbi, TFunctionName>
   ): Promise<SerializableKey> {
-    return this.client.readKey({
+    return this.cache.readKey({
       abi: this.abi,
       address: this.address,
       fn,
@@ -164,7 +172,7 @@ export class Contract<
       value: FunctionReturn<TAbi, TFunctionName>;
     },
   ) {
-    this.client.preloadRead({
+    this.cache.preloadRead({
       abi: this.abi as Abi,
       address: this.address,
       ...params,
@@ -189,7 +197,7 @@ export class Contract<
   invalidateRead<TFunctionName extends FunctionName<TAbi>>(
     ...[fn, args, params]: ContractReadArgs<TAbi, TFunctionName>
   ) {
-    return this.client.invalidateRead({
+    return this.cache.invalidateRead({
       abi: this.abi,
       address: this.address,
       fn,
@@ -203,7 +211,7 @@ export class Contract<
     args?: FunctionArgs<TAbi, TFunctionName>,
     params?: ContractReadOptions,
   ) {
-    return this.client.invalidateReadsMatching({
+    return this.cache.invalidateReadsMatching({
       abi: this.abi,
       address: this.address,
       fn,
@@ -375,15 +383,3 @@ export type ContractWriteArgs<
         args: FunctionArgs<TAbi, TFunctionName>,
         options?: ContractWriteOptions & OnMinedParam,
       ];
-
-function foo(bar: Contract<Abi, Adapter>) {
-  if (bar.isReadWrite()) {
-    bar.write(
-      "foo",
-      { a: 1, b: 2 },
-      {
-        maxFeePerGas: 1n,
-      },
-    );
-  }
-}

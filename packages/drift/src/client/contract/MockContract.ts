@@ -14,7 +14,7 @@ import type {
 import type { EventName } from "src/adapter/types/Event";
 import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
 import type { SimpleCache } from "src/cache/types";
-import type { BaseClient, ClientCacheOptions } from "src/client/BaseClient";
+import type { BaseClient, ClientOptions } from "src/client/BaseClient";
 import { MockClient } from "src/client/MockClient";
 import {
   Contract,
@@ -40,8 +40,6 @@ export class MockContract<
   TCache extends SimpleCache = SimpleCache,
   TClient extends MockClient<TAdapter, TCache> = MockClient<TAdapter, TCache>,
 > extends Contract<TAbi, TAdapter, TCache, TClient> {
-  private adapter: TAdapter;
-
   constructor({
     abi = [] as unknown as TAbi,
     address = ZERO_ADDRESS,
@@ -53,7 +51,10 @@ export class MockContract<
       address,
       client: client ?? (new MockClient(clientOptions) as TClient),
     });
-    this.adapter = this.client.adapter;
+  }
+
+  get adapter() {
+    return this.client.adapter;
   }
 
   reset(method?: FunctionKey<ReadWriteAdapter>) {
@@ -148,5 +149,5 @@ export type MockContractClientOptions<
     }
   | ({
       adapter?: TAdapter;
-    } & ClientCacheOptions<TCache>)
+    } & ClientOptions<TCache>)
 >;

@@ -18,7 +18,12 @@ export class MockDrift<
     abi,
     address = ZERO_ADDRESS,
   }: ContractOptions<TAbi>) {
-    return new MockContract({
+    return new MockContract<
+      TAbi,
+      TAdapter,
+      TCache,
+      MockDrift<TAdapter, TCache>
+    >({
       abi,
       address,
       client: this,
