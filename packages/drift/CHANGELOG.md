@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.1-beta.22
+
+### Patch Changes
+
+- 130ddd6: Update README
+
 ## 0.0.1-beta.21
 
 ### Patch Changes
