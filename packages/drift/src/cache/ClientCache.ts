@@ -17,7 +17,7 @@ import { LruSimpleCache } from "src/cache/LruSimpleCache";
 import type { SimpleCache } from "src/cache/types";
 import { DriftError } from "src/error/DriftError";
 import { createSerializableKey } from "src/utils/createSerializableKey";
-import type { RawKey, SerializableKey } from "src/utils/createSerializableKey";
+import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { MaybePromise } from "src/utils/types";
 
 export type ClientCacheConfig<T extends SimpleCache = SimpleCache> = {
@@ -63,7 +63,9 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
     return this.namespace;
   }
 
-  async createNamespacedKey(...parts: RawKey[]): Promise<SerializableKey> {
+  async createNamespacedKey(
+    ...parts: NonNullable<unknown>[]
+  ): Promise<SerializableKey> {
     const namespace = await this.resolveNamespace();
     return createSerializableKey([namespace, ...parts]);
   }
