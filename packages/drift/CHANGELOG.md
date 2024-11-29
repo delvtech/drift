@@ -1,5 +1,29 @@
 # @delvtech/drift
 
+## 0.0.1-beta.21
+
+### Patch Changes
+
+- a8a4f5f: Patched a bug with the built-in `OxAdapter` in which `onMined` was never called after write operations.
+- 01a8004: Added a `BaseClient` class which contains most of the functionality that used to live in the `Drift` class and centralized logic for cache operations and namespace resolution, using the chain id as a default. This also removes a circular dependency between `Drift` and `Contract`.
+- 01a8004: Added a `MockClient` class which mimics `BaseClient`.
+- 01a8004: Refactored `Drift` and `MockDrift` to extend `BaseClient` and `MockClient`.
+- 01a8004: Refactored `Contract` to go through a `BaseClient` instead of repeating cache and adapter logic.
+- 01a8004: Removed `isReadWriteAdapter` util which simply checked if the `write` property was a function.
+- 01a8004: Removed `Adapter` and `Network` prefix from param types, e.g. `AdapterReadParams` to just `ReadParams`, `NetworkGetBlockParams` to just `GetBlockParams`. Removed redundant types.
+- 01a8004: Renamed constructor `Param` types to `Config`.
+- 01a8004: Renamed `ContractEvent` to `EventLog` to be more consistent with other adapter types like `FunctionArgs`.
+- 01a8004: Replaced the `createLruSimpleCache` function with a `LruSimpleCache` class.
+- d5fff4e: Replaced the `createClientCache` function with a `ClientCache` class which requires a namespace or namespace resolver. All methods are async to allow for dynamic namespace resolution and external cache implementations.
+- d5fff4e: Added new testing utils:
+  - `getRandomInt`
+  - `getRandomHex`
+  - `getRandomAddress`
+  - `createStubBlock`
+  - `createStubTransaction`
+  - `createStubTransactionReceipt`
+- e7380c6: Update deps
+
 ## 0.0.1-beta.20
 
 ### Patch Changes

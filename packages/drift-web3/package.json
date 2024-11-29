@@ -1,7 +1,7 @@
 {
   "name": "@delvtech/drift-web3",
   "description": "Web3.js adapter for Drift",
-  "version": "0.0.0-beta.9",
+  "version": "0.0.0-beta.10",
   "license": "Apache-2.0",
   "type": "module",
   "main": "dist/index.cjs",
@@ -27,11 +27,11 @@
     "watch": "tsup --watch"
   },
   "peerDependencies": {
-    "@delvtech/drift": "0.0.1-beta.20",
+    "@delvtech/drift": "0.0.1-beta.21",
     "web3": "^4.15.0"
   },
   "devDependencies": {
-    "@delvtech/drift": "0.0.1-beta.20",
+    "@delvtech/drift": "0.0.1-beta.21",
     "@repo/typescript-config": "*",
     "abitype": "^1.0.6",
     "tsconfig-paths": "^4.2.0",
@@ -51,5 +51,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": ["dist"]
+  "files": [
+    "dist"
+  ]
 }

@@ -1,5 +1,25 @@
 # @delvtech/drift-ethers
 
+## 0.0.0-beta.6
+
+### Patch Changes
+
+- e7380c6: Update deps
+- Updated dependencies [01a8004]
+- Updated dependencies [d5fff4e]
+- Updated dependencies [01a8004]
+- Updated dependencies [e7380c6]
+- Updated dependencies [01a8004]
+- Updated dependencies [01a8004]
+- Updated dependencies [d5fff4e]
+- Updated dependencies [01a8004]
+- Updated dependencies [01a8004]
+- Updated dependencies [01a8004]
+- Updated dependencies [01a8004]
+- Updated dependencies [01a8004]
+- Updated dependencies [a8a4f5f]
+  - @delvtech/drift@0.0.1-beta.21
+
 ## 0.0.0-beta.5
 
 ### Patch Changes
