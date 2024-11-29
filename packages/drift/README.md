@@ -86,7 +86,7 @@ npm install @delvtech/drift
 adapter:
 
 ```sh
-# Install one
+# Install one (optional)
 npm install @delvtech/drift-viem
 npm install @delvtech/drift-web3
 npm install @delvtech/drift-ethers
