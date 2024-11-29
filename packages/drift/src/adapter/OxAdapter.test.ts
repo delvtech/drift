@@ -1,13 +1,15 @@
-import type {
-  Block,
-  DecodedFunctionData,
-  FunctionArgs,
-  Transaction,
-  TransactionReceipt,
-} from "@delvtech/drift";
 import { OxAdapter } from "src/adapter/OxAdapter";
 import type { Address as AddressType } from "src/adapter/types/Abi";
+import type { Block } from "src/adapter/types/Block";
 import type { EventLog } from "src/adapter/types/Event";
+import type {
+  DecodedFunctionData,
+  FunctionArgs,
+} from "src/adapter/types/Function";
+import type {
+  Transaction,
+  TransactionReceipt,
+} from "src/adapter/types/Transaction";
 import { ZERO_ADDRESS } from "src/constants";
 import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
