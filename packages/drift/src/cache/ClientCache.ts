@@ -1,9 +1,18 @@
 import type { Abi } from "abitype";
 import isMatch from "lodash.ismatch";
-import type { GetEventsParams, ReadParams } from "src/adapter/types/Adapter";
+import type {
+  ContractParams,
+  GetEventsParams,
+  ReadParams,
+} from "src/adapter/types/Adapter";
 import type { Block } from "src/adapter/types/Block";
+import type { ContractReadOptions } from "src/adapter/types/Contract";
 import type { EventLog, EventName } from "src/adapter/types/Event";
-import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
+import type {
+  FunctionArgs,
+  FunctionName,
+  FunctionReturn,
+} from "src/adapter/types/Function";
 import type {
   GetBalanceParams,
   GetBlockParams,
@@ -182,7 +191,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
   async partialReadKey<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >({ address, args, block, fn }: Partial<ReadParams<TAbi, TFunctionName>>) {
+  >({ address, args, block, fn }: PartialReadParams<TAbi, TFunctionName>) {
     return this.createNamespacedKey("read", {
       address,
       args,
@@ -194,7 +203,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
   async readKey<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
     params: ReadParams<TAbi, TFunctionName>,
   ) {
-    return this.partialReadKey(params);
+    return this.partialReadKey(params as PartialReadParams);
   }
 
   async preloadRead<
@@ -221,7 +230,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
   async invalidateReadsMatching<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >(params: Partial<ReadParams<TAbi, TFunctionName>>): Promise<void> {
+  >(params: PartialReadParams<TAbi, TFunctionName>): Promise<void> {
     const matchKey = await this.partialReadKey(params);
     const operations: MaybePromise<void>[] = [];
 
@@ -273,6 +282,17 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
   async clear(): Promise<void> {
     return this.store.clear();
   }
+}
+
+// Required due to incompatibility between the conditional `FunctionArgsParam`
+// type and `Partial` type.
+export interface PartialReadParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+> extends ContractParams<TAbi>,
+    ContractReadOptions {
+  fn?: TFunctionName;
+  args?: FunctionArgs<TAbi, TFunctionName>;
 }
 
 export class ClientCacheError extends DriftError {}

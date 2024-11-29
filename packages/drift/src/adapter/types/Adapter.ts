@@ -61,6 +61,11 @@ export interface WriteAdapter {
 
 export interface ReadWriteAdapter extends ReadAdapter, WriteAdapter {}
 
+export interface ContractParams<TAbi extends Abi = Abi> {
+  abi: TAbi;
+  address: Address;
+}
+
 export type FunctionArgsParam<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
@@ -82,9 +87,7 @@ export type ReadParams<
     TAbi,
     "pure" | "view"
   >,
-> = {
-  abi: TAbi;
-  address: Address;
+> = ContractParams<TAbi> & {
   fn: TFunctionName;
 } & FunctionArgsParam<TAbi, TFunctionName> &
   ContractReadOptions;
@@ -92,9 +95,8 @@ export type ReadParams<
 export interface GetEventsParams<
   TAbi extends Abi = Abi,
   TEventName extends EventName<TAbi> = EventName<TAbi>,
-> extends ContractGetEventsOptions<TAbi, TEventName> {
-  abi: TAbi;
-  address: Address;
+> extends ContractParams<TAbi>,
+    ContractGetEventsOptions<TAbi, TEventName> {
   event: TEventName;
 }
 
@@ -104,9 +106,7 @@ export type SimulateWriteParams<
     TAbi,
     "nonpayable" | "payable"
   > = FunctionName<TAbi, "nonpayable" | "payable">,
-> = {
-  abi: TAbi;
-  address: Address;
+> = ContractParams<TAbi> & {
   fn: TFunctionName;
 } & FunctionArgsParam<TAbi, TFunctionName> &
   ContractWriteOptions;

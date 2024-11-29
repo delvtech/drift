@@ -2,6 +2,7 @@ import type { Abi } from "abitype";
 import type { MockAdapter } from "src/adapter/MockAdapter";
 import type { Bytes } from "src/adapter/types/Abi";
 import type {
+  ContractParams,
   EncodeFunctionDataParams,
   ReadParams,
   ReadWriteAdapter,
@@ -19,7 +20,6 @@ import { MockClient } from "src/client/MockClient";
 import {
   Contract,
   type ContractGetEventsArgs,
-  type ContractOptions,
 } from "src/client/contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
 import type { FunctionKey, OneOf, OptionalKeys, Pretty } from "src/utils/types";
@@ -30,7 +30,7 @@ export type MockContractConfig<
   TCache extends SimpleCache = SimpleCache,
   TClient extends MockClient<TAdapter, TCache> = MockClient<TAdapter, TCache>,
 > = Pretty<
-  Partial<ContractOptions<TAbi>> &
+  Partial<ContractParams<TAbi>> &
     MockContractClientOptions<TAdapter, TCache, TClient>
 >;
 

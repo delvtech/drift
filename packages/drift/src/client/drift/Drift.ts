@@ -1,8 +1,12 @@
 import type { Abi } from "abitype";
-import type { Adapter, ReadWriteAdapter } from "src/adapter/types/Adapter";
+import type {
+  Adapter,
+  ContractParams,
+  ReadWriteAdapter,
+} from "src/adapter/types/Adapter";
 import type { SimpleCache } from "src/cache/types";
 import { BaseClient } from "src/client/BaseClient";
-import { Contract, type ContractOptions } from "src/client/contract/Contract";
+import { Contract } from "src/client/contract/Contract";
 
 export class Drift<
   TAdapter extends Adapter = ReadWriteAdapter,
@@ -11,7 +15,7 @@ export class Drift<
   contract<TAbi extends Abi>({
     abi,
     address,
-  }: ContractOptions<TAbi>): Contract<
+  }: ContractParams<TAbi>): Contract<
     TAbi,
     TAdapter,
     TCache,

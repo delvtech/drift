@@ -2,6 +2,7 @@ import type { Abi } from "abitype";
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
+  ContractParams,
   GetEventsParams,
   OnMinedParam,
   ReadParams,
@@ -36,7 +37,7 @@ export type ContractConfig<
   TCache extends SimpleCache = SimpleCache,
   TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
 > = Pretty<
-  ContractOptions<TAbi> & ContractClientOptions<TAdapter, TCache, TClient>
+  ContractParams<TAbi> & ContractClientOptions<TAdapter, TCache, TClient>
 >;
 
 export class Contract<
@@ -168,7 +169,7 @@ export class Contract<
   }
 
   preloadRead<TFunctionName extends FunctionName<TAbi>>(
-    params: Omit<ReadParams<TAbi, TFunctionName>, keyof ContractConfig> & {
+    params: Omit<ReadParams<TAbi, TFunctionName>, keyof ContractParams<TAbi>> & {
       value: FunctionReturn<TAbi, TFunctionName>;
     },
   ) {
@@ -284,11 +285,6 @@ export type ReadWriteContract<
   TAbi extends Abi = Abi,
   TClient extends ReadWriteClient = ReadWriteClient,
 > = Contract<TAbi, TClient>;
-
-export interface ContractOptions<TAbi extends Abi = Abi> {
-  abi: TAbi;
-  address: Address;
-}
 
 export type ContractClientOptions<
   TAdapter extends Adapter = Adapter,
