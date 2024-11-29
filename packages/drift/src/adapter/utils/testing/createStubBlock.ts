@@ -1,6 +1,6 @@
 import type { Block } from "src/adapter/types/Block";
 import { getRandomAddress } from "src/utils/testing/getRandomAddress";
-import { getRandomHash } from "src/utils/testing/getRandomHash";
+import { getRandomHex } from "src/utils/testing/getRandomHex";
 
 /**
  * Creates a stub block for testing.
@@ -10,21 +10,21 @@ export function createStubBlock(override: Partial<Block> = {}): Block {
   return {
     extraData: "0x",
     gasLimit: 30000000n,
-    gasUsed: 21000n,
-    hash: getRandomHash(),
+    gasUsed: 108_000_000n,
+    hash: getRandomHex(),
     logsBloom: "0x0",
     miner: getRandomAddress(),
-    mixHash: getRandomHash(),
+    mixHash: getRandomHex(),
     nonce: 1n,
     number: 1n,
-    parentHash: getRandomHash(),
-    receiptsRoot: getRandomHash(),
-    sha3Uncles: getRandomHash(),
-    size: 1000n,
-    stateRoot: getRandomHash(),
-    timestamp: 1700000000n,
+    parentHash: getRandomHex(),
+    receiptsRoot: getRandomHex(),
+    sha3Uncles: getRandomHex(),
+    size: 100_000n,
+    stateRoot: getRandomHex(),
+    timestamp: BigInt(Date.now() / 1000),
     transactions: [],
-    transactionsRoot: getRandomHash(),
+    transactionsRoot: getRandomHex(),
     ...override,
   };
 }

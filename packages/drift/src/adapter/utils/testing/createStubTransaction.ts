@@ -1,6 +1,7 @@
 import type { Transaction } from "src/adapter/types/Transaction";
 import { getRandomAddress } from "src/utils/testing/getRandomAddress";
-import { getRandomHash } from "src/utils/testing/getRandomHash";
+import { getRandomHex } from "src/utils/testing/getRandomHex";
+import { getRandomInt } from "src/utils/testing/getRandomInt";
 
 /**
  * Creates a stub transaction for testing.
@@ -10,17 +11,16 @@ export function createStubTransaction(
   override: Partial<Transaction> = {},
 ): Transaction {
   return {
-    blockHash: getRandomHash(),
+    blockHash: getRandomHex(),
     blockNumber: 1n,
     from: getRandomAddress(),
-    gas: 21000n,
-    transactionHash: getRandomHash(),
+    gas: BigInt(getRandomInt(21_000, 210_000)),
+    transactionHash: getRandomHex(),
     input: "0x",
     nonce: 1n,
     to: getRandomAddress(),
     transactionIndex: 0n,
     value: 0n,
-    // TODO: Verify type
     type: "0x02",
     ...override,
   };

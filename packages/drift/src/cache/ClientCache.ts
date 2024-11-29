@@ -129,7 +129,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
     return this.store.set(key, value);
   }
 
-  // Transaction receipt //
+  // Transaction Receipt //
 
   async transactionReceiptKey({
     hash,
