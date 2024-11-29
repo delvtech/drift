@@ -27,8 +27,7 @@
     "node": ">=18"
   },
   "resolutions": {
-    "typescript": "^5.4.5",
-    "viem": "^2.21.37"
+    "typescript": "^5.7.2"
   },
   "packageManager": "yarn@1.22.21",
   "workspaces": ["apps/*", "packages/*"]
