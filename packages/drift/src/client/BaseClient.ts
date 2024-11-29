@@ -29,12 +29,12 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
-import { ClientCache } from "src/cache/ClientCache";
 import {
   LruSimpleCache,
   type LruSimpleCacheConfig,
 } from "src/cache/LruSimpleCache";
 import type { SimpleCache } from "src/cache/types";
+import { ClientCache } from "src/client/cache/ClientCache";
 import { DriftError } from "src/error/DriftError";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { OneOf, Pretty } from "src/utils/types";

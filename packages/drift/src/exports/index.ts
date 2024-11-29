@@ -84,13 +84,14 @@ export {
   type LruSimpleCacheConfig,
 } from "src/cache/LruSimpleCache";
 export type { SimpleCache } from "src/cache/types";
+
+// client //
+
 export {
   ClientCache,
   ClientCacheError,
   type ClientCacheConfig,
-} from "src/cache/ClientCache";
-
-// clients //
+} from "src/client/cache/ClientCache";
 
 export {
   BaseClient,
@@ -102,6 +103,8 @@ export {
   type ReadClient,
   type ReadWriteClient,
 } from "src/client/BaseClient";
+
+export { Drift } from "src/client/drift/Drift";
 
 export {
   Contract,
@@ -115,8 +118,6 @@ export {
   type ContractClientOptions,
   type ContractSimulateWriteArgs,
 } from "src/client/contract/Contract";
-
-export { Drift } from "src/client/drift/Drift";
 
 // error //
 
