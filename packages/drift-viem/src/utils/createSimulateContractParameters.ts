@@ -1,6 +1,6 @@
 import {
-  type AdapterWriteParams,
   type FunctionName,
+  type WriteParams,
   objectToArray,
 } from "@delvtech/drift";
 import type { Abi, SimulateContractParameters } from "viem";
@@ -24,7 +24,7 @@ export function createSimulateContractParameters<
   maxPriorityFeePerGas,
   nonce,
   value,
-}: AdapterWriteParams<TAbi, TFunctionName>): SimulateContractParameters {
+}: WriteParams<TAbi, TFunctionName>): SimulateContractParameters {
   const argsArray = objectToArray({
     abi: abi as Abi,
     type: "function",

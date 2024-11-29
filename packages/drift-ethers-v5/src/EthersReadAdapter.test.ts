@@ -66,7 +66,7 @@ describe("EthersReadAdapter", () => {
       gasPrice: expect.any(BigInt),
       input: expect.any(String),
       nonce: expect.any(BigInt),
-      type: expect.any(String) || undefined,
+      type: expect.any(String || undefined),
       value: expect.any(BigInt),
       blockHash: expect.any(String),
       blockNumber: expect.any(BigInt),

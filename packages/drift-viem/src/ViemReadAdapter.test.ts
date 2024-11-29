@@ -1,7 +1,7 @@
 import type {
   Block,
-  ContractEvent,
   DecodedFunctionData,
+  EventLog,
   FunctionArgs,
   Transaction,
   TransactionReceipt,
@@ -109,7 +109,7 @@ describe("ViemReadAdapter", () => {
       blockNumber: expect.any(BigInt),
       data: expect.any(String),
       transactionHash: expect.any(String),
-    } as ContractEvent<typeof erc20Abi, "Transfer">);
+    } as EventLog<typeof erc20Abi, "Transfer">);
   });
 
   describe("read", () => {

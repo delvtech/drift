@@ -1,9 +1,9 @@
 import type {
-  AdapterWriteParams,
   Address,
   FunctionName,
   FunctionReturn,
   ReadWriteAdapter,
+  WriteParams,
 } from "@delvtech/drift";
 import {
   ViemReadAdapter,
@@ -51,7 +51,7 @@ export class ViemReadWriteAdapter<
   async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: AdapterWriteParams<TAbi, TFunctionName>) {
+  >(params: WriteParams<TAbi, TFunctionName>) {
     const viemParams = createSimulateContractParameters(
       Object.assign({}, params, {
         from: params.from || (await this.getSignerAddress()),
@@ -69,7 +69,7 @@ export class ViemReadWriteAdapter<
   async write<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: AdapterWriteParams<TAbi, TFunctionName>) {
+  >(params: WriteParams<TAbi, TFunctionName>) {
     const viemParams = createSimulateContractParameters(
       Object.assign({}, params, {
         from: params.from || (await this.getSignerAddress()),

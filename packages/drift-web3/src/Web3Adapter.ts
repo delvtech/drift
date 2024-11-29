@@ -1,27 +1,27 @@
 import {
-  type AdapterDecodeFunctionDataParams,
-  type AdapterEncodeFunctionDataParams,
-  type AdapterGetEventsParams,
-  type AdapterReadParams,
-  type AdapterWriteParams,
   type Address,
   type AnyObject,
   type Block,
-  type ContractEvent,
+  type DecodeFunctionDataParams,
   type DecodedFunctionData,
   DriftError,
+  type EncodeFunctionDataParams,
+  type EventLog,
   type EventName,
   type FunctionName,
   type FunctionReturn,
+  type GetBalanceParams,
+  type GetBlockParams,
+  type GetEventsParams,
+  type GetTransactionParams,
   type Hash,
   type HexString,
-  type NetworkGetBalanceParams,
-  type NetworkGetBlockParams,
-  type NetworkGetTransactionParams,
-  type NetworkWaitForTransactionParams,
+  type ReadParams,
   type ReadWriteAdapter,
   type Transaction,
   type TransactionReceipt,
+  type WaitForTransactionParams,
+  type WriteParams,
   objectToArray,
 } from "@delvtech/drift";
 import type { Abi } from "abitype";
@@ -51,11 +51,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     return this.web3.eth.getBlockNumber();
   }
 
-  async getBlock({
-    blockHash,
-    blockNumber,
-    blockTag,
-  }: NetworkGetBlockParams = {}) {
+  async getBlock({ blockHash, blockNumber, blockTag }: GetBlockParams = {}) {
     const block = await this.web3.eth.getBlock(
       blockHash ?? blockNumber ?? blockTag,
     );
@@ -84,11 +80,11 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
       : undefined;
   }
 
-  getBalance({ address, block }: NetworkGetBalanceParams) {
+  getBalance({ address, block }: GetBalanceParams) {
     return this.web3.eth.getBalance(address, block);
   }
 
-  async getTransaction({ hash }: NetworkGetTransactionParams) {
+  async getTransaction({ hash }: GetTransactionParams) {
     const tx = await this.web3.eth.getTransaction(hash);
     return tx
       ? ({
@@ -121,7 +117,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   async waitForTransaction({
     hash,
     timeout = this.web3.transactionPollingTimeout,
-  }: NetworkWaitForTransactionParams) {
+  }: WaitForTransactionParams) {
     return new Promise<TransactionReceipt | undefined>((resolve, reject) => {
       const getReceipt = () => {
         this.web3.eth
@@ -160,7 +156,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     filter,
     fromBlock,
     toBlock,
-  }: AdapterGetEventsParams<TAbi, TEventName>) {
+  }: GetEventsParams<TAbi, TEventName>) {
     const contract = new this.web3.eth.Contract(
       abi as readonly AbiFragment[],
       address,
@@ -187,14 +183,14 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
         data: event.data,
         eventName,
         transactionHash: event.transactionHash,
-      } as ContractEvent<TAbi, TEventName>;
+      } as EventLog<TAbi, TEventName>;
     });
   }
 
   read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >({ abi, address, fn, args, block }: AdapterReadParams<TAbi, TFunctionName>) {
+  >({ abi, address, fn, args, block }: ReadParams<TAbi, TFunctionName>) {
     const argsArray = objectToArray({
       abi: abi as Abi,
       type: "function",
@@ -212,7 +208,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: AdapterWriteParams<TAbi, TFunctionName>) {
+  >(params: WriteParams<TAbi, TFunctionName>) {
     const { abi, address, args, fn } = params;
     const arrayArgs = objectToArray({
       abi: abi as Abi,
@@ -254,7 +250,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   encodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >({ abi, fn, args }: AdapterEncodeFunctionDataParams<TAbi, TFunctionName>) {
+  >({ abi, fn, args }: EncodeFunctionDataParams<TAbi, TFunctionName>) {
     const arrayArgs = objectToArray({
       abi: abi as Abi,
       type: "function",
@@ -269,7 +265,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   decodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >({ abi, data }: AdapterDecodeFunctionDataParams<TAbi, TFunctionName>) {
+  >({ abi, data }: DecodeFunctionDataParams<TAbi, TFunctionName>) {
     const { __method__, ...args } = new this.web3.eth.Contract(
       abi as readonly AbiFragment[],
     ).decodeMethodData(data);
@@ -289,7 +285,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   async write<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: AdapterWriteParams<TAbi, TFunctionName>) {
+  >(params: WriteParams<TAbi, TFunctionName>) {
     const {
       abi,
       address,

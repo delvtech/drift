@@ -1,21 +1,21 @@
 import {
   type AbiObjectType,
-  type AdapterDecodeFunctionDataParams,
-  type AdapterEncodeFunctionDataParams,
-  type AdapterGetEventsParams,
-  type AdapterReadParams,
-  type AdapterWriteParams,
   type Block,
+  type DecodeFunctionDataParams,
   type DecodedFunctionData,
+  type EncodeFunctionDataParams,
   type EventName,
   type FunctionName,
   type FunctionReturn,
-  type NetworkGetBalanceParams,
-  type NetworkGetBlockParams,
-  type NetworkGetTransactionParams,
-  type NetworkWaitForTransactionParams,
+  type GetBalanceParams,
+  type GetBlockParams,
+  type GetEventsParams,
+  type GetTransactionParams,
   type ReadAdapter,
+  type ReadParams,
   type TransactionReceipt,
+  type WaitForTransactionParams,
+  type WriteParams,
   arrayToObject,
   objectToArray,
 } from "@delvtech/drift";
@@ -61,7 +61,7 @@ export class ViemReadAdapter<TClient extends PublicClient>
     return this.publicClient.getBlockNumber();
   }
 
-  async getBlock(params: NetworkGetBlockParams = {}) {
+  async getBlock(params: GetBlockParams = {}) {
     const block = await this.publicClient.getBlock(
       params as GetBlockParameters,
     );
@@ -86,7 +86,7 @@ export class ViemReadAdapter<TClient extends PublicClient>
     } as Block;
   }
 
-  getBalance({ address, block }: NetworkGetBalanceParams) {
+  getBalance({ address, block }: GetBalanceParams) {
     return this.publicClient.getBalance({
       address,
       blockNumber: typeof block === "bigint" ? block : undefined,
@@ -94,7 +94,7 @@ export class ViemReadAdapter<TClient extends PublicClient>
     } as GetBalanceParameters);
   }
 
-  async getTransaction({ hash }: NetworkGetTransactionParams) {
+  async getTransaction({ hash }: GetTransactionParams) {
     const tx = await this.publicClient.getTransaction({ hash });
     return {
       gas: tx.gas,
@@ -113,7 +113,7 @@ export class ViemReadAdapter<TClient extends PublicClient>
     };
   }
 
-  async waitForTransaction({ hash, timeout }: NetworkWaitForTransactionParams) {
+  async waitForTransaction({ hash, timeout }: WaitForTransactionParams) {
     const receipt = await this.publicClient.waitForTransactionReceipt({
       hash,
       timeout,
@@ -140,7 +140,7 @@ export class ViemReadAdapter<TClient extends PublicClient>
     filter,
     fromBlock,
     toBlock,
-  }: AdapterGetEventsParams<TAbi, TEventName>) {
+  }: GetEventsParams<TAbi, TEventName>) {
     const events = await this.publicClient.getContractEvents({
       address,
       abi: abi as Abi,
@@ -176,7 +176,7 @@ export class ViemReadAdapter<TClient extends PublicClient>
   async read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >({ abi, address, fn, args, block }: AdapterReadParams<TAbi, TFunctionName>) {
+  >({ abi, address, fn, args, block }: ReadParams<TAbi, TFunctionName>) {
     const argsArray = objectToArray({
       abi: abi as Abi,
       type: "function",
@@ -204,7 +204,7 @@ export class ViemReadAdapter<TClient extends PublicClient>
   async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: AdapterWriteParams<TAbi, TFunctionName>) {
+  >(params: WriteParams<TAbi, TFunctionName>) {
     const { result } = await this.publicClient.simulateContract(
       createSimulateContractParameters(params),
     );
@@ -219,7 +219,7 @@ export class ViemReadAdapter<TClient extends PublicClient>
   encodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >({ abi, fn, args }: AdapterEncodeFunctionDataParams<TAbi, TFunctionName>) {
+  >({ abi, fn, args }: EncodeFunctionDataParams<TAbi, TFunctionName>) {
     const arrayArgs = objectToArray({
       abi: abi as Abi,
       type: "function",
@@ -238,7 +238,7 @@ export class ViemReadAdapter<TClient extends PublicClient>
   decodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >({ abi, data }: AdapterDecodeFunctionDataParams<TAbi, TFunctionName>) {
+  >({ abi, data }: DecodeFunctionDataParams<TAbi, TFunctionName>) {
     const { args, functionName } = decodeFunctionData({ abi, data });
     const arrayArgs = Array.isArray(args) ? args : [args];
 
