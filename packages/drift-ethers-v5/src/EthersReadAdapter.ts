@@ -1,22 +1,22 @@
 import {
-  type AdapterDecodeFunctionDataParams,
-  type AdapterEncodeFunctionDataParams,
-  type AdapterGetEventsParams,
-  type AdapterReadParams,
-  type AdapterWriteParams,
   type Block,
-  type ContractEvent,
+  type DecodeFunctionDataParams,
   type DecodedFunctionData,
   DriftError,
+  type EncodeFunctionDataParams,
+  type EventLog,
   type EventName,
   type FunctionName,
-  type NetworkGetBalanceParams,
-  type NetworkGetBlockParams,
-  type NetworkGetTransactionParams,
-  type NetworkWaitForTransactionParams,
+  type GetBalanceParams,
+  type GetBlockParams,
+  type GetEventsParams,
+  type GetTransactionParams,
   type ReadAdapter,
+  type ReadParams,
   type Transaction,
   type TransactionReceipt,
+  type WaitForTransactionParams,
+  type WriteParams,
   arrayToObject,
   convertType,
   objectToArray,
@@ -67,11 +67,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     return BigInt(num);
   }
 
-  async getBlock({
-    blockHash,
-    blockNumber,
-    blockTag,
-  }: NetworkGetBlockParams = {}) {
+  async getBlock({ blockHash, blockNumber, blockTag }: GetBlockParams = {}) {
     const ethersBlock = await this.provider.getBlock(
       blockParam(blockHash ?? blockNumber ?? blockTag ?? "latest"),
     );
@@ -99,12 +95,12 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     return block;
   }
 
-  async getBalance({ address, block }: NetworkGetBalanceParams) {
+  async getBalance({ address, block }: GetBalanceParams) {
     const balance = await this.provider.getBalance(address, blockParam(block));
     return balance.toBigInt();
   }
 
-  async getTransaction({ hash }: NetworkGetTransactionParams) {
+  async getTransaction({ hash }: GetTransactionParams) {
     const ethersTx = await this.provider.getTransaction(hash);
     const tx: Transaction | undefined = ethersTx
       ? {
@@ -129,7 +125,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     return tx;
   }
 
-  async waitForTransaction({ hash, timeout }: NetworkWaitForTransactionParams) {
+  async waitForTransaction({ hash, timeout }: WaitForTransactionParams) {
     const ethersReceipt = await this.provider.waitForTransaction(
       hash,
       undefined,
@@ -160,7 +156,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     filter,
     fromBlock,
     toBlock,
-  }: AdapterGetEventsParams<TAbi, TEventName>) {
+  }: GetEventsParams<TAbi, TEventName>) {
     const contract = new Contract(address, abi as EthersAbi, this.provider);
 
     let eventFilter: string | EventFilter = eventName;
@@ -182,7 +178,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     );
 
     return events.map((ethersEvent) => {
-      const event: ContractEvent<TAbi, TEventName> = {
+      const event: EventLog<TAbi, TEventName> = {
         args: arrayToObject({
           abi: abi as Abi,
           kind: "inputs",
@@ -203,7 +199,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
   async read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >({ abi, address, fn, args, block }: AdapterReadParams<TAbi, TFunctionName>) {
+  >({ abi, address, fn, args, block }: ReadParams<TAbi, TFunctionName>) {
     const contract = new Contract(address, abi as EthersAbi, this.provider);
 
     const argsArray = objectToArray({
@@ -224,7 +220,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
   async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: AdapterWriteParams<TAbi, TFunctionName>) {
+  >(params: WriteParams<TAbi, TFunctionName>) {
     const { abi, address, args, fn, onMined, ...options } = params;
     const contract = new Contract(address, abi as EthersAbi, this.provider);
 
@@ -253,7 +249,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
   encodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >({ abi, fn, args }: AdapterEncodeFunctionDataParams<TAbi, TFunctionName>) {
+  >({ abi, fn, args }: EncodeFunctionDataParams<TAbi, TFunctionName>) {
     const iface = new Interface(abi as EthersAbi);
 
     const arrayArgs = objectToArray({
@@ -270,7 +266,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
   decodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >({ abi, data, fn }: AdapterDecodeFunctionDataParams<TAbi, TFunctionName>) {
+  >({ abi, data, fn }: DecodeFunctionDataParams<TAbi, TFunctionName>) {
     const iface = new Interface(abi as EthersAbi);
     const { args, name } = iface.parseTransaction({ data }) || {};
 

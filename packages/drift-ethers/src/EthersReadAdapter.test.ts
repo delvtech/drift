@@ -1,8 +1,8 @@
 import type {
   Address,
   Block,
-  ContractEvent,
   DecodedFunctionData,
+  EventLog,
   FunctionArgs,
   Hash,
   TransactionReceipt,
@@ -119,7 +119,7 @@ describe("EthersReadAdapter", () => {
         blockNumber: expect.any(BigInt),
         data: expect.any(String),
         transactionHash: expect.any(String),
-      } as ContractEvent<typeof erc20.abi, "Transfer">),
+      } as EventLog<typeof erc20.abi, "Transfer">),
     );
   });
 

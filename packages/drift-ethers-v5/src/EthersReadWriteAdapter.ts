@@ -1,11 +1,11 @@
 import {
-  type AdapterWriteParams,
   type Address,
   type FunctionName,
   type Hash,
   type HexString,
   type ReadWriteAdapter,
   type TransactionReceipt,
+  type WriteParams,
   objectToArray,
 } from "@delvtech/drift";
 import type { Abi } from "abitype";
@@ -48,17 +48,17 @@ export class EthersReadWriteAdapter<
   async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: AdapterWriteParams<TAbi, TFunctionName>) {
+  >(params: WriteParams<TAbi, TFunctionName>) {
     return super.simulateWrite({
       ...params,
       from: params.from ?? (await this.signer.getAddress()),
-    } as AdapterWriteParams<TAbi, TFunctionName>);
+    } as WriteParams<TAbi, TFunctionName>);
   }
 
   async write<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: AdapterWriteParams<TAbi, TFunctionName>) {
+  >(params: WriteParams<TAbi, TFunctionName>) {
     const {
       abi,
       address,
