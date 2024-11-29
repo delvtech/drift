@@ -286,7 +286,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
 
 // Required due to incompatibility between the conditional `FunctionArgsParam`
 // type and `Partial` type.
-export interface PartialReadParams<
+interface PartialReadParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 > extends ContractParams<TAbi>,

@@ -17,17 +17,18 @@ export type {
 } from "src/adapter/types/Abi";
 export type {
   Adapter,
-  FunctionArgsParam,
+  ContractParams,
   DecodeFunctionDataParams,
   EncodeFunctionDataParams,
+  FunctionArgsParam,
   GetEventsParams,
-  ReadParams,
-  SimulateWriteParams,
-  WriteParams,
   OnMinedParam,
   ReadAdapter,
+  ReadParams,
   ReadWriteAdapter,
+  SimulateWriteParams,
   WriteAdapter,
+  WriteParams,
 } from "src/adapter/types/Adapter";
 export type {
   BlockBase,
@@ -112,7 +113,6 @@ export {
   type ReadContract,
   type ReadWriteContract,
   type ContractClientOptions,
-  type ContractOptions,
   type ContractSimulateWriteArgs,
 } from "src/client/contract/Contract";
 
