@@ -190,7 +190,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
 
   async partialReadKey<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
+    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >({ address, args, block, fn }: PartialReadParams<TAbi, TFunctionName>) {
     return this.createNamespacedKey("read", {
       address,
@@ -200,15 +200,16 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
     });
   }
 
-  async readKey<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
-    params: ReadParams<TAbi, TFunctionName>,
-  ) {
+  async readKey<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
+  >(params: ReadParams<TAbi, TFunctionName>) {
     return this.partialReadKey(params as PartialReadParams);
   }
 
   async preloadRead<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
+    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >({
     value,
     ...params
@@ -221,7 +222,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
 
   async invalidateRead<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
+    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(params: ReadParams<TAbi, TFunctionName>): Promise<void> {
     const key = await this.readKey(params);
     return this.store.delete(key);
@@ -229,7 +230,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
 
   async invalidateReadsMatching<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
+    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(params: PartialReadParams<TAbi, TFunctionName>): Promise<void> {
     const matchKey = await this.partialReadKey(params);
     const operations: MaybePromise<void>[] = [];
@@ -288,7 +289,10 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
 // type and `Partial` type.
 interface PartialReadParams<
   TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+  TFunctionName extends FunctionName<TAbi, "pure" | "view"> = FunctionName<
+    TAbi,
+    "pure" | "view"
+  >,
 > extends ContractParams<TAbi>,
     ContractReadOptions {
   fn?: TFunctionName;

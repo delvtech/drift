@@ -147,7 +147,7 @@ export class Contract<
 
   // read //
 
-  partialReadKey<TFunctionName extends FunctionName<TAbi>>(
+  partialReadKey<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     fn?: TFunctionName,
     args?: FunctionArgs<TAbi, TFunctionName>,
     params?: ContractReadOptions,
@@ -161,7 +161,7 @@ export class Contract<
     });
   }
 
-  readKey<TFunctionName extends FunctionName<TAbi>>(
+  readKey<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     ...[fn, args, params]: ContractReadArgs<TAbi, TFunctionName>
   ): Promise<SerializableKey> {
     return this.cache.readKey({
@@ -173,7 +173,7 @@ export class Contract<
     });
   }
 
-  preloadRead<TFunctionName extends FunctionName<TAbi>>(
+  preloadRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     params: Omit<
       ReadParams<TAbi, TFunctionName>,
       keyof ContractParams<TAbi>
@@ -203,7 +203,7 @@ export class Contract<
     });
   }
 
-  invalidateRead<TFunctionName extends FunctionName<TAbi>>(
+  invalidateRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     ...[fn, args, params]: ContractReadArgs<TAbi, TFunctionName>
   ) {
     return this.cache.invalidateRead({
@@ -215,7 +215,9 @@ export class Contract<
     });
   }
 
-  invalidateReadsMatching<TFunctionName extends FunctionName<TAbi>>(
+  invalidateReadsMatching<
+    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
+  >(
     fn?: TFunctionName,
     args?: FunctionArgs<TAbi, TFunctionName>,
     params?: ContractReadOptions,
