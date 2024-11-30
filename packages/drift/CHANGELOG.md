@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.1-beta.23
+
+### Patch Changes
+
+- f103ab3: Patch `ReadContract` and `ReadWriteContract` types.
+
 ## 0.0.1-beta.22
 
 ### Patch Changes
