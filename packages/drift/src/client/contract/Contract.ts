@@ -5,6 +5,7 @@ import type {
   ContractParams,
   GetEventsParams,
   OnMinedParam,
+  ReadAdapter,
   ReadParams,
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
@@ -24,7 +25,6 @@ import type { SimpleCache } from "src/cache/types";
 import {
   BaseClient,
   type ClientConfig,
-  type ReadClient,
   type ReadWriteClient,
   ReadonlyError,
 } from "src/client/BaseClient";
@@ -69,7 +69,12 @@ export class Contract<
     return this.client.cache;
   }
 
-  isReadWrite(): this is Contract<TAbi, ReadWriteClient> {
+  isReadWrite(): this is Contract<
+    TAbi,
+    ReadWriteAdapter,
+    TCache,
+    BaseClient<ReadWriteAdapter, TCache>
+  > {
     return this.client.isReadWrite();
   }
 
@@ -169,7 +174,10 @@ export class Contract<
   }
 
   preloadRead<TFunctionName extends FunctionName<TAbi>>(
-    params: Omit<ReadParams<TAbi, TFunctionName>, keyof ContractParams<TAbi>> & {
+    params: Omit<
+      ReadParams<TAbi, TFunctionName>,
+      keyof ContractParams<TAbi>
+    > & {
       value: FunctionReturn<TAbi, TFunctionName>;
     },
   ) {
@@ -278,13 +286,17 @@ export class Contract<
 
 export type ReadContract<
   TAbi extends Abi = Abi,
-  TClient extends ReadClient = ReadClient,
-> = Contract<TAbi, TClient>;
+  TAdapter extends ReadAdapter = ReadAdapter,
+  TCache extends SimpleCache = SimpleCache,
+  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
+> = Contract<TAbi, TAdapter, TCache, TClient>;
 
 export type ReadWriteContract<
   TAbi extends Abi = Abi,
-  TClient extends ReadWriteClient = ReadWriteClient,
-> = Contract<TAbi, TClient>;
+  TAdapter extends ReadWriteAdapter = ReadWriteAdapter,
+  TCache extends SimpleCache = SimpleCache,
+  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
+> = Contract<TAbi, TAdapter, TCache, TClient>;
 
 export type ContractClientOptions<
   TAdapter extends Adapter = Adapter,
