@@ -45,12 +45,9 @@ export type DeepPartial<T> = {
 /**
  * Get a union of all property keys on `T` that are functions
  */
-export type FunctionKey<T> = Exclude<
-  {
-    [K in keyof T]: T[K] extends AnyFunction ? K : never;
-  }[keyof T],
-  undefined
->;
+export type FunctionKey<T> = keyof {
+  [K in keyof T as T[K] extends AnyFunction ? K : never]: never;
+};
 
 /**
  * Convert members of a union to an intersection.
