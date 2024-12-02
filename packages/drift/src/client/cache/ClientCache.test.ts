@@ -74,7 +74,7 @@ describe("ClientCache", () => {
 
   // Transaction Receipt //
 
-  it("Namespaces trandaction receipt keys", async () => {
+  it("Namespaces transaction receipt keys", async () => {
     const store = new LruSimpleCache({ max: 100 });
     const cache1 = new ClientCache({ store, namespace: "ns1" });
     const cache2 = new ClientCache({ store, namespace: "ns2" });
