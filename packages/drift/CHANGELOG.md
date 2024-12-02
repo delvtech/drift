@@ -1,5 +1,13 @@
 # @delvtech/drift
 
+## 0.0.1-beta.24
+
+### Patch Changes
+
+- 3a95c5c: Narrowed args type for all read functions to ensure they only accept pure and view functions.
+- c81a29e: Simplified `FunctionKey` type.
+- 37e993d: Patched `AbiFriendlyType` to return `unknown` instead of `undefined` when the abi is unknown.
+
 ## 0.0.1-beta.23
 
 ### Patch Changes

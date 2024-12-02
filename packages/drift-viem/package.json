@@ -1,7 +1,7 @@
 {
   "name": "@delvtech/drift-viem",
   "description": "Viem adapter for Drift",
-  "version": "0.0.1-beta.26",
+  "version": "0.0.1-beta.27",
   "license": "Apache-2.0",
   "type": "module",
   "main": "dist/index.cjs",
@@ -27,11 +27,11 @@
     "watch": "tsup --watch"
   },
   "peerDependencies": {
-    "@delvtech/drift": "0.0.1-beta.23",
+    "@delvtech/drift": "0.0.1-beta.24",
     "viem": "^2.21.52"
   },
   "devDependencies": {
-    "@delvtech/drift": "0.0.1-beta.23",
+    "@delvtech/drift": "0.0.1-beta.24",
     "@repo/typescript-config": "*",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.3.5",

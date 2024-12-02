@@ -1,5 +1,14 @@
 # @delvtech/drift-ethers
 
+## 0.0.0-beta.9
+
+### Patch Changes
+
+- Updated dependencies [3a95c5c]
+- Updated dependencies [c81a29e]
+- Updated dependencies [37e993d]
+  - @delvtech/drift@0.0.1-beta.24
+
 ## 0.0.0-beta.8
 
 ### Patch Changes
