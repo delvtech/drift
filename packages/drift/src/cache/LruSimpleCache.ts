@@ -21,39 +21,39 @@ export class LruSimpleCache<
   V extends NonNullable<unknown> = NonNullable<unknown>,
 > implements SimpleCache<K, V>
 {
-  private lru: LRUCache<string, V, unknown>;
+  private _lru: LRUCache<string, V, unknown>;
 
   constructor(config: LruSimpleCacheConfig<V>) {
-    this.lru = new LRUCache(config);
+    this._lru = new LRUCache(config);
   }
 
   *entries() {
-    for (const [key, value] of this.lru.entries()) {
+    for (const [key, value] of this._lru.entries()) {
       yield [JSON.parse(key), value] as [K, V];
     }
   }
 
   find(predicate: (value: V, key: K) => boolean) {
-    return this.lru.find((value, key) => predicate(value, JSON.parse(key)));
+    return this._lru.find((value, key) => predicate(value, JSON.parse(key)));
   }
 
   has(key: K) {
-    return this.lru.has(stringify(key));
+    return this._lru.has(stringify(key));
   }
 
   get(key: K) {
-    return this.lru.get(stringify(key));
+    return this._lru.get(stringify(key));
   }
 
   set(key: K, value: V) {
-    this.lru.set(stringify(key), value);
+    this._lru.set(stringify(key), value);
   }
 
   delete(key: K) {
-    this.lru.delete(stringify(key));
+    this._lru.delete(stringify(key));
   }
 
   clear() {
-    this.lru.clear();
+    this._lru.clear();
   }
 }
