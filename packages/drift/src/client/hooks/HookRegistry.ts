@@ -76,15 +76,23 @@ export class HookRegistry<T extends AnyObject = AnyObject> {
    * @param hook - The hook to call
    * @param args - Arguments to pass to each handler
    */
-  async call<THook extends HookName<T>>(
+  call<THook extends HookName<T>>(
     hook: THook,
     ...args: Parameters<HookHandler<T, THook>>
-  ): Promise<void> {
+  ): ReturnType<HookHandler<T, THook>> extends Promise<any>
+    ? Promise<void>
+    : void {
     const handlers = this._handlers[hook];
-    if (!handlers) return;
+    let result: MaybePromise<any> = undefined;
+    if (!handlers) return result;
     for (const handler of handlers) {
-      await handler(...args);
+      if (result instanceof Promise) {
+        result = result.then(() => handler(...args));
+      } else {
+        result = handler(...args);
+      }
     }
+    return result;
   }
 }
 

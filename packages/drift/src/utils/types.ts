@@ -4,6 +4,7 @@ export type AnyObject = Record<PropertyKey, any>;
 export type AnyFunction = (...args: any) => any;
 
 export type MaybePromise<T> = T | Promise<T>;
+export type MaybeAwaited<T> = T extends Promise<infer U> ? MaybePromise<U> : T;
 
 /**
  * Combines members of an intersection into a readable type.
