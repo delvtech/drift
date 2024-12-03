@@ -6,8 +6,9 @@ import { describe, expect, it, vi } from "vitest";
 
 describe("BaseClient", () => {
   describe("hooks", () => {
-    const adapter = new MockAdapter();
     const abi = [] as Abi;
+    const adapter = new MockAdapter();
+    adapter.onGetChainId().resolves(0);
 
     it("Calls getChainId hooks", async () => {
       const client = new BaseClient({ adapter });

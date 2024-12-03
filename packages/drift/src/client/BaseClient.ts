@@ -35,11 +35,10 @@ import {
 } from "src/cache/LruSimpleCache";
 import type { SimpleCache } from "src/cache/types";
 import { ClientCache } from "src/client/cache/ClientCache";
-import { HookRegistry } from "src/client/hooks/HookRegistry";
-import type { MethodHooks } from "src/client/hooks/types";
+import { MethodInterceptor } from "src/client/hooks/MethodInterceptor";
 import { DriftError } from "src/error/DriftError";
 import type { SerializableKey } from "src/utils/createSerializableKey";
-import type { AnyFunction, FunctionKey, OneOf, Pretty } from "src/utils/types";
+import type { OneOf, Pretty } from "src/utils/types";
 
 export type ClientConfig<
   TAdapter extends Adapter = Adapter,
@@ -47,7 +46,8 @@ export type ClientConfig<
 > = Pretty<ClientOptions<TCache> & ClientAdapterOptions<TAdapter>>;
 
 /**
- * A client for interacting with a network through an adapter and cache.
+ * A client for interacting with a network through an adapter with caching and
+ * hooks.
  *
  * This class is not intended for direct use in apps, but rather as a base class
  * for other clients.
@@ -58,7 +58,7 @@ export class BaseClient<
 > {
   adapter: TAdapter;
   cache: ClientCache<TCache>;
-  private _hooks = new HookRegistry<MethodHooks<ReadWriteAdapter>>();
+  private _interceptor = new MethodInterceptor<TAdapter>();
   private _chainId?: number;
 
   constructor({
@@ -67,8 +67,9 @@ export class BaseClient<
     chainId,
     ...adapterConfig
   }: ClientConfig<TAdapter, TCache> = {}) {
-    this.adapter =
-      adapter ?? (new OxAdapter(adapterConfig) as Adapter as TAdapter);
+    this.adapter = this._interceptor.createProxy(
+      adapter ?? (new OxAdapter(adapterConfig) as Adapter as TAdapter),
+    );
 
     let store: TCache;
     if (cache && "clear" in cache) {
@@ -89,7 +90,7 @@ export class BaseClient<
   }
 
   get hooks() {
-    return this._hooks as HookRegistry<MethodHooks<TAdapter>>;
+    return this._interceptor.hooks;
   }
 
   isReadWrite(): this is BaseClient<ReadWriteAdapter, TCache> {
@@ -100,40 +101,25 @@ export class BaseClient<
    * Get the chain ID of the network.
    */
   async getChainId(): Promise<number> {
-    return this._runWithHooks({
-      method: "getChainId",
-      args: [],
-      fn: async () => {
-        this._chainId ??= await this.adapter.getChainId();
-        return this._chainId;
-      },
-    });
+    this._chainId ??= await this.adapter.getChainId();
+    return this._chainId;
   }
 
   /**
    * Get the current block number.
    */
   async getBlockNumber(): Promise<bigint> {
-    return this._runWithHooks({
-      method: "getBlockNumber",
-      args: [],
-      fn: () => this.adapter.getBlockNumber(),
-    });
+    return this.adapter.getBlockNumber();
   }
 
   /**
-   * Get a block from a block tag, number, or hash. If no argument is provided,
+   * Get a block by its number or hash. If no block number or hash is provided,
    * the latest block is returned.
    */
   async getBlock(params?: GetBlockParams): Promise<Block | undefined> {
-    return this._runWithHooks({
-      method: "getBlock",
-      args: [params],
-      fn: async (params) =>
-        this._cachedFn({
-          key: await this.cache.blockKey(params),
-          fn: () => this.adapter.getBlock(params),
-        }),
+    return this._cachedFn({
+      key: await this.cache.blockKey(params),
+      fn: () => this.adapter.getBlock(params),
     });
   }
 
@@ -141,175 +127,114 @@ export class BaseClient<
    * Get the balance of native currency for an account.
    */
   async getBalance(params: GetBalanceParams): Promise<bigint> {
-    return this._runWithHooks({
-      method: "getBalance",
-      args: [params],
-      fn: async (params) =>
-        this._cachedFn({
-          key: await this.cache.balanceKey(params),
-          fn: () => this.adapter.getBalance(params),
-        }),
+    return this._cachedFn({
+      key: await this.cache.balanceKey(params),
+      fn: () => this.adapter.getBalance(params),
     });
   }
 
   /**
-   * Get a transaction from a transaction hash.
+   * Get a transaction by its hash.
    */
   async getTransaction(
     params: GetTransactionParams,
   ): Promise<Transaction | undefined> {
-    return this._runWithHooks({
-      method: "getTransaction",
-      args: [params],
-      fn: async (params) =>
-        this._cachedFn({
-          key: await this.cache.transactionKey(params),
-          fn: () => this.adapter.getTransaction(params),
-        }),
+    return this._cachedFn({
+      key: await this.cache.transactionKey(params),
+      fn: () => this.adapter.getTransaction(params),
     });
   }
 
   /**
-   * Wait for a transaction to be mined and get the transaction receipt.
+   * Wait for a transaction to be mined and get its receipt.
    */
   async waitForTransaction(
     params: WaitForTransactionParams,
   ): Promise<TransactionReceipt | undefined> {
-    return this._runWithHooks({
-      method: "waitForTransaction",
-      args: [params],
-      fn: async (params) =>
-        this._cachedFn({
-          key: await this.cache.transactionReceiptKey(params),
-          fn: () => this.adapter.waitForTransaction(params),
-        }),
+    return this._cachedFn({
+      key: await this.cache.transactionReceiptKey(params),
+      fn: () => this.adapter.waitForTransaction(params),
     });
   }
 
   /**
-   * Encodes a function call into calldata.
+   * Encode function data for a contract method.
    */
   encodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
   >(params: EncodeFunctionDataParams<TAbi, TFunctionName>): Bytes {
-    return this._runWithHooks({
-      method: "encodeFunctionData",
-      args: [params],
-      fn: (params) => this.adapter.encodeFunctionData(params),
-    });
+    return this.adapter.encodeFunctionData(params);
   }
 
   /**
-   * Decodes a string of function calldata into it's arguments and function
-   * name.
+   * Decode function data for a contract method.
    */
   decodeFunctionData<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+    TFunctionName extends FunctionName<TAbi>,
   >(
     params: DecodeFunctionDataParams<TAbi, TFunctionName>,
   ): DecodedFunctionData<TAbi, TFunctionName> {
-    return this._runWithHooks({
-      method: "decodeFunctionData",
-      args: [params],
-      fn: (params) => this.adapter.decodeFunctionData(params),
-    }) as DecodedFunctionData<TAbi, TFunctionName>;
+    return this.adapter.decodeFunctionData(params);
   }
 
   /**
-   * Retrieves specified events from a contract.
+   * Get events from a contract.
    */
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
     params: GetEventsParams<TAbi, TEventName>,
   ): Promise<EventLog<TAbi, TEventName>[]> {
-    return this._runWithHooks({
-      method: "getEvents",
-      args: [params],
-      fn: async (params) =>
-        this._cachedFn({
-          key: await this.cache.eventsKey(params),
-          fn: () => this.adapter.getEvents(params),
-        }),
-    }) as Promise<EventLog<TAbi, any>[]> as Promise<
-      EventLog<TAbi, TEventName>[]
-    >;
+    return this._cachedFn({
+      key: await this.cache.eventsKey(params),
+      fn: () => this.adapter.getEvents(params),
+    });
   }
 
   /**
-   * Reads a specified function from a contract.
+   * Read from a contract.
    */
-  async read<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(
+  async read<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
     params: ReadParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
-    return this._runWithHooks({
-      method: "read",
-      args: [params],
-      fn: async (params) =>
-        this._cachedFn({
-          key: await this.cache.readKey(params),
-          fn: () => this.adapter.read(params),
-        }),
-    }) as Promise<FunctionReturn<TAbi, TFunctionName>>;
+    return this._cachedFn({
+      key: await this.cache.readKey(params),
+      fn: () => this.adapter.read(params),
+    });
   }
 
   /**
-   * Simulates a write operation on a specified function of a contract.
+   * Simulate a write to a contract without actually writing to the blockchain.
    */
   async simulateWrite<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+    TFunctionName extends FunctionName<TAbi>,
   >(
     params: SimulateWriteParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
-    return this._runWithHooks({
-      method: "simulateWrite",
-      args: [params],
-      fn: async (params) => this.adapter.simulateWrite(params),
-    }) as Promise<FunctionReturn<TAbi, TFunctionName>>;
+    return this.adapter.simulateWrite(params);
   }
 
   /**
-   * Writes to a specified function on a contract.
-   * @returns The transaction hash of the submitted transaction.
-   * @throws A {@linkcode ReadonlyError} if not connected to a signer.
+   * Write to a contract.
    */
-  write<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(
-    ...[params]: TAdapter extends ReadWriteAdapter
-      ? [params: WriteParams<TAbi, TFunctionName>]
-      : never
-  ): TAdapter extends ReadWriteAdapter ? Promise<Hash> : never {
+  async write<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
+    params: WriteParams<TAbi, TFunctionName>,
+  ): Promise<Hash> {
     if (!this.isReadWrite()) {
       throw new ReadonlyError();
     }
-    return this._runWithHooks({
-      method: "write",
-      args: [params],
-      fn: (params) => this.adapter.write(params),
-    }) as Promise<Hash> as any;
+    return this.adapter.write(params);
   }
 
   /**
-   * Get the address of the signer for this instance.
-   * @throws A {@linkcode ReadonlyError} if not connected to a signer.
+   * Get the address of the signer.
    */
-  getSignerAddress(
-    ..._: TAdapter extends ReadWriteAdapter ? [] : never
-  ): TAdapter extends ReadWriteAdapter ? Promise<Address> : never {
+  async getSignerAddress(): Promise<Address> {
     if (!this.isReadWrite()) {
       throw new ReadonlyError();
     }
-    return this._runWithHooks({
-      method: "getSignerAddress",
-      args: [],
-      fn: async () => this.adapter.getSignerAddress(),
-    }) as Promise<Address> as any;
+    return this.adapter.getSignerAddress();
   }
 
   /**
@@ -328,67 +253,6 @@ export class BaseClient<
     }
     const value = await fn();
     return this.cache.set(key, value).then(() => value);
-  }
-
-  private _runWithHooks<
-    TMethod extends FunctionKey<ReadWriteAdapter>,
-    TFunction extends ReadWriteAdapter[TMethod],
-    TArgs extends Parameters<TFunction>,
-  >({
-    method,
-    fn,
-    args,
-  }: {
-    method: TMethod;
-    fn: TFunction;
-    args: TArgs;
-  }): ReturnType<typeof fn> {
-    let resolved = false;
-    let result: any = undefined;
-
-    // Call before hook handlers
-    const beforeHook: unknown = this._hooks.call(`before:${method as string}`, {
-      get args() {
-        return args;
-      },
-      setArgs: (newArgs: any) => {
-        args = newArgs;
-      },
-      resolve: (value: any) => {
-        if (!resolved) {
-          resolved = true;
-          result = value;
-        }
-      },
-    });
-
-    // Call the function if not already resolved by a before hook
-    if (beforeHook instanceof Promise) {
-      beforeHook.then(() => {
-        if (!resolved) {
-          result = (fn as AnyFunction)(...args);
-        }
-      });
-    } else if (!resolved) {
-      result = (fn as AnyFunction)(...args);
-    }
-
-    // Call after hook handlers
-    const afterHook: unknown = this._hooks.call(`after:${method as string}`, {
-      args: args,
-      get result() {
-        return result;
-      },
-      setResult: (newResult: any) => {
-        result = newResult;
-      },
-    });
-
-    // Return the result
-    if (afterHook instanceof Promise) {
-      return afterHook.then(() => result) as any;
-    }
-    return result;
   }
 }
 

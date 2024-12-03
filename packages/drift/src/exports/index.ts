@@ -88,12 +88,6 @@ export type { SimpleCache } from "src/cache/types";
 // client //
 
 export {
-  ClientCache,
-  ClientCacheError,
-  type ClientCacheConfig,
-} from "src/client/cache/ClientCache";
-
-export {
   BaseClient,
   ClientError,
   ReadonlyError,
@@ -119,6 +113,24 @@ export {
   type ContractSimulateWriteArgs,
 } from "src/client/contract/Contract";
 
+export {
+  ClientCache,
+  ClientCacheError,
+  type ClientCacheConfig,
+} from "src/client/cache/ClientCache";
+
+export {
+  MethodInterceptor,
+  type MethodHooks,
+} from "src/client/hooks/MethodInterceptor";
+
+export {
+  type HookHandler,
+  type HookName,
+  type HookPayload,
+  type HookRegistry,
+} from "src/client/hooks/HookRegistry";
+
 // error //
 
 export { DriftError, type DriftErrorOptions } from "src/error/DriftError";
@@ -138,6 +150,7 @@ export type {
   DeepPartial,
   EmptyObject,
   FunctionKey,
+  MaybeAwaited,
   MaybePromise,
   MergeKeys,
   OneOf,
