@@ -12,8 +12,8 @@ import type {
  * @template T - The hooks configuration object
  */
 export class HookRegistry<T extends AnyObject = AnyObject> {
-  private handlers: {
-    [K in HookName<T>]?: HookHandler<K, T>[];
+  private _handlers: {
+    [K in HookName<T>]?: HookHandler<T, K>[];
   } = {};
 
   /**
@@ -23,10 +23,10 @@ export class HookRegistry<T extends AnyObject = AnyObject> {
    */
   on<THook extends HookName<T>>(
     hook: THook,
-    handler: HookHandler<THook, T>,
+    handler: HookHandler<T, THook>,
   ): void {
-    this.handlers[hook] ??= [];
-    this.handlers[hook].push(handler);
+    this._handlers[hook] ??= [];
+    this._handlers[hook].push(handler);
   }
 
   /**
@@ -37,13 +37,13 @@ export class HookRegistry<T extends AnyObject = AnyObject> {
    */
   off<THook extends HookName<T>>(
     hook: THook,
-    handler: HookHandler<THook, T>,
+    handler: HookHandler<T, THook>,
   ): boolean {
-    const handlers = this.handlers[hook];
+    const handlers = this._handlers[hook];
     if (!handlers) return false;
 
     let didRemove = false;
-    this.handlers[hook] = handlers.filter((existing) => {
+    this._handlers[hook] = handlers.filter((existing) => {
       if (existing === handler) {
         didRemove = true;
         return false;
@@ -61,13 +61,13 @@ export class HookRegistry<T extends AnyObject = AnyObject> {
    */
   once<THook extends HookName<T>>(
     hook: THook,
-    handler: HookHandler<THook, T>,
+    handler: HookHandler<T, THook>,
   ): void {
-    const wrapped = (...args: unknown[]) => {
-      this.off(hook, wrapped as HookHandler<THook, T>);
+    const wrapped = (...args: any[]) => {
+      this.off(hook, wrapped);
       handler(...args);
     };
-    this.on(hook, wrapped as HookHandler<THook, T>);
+    this.on(hook, wrapped);
   }
 
   /**
@@ -78,9 +78,9 @@ export class HookRegistry<T extends AnyObject = AnyObject> {
    */
   async call<THook extends HookName<T>>(
     hook: THook,
-    ...args: Parameters<HookHandler<THook, T>>
+    ...args: Parameters<HookHandler<T, THook>>
   ): Promise<void> {
-    const handlers = this.handlers[hook];
+    const handlers = this._handlers[hook];
     if (!handlers) return;
     for (const handler of handlers) {
       await handler(...args);
@@ -102,12 +102,14 @@ export type HookName<THooks extends AnyObject = AnyObject> =
  * @template T - The hooks configuration object containing the hook
  * @group Hooks
  */
-type HookHandler<
-  THook extends HookName<T> = string,
+export type HookHandler<
   T extends AnyObject = AnyObject,
-> = T[THook] extends AnyFunction
-  ? T[THook]
-  : (...args: unknown[]) => MaybePromise<void>;
+  THook extends HookName<T> = HookName<T>,
+> = AnyObject extends T
+  ? (...args: any[]) => MaybePromise<void>
+  : T[THook] extends AnyFunction
+    ? T[THook]
+    : (...args: any[]) => MaybePromise<void>;
 
 /**
  * The payload object passed to a hook handler.
@@ -120,6 +122,6 @@ type HookHandler<
  * @group Hooks
  */
 export type HookPayload<
-  THook extends HookName<T> = string,
   T extends AnyObject = AnyObject,
-> = Parameters<HookHandler<THook, T>>[0];
+  THook extends HookName<T> = HookName<T>,
+> = Parameters<HookHandler<T, THook>>[0];
