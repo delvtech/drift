@@ -44,6 +44,7 @@
     "watch": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest --reporter=verbose",
+    "coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
@@ -64,6 +65,7 @@
     "@repo/typescript-config": "*",
     "@types/lodash.ismatch": "^4.4.9",
     "@types/sinon": "^17.0.3",
+    "@vitest/coverage-v8": "2.1.6",
     "abitype": "^1.0.6",
     "fast-json-stable-stringify": "^2.1.0",
     "sinon": "^17.0.1",
