@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.1-beta.25
+
+### Patch Changes
+
+- 63ee6d2: Added hooks to `BaseClient` (and `Drift`) to add custom behavior before or after adapter method calls.
+
 ## 0.0.1-beta.24
 
 ### Patch Changes
