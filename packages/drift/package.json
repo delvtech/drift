@@ -31,17 +31,14 @@
   },
   "typesVersions": {
     "*": {
-      ".": [
-        "./dist/index.d.ts"
-      ],
-      "testing": [
-        "./dist/testing.d.ts"
-      ]
+      ".": ["./dist/index.d.ts"],
+      "testing": ["./dist/testing.d.ts"]
     }
   },
   "scripts": {
-    "build": "tsup",
-    "watch": "tsup --watch",
+    "build:evm-types": "sh scripts/buildEvmTypes.sh",
+    "build": "yarn build:evm-types && tsup",
+    "watch": "yarn build:evm-types && tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest --reporter=verbose",
     "coverage": "vitest run --coverage",
@@ -62,6 +59,7 @@
     "safe-stable-stringify": "^2.5.0"
   },
   "devDependencies": {
+    "@open-rpc/typings": "^1.12.4",
     "@repo/typescript-config": "*",
     "@types/lodash.ismatch": "^4.4.9",
     "@types/sinon": "^17.0.3",
@@ -85,7 +83,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist"
-  ]
+  "files": ["dist"]
 }
