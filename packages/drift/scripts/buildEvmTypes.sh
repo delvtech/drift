@@ -9,19 +9,23 @@ set -e
 # repo_url:  The url of the git repository to clone. (default: $default_repo_url)
 
 # SETTINGS
-default_branch="main"
 default_repo_url="git@github.com:ethereum/execution-apis.git"
+default_branch="main"
 schema_doc="refs-openrpc.json"
-src_dir="generated/execution-apis"
+out_schema_doc="openrpc.json"
+src_dir="src"
+src_name="execution-apis"
+out_file="$src_dir/$src_name".ts
 
-if [ ! -d "$src_dir" ]; then
+#  if no src_schema_doc
+if [ ! -f "$out_schema_doc" ]; then
   branch=${1:-$default_branch}
   repo_url=${2:-$default_repo_url}
   temp_dir=$(mktemp -d "execution-apis_temp.XXXXXX")
 
   # Echo settings
-  echo "Branch: $branch"
   echo "Repo URL: $repo_url"
+  echo "Branch: $branch"
   echo ""
 
   git clone --depth 1 "$repo_url" --branch "$branch" "$temp_dir"
@@ -32,19 +36,23 @@ if [ ! -d "$src_dir" ]; then
     npm i ci
     npm run build
   )
-  cp "$temp_dir/$schema_doc" openrpc.json
+  cp "$temp_dir/$schema_doc" "$out_schema_doc"
 
   echo "Deleting temp clone..."
   rm -rf "$temp_dir"
 fi
 
 echo "Generating types..."
-if [ -d "$src_dir" ]; then
-  (
-    cd "$src_dir"
-    rm -rf ./*
-  )
-else
-  mkdir -p "$src_dir"
-fi
-npx open-rpc-typings --output-ts "$src_dir"
+npx open-rpc-typings -d "$out_schema_doc" --output-ts "$src_dir" --name-ts "$src_name"
+
+{
+  echo "// This file was generated from the ethereum/execution-apis repo."
+  echo "// See https://github.com/ethereum/execution-apis for more information."
+  echo "//"
+  echo "// Changes to this file may cause incorrect behavior and will be lost if"
+  echo "// the code is regenerated."
+  echo ""
+  echo ""
+  cat "$out_file"
+} >"$out_file.tmp"
+mv "$out_file.tmp" "$out_file"
