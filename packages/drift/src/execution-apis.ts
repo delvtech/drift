@@ -1,3 +1,6 @@
+/* eslint-disable */
+/* @ts-nocheck */
+
 // This file was generated from the ethereum/execution-apis repo.
 // See https://github.com/ethereum/execution-apis for more information.
 //
@@ -5,6 +8,7 @@
 // the code is regenerated.
 
 
+export namespace ExecutionApis {
 export type BlockNumber = string;
 /**
  *
@@ -785,4 +789,4 @@ export type EthSendTransaction = (Transaction: TransactionObjectGenericToAllType
 export type EthSign = (Address: HexEncodedAddress, Message: HexEncodedBytes) => Promise<SixFiveHexEncodedBytes>;
 export type EthSignTransaction = (Transaction: TransactionObjectGenericToAllTypes) => Promise<HexEncodedBytes>;
 export type EthSyncing = () => Promise<SyncingStatus>;
-export type EthUninstallFilter = (Filter identifier: HexEncodedUnsignedInteger) => Promise<BooleanVyG3AETh>;
+export type EthUninstallFilter = (Filter identifier: HexEncodedUnsignedInteger) => Promise<BooleanVyG3AETh>;}
