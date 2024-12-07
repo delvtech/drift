@@ -36,9 +36,9 @@
     }
   },
   "scripts": {
-    "build:evm-types": "sh scripts/buildEvmTypes.sh",
-    "build": "yarn build:evm-types && tsup",
-    "watch": "yarn build:evm-types && tsup --watch",
+    "build:ethereum": "sh scripts/buildEthereum.sh",
+    "build": "yarn build:ethereum && tsup",
+    "watch": "yarn build:ethereum && tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest --reporter=verbose",
     "coverage": "vitest run --coverage",
