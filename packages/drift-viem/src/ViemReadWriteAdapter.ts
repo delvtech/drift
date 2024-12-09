@@ -72,7 +72,7 @@ export class ViemReadWriteAdapter<
     const writeParams = {
       ...params,
       functionName: params.fn,
-      chain: null,
+      chain: this.walletClient.chain,
       account: await this.getSignerAddress(),
     } as WriteContractParameters;
 
