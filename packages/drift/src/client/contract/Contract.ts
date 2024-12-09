@@ -2,7 +2,6 @@ import type { Abi } from "abitype";
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
-  ContractParams,
   GetEventsParams,
   OnMinedParam,
   ReadAdapter,
@@ -11,6 +10,7 @@ import type {
 } from "src/adapter/types/Adapter";
 import type {
   ContractGetEventsOptions,
+  ContractParams,
   ContractReadOptions,
   ContractWriteOptions,
 } from "src/adapter/types/Contract";

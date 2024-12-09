@@ -2,13 +2,13 @@ import type { Abi } from "abitype";
 import type { MockAdapter } from "src/adapter/MockAdapter";
 import type { Bytes } from "src/adapter/types/Abi";
 import type {
-  ContractParams,
   EncodeFunctionDataParams,
   ReadParams,
   ReadWriteAdapter,
   WriteParams,
 } from "src/adapter/types/Adapter";
 import type {
+  ContractParams,
   ContractReadOptions,
   ContractWriteOptions,
 } from "src/adapter/types/Contract";

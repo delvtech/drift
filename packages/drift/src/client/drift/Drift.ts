@@ -1,9 +1,6 @@
 import type { Abi } from "abitype";
-import type {
-  Adapter,
-  ContractParams,
-  ReadWriteAdapter,
-} from "src/adapter/types/Adapter";
+import type { Adapter, ReadWriteAdapter } from "src/adapter/types/Adapter";
+import type { ContractParams } from "src/adapter/types/Contract";
 import type { SimpleCache } from "src/cache/types";
 import { BaseClient } from "src/client/BaseClient";
 import { Contract } from "src/client/contract/Contract";

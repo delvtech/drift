@@ -1,6 +1,6 @@
 import type { Abi } from "abitype";
 import type { MockAdapter } from "src/adapter/MockAdapter";
-import type { ContractParams } from "src/adapter/types/Adapter";
+import type { ContractParams } from "src/adapter/types/Contract";
 import type { SimpleCache } from "src/cache/types";
 import { MockClient } from "src/client/MockClient";
 import { MockContract } from "src/client/contract/MockContract";

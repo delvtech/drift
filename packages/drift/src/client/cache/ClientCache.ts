@@ -1,12 +1,11 @@
 import type { Abi } from "abitype";
 import isMatch from "lodash.ismatch";
+import type { GetEventsParams, ReadParams } from "src/adapter/types/Adapter";
+import type { Block } from "src/adapter/types/Block";
 import type {
   ContractParams,
-  GetEventsParams,
-  ReadParams,
-} from "src/adapter/types/Adapter";
-import type { Block } from "src/adapter/types/Block";
-import type { ContractReadOptions } from "src/adapter/types/Contract";
+  ContractReadOptions,
+} from "src/adapter/types/Contract";
 import type { EventLog, EventName } from "src/adapter/types/Event";
 import type {
   FunctionArgs,
