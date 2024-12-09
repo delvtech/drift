@@ -17,7 +17,6 @@ export type {
 } from "src/adapter/types/Abi";
 export type {
   Adapter,
-  ContractParams,
   DecodeFunctionDataParams,
   EncodeFunctionDataParams,
   FunctionArgsParam,
@@ -38,6 +37,7 @@ export type {
   MinedBlockProps,
 } from "src/adapter/types/Block";
 export type {
+  ContractParams,
   ContractWriteOptions,
   ContractGetEventsOptions,
   ContractReadOptions,
