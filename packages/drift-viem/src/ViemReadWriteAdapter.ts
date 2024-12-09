@@ -66,28 +66,22 @@ export class ViemReadWriteAdapter<
     }) as FunctionReturn<TAbi, TFunctionName>;
   }
 
-  async write<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>) {
-    const viemParams = createSimulateContractParameters(
-      Object.assign({}, params, {
-        from: params.from || (await this.getSignerAddress()),
-      }),
-    );
-    const writePromise = this.publicClient
-      .simulateContract(viemParams)
-      .then(({ request }) =>
-        this.walletClient.writeContract(request as WriteContractParameters),
-      );
+  async write<TAbi extends Abi, TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">>(
+    params: WriteParams<TAbi, TFunctionName>
+  ) {
+    const writeParams = {
+      ...params,
+      functionName: params.fn,
+      chain: this.walletClient.chain,
+      account: await this.getSignerAddress(),
+    } as WriteContractParameters;
+
+    const hash = await this.walletClient.writeContract(writeParams);
 
     if (params.onMined) {
-      writePromise.then((hash) => {
-        this.waitForTransaction({ hash }).then(params.onMined);
-        return hash;
-      });
+      this.waitForTransaction({ hash }).then(params.onMined);
     }
 
-    return writePromise;
+    return hash;
   }
 }
