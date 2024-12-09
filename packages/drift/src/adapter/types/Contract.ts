@@ -5,6 +5,11 @@ import type { EventFilter, EventName } from "src/adapter/types/Event";
 
 // https://ethereum.github.io/execution-apis/api-documentation/
 
+export interface ContractParams<TAbi extends Abi = Abi> {
+  abi: TAbi;
+  address: Address;
+}
+
 // https://github.com/ethereum/execution-apis/blob/main/src/eth/execute.yaml#L1
 export interface ContractReadOptions {
   block?: BlockTag | bigint;
