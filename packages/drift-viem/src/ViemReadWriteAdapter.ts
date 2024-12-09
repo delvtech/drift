@@ -67,7 +67,7 @@ export class ViemReadWriteAdapter<
   }
 
   async write<TAbi extends Abi, TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">>(
-    params: AdapterWriteParams<TAbi, TFunctionName>
+    params: WriteParams<TAbi, TFunctionName>
   ) {
     const writeParams = {
       ...params,
