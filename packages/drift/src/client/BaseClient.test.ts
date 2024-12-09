@@ -114,6 +114,19 @@ describe("BaseClient", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
+    it("Calls call hooks", async () => {
+      const client = new BaseClient({ adapter });
+      const beforeHandler = vi.fn(async ({ resolve }) => resolve());
+      const afterHandler = vi.fn();
+
+      client.hooks.on("before:call", beforeHandler);
+      client.hooks.on("after:call", afterHandler);
+      await client.call({ to: "0x" });
+
+      expect(beforeHandler).toHaveBeenCalledTimes(1);
+      expect(afterHandler).toHaveBeenCalledTimes(1);
+    });
+
     it("Calls getEvents hooks", async () => {
       const client = new BaseClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());

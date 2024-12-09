@@ -1,5 +1,6 @@
 import type { Abi } from "abitype";
 import {
+  AbiConstructor,
   AbiEvent,
   AbiFunction,
   type AbiItem,
@@ -14,6 +15,7 @@ import {
 } from "ox";
 import type { HexString } from "src/adapter/types/Abi";
 import type {
+  CallParams,
   DecodeFunctionDataParams,
   EncodeFunctionDataParams,
   GetEventsParams,
@@ -23,6 +25,7 @@ import type {
   WriteParams,
 } from "src/adapter/types/Adapter";
 import type { BlockTag } from "src/adapter/types/Block";
+import type { ContractCallOptions } from "src/adapter/types/Contract";
 import type { EventArgs, EventName } from "src/adapter/types/Event";
 import type {
   DecodedFunctionData,
@@ -38,6 +41,7 @@ import type {
 } from "src/adapter/types/Network";
 import type { TransactionReceipt as TransactionReceiptType } from "src/adapter/types/Transaction";
 import { objectToArray } from "src/adapter/utils/objectToArray";
+import { CodeCaller } from "src/artifacts/CodeCaller";
 import { DriftError } from "src/error/DriftError";
 import type { AnyObject } from "src/utils/types";
 
@@ -105,7 +109,7 @@ export class OxAdapter implements ReadWriteAdapter {
           : "eth_getBlockByNumber",
         params: [
           params?.blockHash ??
-            blockParam(params?.blockNumber ?? params?.blockTag),
+            prepBlockParam(params?.blockNumber ?? params?.blockTag),
           false,
         ],
       })
@@ -126,7 +130,7 @@ export class OxAdapter implements ReadWriteAdapter {
     return this.provider
       .request({
         method: "eth_getBalance",
-        params: [params.address, blockParam(params.block)],
+        params: [params.address, prepBlockParam(params.block)],
       })
       .then(BigInt)
       .catch(handleError);
@@ -156,16 +160,12 @@ export class OxAdapter implements ReadWriteAdapter {
     TFunctionName extends FunctionName<TAbi>,
   >({ abi, fn, args }: EncodeFunctionDataParams<TAbi, TFunctionName>) {
     try {
-      return AbiFunction.encodeData(
-        AbiFunction.fromAbi(abi, fn as any),
-        objectToArray({
-          abi,
-          type: "function",
-          name: fn,
-          kind: "inputs",
-          value: args as FunctionArgs<TAbi, TFunctionName>,
-        }),
-      );
+      const { data } = prepFunctionData({
+        abi,
+        fn,
+        args: args as FunctionArgs<TAbi, TFunctionName>,
+      });
+      return data;
     } catch (e) {
       handleError(e);
     }
@@ -219,7 +219,32 @@ export class OxAdapter implements ReadWriteAdapter {
     ).catch(handleError);
   }
 
-  getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
+  call({ to, data, bytecode, block, ...options }: CallParams) {
+    let _data = data;
+
+    // Use CodeCaller to call bytecode
+    if (bytecode && data) {
+      const CodeCallerConstructor = AbiConstructor.fromAbi(CodeCaller.abi);
+      _data = AbiConstructor.encode(CodeCallerConstructor, {
+        bytecode: CodeCaller.bytecode,
+        args: [bytecode, data],
+      });
+    }
+
+    return this.provider.request({
+      method: "eth_call",
+      params: [
+        {
+          to,
+          data: _data,
+          ...prepCallParams(options),
+        },
+        prepBlockParam(block),
+      ],
+    });
+  }
+
+  async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
     abi,
     address,
     event,
@@ -227,7 +252,7 @@ export class OxAdapter implements ReadWriteAdapter {
     fromBlock,
     toBlock,
   }: GetEventsParams<TAbi, TEventName>) {
-    const abiFn = AbiEvent.fromAbi(
+    const abiEvent = AbiEvent.fromAbi(
       abi,
       event as any,
       {
@@ -240,36 +265,161 @@ export class OxAdapter implements ReadWriteAdapter {
         }),
       } as AbiItem.fromAbi.Options,
     );
-    return this.provider
+
+    const logs = await this.provider
       .request({
         method: "eth_getLogs",
         params: [
           {
             address,
-            fromBlock: blockParam(fromBlock),
-            toBlock: blockParam(toBlock),
-            topics: AbiEvent.encode(abiFn, filter as any).topics,
+            fromBlock: prepBlockParam(fromBlock),
+            toBlock: prepBlockParam(toBlock),
+            topics: AbiEvent.encode(abiEvent, filter as any).topics,
           },
         ],
       })
-      .then((logs) =>
-        logs.map((log) => {
-          return {
-            args: AbiEvent.decode(abiFn, log) as EventArgs<TAbi, TEventName>,
-            blockNumber: BigInt(log.blockNumber),
-            data: log.data,
-            eventName: event,
-            transactionHash: log.transactionHash,
-          };
-        }),
-      )
       .catch(handleError);
+
+    return logs.map((log) => {
+      return {
+        args: AbiEvent.decode(abiEvent, log) as EventArgs<TAbi, TEventName>,
+        blockNumber: BigInt(log.blockNumber),
+        data: log.data,
+        eventName: event,
+        transactionHash: log.transactionHash,
+      };
+    });
   }
 
-  read<
+  async read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >({ abi, address, fn, args, block }: ReadParams<TAbi, TFunctionName>) {
+    const { data, abiFn } = prepFunctionData({
+      abi,
+      fn,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
+    });
+
+    const result = await this.provider
+      .request({
+        method: "eth_call",
+        params: [
+          {
+            to: address,
+            data,
+          },
+          prepBlockParam(block),
+        ],
+      })
+      .catch(handleError);
+
+    return AbiFunction.decodeResult(abiFn, result) as Promise<
+      FunctionReturn<TAbi, TFunctionName>
+    >;
+  }
+
+  async simulateWrite<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >({
+    abi,
+    fn,
+    args,
+    address,
+    ...options
+  }: SimulateWriteParams<TAbi, TFunctionName>) {
+    const { abiFn, data } = prepFunctionData({
+      abi,
+      fn,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
+    });
+
+    const result = await this.provider
+      .request({
+        method: "eth_call",
+        params: [
+          {
+            to: address,
+            data,
+            ...prepCallParams(options),
+          },
+        ],
+      })
+      .catch(handleError);
+
+    return AbiFunction.decodeResult(abiFn, result) as Promise<
+      FunctionReturn<TAbi, TFunctionName>
+    >;
+  }
+
+  async getSignerAddress() {
+    const [address] = await this.provider
+      .request({ method: "eth_accounts" })
+      .catch(handleError);
+    if (!address) throw new DriftError("No signer address found");
+    return Address.checksum(address);
+  }
+
+  async write<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >({
+    abi,
+    fn,
+    args,
+    address,
+    from,
+    onMined,
+    ...options
+  }: WriteParams<TAbi, TFunctionName>) {
+    const { data } = prepFunctionData({
+      abi,
+      fn,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
+    });
+
+    const hash = await this.provider
+      .request({
+        method: "eth_sendTransaction",
+        params: [
+          {
+            to: address,
+            data,
+            from: from ?? (await this.getSignerAddress()),
+            ...prepCallParams(options),
+          },
+        ],
+      })
+      .catch(handleError);
+
+    if (onMined) {
+      this.waitForTransaction({ hash }).then(onMined);
+    }
+
+    return hash;
+  }
+}
+
+function prepBlockParam(block?: BlockTag | bigint): HexString | BlockTag {
+  if (block === undefined) {
+    return "latest";
+  }
+  if (typeof block === "bigint") {
+    return `0x${block.toString(16)}`;
+  }
+  return block;
+}
+
+function prepFunctionData<
+  TAbi extends Abi,
+  TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+>({
+  abi,
+  args,
+  fn,
+}: { abi: TAbi; fn: TFunctionName; args: FunctionArgs<TAbi, TFunctionName> }) {
+  try {
     const argsArray = objectToArray({
       abi,
       type: "function",
@@ -284,77 +434,62 @@ export class OxAdapter implements ReadWriteAdapter {
         args: argsArray,
       } as AbiItem.fromAbi.Options,
     );
-    return this.provider
-      .request({
-        method: "eth_call",
-        params: [
-          {
-            to: address,
-            data: AbiFunction.encodeData(abiFn, argsArray),
-          },
-          blockParam(block),
-        ],
-      })
-      .then(
-        (data) =>
-          AbiFunction.decodeResult(abiFn, data) as Promise<
-            FunctionReturn<TAbi, TFunctionName>
-          >,
-      )
-      .catch(handleError);
+    return {
+      abiFn,
+      data: AbiFunction.encodeData(abiFn, argsArray),
+    };
+  } catch (e) {
+    handleError(e);
   }
+}
 
-  simulateWrite<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(writeParams: SimulateWriteParams<TAbi, TFunctionName>) {
-    const { abiFn, params } = prepWriteParams(writeParams);
-    return this.provider
-      .request({
-        method: "eth_call",
-        params: params as any,
-      })
-      .then(
-        (data) =>
-          AbiFunction.decodeResult(abiFn, data) as Promise<
-            FunctionReturn<TAbi, TFunctionName>
-          >,
-      )
-      .catch(handleError);
-  }
-
-  async getSignerAddress() {
-    const [address] = await this.provider
-      .request({ method: "eth_accounts" })
-      .catch(handleError);
-    if (!address) throw new DriftError("No signer address found");
-    return Address.checksum(address);
-  }
-
-  async write<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(writeParams: WriteParams<TAbi, TFunctionName>) {
-    const { params } = prepWriteParams(writeParams);
-    const from = params[0].from || (await this.getSignerAddress());
-    const hash = await this.provider
-      .request({
-        method: "eth_sendTransaction",
-        params: [
-          {
-            ...params[0],
-            from,
-          },
-        ],
-      })
-      .catch(handleError);
-
-    if (writeParams.onMined) {
-      this.waitForTransaction({ hash }).then(writeParams.onMined);
-    }
-
-    return hash;
-  }
+function prepCallParams({
+  block, // omitted
+  chainId,
+  gas,
+  gasPrice,
+  maxFeePerBlobGas,
+  maxFeePerGas,
+  maxPriorityFeePerGas,
+  nonce,
+  value,
+  ...rest
+}: ContractCallOptions) {
+  return [
+    {
+      ...rest,
+      chainId:
+        chainId === undefined
+          ? undefined
+          : (`0x${chainId.toString(16)}` as HexString),
+      gas:
+        gas === undefined ? undefined : (`0x${gas.toString(16)}` as HexString),
+      gasPrice:
+        gasPrice === undefined
+          ? undefined
+          : (`0x${gasPrice.toString(16)}` as HexString),
+      maxFeePerBlobGas:
+        maxFeePerBlobGas === undefined
+          ? undefined
+          : (`0x${maxFeePerBlobGas.toString(16)}` as HexString),
+      maxFeePerGas:
+        maxFeePerGas === undefined
+          ? undefined
+          : (`0x${maxFeePerGas.toString(16)}` as HexString),
+      maxPriorityFeePerGas:
+        maxPriorityFeePerGas === undefined
+          ? undefined
+          : (`0x${maxPriorityFeePerGas.toString(16)}` as HexString),
+      nonce:
+        nonce === undefined
+          ? undefined
+          : (`0x${nonce.toString(16)}` as HexString),
+      value:
+        value === undefined
+          ? undefined
+          : (`0x${value.toString(16)}` as HexString),
+    },
+  ] as const;
 }
 
 function handleError(error: any): never {
@@ -379,74 +514,6 @@ function handleError(error: any): never {
   _error.message = _error.message.trimStart();
 
   throw new DriftError(_error);
-}
-
-function blockParam(block?: BlockTag | bigint): HexString | BlockTag {
-  if (block === undefined) {
-    return "latest";
-  }
-  if (typeof block === "bigint") {
-    return `0x${block.toString(16)}`;
-  }
-  return block;
-}
-
-function prepWriteParams<
-  TAbi extends Abi,
-  TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
->({
-  abi,
-  address,
-  args,
-  chainId,
-  fn,
-  gas,
-  gasPrice,
-  maxFeePerGas,
-  maxPriorityFeePerGas,
-  nonce,
-  value,
-  ...rest
-}: SimulateWriteParams<TAbi, TFunctionName>) {
-  const argsArray = objectToArray({
-    abi,
-    type: "function",
-    name: fn,
-    kind: "inputs",
-    value: args as FunctionArgs<TAbi, TFunctionName>,
-  });
-  const abiFn = AbiFunction.fromAbi(
-    abi,
-    fn as any,
-    {
-      args: argsArray,
-    } as AbiItem.fromAbi.Options,
-  );
-  return {
-    abiFn,
-    params: [
-      {
-        ...rest,
-        chainId: chainId
-          ? (`0x${chainId.toString(16)}` as HexString)
-          : undefined,
-        data: AbiFunction.encodeData(abiFn, argsArray),
-        gas: gas ? (`0x${gas.toString(16)}` as HexString) : undefined,
-        gasPrice: gasPrice
-          ? (`0x${gasPrice.toString(16)}` as HexString)
-          : undefined,
-        maxFeePerGas: maxFeePerGas
-          ? (`0x${maxFeePerGas.toString(16)}` as HexString)
-          : undefined,
-        maxPriorityFeePerGas: maxPriorityFeePerGas
-          ? (`0x${maxPriorityFeePerGas.toString(16)}` as HexString)
-          : undefined,
-        nonce: nonce ? (`0x${nonce.toString(16)}` as HexString) : undefined,
-        to: address,
-        value: value ? (`0x${value.toString(16)}` as HexString) : undefined,
-      },
-    ] as const,
-  };
 }
 
 declare global {

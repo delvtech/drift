@@ -3,6 +3,7 @@ import { OxAdapter, type OxAdapterConfig } from "src/adapter/OxAdapter";
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
+  CallParams,
   DecodeFunctionDataParams,
   EncodeFunctionDataParams,
   GetEventsParams,
@@ -177,6 +178,16 @@ export class BaseClient<
     params: DecodeFunctionDataParams<TAbi, TFunctionName>,
   ): DecodedFunctionData<TAbi, TFunctionName> {
     return this.adapter.decodeFunctionData(params);
+  }
+
+  /**
+   * Call an address or bytecode.
+   */
+  async call(params: CallParams): Promise<Bytes> {
+    return this._cachedFn({
+      key: await this.cache.callKey(params),
+      fn: () => this.adapter.call(params),
+    });
   }
 
   /**

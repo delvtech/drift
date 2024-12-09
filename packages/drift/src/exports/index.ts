@@ -17,6 +17,7 @@ export type {
 } from "src/adapter/types/Abi";
 export type {
   Adapter,
+  CallParams,
   DecodeFunctionDataParams,
   EncodeFunctionDataParams,
   FunctionArgsParam,
@@ -38,9 +39,10 @@ export type {
 } from "src/adapter/types/Block";
 export type {
   ContractParams,
-  ContractWriteOptions,
+  ContractCallOptions,
   ContractGetEventsOptions,
   ContractReadOptions,
+  ContractWriteOptions,
 } from "src/adapter/types/Contract";
 export type {
   EventLog,

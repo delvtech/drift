@@ -1,6 +1,7 @@
 import type { Abi } from "abitype";
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
+  CallParams,
   DecodeFunctionDataParams,
   EncodeFunctionDataParams,
   GetEventsParams,
@@ -218,6 +219,23 @@ export class MockAdapter implements ReadWriteAdapter {
       key: this.createKey(params),
       matchPartial: true,
     })(params as DecodeFunctionDataParams<TAbi, TFunctionName>);
+  }
+
+  // call //
+
+  onCall(params: Partial<CallParams>) {
+    return this.stubs.get<[CallParams], Promise<Bytes>>({
+      method: "call",
+      key: this.createKey(params),
+    });
+  }
+
+  async call(params: CallParams) {
+    return this.stubs.get<[CallParams], Promise<Bytes>>({
+      method: "call",
+      key: this.createKey(params),
+      matchPartial: true,
+    })(params);
   }
 
   // getEvents //

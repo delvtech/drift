@@ -2,6 +2,7 @@ import type { Abi } from "abitype";
 import { MockAdapter } from "src/adapter/MockAdapter";
 import type { OxAdapterConfig } from "src/adapter/OxAdapter";
 import type {
+  CallParams,
   DecodeFunctionDataParams,
   EncodeFunctionDataParams,
   GetEventsParams,
@@ -87,6 +88,10 @@ export class MockClient<
     params: OptionalKeys<DecodeFunctionDataParams<TAbi, TFunctionName>, "data">,
   ) {
     return this.adapter.onDecodeFunctionData(params);
+  }
+
+  onCall(params: Partial<CallParams>) {
+    return this.adapter.onCall(params);
   }
 
   onGetEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(

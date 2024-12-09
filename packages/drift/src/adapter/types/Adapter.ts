@@ -1,6 +1,7 @@
 import type { Abi } from "abitype";
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
+  ContractCallOptions,
   ContractGetEventsOptions,
   ContractParams,
   ContractReadOptions,
@@ -15,12 +16,12 @@ import type {
 } from "src/adapter/types/Function";
 import type { Network } from "src/adapter/types/Network";
 import type { TransactionReceipt } from "src/adapter/types/Transaction";
-import type { AnyObject, EmptyObject } from "src/utils/types";
+import type { AnyObject, EmptyObject, OneOf } from "src/utils/types";
 
 export interface Adapter extends ReadAdapter, Partial<WriteAdapter> {}
 
 export interface ReadAdapter extends Network {
-  // call(params: CallParams): Promise<Bytes>;
+  call(params: CallParams): Promise<Bytes>;
 
   getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
     params: GetEventsParams<TAbi, TEventName>,
@@ -45,12 +46,24 @@ export interface ReadAdapter extends Network {
     TFunctionName extends FunctionName<TAbi>,
   >(params: EncodeFunctionDataParams<TAbi, TFunctionName>): Bytes;
 
+  // encodeFunctionResult<
+  //   TAbi extends Abi,
+  //   TFunctionName extends FunctionName<TAbi>,
+  // >(params: EncodeFunctionResultParams<TAbi, TFunctionName>): Bytes;
+
   decodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
   >(
     params: DecodeFunctionDataParams<TAbi, TFunctionName>,
   ): DecodedFunctionData<TAbi, TFunctionName>;
+
+  // decodeFunctionResult<
+  //   TAbi extends Abi,
+  //   TFunctionName extends FunctionName<TAbi>,
+  // >(
+  //   params: DecodeFunctionDataParams<TAbi, TFunctionName>,
+  // ): FunctionReturn<TAbi, TFunctionName>;
 }
 
 export interface WriteAdapter {
@@ -64,20 +77,23 @@ export interface WriteAdapter {
 
 export interface ReadWriteAdapter extends ReadAdapter, WriteAdapter {}
 
-// export type CallParams = ContractReadOptions &
-//   ContractWriteOptions & {
-//     data?: Bytes;
-//   } & OneOf<
-//     | {
-//         to?: Address;
-//       }
-//     | {
-//         /**
-//          * A contract bytecode to temporarily deploy and call.
-//          */
-//         bytecode?: Bytes;
-//       }
-//   >;
+export type CallParams = {
+  data?: Bytes;
+} & OneOf<
+  | {
+      /**
+       * A contract address to call.
+       */
+      to: Address;
+    }
+  | {
+      /**
+       * A contract bytecode to temporarily deploy and call.
+       */
+      bytecode: Bytes;
+    }
+> &
+  ContractCallOptions;
 
 export type FunctionArgsParam<
   TAbi extends Abi = Abi,
@@ -143,6 +159,15 @@ export type EncodeFunctionDataParams<
   abi: TAbi;
   fn: TFunctionName;
 } & FunctionArgsParam<TAbi, TFunctionName>;
+
+// export interface EncodeFunctionResultParams<
+//   TAbi extends Abi = Abi,
+//   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+// > {
+//   abi: TAbi;
+//   fn: TFunctionName;
+//   value: FunctionReturn<TAbi, TFunctionName>;
+// }
 
 export interface DecodeFunctionDataParams<
   TAbi extends Abi = Abi,

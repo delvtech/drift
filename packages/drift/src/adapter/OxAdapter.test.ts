@@ -10,6 +10,7 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
+import { MockErc20Example } from "src/artifacts/MockErc20Example";
 import { ZERO_ADDRESS } from "src/constants";
 import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
@@ -116,6 +117,46 @@ describe("OxAdapter", () => {
         transactionIndex: expect.any(BigInt),
       } as TransactionReceipt),
     );
+  });
+
+  describe("call", () => {
+    it("reads from deployed contracts", async () => {
+      const adapter = new OxAdapter({ rpcUrl });
+      const data = adapter.encodeFunctionData({
+        abi: erc20.abi,
+        fn: "symbol",
+      });
+      const result = await adapter.call({
+        to: address,
+        data,
+      });
+      // TODO:
+      // const decoded = adapter.decodeFunctionResult({
+      //   abi: erc20.abi,
+      //   fn: "symbol",
+      //   data: symbol,
+      // });
+      expect(result).toEqual(expect.stringMatching(/^0x/));
+    });
+
+    it("reads from bytecodes", async () => {
+      const adapter = new OxAdapter({ rpcUrl });
+      const data = adapter.encodeFunctionData({
+        abi: MockErc20Example.abi,
+        fn: "name",
+      });
+      const result = await adapter.call({
+        bytecode: MockErc20Example.bytecode,
+        data,
+      });
+      // TODO:
+      // const decoded = adapter.decodeFunctionResult({
+      //   abi: erc20.abi,
+      //   fn: "symbol",
+      //   data: symbol,
+      // });
+      expect(result).toEqual(expect.stringMatching(/^0x/));
+    });
   });
 
   it("fetches events", async () => {

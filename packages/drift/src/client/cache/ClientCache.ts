@@ -1,6 +1,11 @@
 import type { Abi } from "abitype";
 import isMatch from "lodash.ismatch";
-import type { GetEventsParams, ReadParams } from "src/adapter/types/Adapter";
+import type { Bytes } from "src/adapter/types/Abi";
+import type {
+  CallParams,
+  GetEventsParams,
+  ReadParams,
+} from "src/adapter/types/Adapter";
 import type { Block } from "src/adapter/types/Block";
 import type {
   ContractParams,
@@ -157,6 +162,61 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
     return this.store.set(key, value);
   }
 
+  // Call //
+
+  async callKey({
+    to,
+    data,
+    value,
+    from,
+    block,
+    accessList,
+    blobVersionedHashes,
+    chainId,
+    blobs,
+    bytecode,
+    nonce,
+  }: CallParams): Promise<SerializableKey> {
+    return this.createNamespacedKey("call", {
+      to,
+      data,
+      value,
+      from,
+      block,
+      accessList,
+      blobVersionedHashes,
+      chainId,
+      blobs,
+      bytecode,
+      nonce,
+    });
+  }
+
+  async preloadCall({
+    preloadValue,
+    ...params
+  }: {
+    preloadValue: Bytes;
+    /**
+     * **IMPORTANT**: This is the `value` from the {@linkcode CallParams}, not
+     * the value to preload. Use `preloadValue` instead.
+     */
+    value?: CallParams["value"];
+  } & CallParams): Promise<void> {
+    const key = await this.callKey(params);
+    return this.store.set(key, preloadValue);
+  }
+
+  async invalidateCall(params: CallParams): Promise<void> {
+    const key = await this.callKey(params);
+    return this.store.delete(key);
+  }
+
+  async invalidateCallsMatching(params: CallParams): Promise<void> {
+    const key = await this.callKey(params);
+    return this._deleteMatches(key);
+  }
+
   // Events //
 
   async eventsKey<TAbi extends Abi, TEventName extends EventName<TAbi>>({
@@ -232,21 +292,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(params: PartialReadParams<TAbi, TFunctionName>): Promise<void> {
     const matchKey = await this.partialReadKey(params);
-    const operations: MaybePromise<void>[] = [];
-
-    for await (const [key] of this.store.entries()) {
-      if (key === matchKey) {
-        operations.push(this.store.delete(key));
-      } else if (
-        typeof key === "object" &&
-        typeof matchKey === "object" &&
-        isMatch(key, matchKey)
-      ) {
-        operations.push(this.store.delete(key));
-      }
-    }
-
-    await Promise.all(operations);
+    return this._deleteMatches(matchKey);
   }
 
   // Store Operations //
@@ -281,6 +327,26 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
 
   async clear(): Promise<void> {
     return this.store.clear();
+  }
+
+  // Internal //
+
+  private async _deleteMatches(matchKey: SerializableKey): Promise<void> {
+    const operations: MaybePromise<void>[] = [];
+
+    for await (const [key] of this.store.entries()) {
+      if (key === matchKey) {
+        operations.push(this.store.delete(key));
+      } else if (
+        typeof key === "object" &&
+        typeof matchKey === "object" &&
+        isMatch(key, matchKey)
+      ) {
+        operations.push(this.store.delete(key));
+      }
+    }
+
+    await Promise.all(operations);
   }
 }
 

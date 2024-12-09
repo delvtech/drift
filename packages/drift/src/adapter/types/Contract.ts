@@ -1,5 +1,5 @@
 import type { Abi } from "abitype";
-import type { Address, HexString } from "src/adapter/types/Abi";
+import type { Address, Bytes, Hash, HexString } from "src/adapter/types/Abi";
 import type { BlockTag } from "src/adapter/types/Block";
 import type { EventFilter, EventName } from "src/adapter/types/Event";
 
@@ -52,10 +52,26 @@ export interface ContractWriteOptions {
    */
   accessList?: {
     address: Address;
-    storageKeys: HexString[];
+    storageKeys: readonly HexString[];
   }[];
   /**
    * Chain ID that this transaction is valid on.
    */
   chainId?: bigint;
+}
+
+// https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/eth/execute.yaml#L1
+export interface ContractCallOptions
+  extends ContractReadOptions,
+    ContractWriteOptions {
+  /**
+   * The maximum total fee per gas the sender is willing to pay for blob gas in
+   * wei
+   */
+  maxFeePerBlobGas?: bigint;
+  /**
+   * List of versioned blob hashes associated with the transaction's EIP-4844 data blobs.
+   */
+  blobVersionedHashes?: readonly Hash[];
+  blobs?: readonly Bytes[];
 }

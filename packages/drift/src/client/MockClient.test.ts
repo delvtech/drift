@@ -1,4 +1,5 @@
 import type {
+  CallParams,
   DecodeFunctionDataParams,
   EncodeFunctionDataParams,
   GetEventsParams,
@@ -394,6 +395,50 @@ describe("MockClient", () => {
           data: "0x1",
         }),
       ).toBe(decoded);
+    });
+  });
+
+  describe("call", () => {
+    it("Throws an error by default", async () => {
+      const client = new MockClient();
+      let error: unknown;
+      try {
+        await client.call({
+          to: "0x",
+        });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
+    });
+
+    it("Can be stubbed with specific params", async () => {
+      const client = new MockClient();
+      const params1: CallParams = {
+        to: "0x1",
+      };
+      const params2: CallParams = {
+        to: "0x2",
+      };
+      client.onCall(params1).resolves("0xA");
+      client.onCall(params2).resolves("0xB");
+      expect(await client.call(params1)).toBe("0xA");
+      expect(await client.call(params2)).toBe("0xB");
+    });
+
+    it("Can be stubbed with partial params", async () => {
+      const client = new MockClient();
+      client
+        .onCall({
+          to: "0x1",
+        })
+        .resolves("0xA");
+      expect(
+        await client.call({
+          to: "0x1",
+          data: "0x123",
+        }),
+      ).toBe("0xA");
     });
   });
 

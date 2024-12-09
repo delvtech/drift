@@ -1,5 +1,6 @@
 import { MockAdapter } from "src/adapter/MockAdapter";
 import type {
+  CallParams,
   DecodeFunctionDataParams,
   EncodeFunctionDataParams,
   GetEventsParams,
@@ -386,6 +387,50 @@ describe("MockAdapter", () => {
           data: "0x1",
         }),
       ).toBe(decoded);
+    });
+  });
+
+  describe("call", () => {
+    it("Rejects with an error by default", async () => {
+      const adapter = new MockAdapter();
+      let error: unknown;
+      try {
+        await adapter.call({
+          to: "0x",
+        });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
+    });
+
+    it("Can be stubbed with specific params", async () => {
+      const adapter = new MockAdapter();
+      const params1: CallParams = {
+        to: "0x1",
+      };
+      const params2: CallParams = {
+        to: "0x2",
+      };
+      adapter.onCall(params1).resolves("0xA");
+      adapter.onCall(params2).resolves("0xB");
+      expect(await adapter.call(params1)).toBe("0xA");
+      expect(await adapter.call(params2)).toBe("0xB");
+    });
+
+    it("Can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onCall({
+          to: "0x1",
+        })
+        .resolves("0xA");
+      expect(
+        await adapter.call({
+          to: "0x1",
+          data: "0x2",
+        }),
+      ).toBe("0xA");
     });
   });
 
