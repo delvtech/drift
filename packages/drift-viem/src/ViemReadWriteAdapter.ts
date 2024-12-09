@@ -79,7 +79,7 @@ export class ViemReadWriteAdapter<
     const hash = await this.walletClient.writeContract(writeParams);
 
     if (params.onMined) {
-      await this.waitForTransaction({ hash }).then(params.onMined);
+      this.waitForTransaction({ hash }).then(params.onMined);
     }
 
     return hash;
