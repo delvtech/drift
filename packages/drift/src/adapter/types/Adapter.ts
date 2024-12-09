@@ -15,12 +15,12 @@ import type {
 } from "src/adapter/types/Function";
 import type { Network } from "src/adapter/types/Network";
 import type { TransactionReceipt } from "src/adapter/types/Transaction";
-import type { AnyObject, EmptyObject, OneOf } from "src/utils/types";
+import type { AnyObject, EmptyObject } from "src/utils/types";
 
 export interface Adapter extends ReadAdapter, Partial<WriteAdapter> {}
 
 export interface ReadAdapter extends Network {
-  call(params: CallParams): Promise<Bytes>;
+  // call(params: CallParams): Promise<Bytes>;
 
   getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
     params: GetEventsParams<TAbi, TEventName>,
@@ -64,20 +64,20 @@ export interface WriteAdapter {
 
 export interface ReadWriteAdapter extends ReadAdapter, WriteAdapter {}
 
-export type CallParams = ContractReadOptions &
-  ContractWriteOptions & {
-    data?: Bytes;
-  } & OneOf<
-    | {
-        to?: Address;
-      }
-    | {
-        /**
-         * A contract bytecode to temporarily deploy and call.
-         */
-        bytecode?: Bytes;
-      }
-  >;
+// export type CallParams = ContractReadOptions &
+//   ContractWriteOptions & {
+//     data?: Bytes;
+//   } & OneOf<
+//     | {
+//         to?: Address;
+//       }
+//     | {
+//         /**
+//          * A contract bytecode to temporarily deploy and call.
+//          */
+//         bytecode?: Bytes;
+//       }
+//   >;
 
 export type FunctionArgsParam<
   TAbi extends Abi = Abi,
