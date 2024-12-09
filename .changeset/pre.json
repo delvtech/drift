@@ -8,7 +8,8 @@
     "example": "0.0.0",
     "@delvtech/drift-web3": "0.0.0-beta.0",
     "@delvtech/drift-ethers": "0.0.0-beta.0",
-    "@delvtech/drift-ethers-v5": "0.0.0"
+    "@delvtech/drift-ethers-v5": "0.0.0",
+    "contracts": "0.0.0"
   },
   "changesets": [
     "afraid-llamas-add",
@@ -81,6 +82,7 @@
     "tricky-dogs-attend",
     "warm-oranges-help",
     "warm-spoons-applaud",
+    "witty-glasses-matter",
     "yellow-balloons-search"
   ]
 }

@@ -1,5 +1,11 @@
 # @delvtech/drift-viem
 
+## 0.1.0-beta.29
+
+### Minor Changes
+
+- 8f0d309: Remove forced `simulateContract` from viem adapter `write`
+
 ## 0.0.1-beta.28
 
 ### Patch Changes
