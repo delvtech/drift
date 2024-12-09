@@ -8,7 +8,6 @@ set -e
 # branch:    The branch to clone.
 # repo_url:  The url of the git repository to clone.
 
-# SETTINGS
 repo_url=${2:-"git@github.com:ethereum/execution-apis.git"}
 branch=${1:-"main"}
 schema_doc="refs-openrpc.json"

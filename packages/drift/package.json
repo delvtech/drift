@@ -36,9 +36,10 @@
     }
   },
   "scripts": {
+    "build:artifacts": "sh scripts/buildArtifacts.sh",
     "build:ethereum": "sh scripts/buildEthereum.sh",
-    "build": "yarn build:ethereum && tsup",
-    "watch": "yarn build:ethereum && tsup --watch",
+    "build": "tsup",
+    "watch": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest --reporter=verbose",
     "coverage": "vitest run --coverage",
