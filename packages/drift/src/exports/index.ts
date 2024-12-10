@@ -78,6 +78,7 @@ export {
   type OxAdapterConfig,
 } from "src/adapter/OxAdapter";
 
+export { arrayToFriendly } from "src/adapter/utils/arrayToFriendly";
 export { arrayToObject } from "src/adapter/utils/arrayToObject";
 export { objectToArray } from "src/adapter/utils/objectToArray";
 

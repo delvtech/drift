@@ -6,6 +6,7 @@ export default defineConfig({
   test: {
     coverage: {
       include: ["src/**/*"],
+      exclude: ["src/ethereum", "src/artifacts", "src/exports"],
     },
   },
 });

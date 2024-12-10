@@ -13,7 +13,7 @@ import {
   Transaction,
   TransactionReceipt,
 } from "ox";
-import type { Bytes, HexString } from "src/adapter/types/Abi";
+import type { AbiArrayType, Bytes, HexString } from "src/adapter/types/Abi";
 import type {
   CallParams,
   DecodeFunctionDataParams,
@@ -42,6 +42,7 @@ import type {
   WaitForTransactionParams,
 } from "src/adapter/types/Network";
 import type { TransactionReceipt as TransactionReceiptType } from "src/adapter/types/Transaction";
+import { arrayToFriendly } from "src/adapter/utils/arrayToFriendly";
 import { objectToArray } from "src/adapter/utils/objectToArray";
 import { CodeCaller } from "src/artifacts/CodeCaller";
 import { DriftError } from "src/error/DriftError";
@@ -429,10 +430,21 @@ export class OxAdapter implements ReadWriteAdapter {
   > {
     try {
       const abiFn = AbiFunction.fromAbi(abi, fn as any);
-      return AbiFunction.decodeResult(abiFn, data) as FunctionReturn<
-        TAbi,
-        TFunctionName
-      >;
+      const arrayResult = AbiFunction.decodeResult(abiFn, data, {
+        as: "Array",
+      });
+
+      return arrayToFriendly({
+        abi,
+        name: fn,
+        kind: "outputs",
+        values: arrayResult as AbiArrayType<
+          TAbi,
+          "function",
+          TFunctionName,
+          "outputs"
+        >,
+      });
     } catch (e) {
       handleError(e);
     }
