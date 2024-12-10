@@ -19,21 +19,25 @@ export function decodeFunctionReturn<
 > {
   try {
     const abiFn = AbiFunction.fromAbi(abi, fn as any);
-    const arrayResult = AbiFunction.decodeResult(abiFn, data, {
+    const decoded = AbiFunction.decodeResult(abiFn, data, {
       as: "Array",
     });
 
-    return arrayToFriendly({
-      abi,
-      name: fn,
-      kind: "outputs",
-      values: arrayResult as AbiArrayType<
-        TAbi,
-        "function",
-        TFunctionName,
-        "outputs"
-      >,
-    });
+    if (Array.isArray(decoded)) {
+      return arrayToFriendly({
+        abi,
+        name: fn,
+        kind: "outputs",
+        values: decoded as AbiArrayType<
+          TAbi,
+          "function",
+          TFunctionName,
+          "outputs"
+        >,
+      });
+    }
+
+    return decoded as FunctionReturn<TAbi, TFunctionName>;
   } catch (e) {
     handleError(e);
   }
