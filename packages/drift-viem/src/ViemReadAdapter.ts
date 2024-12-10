@@ -1,9 +1,13 @@
 import {
   type AbiObjectType,
   type Block,
+  type Bytes,
+  type CallParams,
   type DecodeFunctionDataParams,
+  type DecodeFunctionReturnParams,
   type DecodedFunctionData,
   type EncodeFunctionDataParams,
+  type EncodeFunctionReturnParams,
   type EventName,
   type FunctionName,
   type FunctionReturn,
@@ -16,20 +20,23 @@ import {
   type TransactionReceipt,
   type WaitForTransactionParams,
   type WriteParams,
+  arrayToFriendly,
   arrayToObject,
   objectToArray,
 } from "@delvtech/drift";
-import { outputToFriendly } from "src/utils/outputToFriendly";
 import {
   http,
   type Abi,
+  type CallParameters,
   type GetBalanceParameters,
   type GetBlockParameters,
   type PublicClient,
   createPublicClient,
   decodeEventLog,
   decodeFunctionData,
+  decodeFunctionResult,
   encodeFunctionData,
+  encodeFunctionResult,
   rpcTransactionType,
 } from "viem";
 
@@ -132,6 +139,18 @@ export class ViemReadAdapter<TClient extends PublicClient>
     } as TransactionReceipt;
   }
 
+  async call({ block, bytecode, from, nonce, ...rest }: CallParams) {
+    const { data } = await this.publicClient.call({
+      blockNumber: typeof block === "bigint" ? block : undefined,
+      blockTag: typeof block === "string" ? block : (undefined as any),
+      code: bytecode,
+      account: from,
+      nonce: typeof nonce === "bigint" ? Number(nonce) : nonce,
+      ...rest,
+    } as CallParameters);
+    return data as Bytes;
+  }
+
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
     abi,
     address,
@@ -193,11 +212,12 @@ export class ViemReadAdapter<TClient extends PublicClient>
       blockTag: typeof block === "string" ? block : undefined,
     });
 
-    return outputToFriendly({
+    return arrayToFriendly({
       abi,
-      functionName: fn,
-      output,
-    }) as FunctionReturn<TAbi, typeof fn>;
+      values: (Array.isArray(output) ? output : [output]) as any,
+      kind: "outputs",
+      name: fn,
+    }) as FunctionReturn<TAbi, TFunctionName>;
   }
 
   async simulateWrite<
@@ -237,10 +257,11 @@ export class ViemReadAdapter<TClient extends PublicClient>
       ...gasPriceOptions,
     });
 
-    return outputToFriendly({
+    return arrayToFriendly({
       abi: params.abi,
-      functionName: params.fn,
-      output: result,
+      values: (Array.isArray(result) ? result : [result]) as any,
+      kind: "outputs",
+      name: params.fn,
     }) as FunctionReturn<TAbi, TFunctionName>;
   }
 
@@ -263,6 +284,17 @@ export class ViemReadAdapter<TClient extends PublicClient>
     });
   }
 
+  encodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >({ abi, fn, value }: EncodeFunctionReturnParams<TAbi, TFunctionName>) {
+    return encodeFunctionResult({
+      abi: abi as Abi,
+      functionName: fn as string,
+      result: [value] as any,
+    });
+  }
+
   decodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
@@ -280,5 +312,23 @@ export class ViemReadAdapter<TClient extends PublicClient>
       }),
       functionName,
     } as DecodedFunctionData<TAbi, TFunctionName>;
+  }
+
+  decodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >({ abi, data, fn }: DecodeFunctionReturnParams<TAbi, TFunctionName>) {
+    const result = decodeFunctionResult({
+      abi: abi as Abi,
+      data,
+      functionName: fn as string,
+    });
+
+    return arrayToFriendly({
+      abi: abi as Abi,
+      values: (Array.isArray(result) ? result : [result]) as any,
+      kind: "outputs",
+      name: fn,
+    }) as FunctionReturn<TAbi, TFunctionName>;
   }
 }

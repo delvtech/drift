@@ -3,13 +3,13 @@ import {
   type FunctionReturn,
   type ReadWriteAdapter,
   type WriteParams,
+  arrayToFriendly,
   objectToArray,
 } from "@delvtech/drift";
 import {
   ViemReadAdapter,
   type ViemReadAdapterParams,
 } from "src/ViemReadAdapter";
-import { outputToFriendly } from "src/utils/outputToFriendly";
 import type { Abi, Address, PublicClient, WalletClient } from "viem";
 
 export interface ViemReadWriteAdapterParams<
@@ -79,10 +79,11 @@ export class ViemReadWriteAdapter<
       ...gasPriceOptions,
     });
 
-    return outputToFriendly({
+    return arrayToFriendly({
       abi: params.abi,
-      functionName: params.fn,
-      output: result,
+      values: (Array.isArray(result) ? result : [result]) as any,
+      kind: "outputs",
+      name: params.fn,
     }) as FunctionReturn<TAbi, TFunctionName>;
   }
 

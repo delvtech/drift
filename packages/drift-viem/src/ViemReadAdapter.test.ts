@@ -6,6 +6,7 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "@delvtech/drift";
+import { mockErc20 } from "@delvtech/drift/testing";
 import { ViemReadAdapter } from "src/ViemReadAdapter";
 import { http, type Address, createPublicClient, erc20Abi } from "viem";
 import { describe, expect, it } from "vitest";
@@ -88,10 +89,37 @@ describe("ViemReadAdapter", () => {
       gasUsed: expect.any(BigInt),
       logsBloom: expect.any(String),
       status: expect.stringMatching(/^(success|reverted)$/),
-      to: expect.any(String),
       transactionHash: expect.any(String),
       transactionIndex: expect.any(BigInt),
     } as TransactionReceipt);
+  });
+
+  describe("call", () => {
+    it("reads from deployed contracts", async () => {
+      const adapter = new ViemReadAdapter({ publicClient });
+      const data = adapter.encodeFunctionData({
+        abi: erc20Abi,
+        fn: "symbol",
+      });
+      const result = await adapter.call({
+        to: address,
+        data,
+      });
+      expect(result).toEqual(expect.stringMatching(/^0x/));
+    });
+
+    it("reads from bytecodes", async () => {
+      const adapter = new ViemReadAdapter({ publicClient });
+      const data = adapter.encodeFunctionData({
+        abi: mockErc20.abi,
+        fn: "name",
+      });
+      const result = await adapter.call({
+        bytecode: mockErc20.bytecode,
+        data,
+      });
+      expect(result).toEqual(expect.stringMatching(/^0x/));
+    });
   });
 
   it("fetches events", async () => {
@@ -162,6 +190,18 @@ describe("ViemReadAdapter", () => {
     expect(encoded).toBeTypeOf("string");
   });
 
+  it("encodes function return data", async () => {
+    const adapter = new ViemReadAdapter({ publicClient });
+    const encoded = adapter.encodeFunctionReturn({
+      abi: erc20Abi,
+      fn: "balanceOf",
+      value: 123n,
+    });
+    expect(encoded).toEqual(
+      "0x000000000000000000000000000000000000000000000000000000000000007b",
+    );
+  });
+
   it("decodes function data", async () => {
     const adapter = new ViemReadAdapter({ publicClient });
     const args: FunctionArgs<typeof erc20Abi, "transfer"> = {
@@ -181,5 +221,15 @@ describe("ViemReadAdapter", () => {
       args,
       functionName: "transfer",
     } as DecodedFunctionData<typeof erc20Abi, "transfer">);
+  });
+
+  it("decodes function return data", async () => {
+    const adapter = new ViemReadAdapter({ publicClient });
+    const decoded = adapter.decodeFunctionReturn({
+      abi: erc20Abi,
+      fn: "balanceOf",
+      data: "0x000000000000000000000000000000000000000000000000000000000000007b",
+    });
+    expect(decoded).toEqual(123n);
   });
 });
