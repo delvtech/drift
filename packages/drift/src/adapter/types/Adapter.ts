@@ -46,10 +46,10 @@ export interface ReadAdapter extends Network {
     TFunctionName extends FunctionName<TAbi>,
   >(params: EncodeFunctionDataParams<TAbi, TFunctionName>): Bytes;
 
-  // encodeFunctionResult<
-  //   TAbi extends Abi,
-  //   TFunctionName extends FunctionName<TAbi>,
-  // >(params: EncodeFunctionResultParams<TAbi, TFunctionName>): Bytes;
+  encodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(params: EncodeFunctionReturnParams<TAbi, TFunctionName>): Bytes;
 
   decodeFunctionData<
     TAbi extends Abi,
@@ -58,12 +58,12 @@ export interface ReadAdapter extends Network {
     params: DecodeFunctionDataParams<TAbi, TFunctionName>,
   ): DecodedFunctionData<TAbi, TFunctionName>;
 
-  // decodeFunctionResult<
-  //   TAbi extends Abi,
-  //   TFunctionName extends FunctionName<TAbi>,
-  // >(
-  //   params: DecodeFunctionDataParams<TAbi, TFunctionName>,
-  // ): FunctionReturn<TAbi, TFunctionName>;
+  decodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(
+    params: DecodeFunctionReturnParams<TAbi, TFunctionName>,
+  ): FunctionReturn<TAbi, TFunctionName>;
 }
 
 export interface WriteAdapter {
@@ -160,14 +160,14 @@ export type EncodeFunctionDataParams<
   fn: TFunctionName;
 } & FunctionArgsParam<TAbi, TFunctionName>;
 
-// export interface EncodeFunctionResultParams<
-//   TAbi extends Abi = Abi,
-//   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-// > {
-//   abi: TAbi;
-//   fn: TFunctionName;
-//   value: FunctionReturn<TAbi, TFunctionName>;
-// }
+export interface EncodeFunctionReturnParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+> {
+  abi: TAbi;
+  fn: TFunctionName;
+  value: FunctionReturn<TAbi, TFunctionName>;
+}
 
 export interface DecodeFunctionDataParams<
   TAbi extends Abi = Abi,
@@ -179,4 +179,13 @@ export interface DecodeFunctionDataParams<
   // there another way to get the return type based on the function selector in
   // the data?
   fn?: TFunctionName;
+}
+
+export interface DecodeFunctionReturnParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+> {
+  abi: TAbi;
+  data: Bytes;
+  fn: TFunctionName;
 }

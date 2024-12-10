@@ -19,7 +19,9 @@ export type {
   Adapter,
   CallParams,
   DecodeFunctionDataParams,
+  DecodeFunctionReturnParams,
   EncodeFunctionDataParams,
+  EncodeFunctionReturnParams,
   FunctionArgsParam,
   GetEventsParams,
   OnMinedParam,
@@ -105,7 +107,6 @@ export { Drift } from "src/client/drift/Drift";
 export {
   Contract,
   type ContractEncodeFunctionDataArgs,
-  type ContractGetEventsArgs,
   type ContractConfig,
   type ContractReadArgs,
   type ContractWriteArgs,

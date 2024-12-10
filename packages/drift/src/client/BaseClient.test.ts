@@ -101,6 +101,19 @@ describe("BaseClient", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
+    it("Calls encodeFunctionReturn hooks", async () => {
+      const client = new BaseClient({ adapter });
+      const beforeHandler = vi.fn(async ({ resolve }) => resolve());
+      const afterHandler = vi.fn();
+
+      client.hooks.on("before:encodeFunctionReturn", beforeHandler);
+      client.hooks.on("after:encodeFunctionReturn", afterHandler);
+      await client.encodeFunctionReturn({ abi, fn: "", value: "0x" });
+
+      expect(beforeHandler).toHaveBeenCalledTimes(1);
+      expect(afterHandler).toHaveBeenCalledTimes(1);
+    });
+
     it("Calls decodeFunctionData hooks", async () => {
       const client = new BaseClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
@@ -109,6 +122,19 @@ describe("BaseClient", () => {
       client.hooks.on("before:decodeFunctionData", beforeHandler);
       client.hooks.on("after:decodeFunctionData", afterHandler);
       await client.decodeFunctionData({ abi, data: "0x" });
+
+      expect(beforeHandler).toHaveBeenCalledTimes(1);
+      expect(afterHandler).toHaveBeenCalledTimes(1);
+    });
+
+    it("Calls decodeFunctionReturn hooks", async () => {
+      const client = new BaseClient({ adapter });
+      const beforeHandler = vi.fn(async ({ resolve }) => resolve());
+      const afterHandler = vi.fn();
+
+      client.hooks.on("before:decodeFunctionReturn", beforeHandler);
+      client.hooks.on("after:decodeFunctionReturn", afterHandler);
+      await client.decodeFunctionReturn({ abi, fn: "", data: "0x" });
 
       expect(beforeHandler).toHaveBeenCalledTimes(1);
       expect(afterHandler).toHaveBeenCalledTimes(1);

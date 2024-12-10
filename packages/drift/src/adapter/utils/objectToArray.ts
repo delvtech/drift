@@ -55,7 +55,7 @@ export function objectToArray<
   TItemType extends AbiItemType,
   TName extends AbiEntryName<TAbi, TItemType>,
   TParameterKind extends AbiParameterKind,
-  TValue extends AbiObjectType<TAbi, TItemType, TName, TParameterKind>,
+  TValue extends Partial<AbiObjectType<TAbi, TItemType, TName, TParameterKind>>,
 >({
   abi: _abi,
   type,

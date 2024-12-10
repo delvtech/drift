@@ -13,11 +13,13 @@ import {
   Transaction,
   TransactionReceipt,
 } from "ox";
-import type { HexString } from "src/adapter/types/Abi";
+import type { Bytes, HexString } from "src/adapter/types/Abi";
 import type {
   CallParams,
   DecodeFunctionDataParams,
+  DecodeFunctionReturnParams,
   EncodeFunctionDataParams,
+  EncodeFunctionReturnParams,
   GetEventsParams,
   ReadParams,
   ReadWriteAdapter,
@@ -136,41 +138,6 @@ export class OxAdapter implements ReadWriteAdapter {
       .catch(handleError);
   }
 
-  decodeFunctionData<
-    TAbi extends Abi = Abi,
-    TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-  >({ abi, data }: DecodeFunctionDataParams<TAbi, TFunctionName>) {
-    try {
-      const sig = Hex.slice(data, 0, 4);
-      const abiFn = AbiFunction.fromAbi(abi, sig);
-
-      return {
-        functionName: abiFn.name as TFunctionName,
-        args: AbiParameters.decode(abiFn.inputs, Hex.slice(data, 4), {
-          as: "Object",
-        }),
-      } as DecodedFunctionData<TAbi, TFunctionName>;
-    } catch (e) {
-      handleError(e);
-    }
-  }
-
-  encodeFunctionData<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >({ abi, fn, args }: EncodeFunctionDataParams<TAbi, TFunctionName>) {
-    try {
-      const { data } = prepFunctionData({
-        abi,
-        fn,
-        args: args as FunctionArgs<TAbi, TFunctionName>,
-      });
-      return data;
-    } catch (e) {
-      handleError(e);
-    }
-  }
-
   async getTransaction({ hash }: GetTransactionParams) {
     const tx = await this.provider
       .request({
@@ -261,7 +228,7 @@ export class OxAdapter implements ReadWriteAdapter {
           type: "event",
           name: event,
           kind: "inputs",
-          value: filter as any,
+          value: filter as EventArgs<TAbi, TEventName>,
         }),
       } as AbiItem.fromAbi.Options,
     );
@@ -274,7 +241,7 @@ export class OxAdapter implements ReadWriteAdapter {
             address,
             fromBlock: prepBlockParam(fromBlock),
             toBlock: prepBlockParam(toBlock),
-            topics: AbiEvent.encode(abiEvent, filter as any).topics,
+            topics: AbiEvent.encode(abiEvent, filter || {}).topics,
           },
         ],
       })
@@ -398,6 +365,77 @@ export class OxAdapter implements ReadWriteAdapter {
     }
 
     return hash;
+  }
+
+  encodeFunctionData<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >({ abi, fn, args }: EncodeFunctionDataParams<TAbi, TFunctionName>) {
+    try {
+      const { data } = prepFunctionData({
+        abi,
+        fn,
+        args: args as FunctionArgs<TAbi, TFunctionName>,
+      });
+      return data;
+    } catch (e) {
+      handleError(e);
+    }
+  }
+
+  encodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >({
+    abi,
+    fn,
+    value,
+  }: EncodeFunctionReturnParams<TAbi, TFunctionName>): Bytes {
+    const abiFn = AbiFunction.fromAbi(abi, fn as any);
+    return AbiFunction.encodeResult(abiFn, value as any, {
+      as: "Object",
+    });
+  }
+
+  decodeFunctionData<
+    TAbi extends Abi = Abi,
+    TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+  >({ abi, data }: DecodeFunctionDataParams<TAbi, TFunctionName>) {
+    try {
+      const sig = Hex.slice(data, 0, 4);
+      const abiFn = AbiFunction.fromAbi(abi, sig);
+
+      return {
+        functionName: abiFn.name as TFunctionName,
+        args: AbiParameters.decode(abiFn.inputs, Hex.slice(data, 4), {
+          as: "Object",
+        }),
+      } as DecodedFunctionData<TAbi, TFunctionName>;
+    } catch (e) {
+      handleError(e);
+    }
+  }
+
+  decodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+  >({
+    abi,
+    data,
+    fn,
+  }: DecodeFunctionReturnParams<TAbi, TFunctionName>): FunctionReturn<
+    TAbi,
+    TFunctionName
+  > {
+    try {
+      const abiFn = AbiFunction.fromAbi(abi, fn as any);
+      return AbiFunction.decodeResult(abiFn, data) as FunctionReturn<
+        TAbi,
+        TFunctionName
+      >;
+    } catch (e) {
+      handleError(e);
+    }
   }
 }
 

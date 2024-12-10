@@ -130,12 +130,6 @@ describe("OxAdapter", () => {
         to: address,
         data,
       });
-      // TODO:
-      // const decoded = adapter.decodeFunctionResult({
-      //   abi: erc20.abi,
-      //   fn: "symbol",
-      //   data: symbol,
-      // });
       expect(result).toEqual(expect.stringMatching(/^0x/));
     });
 
@@ -149,12 +143,6 @@ describe("OxAdapter", () => {
         bytecode: MockErc20Example.bytecode,
         data,
       });
-      // TODO:
-      // const decoded = adapter.decodeFunctionResult({
-      //   abi: erc20.abi,
-      //   fn: "symbol",
-      //   data: symbol,
-      // });
       expect(result).toEqual(expect.stringMatching(/^0x/));
     });
   });
@@ -229,6 +217,18 @@ describe("OxAdapter", () => {
     expect(encoded).toBeTypeOf("string");
   });
 
+  it("encodes function return data", async () => {
+    const adapter = new OxAdapter({ rpcUrl });
+    const encoded = adapter.encodeFunctionReturn({
+      abi: MockErc20Example.abi,
+      fn: "name",
+      value: "MockERC20Example",
+    });
+    expect(encoded).toEqual(
+      "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000104d6f636b45524332304578616d706c6500000000000000000000000000000000",
+    );
+  });
+
   it("decodes function data", async () => {
     const adapter = new OxAdapter({ rpcUrl });
     const args: FunctionArgs<typeof erc20.abi, "transfer"> = {
@@ -248,5 +248,15 @@ describe("OxAdapter", () => {
       args,
       functionName: "transfer",
     } as DecodedFunctionData<typeof erc20.abi, "transfer">);
+  });
+
+  it("decodes function return data", async () => {
+    const adapter = new OxAdapter({ rpcUrl });
+    const decoded = adapter.decodeFunctionReturn({
+      abi: MockErc20Example.abi,
+      fn: "name",
+      data: "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000104d6f636b45524332304578616d706c6500000000000000000000000000000000",
+    });
+    expect(decoded).toEqual("MockERC20Example");
   });
 });

@@ -4,7 +4,9 @@ import type { OxAdapterConfig } from "src/adapter/OxAdapter";
 import type {
   CallParams,
   DecodeFunctionDataParams,
+  DecodeFunctionReturnParams,
   EncodeFunctionDataParams,
+  EncodeFunctionReturnParams,
   GetEventsParams,
   ReadParams,
   ReadWriteAdapter,
@@ -81,6 +83,18 @@ export class MockClient<
     return this.adapter.onEncodeFunctionData(params);
   }
 
+  onEncodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(
+    params?: OptionalKeys<
+      EncodeFunctionReturnParams<TAbi, TFunctionName>,
+      "value"
+    >,
+  ) {
+    return this.adapter.onEncodeFunctionReturn(params);
+  }
+
   onDecodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
@@ -88,6 +102,18 @@ export class MockClient<
     params: OptionalKeys<DecodeFunctionDataParams<TAbi, TFunctionName>, "data">,
   ) {
     return this.adapter.onDecodeFunctionData(params);
+  }
+
+  onDecodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(
+    params: OptionalKeys<
+      DecodeFunctionReturnParams<TAbi, TFunctionName>,
+      "data"
+    >,
+  ) {
+    return this.adapter.onDecodeFunctionReturn(params);
   }
 
   onCall(params: Partial<CallParams>) {

@@ -52,6 +52,38 @@ describe("MockContract", () => {
       );
     });
   });
+  describe("encodeFunctionReturn", () => {
+    it("Throws an error by default", async () => {
+      const contract = new MockContract({ abi });
+      let error: unknown;
+      try {
+        contract.encodeFunctionReturn("balanceOf", 123n);
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
+    });
+
+    it("Can be stubbed with specific args", async () => {
+      const contract = new MockContract({ abi });
+      contract.onEncodeFunctionReturn("balanceOf", 123n).returns("0x1");
+      contract.onEncodeFunctionReturn("balanceOf", 456n).returns("0x2");
+      expect(contract.encodeFunctionReturn("balanceOf", 123n)).toBe("0x1");
+      expect(contract.encodeFunctionReturn("balanceOf", 456n)).toBe("0x2");
+    });
+
+    it("Can be stubbed with partial args", async () => {
+      const contract = new MockContract({ abi });
+      contract.onEncodeFunctionReturn("balanceOf").returns("0x123");
+      expect(contract.encodeFunctionReturn("balanceOf", 123n)).toBe("0x123");
+    });
+
+    it("Can be called with args after being stubbed with no args", async () => {
+      const contract = new MockContract({ abi });
+      contract.onEncodeFunctionReturn().returns("0x123");
+      expect(contract.encodeFunctionReturn("balanceOf", 123n)).toBe("0x123");
+    });
+  });
 
   describe("decodeFunctionData", () => {
     it("Throws an error by default", async () => {
@@ -79,6 +111,27 @@ describe("MockContract", () => {
       contract.onDecodeFunctionData("0x2").returns(decoded2);
       expect(contract.decodeFunctionData("0x1")).toBe(decoded1);
       expect(contract.decodeFunctionData("0x2")).toBe(decoded2);
+    });
+  });
+
+  describe("decodeFunctionReturn", () => {
+    it("Throws an error by default", async () => {
+      const contract = new MockContract({ abi });
+      let error: unknown;
+      try {
+        contract.decodeFunctionReturn("balanceOf", "0x");
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
+    });
+
+    it("Can be stubbed with specific args", async () => {
+      const contract = new MockContract({ abi });
+      contract.onDecodeFunctionReturn("balanceOf", "0x1").returns(123n);
+      contract.onDecodeFunctionReturn("balanceOf", "0x2").returns(456n);
+      expect(contract.decodeFunctionReturn("balanceOf", "0x1")).toBe(123n);
+      expect(contract.decodeFunctionReturn("balanceOf", "0x2")).toBe(456n);
     });
   });
 

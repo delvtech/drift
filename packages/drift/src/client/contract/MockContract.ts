@@ -3,23 +3,28 @@ import type { MockAdapter } from "src/adapter/MockAdapter";
 import type { Bytes } from "src/adapter/types/Abi";
 import type {
   EncodeFunctionDataParams,
+  EncodeFunctionReturnParams,
   ReadParams,
   ReadWriteAdapter,
   WriteParams,
 } from "src/adapter/types/Adapter";
 import type {
+  ContractGetEventsOptions,
   ContractParams,
   ContractReadOptions,
   ContractWriteOptions,
 } from "src/adapter/types/Contract";
 import type { EventName } from "src/adapter/types/Event";
-import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
+import type {
+  FunctionArgs,
+  FunctionName,
+  FunctionReturn,
+} from "src/adapter/types/Function";
 import type { SimpleCache } from "src/cache/types";
 import type { BaseClient, ClientOptions } from "src/client/BaseClient";
 import { MockClient } from "src/client/MockClient";
 import {
-  Contract,
-  type ContractGetEventsArgs,
+  Contract
 } from "src/client/contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
 import type { FunctionKey, OneOf, OptionalKeys, Pretty } from "src/utils/types";
@@ -62,7 +67,8 @@ export class MockContract<
   }
 
   onGetEvents<TEventName extends EventName<TAbi>>(
-    ...[event, options]: ContractGetEventsArgs<TAbi, TEventName>
+    event: TEventName,
+    options?: ContractGetEventsOptions<TAbi, TEventName>,
   ) {
     return this.adapter.onGetEvents({
       abi: this.abi,
@@ -113,9 +119,31 @@ export class MockContract<
     } as EncodeFunctionDataParams<TAbi, TFunctionName>);
   }
 
-  onDecodeFunctionData(data?: Bytes) {
-    return this.adapter.onDecodeFunctionData({
+  onEncodeFunctionReturn<TFunctionName extends FunctionName<TAbi>>(
+    fn?: TFunctionName,
+    value?: FunctionReturn<TAbi, TFunctionName>,
+  ) {
+    return this.adapter.onEncodeFunctionReturn({
       abi: this.abi,
+      fn,
+      value,
+    } as EncodeFunctionReturnParams<TAbi, TFunctionName>);
+  }
+
+  onDecodeFunctionData<TFunctionName extends FunctionName<TAbi>>(data?: Bytes) {
+    return this.adapter.onDecodeFunctionData<TAbi, TFunctionName>({
+      abi: this.abi,
+      data,
+    });
+  }
+
+  onDecodeFunctionReturn<TFunctionName extends FunctionName<TAbi>>(
+    fn: TFunctionName,
+    data?: Bytes,
+  ) {
+    return this.adapter.onDecodeFunctionReturn({
+      abi: this.abi,
+      fn,
       data,
     });
   }

@@ -78,7 +78,7 @@ export class Contract<
     return this.client.isReadWrite();
   }
 
-  // Function data //
+  // Encoding //
 
   /**
    * Encodes a function call into calldata.
@@ -94,6 +94,22 @@ export class Contract<
   }
 
   /**
+   * Encodes a function return data for a contract method.
+   */
+  encodeFunctionReturn<TFunctionName extends FunctionName<TAbi>>(
+    fn: TFunctionName,
+    value: FunctionReturn<TAbi, TFunctionName>,
+  ) {
+    return this.client.encodeFunctionReturn({
+      abi: this.abi,
+      fn,
+      value,
+    });
+  }
+
+  // Decoding //
+
+  /**
    * Decodes a string of function calldata into it's arguments and function
    * name.
    */
@@ -106,16 +122,30 @@ export class Contract<
     });
   }
 
+  /**
+   * Decodes a string of function return data into it's return value.
+   */
+  decodeFunctionReturn<
+    TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+  >(fn: TFunctionName, data: Bytes): FunctionReturn<TAbi, TFunctionName> {
+    return this.client.decodeFunctionReturn({
+      abi: this.abi,
+      fn,
+      data,
+    });
+  }
+
   // Events //
 
   eventsKey<TEventName extends EventName<TAbi>>(
-    ...[event, params]: ContractGetEventsArgs<TAbi, TEventName>
+    event: TEventName,
+    options?: ContractGetEventsOptions<TAbi, TEventName>,
   ) {
     return this.client.cache.eventsKey({
       abi: this.abi,
       address: this.address,
       event,
-      ...params,
+      ...options,
     });
   }
 
@@ -135,13 +165,14 @@ export class Contract<
    * Retrieves specified events from the contract.
    */
   getEvents<TEventName extends EventName<TAbi>>(
-    ...[event, params]: ContractGetEventsArgs<TAbi, TEventName>
+    event: TEventName,
+    options?: ContractGetEventsOptions<TAbi, TEventName>,
   ): Promise<EventLog<TAbi, TEventName>[]> {
     return this.client.getEvents({
       abi: this.abi,
       address: this.address,
       event,
-      ...params,
+      ...options,
     });
   }
 
@@ -239,7 +270,7 @@ export class Contract<
   simulateWrite<
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
-    ...[fn, args, params]: ContractWriteArgs<TAbi, TFunctionName>
+    ...[fn, args, params]: ContractSimulateWriteArgs<TAbi, TFunctionName>
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
     return this.client.simulateWrite({
       abi: this.abi,
@@ -319,11 +350,6 @@ export type ContractEncodeFunctionDataArgs<
   : FunctionArgs<TAbi, TFunctionName> extends EmptyObject
     ? [functionName: TFunctionName, args?: EmptyObject]
     : [functionName: TFunctionName, args: FunctionArgs<TAbi, TFunctionName>];
-
-export type ContractGetEventsArgs<
-  TAbi extends Abi = Abi,
-  TEventName extends EventName<TAbi> = EventName<TAbi>,
-> = [event: TEventName, options?: ContractGetEventsOptions<TAbi, TEventName>];
 
 export type ContractReadArgs<
   TAbi extends Abi = Abi,

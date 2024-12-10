@@ -3,7 +3,9 @@ import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   CallParams,
   DecodeFunctionDataParams,
+  DecodeFunctionReturnParams,
   EncodeFunctionDataParams,
+  EncodeFunctionReturnParams,
   GetEventsParams,
   ReadParams,
   ReadWriteAdapter,
@@ -156,7 +158,7 @@ export class MockAdapter implements ReadWriteAdapter {
     })(params);
   }
 
-  // encodeFunction //
+  // encodeFunctionData //
 
   onEncodeFunctionData<
     TAbi extends Abi,
@@ -190,7 +192,41 @@ export class MockAdapter implements ReadWriteAdapter {
     })(params);
   }
 
-  // decodeFunction //
+  // encodeFunctionReturn //
+
+  onEncodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(
+    params?: OptionalKeys<
+      EncodeFunctionReturnParams<TAbi, TFunctionName>,
+      "value"
+    >,
+  ) {
+    return this.stubs.get<
+      [EncodeFunctionReturnParams<TAbi, TFunctionName>],
+      Bytes
+    >({
+      method: "encodeFunctionReturn",
+      key: params ? this.createKey(params) : undefined,
+    });
+  }
+
+  encodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(params: EncodeFunctionReturnParams<TAbi, TFunctionName>) {
+    return this.stubs.get<
+      [EncodeFunctionReturnParams<TAbi, TFunctionName>],
+      Bytes
+    >({
+      method: "encodeFunctionReturn",
+      key: this.createKey(params),
+      matchPartial: true,
+    })(params);
+  }
+
+  // decodeFunctionData //
 
   onDecodeFunctionData<
     TAbi extends Abi,
@@ -219,6 +255,40 @@ export class MockAdapter implements ReadWriteAdapter {
       key: this.createKey(params),
       matchPartial: true,
     })(params as DecodeFunctionDataParams<TAbi, TFunctionName>);
+  }
+
+  // decodeFunctionReturn //
+
+  onDecodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(
+    params: OptionalKeys<
+      DecodeFunctionReturnParams<TAbi, TFunctionName>,
+      "data"
+    >,
+  ) {
+    return this.stubs.get<
+      [DecodeFunctionReturnParams<TAbi, TFunctionName>],
+      FunctionReturn<TAbi, TFunctionName>
+    >({
+      method: "decodeFunctionReturn",
+      key: this.createKey(params),
+    });
+  }
+
+  decodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(params: Partial<DecodeFunctionReturnParams<TAbi, TFunctionName>>) {
+    return this.stubs.get<
+      [DecodeFunctionReturnParams<TAbi, TFunctionName>],
+      FunctionReturn<TAbi, TFunctionName>
+    >({
+      method: "decodeFunctionReturn",
+      key: this.createKey(params),
+      matchPartial: true,
+    })(params as DecodeFunctionReturnParams<TAbi, TFunctionName>);
   }
 
   // call //

@@ -2,7 +2,9 @@ import { MockAdapter } from "src/adapter/MockAdapter";
 import type {
   CallParams,
   DecodeFunctionDataParams,
+  DecodeFunctionReturnParams,
   EncodeFunctionDataParams,
+  EncodeFunctionReturnParams,
   GetEventsParams,
   ReadParams,
   WriteParams,
@@ -327,6 +329,69 @@ describe("MockAdapter", () => {
     });
   });
 
+  describe("encodeFunctionReturn", () => {
+    it("Throws an error by default", async () => {
+      const adapter = new MockAdapter();
+      let error: unknown;
+      try {
+        await adapter.encodeFunctionReturn({
+          abi: erc20.abi,
+          fn: "balanceOf",
+          value: 123n,
+        });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
+    });
+
+    it("Can be stubbed with specific params", async () => {
+      const adapter = new MockAdapter();
+      const params1: EncodeFunctionReturnParams<Erc20Abi, "balanceOf"> = {
+        abi: erc20.abi,
+        fn: "balanceOf",
+        value: 123n,
+      };
+      const params2: EncodeFunctionReturnParams<Erc20Abi, "balanceOf"> = {
+        ...params1,
+        value: 456n,
+      };
+      adapter.onEncodeFunctionReturn(params1).returns("0x1");
+      adapter.onEncodeFunctionReturn(params2).returns("0x2");
+      expect(adapter.encodeFunctionReturn(params1)).toBe("0x1");
+      expect(adapter.encodeFunctionReturn(params2)).toBe("0x2");
+    });
+
+    it("Can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onEncodeFunctionReturn({
+          abi: erc20.abi,
+          fn: "balanceOf",
+        })
+        .returns("0x123");
+      expect(
+        adapter.encodeFunctionReturn({
+          abi: erc20.abi,
+          fn: "balanceOf",
+          value: 123n,
+        }),
+      ).toBe("0x123");
+    });
+
+    it("Can be called with args after being stubbed with no args", async () => {
+      const adapter = new MockAdapter();
+      adapter.onEncodeFunctionReturn().returns("0x123");
+      expect(
+        adapter.encodeFunctionReturn({
+          abi: erc20.abi,
+          fn: "balanceOf",
+          value: 123n,
+        }),
+      ).toBe("0x123");
+    });
+  });
+
   describe("decodeFunctionData", () => {
     it("Throws an error by default", async () => {
       const adapter = new MockAdapter();
@@ -387,6 +452,57 @@ describe("MockAdapter", () => {
           data: "0x1",
         }),
       ).toBe(decoded);
+    });
+  });
+
+  describe("decodeFunctionReturn", () => {
+    it("Throws an error by default", async () => {
+      const adapter = new MockAdapter();
+      let error: unknown;
+      try {
+        adapter.decodeFunctionReturn({
+          abi: erc20.abi,
+          fn: "balanceOf",
+          data: "0x",
+        });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
+    });
+
+    it("Can be stubbed with specific params", async () => {
+      const adapter = new MockAdapter();
+      const params1: DecodeFunctionReturnParams<Erc20Abi, "balanceOf"> = {
+        abi: erc20.abi,
+        fn: "balanceOf",
+        data: "0x1",
+      };
+      const params2: DecodeFunctionReturnParams<Erc20Abi, "balanceOf"> = {
+        ...params1,
+        data: "0x2",
+      };
+      adapter.onDecodeFunctionReturn(params1).returns(123n);
+      adapter.onDecodeFunctionReturn(params2).returns(456n);
+      expect(adapter.decodeFunctionReturn(params1)).toBe(123n);
+      expect(adapter.decodeFunctionReturn(params2)).toBe(456n);
+    });
+
+    it("Can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onDecodeFunctionReturn({
+          abi: erc20.abi,
+          fn: "balanceOf",
+        })
+        .returns(123n);
+      expect(
+        adapter.decodeFunctionReturn({
+          abi: erc20.abi,
+          fn: "balanceOf",
+          data: "0x1",
+        }),
+      ).toBe(123n);
     });
   });
 

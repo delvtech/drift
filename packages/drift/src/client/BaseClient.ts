@@ -5,7 +5,9 @@ import type {
   Adapter,
   CallParams,
   DecodeFunctionDataParams,
+  DecodeFunctionReturnParams,
   EncodeFunctionDataParams,
+  EncodeFunctionReturnParams,
   GetEventsParams,
   ReadAdapter,
   ReadParams,
@@ -169,6 +171,16 @@ export class BaseClient<
   }
 
   /**
+   * Encode function return data for a contract method.
+   */
+  encodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(params: EncodeFunctionReturnParams<TAbi, TFunctionName>): Bytes {
+    return this.adapter.encodeFunctionReturn(params);
+  }
+
+  /**
    * Decode function data for a contract method.
    */
   decodeFunctionData<
@@ -178,6 +190,18 @@ export class BaseClient<
     params: DecodeFunctionDataParams<TAbi, TFunctionName>,
   ): DecodedFunctionData<TAbi, TFunctionName> {
     return this.adapter.decodeFunctionData(params);
+  }
+
+  /**
+   * Decode function return data for a contract method.
+   */
+  decodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(
+    params: DecodeFunctionReturnParams<TAbi, TFunctionName>,
+  ): FunctionReturn<TAbi, TFunctionName> {
+    return this.adapter.decodeFunctionReturn(params);
   }
 
   /**
