@@ -1,5 +1,11 @@
 # @delvtech/drift-viem
 
+## 0.1.0-beta.30
+
+### Patch Changes
+
+- 1574acb: Patched `write` function
+
 ## 0.1.0-beta.29
 
 ### Minor Changes
