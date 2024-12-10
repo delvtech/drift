@@ -4,4 +4,5 @@ import type { Abi, AbiParameter } from "abitype";
 export type WithOptionalFields<T extends Abi> = (T[number] & {
   name?: string;
   inputs?: AbiParameter[];
+  outputs?: AbiParameter[];
 })[];

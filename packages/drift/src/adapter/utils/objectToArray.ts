@@ -3,6 +3,7 @@ import type {
   AbiArrayType,
   AbiEntryName,
   AbiObjectType,
+  AbiParameters,
 } from "src/adapter/types/Abi";
 import type { WithOptionalFields } from "src/adapter/utils/types";
 import type { AnyObject } from "src/utils/types";
@@ -85,9 +86,18 @@ export function objectToArray<
 
   if (matches.length === 1) {
     const match = matches[0] as WithOptionalFields<TAbi>[number];
-    return (match.inputs || []).map(
-      ({ name }, i) => value?.[name || i],
-    ) as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
+    const params = (match[kind] || []) as AbiParameters<
+      TAbi,
+      TItemType,
+      TName,
+      TParameterKind
+    >;
+    return params.map(({ name }, i) => value?.[name || i]) as AbiArrayType<
+      TAbi,
+      TItemType,
+      TName,
+      TParameterKind
+    >;
   }
 
   const argsCount = value ? Object.keys(value).length : 0;
@@ -95,8 +105,9 @@ export function objectToArray<
   let keyMatchCount = 0;
 
   for (const entry of matches) {
-    if (!entry.inputs?.length) {
+    if (!entry[kind]?.length) {
       if (!argsCount) {
+        console.log(`No ${kind} found`);
         return [] as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
       }
       continue;
@@ -106,7 +117,7 @@ export function objectToArray<
     const potentialArrayArgs: any[] = [];
     let potentialKeyMatchCount = 0;
 
-    for (const [i, input] of entry.inputs.entries()) {
+    for (const [i, input] of entry[kind].entries()) {
       const key = input.name || i;
       if (key in args) potentialKeyMatchCount++;
       potentialArrayArgs.push(args[key]);
