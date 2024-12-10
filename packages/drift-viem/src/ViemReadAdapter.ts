@@ -19,7 +19,6 @@ import {
   arrayToObject,
   objectToArray,
 } from "@delvtech/drift";
-import { createSimulateContractParameters } from "src/utils/createSimulateContractParameters";
 import { outputToFriendly } from "src/utils/outputToFriendly";
 import {
   http,
@@ -205,9 +204,38 @@ export class ViemReadAdapter<TClient extends PublicClient>
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(params: WriteParams<TAbi, TFunctionName>) {
-    const { result } = await this.publicClient.simulateContract(
-      createSimulateContractParameters(params),
-    );
+    const argsArray = objectToArray({
+      abi: params.abi as Abi,
+      type: "function",
+      name: params.fn,
+      kind: "inputs",
+      value: params.args,
+    });
+
+    const gasPriceOptions =
+      params.gasPrice !== undefined
+        ? {
+            gasPrice: params.gasPrice,
+          }
+        : {
+            maxFeePerGas: params.maxFeePerGas,
+            maxPriorityFeePerGas: params.maxPriorityFeePerGas,
+          };
+
+    const { result } = await this.publicClient.simulateContract({
+      abi: params.abi as Abi,
+      address: params.address,
+      functionName: params.fn,
+      args: argsArray,
+      accessList: params.accessList,
+      account: params.from,
+      gas: params.gas,
+      nonce: params.nonce !== undefined ? Number(params.nonce) : undefined,
+      value: params.value,
+      chain: this.publicClient.chain,
+      type: params.type as any,
+      ...gasPriceOptions,
+    });
 
     return outputToFriendly({
       abi: params.abi,
