@@ -1,9 +1,7 @@
 import {
   type FunctionName,
-  type FunctionReturn,
   type ReadWriteAdapter,
   type WriteParams,
-  arrayToFriendly,
   objectToArray,
 } from "@delvtech/drift";
 import {
@@ -41,50 +39,14 @@ export class ViemReadWriteAdapter<
     return address as Address;
   }
 
-  // override to get the account from the wallet client
   async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(params: WriteParams<TAbi, TFunctionName>) {
-    const argsArray = objectToArray({
-      abi: params.abi as Abi,
-      type: "function",
-      name: params.fn,
-      kind: "inputs",
-      value: params.args,
-    });
-
-    const gasPriceOptions =
-      params.gasPrice !== undefined
-        ? {
-            gasPrice: params.gasPrice,
-          }
-        : {
-            maxFeePerGas: params.maxFeePerGas,
-            maxPriorityFeePerGas: params.maxPriorityFeePerGas,
-          };
-
-    const { result } = await this.publicClient.simulateContract({
-      abi: params.abi as Abi,
-      address: params.address,
-      functionName: params.fn,
-      args: argsArray,
-      accessList: params.accessList,
-      account: params.from ?? (await this.getSignerAddress()) ?? null,
-      gas: params.gas,
-      nonce: params.nonce !== undefined ? Number(params.nonce) : undefined,
-      value: params.value,
-      chain: this.walletClient.chain,
-      type: params.type as any,
-      ...gasPriceOptions,
-    });
-
-    return arrayToFriendly({
-      abi: params.abi,
-      values: (Array.isArray(result) ? result : [result]) as any,
-      kind: "outputs",
-      name: params.fn,
-    }) as FunctionReturn<TAbi, TFunctionName>;
+    return super.simulateWrite({
+      ...params,
+      from: params.from ?? (await this.getSignerAddress()),
+    } as WriteParams<TAbi, TFunctionName>);
   }
 
   async write<
