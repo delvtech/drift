@@ -14,11 +14,15 @@ export {
 } from "src/client/contract/MockContract";
 export { MockDrift } from "src/client/drift/MockDrift";
 
+// Artifacts
+
+export { MockErc20Example as mockErc20 } from "src/artifacts/MockErc20Example";
+export { IERC20 as erc20 } from "src/artifacts/IERC20";
+
 // Utils
 
 export { NotImplementedError } from "src/utils/testing/StubStore";
 export { ALICE, BOB, NANCY } from "src/utils/testing/accounts";
-export { erc20 } from "src/utils/testing/erc20";
 export { getRandomAddress } from "src/utils/testing/getRandomAddress";
 export { getRandomHex } from "src/utils/testing/getRandomHex";
 export { getRandomInt } from "src/utils/testing/getRandomInt";
