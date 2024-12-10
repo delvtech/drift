@@ -81,6 +81,11 @@ export {
 export { arrayToFriendly } from "src/adapter/utils/arrayToFriendly";
 export { arrayToObject } from "src/adapter/utils/arrayToObject";
 export { objectToArray } from "src/adapter/utils/objectToArray";
+export { decodeFunctionData } from "src/adapter/utils/decodeFunctionData";
+export { decodeFunctionReturn } from "src/adapter/utils/decodeFunctionReturn";
+export { encodeFunctionData } from "src/adapter/utils/encodeFunctionData";
+export { encodeFunctionReturn } from "src/adapter/utils/encodeFunctionReturn";
+export { prepareBytecodeCallData } from "src/adapter/utils/prepareBytecodeCallData";
 
 // cache //
 

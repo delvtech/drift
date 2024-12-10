@@ -5,7 +5,7 @@ import type {
   AbiObjectType,
   AbiParameters,
 } from "src/adapter/types/Abi";
-import type { WithOptionalFields } from "src/adapter/utils/types";
+import type { WithOptionalFields } from "src/adapter/utils/internal/types";
 import type { AnyObject } from "src/utils/types";
 
 /**

@@ -60,10 +60,8 @@ export interface ContractWriteOptions {
   chainId?: bigint;
 }
 
-// https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/eth/execute.yaml#L1
-export interface ContractCallOptions
-  extends ContractReadOptions,
-    ContractWriteOptions {
+// https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/schemas/transaction.yaml#L1
+export interface Eip4844CallOptions {
   /**
    * The maximum total fee per gas the sender is willing to pay for blob gas in
    * wei
@@ -75,3 +73,9 @@ export interface ContractCallOptions
   blobVersionedHashes?: readonly Hash[];
   blobs?: readonly Bytes[];
 }
+
+// https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/eth/execute.yaml#L1
+export interface ContractCallOptions
+  extends ContractReadOptions,
+    ContractWriteOptions,
+    Eip4844CallOptions {}

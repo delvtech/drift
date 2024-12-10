@@ -1,19 +1,16 @@
 import type { Abi } from "abitype";
 import {
-  AbiConstructor,
   AbiEvent,
   AbiFunction,
   type AbiItem,
-  AbiParameters,
   Address,
   Block,
-  Hex,
   Provider,
   RpcTransport,
   Transaction,
   TransactionReceipt,
 } from "ox";
-import type { AbiArrayType, Bytes, HexString } from "src/adapter/types/Abi";
+import type { Bytes, HexString } from "src/adapter/types/Abi";
 import type {
   CallParams,
   DecodeFunctionDataParams,
@@ -30,7 +27,6 @@ import type { BlockTag } from "src/adapter/types/Block";
 import type { ContractCallOptions } from "src/adapter/types/Contract";
 import type { EventArgs, EventName } from "src/adapter/types/Event";
 import type {
-  DecodedFunctionData,
   FunctionArgs,
   FunctionName,
   FunctionReturn,
@@ -42,11 +38,15 @@ import type {
   WaitForTransactionParams,
 } from "src/adapter/types/Network";
 import type { TransactionReceipt as TransactionReceiptType } from "src/adapter/types/Transaction";
-import { arrayToFriendly } from "src/adapter/utils/arrayToFriendly";
+import { decodeFunctionData } from "src/adapter/utils/decodeFunctionData";
+import { decodeFunctionReturn } from "src/adapter/utils/decodeFunctionReturn";
+import { encodeFunctionData } from "src/adapter/utils/encodeFunctionData";
+import { encodeFunctionReturn } from "src/adapter/utils/encodeFunctionReturn";
+import { handleError } from "src/adapter/utils/internal/handleError";
+import { prepareFunctionData } from "src/adapter/utils/internal/prepareFunctionData";
 import { objectToArray } from "src/adapter/utils/objectToArray";
-import { CodeCaller } from "src/artifacts/CodeCaller";
+import { prepareBytecodeCallData } from "src/adapter/utils/prepareBytecodeCallData";
 import { DriftError } from "src/error/DriftError";
-import type { AnyObject } from "src/utils/types";
 
 export interface OxAdapterConfig {
   rpcUrl?: string;
@@ -112,7 +112,7 @@ export class OxAdapter implements ReadWriteAdapter {
           : "eth_getBlockByNumber",
         params: [
           params?.blockHash ??
-            prepBlockParam(params?.blockNumber ?? params?.blockTag),
+            prepareBlockParam(params?.blockNumber ?? params?.blockTag),
           false,
         ],
       })
@@ -133,7 +133,7 @@ export class OxAdapter implements ReadWriteAdapter {
     return this.provider
       .request({
         method: "eth_getBalance",
-        params: [params.address, prepBlockParam(params.block)],
+        params: [params.address, prepareBlockParam(params.block)],
       })
       .then(BigInt)
       .catch(handleError);
@@ -190,13 +190,8 @@ export class OxAdapter implements ReadWriteAdapter {
   call({ to, data, bytecode, block, ...options }: CallParams) {
     let _data = data;
 
-    // Use CodeCaller to call bytecode
     if (bytecode && data) {
-      const CodeCallerConstructor = AbiConstructor.fromAbi(CodeCaller.abi);
-      _data = AbiConstructor.encode(CodeCallerConstructor, {
-        bytecode: CodeCaller.bytecode,
-        args: [bytecode, data],
-      });
+      _data = prepareBytecodeCallData(bytecode, data);
     }
 
     return this.provider.request({
@@ -205,9 +200,9 @@ export class OxAdapter implements ReadWriteAdapter {
         {
           to,
           data: _data,
-          ...prepCallParams(options),
+          ...prepareCallParams(options),
         },
-        prepBlockParam(block),
+        prepareBlockParam(block),
       ],
     });
   }
@@ -240,8 +235,8 @@ export class OxAdapter implements ReadWriteAdapter {
         params: [
           {
             address,
-            fromBlock: prepBlockParam(fromBlock),
-            toBlock: prepBlockParam(toBlock),
+            fromBlock: prepareBlockParam(fromBlock),
+            toBlock: prepareBlockParam(toBlock),
             topics: AbiEvent.encode(abiEvent, filter || {}).topics,
           },
         ],
@@ -263,7 +258,7 @@ export class OxAdapter implements ReadWriteAdapter {
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >({ abi, address, fn, args, block }: ReadParams<TAbi, TFunctionName>) {
-    const { data, abiFn } = prepFunctionData({
+    const { data, abiFn } = prepareFunctionData({
       abi,
       fn,
       args: args as FunctionArgs<TAbi, TFunctionName>,
@@ -277,7 +272,7 @@ export class OxAdapter implements ReadWriteAdapter {
             to: address,
             data,
           },
-          prepBlockParam(block),
+          prepareBlockParam(block),
         ],
       })
       .catch(handleError);
@@ -297,7 +292,7 @@ export class OxAdapter implements ReadWriteAdapter {
     address,
     ...options
   }: SimulateWriteParams<TAbi, TFunctionName>) {
-    const { abiFn, data } = prepFunctionData({
+    const { abiFn, data } = prepareFunctionData({
       abi,
       fn,
       args: args as FunctionArgs<TAbi, TFunctionName>,
@@ -310,7 +305,7 @@ export class OxAdapter implements ReadWriteAdapter {
           {
             to: address,
             data,
-            ...prepCallParams(options),
+            ...prepareCallParams(options),
           },
         ],
       })
@@ -341,7 +336,7 @@ export class OxAdapter implements ReadWriteAdapter {
     onMined,
     ...options
   }: WriteParams<TAbi, TFunctionName>) {
-    const { data } = prepFunctionData({
+    const { data } = prepareFunctionData({
       abi,
       fn,
       args: args as FunctionArgs<TAbi, TFunctionName>,
@@ -355,7 +350,7 @@ export class OxAdapter implements ReadWriteAdapter {
             to: address,
             data,
             from: from ?? (await this.getSignerAddress()),
-            ...prepCallParams(options),
+            ...prepareCallParams(options),
           },
         ],
       })
@@ -371,87 +366,35 @@ export class OxAdapter implements ReadWriteAdapter {
   encodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >({ abi, fn, args }: EncodeFunctionDataParams<TAbi, TFunctionName>) {
-    try {
-      const { data } = prepFunctionData({
-        abi,
-        fn,
-        args: args as FunctionArgs<TAbi, TFunctionName>,
-      });
-      return data;
-    } catch (e) {
-      handleError(e);
-    }
+  >(params: EncodeFunctionDataParams<TAbi, TFunctionName>) {
+    return encodeFunctionData(params);
   }
 
   encodeFunctionReturn<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
-  >({
-    abi,
-    fn,
-    value,
-  }: EncodeFunctionReturnParams<TAbi, TFunctionName>): Bytes {
-    const abiFn = AbiFunction.fromAbi(abi, fn as any);
-    return AbiFunction.encodeResult(abiFn, value as any, {
-      as: "Object",
-    });
+  >(params: EncodeFunctionReturnParams<TAbi, TFunctionName>): Bytes {
+    return encodeFunctionReturn(params);
   }
 
   decodeFunctionData<
     TAbi extends Abi = Abi,
     TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-  >({ abi, data }: DecodeFunctionDataParams<TAbi, TFunctionName>) {
-    try {
-      const sig = Hex.slice(data, 0, 4);
-      const abiFn = AbiFunction.fromAbi(abi, sig);
-
-      return {
-        functionName: abiFn.name as TFunctionName,
-        args: AbiParameters.decode(abiFn.inputs, Hex.slice(data, 4), {
-          as: "Object",
-        }),
-      } as DecodedFunctionData<TAbi, TFunctionName>;
-    } catch (e) {
-      handleError(e);
-    }
+  >(params: DecodeFunctionDataParams<TAbi, TFunctionName>) {
+    return decodeFunctionData(params);
   }
 
   decodeFunctionReturn<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-  >({
-    abi,
-    data,
-    fn,
-  }: DecodeFunctionReturnParams<TAbi, TFunctionName>): FunctionReturn<
-    TAbi,
-    TFunctionName
-  > {
-    try {
-      const abiFn = AbiFunction.fromAbi(abi, fn as any);
-      const arrayResult = AbiFunction.decodeResult(abiFn, data, {
-        as: "Array",
-      });
-
-      return arrayToFriendly({
-        abi,
-        name: fn,
-        kind: "outputs",
-        values: arrayResult as AbiArrayType<
-          TAbi,
-          "function",
-          TFunctionName,
-          "outputs"
-        >,
-      });
-    } catch (e) {
-      handleError(e);
-    }
+  >(
+    params: DecodeFunctionReturnParams<TAbi, TFunctionName>,
+  ): FunctionReturn<TAbi, TFunctionName> {
+    return decodeFunctionReturn(params);
   }
 }
 
-function prepBlockParam(block?: BlockTag | bigint): HexString | BlockTag {
+function prepareBlockParam(block?: BlockTag | bigint): HexString | BlockTag {
   if (block === undefined) {
     return "latest";
   }
@@ -461,39 +404,7 @@ function prepBlockParam(block?: BlockTag | bigint): HexString | BlockTag {
   return block;
 }
 
-function prepFunctionData<
-  TAbi extends Abi,
-  TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
->({
-  abi,
-  args,
-  fn,
-}: { abi: TAbi; fn: TFunctionName; args: FunctionArgs<TAbi, TFunctionName> }) {
-  try {
-    const argsArray = objectToArray({
-      abi,
-      type: "function",
-      name: fn,
-      kind: "inputs",
-      value: args as FunctionArgs<TAbi, TFunctionName>,
-    });
-    const abiFn = AbiFunction.fromAbi(
-      abi,
-      fn as any,
-      {
-        args: argsArray,
-      } as AbiItem.fromAbi.Options,
-    );
-    return {
-      abiFn,
-      data: AbiFunction.encodeData(abiFn, argsArray),
-    };
-  } catch (e) {
-    handleError(e);
-  }
-}
-
-function prepCallParams({
+function prepareCallParams({
   block, // omitted
   chainId,
   gas,
@@ -540,30 +451,6 @@ function prepCallParams({
           : (`0x${value.toString(16)}` as HexString),
     },
   ] as const;
-}
-
-function handleError(error: any): never {
-  if (typeof error !== "object") {
-    throw new DriftError(error);
-  }
-
-  const _error = { message: "" };
-  let details: AnyObject | undefined;
-
-  try {
-    details = JSON.parse(error.details);
-  } catch {}
-
-  if (error.shortMessage) {
-    _error.message += error.shortMessage;
-  }
-  if (details?.message) {
-    _error.message += `\n${details.message}`;
-  }
-  _error.message += `\n${error.message.replace(error.shortMessage, "").trimStart()}`;
-  _error.message = _error.message.trimStart();
-
-  throw new DriftError(_error);
 }
 
 declare global {
