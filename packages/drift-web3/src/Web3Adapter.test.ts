@@ -7,7 +7,7 @@ import type {
   Hash,
   TransactionReceipt,
 } from "@delvtech/drift";
-import { erc20 } from "@delvtech/drift/testing";
+import { erc20, mockErc20 } from "@delvtech/drift/testing";
 import { Web3Adapter } from "src/Web3Adapter";
 import { describe, expect, it } from "vitest";
 import Web3 from "web3";
@@ -102,6 +102,34 @@ describe("Web3Adapter", () => {
     } as TransactionReceipt);
   });
 
+  describe("call", () => {
+    it("reads from deployed contracts", async () => {
+      const adapter = new Web3Adapter(web3);
+      const data = adapter.encodeFunctionData({
+        abi: erc20.abi,
+        fn: "symbol",
+      });
+      const result = await adapter.call({
+        to: address,
+        data,
+      });
+      expect(result).toEqual(expect.stringMatching(/^0x/));
+    });
+
+    it("reads from bytecodes", async () => {
+      const adapter = new Web3Adapter(web3);
+      const data = adapter.encodeFunctionData({
+        abi: mockErc20.abi,
+        fn: "name",
+      });
+      const result = await adapter.call({
+        bytecode: mockErc20.bytecode,
+        data,
+      });
+      expect(result).toEqual(expect.stringMatching(/^0x/));
+    });
+  });
+
   it("fetches events", async () => {
     const adapter = new Web3Adapter(web3);
     const currentBlock = await web3.eth.getBlockNumber();
@@ -172,6 +200,18 @@ describe("Web3Adapter", () => {
     expect(encoded).toBeTypeOf("string");
   });
 
+  it("encodes function return data", async () => {
+    const adapter = new Web3Adapter(web3);
+    const encoded = adapter.encodeFunctionReturn({
+      abi: erc20.abi,
+      fn: "balanceOf",
+      value: 123n,
+    });
+    expect(encoded).toEqual(
+      "0x000000000000000000000000000000000000000000000000000000000000007b",
+    );
+  });
+
   it("decodes function data", async () => {
     const adapter = new Web3Adapter(web3);
     const args: FunctionArgs<typeof erc20.abi, "transfer"> = {
@@ -191,5 +231,15 @@ describe("Web3Adapter", () => {
       args,
       functionName: "transfer",
     } as DecodedFunctionData<typeof erc20.abi, "transfer">);
+  });
+
+  it("decodes function return data", async () => {
+    const adapter = new Web3Adapter(web3);
+    const decoded = adapter.decodeFunctionReturn({
+      abi: erc20.abi,
+      fn: "balanceOf",
+      data: "0x000000000000000000000000000000000000000000000000000000000000007b",
+    });
+    expect(decoded).toEqual(123n);
   });
 });

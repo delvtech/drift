@@ -2,10 +2,14 @@ import {
   type Address,
   type AnyObject,
   type Block,
+  type Bytes,
+  type CallParams,
   type DecodeFunctionDataParams,
+  type DecodeFunctionReturnParams,
   type DecodedFunctionData,
   DriftError,
   type EncodeFunctionDataParams,
+  type EncodeFunctionReturnParams,
   type EventLog,
   type EventName,
   type FunctionName,
@@ -22,10 +26,13 @@ import {
   type TransactionReceipt,
   type WaitForTransactionParams,
   type WriteParams,
+  decodeFunctionReturn,
+  encodeFunctionReturn,
   objectToArray,
+  prepareBytecodeCallData,
 } from "@delvtech/drift";
 import type { Abi } from "abitype";
-import { type AbiFragment, default as Web3 } from "web3";
+import { type AbiFragment, type AccessList, default as Web3 } from "web3";
 
 export class Web3Adapter<TWeb3 extends Web3 = Web3>
   implements ReadWriteAdapter
@@ -149,6 +156,45 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     });
   }
 
+  call({
+    accessList,
+    block,
+    bytecode,
+    chainId,
+    data,
+    from,
+    gas,
+    gasPrice,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+    nonce,
+    to,
+    type,
+    value,
+  }: CallParams) {
+    if (bytecode && data) {
+      data = prepareBytecodeCallData(bytecode, data);
+    }
+
+    return this.web3.eth.call(
+      {
+        accessList: accessList as AccessList,
+        chainId,
+        data,
+        from,
+        gas,
+        gasPrice,
+        maxFeePerGas,
+        maxPriorityFeePerGas,
+        nonce,
+        to: to as any,
+        type,
+        value,
+      },
+      block,
+    ) as Promise<Bytes>;
+  }
+
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
     abi,
     address,
@@ -262,6 +308,13 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     return method(...arrayArgs).encodeABI() as HexString;
   }
 
+  encodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(params: EncodeFunctionReturnParams<TAbi, TFunctionName>) {
+    return encodeFunctionReturn(params);
+  }
+
   decodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
@@ -276,6 +329,13 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     } as DecodedFunctionData<TAbi, TFunctionName>;
   }
 
+  decodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(params: DecodeFunctionReturnParams<TAbi, TFunctionName>) {
+    return decodeFunctionReturn(params);
+  }
+
   async getSignerAddress() {
     const [address] = await this.web3.eth.getAccounts();
     if (!address) throw new DriftError("No signer address found");
@@ -288,6 +348,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   >(params: WriteParams<TAbi, TFunctionName>) {
     const {
       abi,
+      accessList,
       address,
       args,
       fn,
@@ -310,6 +371,8 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
       const req = this.web3.eth
         .sendTransaction({
           ...rest,
+          accessList: accessList as AccessList,
+          to: address,
           data: method(...arrayArgs).encodeABI(),
           from,
         })
