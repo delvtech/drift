@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.1-beta.26
+
+### Patch Changes
+
+- 81e5362: Added a `call` method to `Drift` and adapters with support for bytecode (deployless) calls.
+
 ## 0.0.1-beta.25
 
 ### Patch Changes
