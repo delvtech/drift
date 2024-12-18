@@ -1,5 +1,17 @@
 # @delvtech/drift
 
+## 0.0.1-beta.26
+
+### Patch Changes
+
+- 668eff1: Patched the `objectToArray` util to work with outputs
+- 990c8f1: Added `mockErc20` for testing exports
+- ca85ad8: Added `encodeFunctionData`, `encodeFunctionReturn`, `deocodeFunctionData`, and `decodeFunctionReturn` utils
+- bb13c66: Added `encodeFunctionReturn` and `decodeFunctionReturn` methods
+- 416952b: Added an `arrayToFriendly` util
+- 786cc9f: Patched overloaded function handling in `objectToArray`
+- 81e5362: Added a `call` method to `Drift` and adapters with support for bytecode (deployless) calls.
+
 ## 0.0.1-beta.25
 
 ### Patch Changes
