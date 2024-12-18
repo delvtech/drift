@@ -71,8 +71,8 @@ export class OxAdapter implements ReadWriteAdapter {
     try {
       const provider = rpcUrl
         ? RpcTransport.fromHttp(rpcUrl)
-        : "window" in globalThis
-          ? window.ethereum
+        : "ethereum" in globalThis
+          ? (globalThis as any).ethereum
           : undefined;
 
       if (!provider) {
