@@ -29,14 +29,14 @@ import {
   ReadonlyError,
 } from "src/client/BaseClient";
 import type { SerializableKey } from "src/utils/createSerializableKey";
-import type { AnyObject, EmptyObject, OneOf, Pretty } from "src/utils/types";
+import type { AnyObject, EmptyObject, Eval, OneOf } from "src/utils/types";
 
 export type ContractConfig<
   TAbi extends Abi = Abi,
   TAdapter extends Adapter = Adapter,
   TCache extends SimpleCache = SimpleCache,
   TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
-> = Pretty<
+> = Eval<
   ContractParams<TAbi> & ContractClientOptions<TAdapter, TCache, TClient>
 >;
 

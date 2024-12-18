@@ -10,7 +10,22 @@ export type MaybeAwaited<T> = T extends Promise<infer U> ? MaybePromise<U> : T;
  * Combines members of an intersection into a readable type.
  * @see https://x.com/mattpocockuk/status/1622730173446557697?s=20&t=NdpAcmEFXY01xkqU3KO0Mg
  */
-export type Pretty<T> = { [K in keyof T]: T[K] } & {};
+// This is not meant for internal use. It's a public alias for the internal
+// `Eval` that uses a name users might be more familiar with.
+export type Pretty<T> = Eval<T>;
+
+/**
+ * Forces TypeScript to evaluate and expand a type instead of displaying it as a
+ * reference.
+ *
+ * @internal
+ * @privateRemarks
+ * The `& {}` intersection trick works because it forces TypeScript to create a
+ * new object type rather than just reference the existing one. It's like
+ * telling TypeScript "give me a new type that has all these properties" instead
+ * of "just point to this other type."
+ */
+export type Eval<T> = { [K in keyof T]: T[K] } & {};
 
 /**
  * Replace properties in `T` with properties in `U`.

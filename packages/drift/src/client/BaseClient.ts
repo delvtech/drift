@@ -41,12 +41,12 @@ import { ClientCache } from "src/client/cache/ClientCache";
 import { MethodInterceptor } from "src/client/hooks/MethodInterceptor";
 import { DriftError } from "src/error/DriftError";
 import type { SerializableKey } from "src/utils/createSerializableKey";
-import type { OneOf, Pretty } from "src/utils/types";
+import type { Eval, OneOf } from "src/utils/types";
 
 export type ClientConfig<
   TAdapter extends Adapter = Adapter,
   TCache extends SimpleCache = SimpleCache,
-> = Pretty<ClientOptions<TCache> & ClientAdapterOptions<TAdapter>>;
+> = Eval<ClientOptions<TCache> & ClientAdapterOptions<TAdapter>>;
 
 /**
  * A client for interacting with a network through an adapter with caching and

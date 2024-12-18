@@ -23,18 +23,16 @@ import type {
 import type { SimpleCache } from "src/cache/types";
 import type { BaseClient, ClientOptions } from "src/client/BaseClient";
 import { MockClient } from "src/client/MockClient";
-import {
-  Contract
-} from "src/client/contract/Contract";
+import { Contract } from "src/client/contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
-import type { FunctionKey, OneOf, OptionalKeys, Pretty } from "src/utils/types";
+import type { Eval, FunctionKey, OneOf, OptionalKeys } from "src/utils/types";
 
 export type MockContractConfig<
   TAbi extends Abi = Abi,
   TAdapter extends MockAdapter = MockAdapter,
   TCache extends SimpleCache = SimpleCache,
   TClient extends MockClient<TAdapter, TCache> = MockClient<TAdapter, TCache>,
-> = Pretty<
+> = Eval<
   Partial<ContractParams<TAbi>> &
     MockContractClientOptions<TAdapter, TCache, TClient>
 >;
