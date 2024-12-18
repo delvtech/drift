@@ -74,17 +74,18 @@ export class StubStore<T> {
     // Create a new method store if one doesn't exist
     if (!methodStore) {
       methodStore = {
-        defaultStub: sinonStub().throws(
-          new NotImplementedError({
+        defaultStub: sinonStub().callsFake((...args) => {
+          throw new NotImplementedError({
             method: String(method),
-          }),
-        ),
+            args,
+          });
+        }),
         keyedStubs: new Map(),
       };
       this.methodStores.set(method, methodStore);
 
-      // Apply the create function to the default stub and return early if no
-      // key is provided or if partial matching is enabled.
+      // Apply the create function to the new default stub and return early if
+      // no key is provided or if partial matching is enabled.
       if (create && (!key || matchPartial)) {
         methodStore.defaultStub = create(methodStore.defaultStub as any);
         return methodStore.defaultStub as any;
@@ -123,12 +124,13 @@ export class StubStore<T> {
       return methodStore.defaultStub as any;
     }
 
-    let newStub = sinonStub().throws(
-      new NotImplementedError({
+    let newStub = sinonStub().callsFake((...args) => {
+      throw new NotImplementedError({
         method: String(method),
         key: stubKey,
-      }),
-    );
+        args,
+      });
+    });
 
     if (create) {
       newStub = create(newStub as any);
@@ -140,10 +142,40 @@ export class StubStore<T> {
 }
 
 export class NotImplementedError extends DriftError {
-  constructor({ method, key }: { method: string; key?: string }) {
+  constructor({
+    method,
+    key,
+    args,
+  }: { method: string; key?: string; args?: any[] }) {
+    args?.push(BigInt(1.5e18));
     super(
-      `No stub found for method ${method}${key ? ` with key "${key}"` : ""}. The value must be stubbed first:
-    mock.on${method.replace(/^./, (c) => c.toUpperCase())}(...args).resolves(value)`,
+      `Missing stub${key ? ` with key "${key}"` : ""} for ${method} method.
+
+  The value must be stubbed first: \`mock.on${method.replace(/^./, (c) => c.toUpperCase())}(...args).resolves(value)\`
+  ${
+    args
+      ? `
+  args: [
+    ${args
+      .map((arg) => {
+        if (typeof arg === "object" && "abi" in arg) {
+          const { abi, ...rest } = arg;
+          return stringify(
+            {
+              ...rest,
+              abi: stringify(abi)?.replace(/(?<=.{100}).+/, "..."),
+            },
+            null,
+            2,
+          )?.replaceAll("\n", "\n    ");
+        }
+        return stringify(arg, null, 2)?.replaceAll("\n", "\n    ");
+      })
+      .join(",\n    ")}
+  ]
+`
+      : ""
+  }`,
       {
         name: "NotImplementedError",
       },
