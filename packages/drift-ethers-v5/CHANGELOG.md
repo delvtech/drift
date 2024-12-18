@@ -1,5 +1,19 @@
 # @delvtech/drift-ethers-v5
 
+## 0.0.1-beta.7
+
+### Patch Changes
+
+- def8abc: Added `call`, `encodeFunctionReturn`, and `decodeFunctionReturn` methods
+- Updated dependencies [668eff1]
+- Updated dependencies [990c8f1]
+- Updated dependencies [ca85ad8]
+- Updated dependencies [bb13c66]
+- Updated dependencies [416952b]
+- Updated dependencies [786cc9f]
+- Updated dependencies [81e5362]
+  - @delvtech/drift@0.0.1-beta.26
+
 ## 0.0.1-beta.6
 
 ### Patch Changes

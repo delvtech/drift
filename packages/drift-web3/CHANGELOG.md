@@ -1,5 +1,19 @@
 # @delvtech/drift-web3
 
+## 0.0.0-beta.15
+
+### Patch Changes
+
+- 7e13b82: Added `call`, `encodeFunctionReturn`, and `decodeFunctionReturn` methods
+- Updated dependencies [668eff1]
+- Updated dependencies [990c8f1]
+- Updated dependencies [ca85ad8]
+- Updated dependencies [bb13c66]
+- Updated dependencies [416952b]
+- Updated dependencies [786cc9f]
+- Updated dependencies [81e5362]
+  - @delvtech/drift@0.0.1-beta.26
+
 ## 0.0.0-beta.14
 
 ### Patch Changes
