@@ -40,5 +40,20 @@
       "quoteStyle": "double",
       "trailingCommas": "all"
     }
-  }
+  },
+  "overrides": [
+    {
+      "include": [
+        "contracts/lib/**",
+        "packages/drift/src/artifacts/**",
+        "packages/drift/src/ethereum/ethereum.ts"
+      ],
+      "formatter": {
+        "enabled": false
+      },
+      "linter": {
+        "enabled": false
+      }
+    }
+  ]
 }

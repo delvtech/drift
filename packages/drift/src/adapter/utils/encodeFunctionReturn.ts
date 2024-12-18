@@ -1,9 +1,7 @@
 import type { Abi } from "abitype";
 import { AbiFunction } from "ox";
 import type { Bytes } from "src/adapter/types/Abi";
-import type {
-  EncodeFunctionReturnParams
-} from "src/adapter/types/Adapter";
+import type { EncodeFunctionReturnParams } from "src/adapter/types/Adapter";
 import type { FunctionName } from "src/adapter/types/Function";
 import { handleError } from "src/adapter/utils/internal/handleError";
 

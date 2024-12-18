@@ -1,12 +1,7 @@
 import type { Abi } from "abitype";
 import type { Bytes } from "src/adapter/types/Abi";
-import type {
-  EncodeFunctionDataParams
-} from "src/adapter/types/Adapter";
-import type {
-  FunctionArgs,
-  FunctionName
-} from "src/adapter/types/Function";
+import type { EncodeFunctionDataParams } from "src/adapter/types/Adapter";
+import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
 import { handleError } from "src/adapter/utils/internal/handleError";
 import { prepareFunctionData } from "src/adapter/utils/internal/prepareFunctionData";
 
