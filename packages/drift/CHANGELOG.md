@@ -5,7 +5,7 @@
 ### Patch Changes
 
 - 668eff1: Patched the `objectToArray` util to work with outputs
-- 990c8f1: Added `mockErc20` for testing exports
+- 990c8f1: Added `mockErc20` to `/testing` exports
 - ca85ad8: Added `encodeFunctionData`, `encodeFunctionReturn`, `deocodeFunctionData`, and `decodeFunctionReturn` utils
 - bb13c66: Added `encodeFunctionReturn` and `decodeFunctionReturn` methods
 - 416952b: Added an `arrayToFriendly` util
