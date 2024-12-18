@@ -8,7 +8,7 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "@delvtech/drift";
-import { erc20 } from "@delvtech/drift/testing";
+import { erc20, mockErc20 } from "@delvtech/drift/testing";
 import { providers } from "ethers";
 import { EthersReadAdapter } from "src/EthersReadAdapter";
 import { describe, expect, it } from "vitest";
@@ -104,6 +104,34 @@ describe("EthersReadAdapter", () => {
     } as TransactionReceipt);
   });
 
+  describe("call", () => {
+    it("reads from deployed contracts", async () => {
+      const adapter = new EthersReadAdapter({ provider });
+      const data = adapter.encodeFunctionData({
+        abi: erc20.abi,
+        fn: "symbol",
+      });
+      const result = await adapter.call({
+        to: address,
+        data,
+      });
+      expect(result).toEqual(expect.stringMatching(/^0x/));
+    });
+
+    it("reads from bytecodes", async () => {
+      const adapter = new EthersReadAdapter({ provider });
+      const data = adapter.encodeFunctionData({
+        abi: mockErc20.abi,
+        fn: "name",
+      });
+      const result = await adapter.call({
+        bytecode: mockErc20.bytecode,
+        data,
+      });
+      expect(result).toEqual(expect.stringMatching(/^0x/));
+    });
+  });
+
   it("fetches events", async () => {
     const adapter = new EthersReadAdapter({ provider });
     const currentBlock = await provider.getBlockNumber();
@@ -174,6 +202,18 @@ describe("EthersReadAdapter", () => {
     expect(encoded).toBeTypeOf("string");
   });
 
+  it("encodes function return data", async () => {
+    const adapter = new EthersReadAdapter({ provider });
+    const encoded = adapter.encodeFunctionReturn({
+      abi: erc20.abi,
+      fn: "balanceOf",
+      value: 123n,
+    });
+    expect(encoded).toEqual(
+      "0x000000000000000000000000000000000000000000000000000000000000007b",
+    );
+  });
+
   it("decodes function data", async () => {
     const adapter = new EthersReadAdapter({ provider });
     const args: FunctionArgs<typeof erc20.abi, "transfer"> = {
@@ -193,5 +233,15 @@ describe("EthersReadAdapter", () => {
       args,
       functionName: "transfer",
     } as DecodedFunctionData<typeof erc20.abi, "transfer">);
+  });
+
+  it("decodes function return data", async () => {
+    const adapter = new EthersReadAdapter({ provider });
+    const decoded = adapter.decodeFunctionReturn({
+      abi: erc20.abi,
+      fn: "balanceOf",
+      data: "0x000000000000000000000000000000000000000000000000000000000000007b",
+    });
+    expect(decoded).toEqual(123n);
   });
 });

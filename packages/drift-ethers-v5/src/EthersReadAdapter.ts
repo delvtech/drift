@@ -1,9 +1,13 @@
 import {
   type Block,
+  type Bytes,
+  type CallParams,
   type DecodeFunctionDataParams,
+  type DecodeFunctionReturnParams,
   type DecodedFunctionData,
   DriftError,
   type EncodeFunctionDataParams,
+  type EncodeFunctionReturnParams,
   type EventLog,
   type EventName,
   type FunctionName,
@@ -19,7 +23,10 @@ import {
   type WriteParams,
   arrayToObject,
   convertType,
+  decodeFunctionReturn,
+  encodeFunctionReturn,
   objectToArray,
+  prepareBytecodeCallData,
 } from "@delvtech/drift";
 import type { Abi } from "abitype";
 import {
@@ -29,7 +36,7 @@ import {
   getDefaultProvider,
   providers,
 } from "ethers";
-import { Interface } from "ethers/lib/utils";
+import { type AccessList, Interface } from "ethers/lib/utils";
 import type { EthersAbi, Provider } from "src/types";
 
 export interface EthersReadAdapterParams<
@@ -149,6 +156,47 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     return receipt;
   }
 
+  async call({
+    accessList,
+    block,
+    bytecode,
+    chainId,
+    data,
+    from,
+    gas,
+    gasPrice,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+    nonce,
+    to,
+    type,
+    value,
+  }: CallParams) {
+    if (bytecode && data) {
+      data = prepareBytecodeCallData(bytecode, data);
+    }
+    if (typeof block === "bigint") {
+      block = await this.getBlockNumber();
+    }
+    return this.provider.call(
+      {
+        accessList: accessList as AccessList,
+        chainId: chainId === undefined ? undefined : Number(chainId),
+        data,
+        from,
+        gasLimit: gas,
+        gasPrice,
+        maxFeePerGas,
+        maxPriorityFeePerGas,
+        nonce: nonce === undefined ? undefined : Number(nonce),
+        to,
+        type: type === undefined ? undefined : Number(type),
+        value,
+      },
+      block === undefined ? undefined : blockParam(block),
+    ) as Promise<Bytes>;
+  }
+
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
     abi,
     address,
@@ -263,6 +311,13 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     return iface.encodeFunctionData(fn, arrayArgs);
   }
 
+  encodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(params: EncodeFunctionReturnParams<TAbi, TFunctionName>) {
+    return encodeFunctionReturn(params);
+  }
+
   decodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
@@ -287,6 +342,13 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
         ),
       }),
     } as DecodedFunctionData<TAbi, TFunctionName>;
+  }
+
+  decodeFunctionReturn<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(params: DecodeFunctionReturnParams<TAbi, TFunctionName>) {
+    return decodeFunctionReturn(params);
   }
 }
 

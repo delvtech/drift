@@ -64,4 +64,19 @@ declare module "@delvtech/drift" {
     effectiveGasPrice: bigint;
     transactionIndex: bigint;
   }
+
+  interface ContractCallOptions {
+    /**
+     * Unavailable in ethers.js.
+     */
+    blobs?: undefined;
+    /**
+     * Unavailable in ethers.js.
+     */
+    blobVersionedHashes?: undefined;
+    /**
+     * Unavailable in ethers.js.
+     */
+    maxFeePerBlobGas?: undefined;
+  }
 }
