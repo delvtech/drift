@@ -46,6 +46,6 @@ describe("Contract", () => {
     expect(await contract.read("symbol")).toBe("DAI");
 
     contract.invalidateRead("symbol");
-    expect(contract.read("symbol")).rejects.toThrow();
+    await expect(contract.read("symbol")).rejects.toThrow();
   });
 });

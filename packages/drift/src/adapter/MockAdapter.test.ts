@@ -195,9 +195,10 @@ describe("MockAdapter", () => {
   describe("waitForTransaction", () => {
     it("Resolves to undefined by default", async () => {
       const adapter = new MockAdapter();
-      expect(
-        adapter.waitForTransaction({ hash: "0x" }),
-      ).resolves.toBeUndefined();
+      const result = await adapter
+        .waitForTransaction({ hash: "0x" })
+        .catch(() => "error");
+      expect(result).toBeUndefined();
     });
 
     it("Can be stubbed with specific params", async () => {

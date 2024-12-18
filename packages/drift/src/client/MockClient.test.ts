@@ -203,7 +203,7 @@ describe("MockClient", () => {
   describe("waitForTransaction", () => {
     it("Resolves to undefined by default", async () => {
       const client = new MockClient();
-      expect(
+      await expect(
         client.waitForTransaction({ hash: "0x" }),
       ).resolves.toBeUndefined();
     });
