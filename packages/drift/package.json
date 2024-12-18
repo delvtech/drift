@@ -43,7 +43,7 @@
     "test": "vitest run",
     "test:watch": "vitest --reporter=verbose",
     "coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit --p tsconfig.typecheck.json"
   },
   "peerDependencies": {
     "sinon": "^17.0.1"
