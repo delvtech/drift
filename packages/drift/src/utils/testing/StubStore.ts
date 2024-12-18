@@ -171,7 +171,8 @@ export class NotImplementedError extends DriftError {
         }
         return stringify(arg, null, 2)?.replaceAll("\n", "\n    ");
       })
-      .join(",\n    ")}
+      .join(",\n    ")
+      .replace(/"abi": "(.+)"/, '"abi": $1')}
   ]
 `
       : ""
