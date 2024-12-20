@@ -107,7 +107,6 @@ export function objectToArray<
   for (const entry of matches) {
     if (!entry[kind]?.length) {
       if (!argsCount) {
-        console.log(`No ${kind} found`);
         return [] as AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
       }
       continue;
