@@ -22,7 +22,7 @@ export function createStubBlock(override: Partial<Block> = {}): Block {
     sha3Uncles: getRandomHex(),
     size: 100_000n,
     stateRoot: getRandomHex(),
-    timestamp: BigInt(Date.now() / 1000),
+    timestamp: BigInt(Date.now()) / 1000n,
     transactions: [],
     transactionsRoot: getRandomHex(),
     ...override,
