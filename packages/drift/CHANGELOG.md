@@ -1,5 +1,12 @@
 # @delvtech/drift
 
+## 0.0.1-beta.27
+
+### Patch Changes
+
+- be1e986: Patched `getRandomHex` testing util for better distribution and better byte alignment with odd length prefixes.
+- 934d940: Fixed bigint parsing bug in `createStubBlock`
+
 ## 0.0.1-beta.26
 
 ### Patch Changes
