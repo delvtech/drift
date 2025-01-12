@@ -42,24 +42,20 @@ export class MethodInterceptor<T extends AnyObject = AnyObject> {
     });
   }
 
-  private _useMethodHooks<
-    TMethod extends FunctionKey<T>,
-    TFunction extends T[TMethod],
-    TArgs extends Parameters<TFunction>,
-  >({
+  private _useMethodHooks({
     method,
     fn,
     args,
   }: {
-    method: TMethod;
-    fn: TFunction;
-    args: TArgs;
-  }): ReturnType<TFunction> {
+    method: PropertyKey;
+    fn: AnyFunction;
+    args: any[];
+  }) {
     let skipped = false;
     let result: any = undefined;
 
     // Call before hook handlers
-    const beforeHook: unknown = this._hooks.call(`before:${method as string}`, {
+    const beforeHook: unknown = this._hooks.call(`before:${String(method)}`, {
       get args() {
         return args;
       },
@@ -77,11 +73,11 @@ export class MethodInterceptor<T extends AnyObject = AnyObject> {
     const runAfter = () => {
       // Call the function if not already resolved by a before hook
       if (!skipped) {
-        result = (fn as AnyFunction)(...args);
+        result = fn(...args);
       }
 
       // Call after hook handlers
-      const afterHook: unknown = this._hooks.call(`after:${method as string}`, {
+      const afterHook: unknown = this._hooks.call(`after:${String(method)}`, {
         args,
         get result() {
           return result;
