@@ -12,14 +12,11 @@ import type { HexString } from "src/adapter/types/Abi";
  * ```
  */
 export function getRandomHex(bytes = 32, prefix = ""): HexString {
-  let hex = prefix;
-  const length = bytes * 2 - prefix.length;
-  for (let i = 0; i < length; i++) {
-    hex += getRandomHexChar();
-  }
-  return `0x${hex}`;
-}
-
-export function getRandomHexChar() {
-  return Math.floor(Math.random() * 16).toString(16);
+  const array = new Uint8Array(bytes);
+  crypto.getRandomValues(array);
+  const hex = Array.from(array, (b) => b.toString(16).padStart(2, "0")).join(
+    "",
+  );
+  const paddedPrefix = prefix.length % 2 ? `${prefix}0` : prefix;
+  return `0x${paddedPrefix}${hex.slice(paddedPrefix.length)}` as HexString;
 }
