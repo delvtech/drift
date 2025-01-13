@@ -1,5 +1,11 @@
 # @delvtech/drift-viem
 
+## 0.1.0-beta.33
+
+### Patch Changes
+
+- 8c8d18d: Added a default `PublicClient` type to the `ViemReadAdapter` type param.
+
 ## 0.1.0-beta.32
 
 ### Patch Changes
