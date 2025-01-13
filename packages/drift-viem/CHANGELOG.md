@@ -1,5 +1,11 @@
 # @delvtech/drift-viem
 
+## 0.1.0-beta.34
+
+### Patch Changes
+
+- bd83437: Fixed bug where tuple return types were only returning the first item.
+
 ## 0.1.0-beta.33
 
 ### Patch Changes
