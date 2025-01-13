@@ -214,7 +214,7 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
 
     return arrayToFriendly({
       abi,
-      values: (Array.isArray(output) ? output : [output]) as any,
+      values: [output] as any,
       kind: "outputs",
       name: fn,
     }) as FunctionReturn<TAbi, TFunctionName>;
