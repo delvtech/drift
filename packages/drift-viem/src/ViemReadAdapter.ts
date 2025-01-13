@@ -46,7 +46,7 @@ export interface ViemReadAdapterParams<
   publicClient: TClient;
 }
 
-export class ViemReadAdapter<TClient extends PublicClient>
+export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
   implements ReadAdapter
 {
   publicClient: TClient;
