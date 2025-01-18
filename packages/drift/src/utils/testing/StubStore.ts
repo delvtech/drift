@@ -147,7 +147,6 @@ export class NotImplementedError extends DriftError {
     key,
     args,
   }: { method: string; key?: string; args?: any[] }) {
-    args?.push(BigInt(1.5e18));
     super(
       `Missing stub${key ? ` with key "${key}"` : ""} for ${method} method.
 
