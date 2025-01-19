@@ -188,10 +188,8 @@ export class OxAdapter implements ReadWriteAdapter {
   }
 
   call({ to, data, bytecode, block, ...options }: CallParams) {
-    let _data = data;
-
     if (bytecode && data) {
-      _data = prepareBytecodeCallData(bytecode, data);
+      data = prepareBytecodeCallData(bytecode, data);
     }
 
     return this.provider.request({
@@ -199,7 +197,7 @@ export class OxAdapter implements ReadWriteAdapter {
       params: [
         {
           to,
-          data: _data,
+          data,
           ...prepareCallParams(options),
         },
         prepareBlockParam(block),
