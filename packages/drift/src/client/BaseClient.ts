@@ -229,7 +229,10 @@ export class BaseClient<
   /**
    * Read from a contract.
    */
-  async read<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
+  async read<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
+  >(
     params: ReadParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
     return this._cachedFn({
@@ -243,7 +246,7 @@ export class BaseClient<
    */
   async simulateWrite<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
     params: SimulateWriteParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
@@ -253,9 +256,10 @@ export class BaseClient<
   /**
    * Write to a contract.
    */
-  async write<TAbi extends Abi, TFunctionName extends FunctionName<TAbi>>(
-    params: WriteParams<TAbi, TFunctionName>,
-  ): Promise<Hash> {
+  async write<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(params: WriteParams<TAbi, TFunctionName>): Promise<Hash> {
     if (!this.isReadWrite()) {
       throw new ReadonlyError();
     }
