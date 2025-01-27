@@ -97,7 +97,7 @@ export function createClient<
   chainId,
   ...adapterConfig
 }: ClientConfig<TAdapter, TCache> = {}): Client<TAdapter, TCache> {
-  adapter ??= new OxAdapter(adapterConfig) as Adapter as TAdapter;
+  adapter ||= new OxAdapter(adapterConfig) as Adapter as TAdapter;
   const interceptor = new MethodInterceptor<TAdapter>();
 
   // Handle cache config

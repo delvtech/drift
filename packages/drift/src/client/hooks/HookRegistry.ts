@@ -25,7 +25,7 @@ export class HookRegistry<T extends AnyObject = AnyObject> {
     hook: THook,
     handler: HookHandler<T, THook>,
   ): void {
-    this._handlers[hook] ??= [];
+    this._handlers[hook] ||= [];
     this._handlers[hook].push(handler);
   }
 
