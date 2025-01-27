@@ -98,17 +98,16 @@ export type { SimpleCache } from "src/cache/types";
 // client //
 
 export {
-  BaseClient,
-  ClientError,
-  ReadonlyError,
+  createClient,
+  type Client,
   type ClientAdapterOptions,
   type ClientOptions,
   type ClientConfig,
   type ReadClient,
   type ReadWriteClient,
-} from "src/client/BaseClient";
+} from "src/client/Client";
 
-export { Drift } from "src/client/drift/Drift";
+export { type Drift, createDrift } from "src/client/Drift";
 
 export {
   Contract,
@@ -168,6 +167,7 @@ export type {
   ReplaceProps,
   RequiredKeys,
   UnionToIntersection,
+  Extended,
 } from "src/utils/types";
 
 // ...rest //

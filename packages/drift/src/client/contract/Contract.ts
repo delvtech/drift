@@ -23,11 +23,12 @@ import type {
 } from "src/adapter/types/Function";
 import type { SimpleCache } from "src/cache/types";
 import {
-  BaseClient,
+  type Client,
   type ClientConfig,
   type ReadWriteClient,
-  ReadonlyError,
-} from "src/client/BaseClient";
+  createClient,
+} from "src/client/Client";
+import { DriftError } from "src/error/DriftError";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { AnyObject, EmptyObject, Eval, OneOf } from "src/utils/types";
 
@@ -35,16 +36,16 @@ export type ContractConfig<
   TAbi extends Abi = Abi,
   TAdapter extends Adapter = Adapter,
   TCache extends SimpleCache = SimpleCache,
-  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
+  TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
 > = Eval<
   ContractParams<TAbi> & ContractClientOptions<TAdapter, TCache, TClient>
 >;
 
 export class Contract<
   TAbi extends Abi = Abi,
-  TAdapter extends Adapter = ReadWriteAdapter,
+  TAdapter extends Adapter = Adapter,
   TCache extends SimpleCache = SimpleCache,
-  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
+  TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
 > {
   abi: TAbi;
   address: Address;
@@ -58,7 +59,7 @@ export class Contract<
   }: ContractConfig<TAbi, TAdapter, TCache, TClient>) {
     this.abi = abi;
     this.address = address;
-    this.client = client ?? (new BaseClient(clientConfig) as TClient);
+    this.client = client ?? (createClient(clientConfig) as TClient);
   }
 
   get adapter() {
@@ -73,7 +74,7 @@ export class Contract<
     TAbi,
     ReadWriteAdapter,
     TCache,
-    BaseClient<ReadWriteAdapter, TCache>
+    Client<ReadWriteAdapter, TCache>
   > {
     return this.client.isReadWrite();
   }
@@ -292,7 +293,7 @@ export class Contract<
       : never
   ): TClient extends ReadWriteClient ? Promise<Hash> : never {
     if (!this.client.isReadWrite()) {
-      throw new ReadonlyError();
+      throw new DriftError("Contract is read-only");
     }
     return this.client.write({
       abi: this.abi,
@@ -311,7 +312,7 @@ export class Contract<
     ..._: TClient extends ReadWriteClient ? [] : never
   ): TClient extends ReadWriteClient ? Promise<Address> : never {
     if (!this.client.isReadWrite()) {
-      throw new ReadonlyError();
+      throw new DriftError("Contract is read-only");
     }
     return this.client.getSignerAddress() as Promise<Address> as any;
   }
@@ -321,20 +322,20 @@ export type ReadContract<
   TAbi extends Abi = Abi,
   TAdapter extends ReadAdapter = ReadAdapter,
   TCache extends SimpleCache = SimpleCache,
-  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
+  TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
 > = Contract<TAbi, TAdapter, TCache, TClient>;
 
 export type ReadWriteContract<
   TAbi extends Abi = Abi,
   TAdapter extends ReadWriteAdapter = ReadWriteAdapter,
   TCache extends SimpleCache = SimpleCache,
-  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
+  TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
 > = Contract<TAbi, TAdapter, TCache, TClient>;
 
 export type ContractClientOptions<
   TAdapter extends Adapter = Adapter,
   TCache extends SimpleCache = SimpleCache,
-  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
+  TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
 > = OneOf<
   | {
       client?: TClient;

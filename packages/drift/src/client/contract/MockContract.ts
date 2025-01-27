@@ -21,8 +21,8 @@ import type {
   FunctionReturn,
 } from "src/adapter/types/Function";
 import type { SimpleCache } from "src/cache/types";
-import type { BaseClient, ClientOptions } from "src/client/BaseClient";
-import { MockClient } from "src/client/MockClient";
+import type { Client, ClientOptions } from "src/client/Client";
+import { type MockClient, createMockClient } from "src/client/MockClient";
 import { Contract } from "src/client/contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
 import type { Eval, FunctionKey, OneOf, OptionalKeys } from "src/utils/types";
@@ -52,7 +52,7 @@ export class MockContract<
     super({
       abi,
       address,
-      client: client ?? (new MockClient(clientOptions) as TClient),
+      client: client ?? (createMockClient(clientOptions) as TClient),
     });
   }
 
@@ -168,7 +168,7 @@ export class MockContract<
 export type MockContractClientOptions<
   TAdapter extends MockAdapter = MockAdapter,
   TCache extends SimpleCache = SimpleCache,
-  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
+  TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
 > = OneOf<
   | {
       client?: TClient;

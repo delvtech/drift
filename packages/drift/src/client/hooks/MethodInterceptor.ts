@@ -24,23 +24,30 @@ export class MethodInterceptor<T extends AnyObject = AnyObject> {
    * @param target The object whose methods should be intercepted
    * @returns A proxied version of the target object
    */
-  createProxy(target: T): T {
+  createProxy = <U extends T>(target: U): U => {
     return new Proxy(target, {
-      get: (target, prop: string | symbol) => {
-        const value = target[prop as keyof T];
-        if (typeof value === "function") {
-          return (...args: unknown[]) => {
-            return this._useMethodHooks({
-              method: prop as FunctionKey<T>,
-              fn: value.bind(target),
-              args,
-            });
-          };
+      get: (target, prop, receiver) => {
+        const value: unknown = Reflect.get(target, prop, receiver);
+        if (prop === "constructor" || typeof value !== "function") {
+          return value;
         }
-        return value;
+
+        // Wrap the method
+        const wrapped = (...args: unknown[]) =>
+          this._useMethodHooks({
+            method: prop,
+            fn: value.bind(target),
+            args,
+          });
+
+        Object.defineProperty(wrapped, "name", {
+          get: () => value.name,
+        });
+
+        return wrapped;
       },
     });
-  }
+  };
 
   private _useMethodHooks({
     method,

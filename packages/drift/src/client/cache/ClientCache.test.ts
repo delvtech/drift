@@ -18,7 +18,7 @@ type Erc20Abi = typeof erc20.abi;
 describe("ClientCache", () => {
   describe("balances", () => {
     it("Namespaces balance keys", async () => {
-      const store = new LruSimpleCache({ max: 100 });
+      const store = new LruSimpleCache();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
 
@@ -54,7 +54,7 @@ describe("ClientCache", () => {
 
   describe("transactions", () => {
     it("Namespaces transaction keys", async () => {
-      const store = new LruSimpleCache({ max: 100 });
+      const store = new LruSimpleCache();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
 
@@ -78,7 +78,7 @@ describe("ClientCache", () => {
 
   describe("transaction receipts", () => {
     it("Namespaces transaction receipt keys", async () => {
-      const store = new LruSimpleCache({ max: 100 });
+      const store = new LruSimpleCache();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
 
@@ -102,7 +102,7 @@ describe("ClientCache", () => {
 
   describe("calls", () => {
     it("Namespaces call keys", async () => {
-      const store = new LruSimpleCache({ max: 100 });
+      const store = new LruSimpleCache();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
 
@@ -183,7 +183,7 @@ describe("ClientCache", () => {
 
   describe("events", () => {
     it("Namespaces event keys", async () => {
-      const store = new LruSimpleCache({ max: 100 });
+      const store = new LruSimpleCache();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
 
@@ -239,7 +239,7 @@ describe("ClientCache", () => {
 
   describe("Reads", () => {
     it("Namespaces read keys", async () => {
-      const store = new LruSimpleCache({ max: 100 });
+      const store = new LruSimpleCache();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
 

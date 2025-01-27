@@ -7,12 +7,19 @@ export { createStubTransactionReceipt } from "src/adapter/utils/testing/createSt
 
 // Client
 
-export { MockClient, type MockClientConfig } from "src/client/MockClient";
+export {
+  type MockClient,
+  type MockClientConfig,
+  createMockClient,
+} from "src/client/MockClient";
+
 export {
   MockContract,
   type MockContractConfig,
+  type MockContractClientOptions,
 } from "src/client/contract/MockContract";
-export { MockDrift } from "src/client/drift/MockDrift";
+
+export { type MockDrift, createMockDrift } from "src/client/MockDrift";
 
 // Artifacts
 

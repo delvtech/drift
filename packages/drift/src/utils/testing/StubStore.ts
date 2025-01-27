@@ -139,6 +139,13 @@ export class StubStore<T> {
     methodStore.keyedStubs.set(stubKey, newStub);
     return newStub as any;
   }
+
+  /**
+   * Find out if a method has been stubbed.
+   */
+  has(method: FunctionKey<T>) {
+    return this.methodStores.has(method);
+  }
 }
 
 export class NotImplementedError extends DriftError {
@@ -148,9 +155,9 @@ export class NotImplementedError extends DriftError {
     args,
   }: { method: string; key?: string; args?: any[] }) {
     super(
-      `Missing stub${key ? ` with key "${key}"` : ""} for ${method} method.
+      `Missing stub${key ? ` with key '${key}'` : ""} for '${method}' method.
 
-  The value must be stubbed first: \`mock.on${method.replace(/^./, (c) => c.toUpperCase())}(...args).resolves(value)\`
+  The value must be stubbed first: 'mock.on${method.replace(/^./, (c) => c.toUpperCase())}(...args).resolves(value)'
   ${
     args
       ? `

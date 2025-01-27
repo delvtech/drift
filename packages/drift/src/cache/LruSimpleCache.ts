@@ -13,7 +13,8 @@ export type LruSimpleCacheConfig<
  *
  * @template K - The type of key used to access values in the cache.
  * @template V - The type of value to be stored in the cache.
- * @param options - The options to pass to the underlying LRU cache.
+ * @param options - The options to pass to the underlying LRU cache. Defaults to
+ * `{ max: 500 }`.
  * @see [lru-cache](https://www.npmjs.com/package/lru-cache)
  */
 export class LruSimpleCache<
@@ -23,7 +24,7 @@ export class LruSimpleCache<
 {
   private _lru: LRUCache<string, V, unknown>;
 
-  constructor(config: LruSimpleCacheConfig<V>) {
+  constructor(config: LruSimpleCacheConfig<V> = { max: 500 }) {
     this._lru = new LRUCache(config);
   }
 

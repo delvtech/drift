@@ -58,7 +58,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
 
   constructor({
     namespace,
-    store = new LruSimpleCache({ max: 500 }) as SimpleCache as T,
+    store = new LruSimpleCache() as SimpleCache as T,
   }: ClientCacheConfig<T>) {
     this.namespace = namespace;
     this.store = store;
