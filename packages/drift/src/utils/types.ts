@@ -7,6 +7,22 @@ export type MaybePromise<T> = T | Promise<T>;
 export type MaybeAwaited<T> = T extends Promise<infer U> ? MaybePromise<U> : T;
 
 /**
+ * Unwrap the return type of a function that may return a promise.
+ *
+ * @internal
+ * @privateRemarks
+ * This fixes type errors that arise when trying to return
+ * `Awaited<ReturnType<T>>` even though it's basically the same thing. I need to
+ * do some more research to understand why this is necessary. I'm guessing it
+ * has to do with distributing conditional types.
+ */
+export type AwaitedReturnType<T extends AnyFunction> = T extends (
+  ...args: any
+) => MaybePromise<infer U>
+  ? U
+  : never;
+
+/**
  * Combines members of an intersection into a readable type.
  * @see https://x.com/mattpocockuk/status/1622730173446557697?s=20&t=NdpAcmEFXY01xkqU3KO0Mg
  */
@@ -178,3 +194,33 @@ export type OneOf<T extends AnyObject> = UnionToIntersection<T> extends infer I
       >
     : never
   : never;
+
+/**
+ * Get a superset of `T` that allows for arbitrary properties.
+ *
+ * @example
+ *
+ * ```ts
+ * interface Order {
+ *   account: `0x${string}`;
+ *   amount: bigint;
+ * }
+ *
+ * const order1: Order = {
+ *   account: "0x123",
+ *   amount: 100n,
+ *   getStatus() { ... }
+ * // ^ Object literal may only specify known properties, and 'getStatus does not exist in type 'Order'.
+ * };
+ *
+ * // No errors! 🎉
+ * const order2: Extended<Order> = {
+ *   account: "0x123",
+ *   amount: 100n,
+ *   getStatus() { ... }
+ * };
+ * ```
+ *
+ */
+export type Extended<T extends AnyObject> = T &
+  Record<Exclude<PropertyKey, keyof T>, any>;
