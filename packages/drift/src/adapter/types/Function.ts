@@ -1,5 +1,9 @@
 import type { Abi, AbiStateMutability } from "abitype";
-import type { AbiFriendlyType, AbiObjectType } from "src/adapter/types/Abi";
+import type {
+  AbiEntry,
+  AbiFriendlyType,
+  AbiObjectType,
+} from "src/adapter/types/Abi";
 
 /**
  * Get a union of function names from an abi
@@ -9,10 +13,7 @@ export type FunctionName<
   TAbiStateMutability extends AbiStateMutability = AbiStateMutability,
 > = Abi extends TAbi
   ? string
-  : Extract<
-      TAbi[number],
-      { type: "function"; stateMutability: TAbiStateMutability }
-    >["name"];
+  : AbiEntry<TAbi, "function", string, TAbiStateMutability>["name"];
 
 /**
  * Get an object type for an abi function's arguments.
