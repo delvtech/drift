@@ -160,10 +160,10 @@ export type MergeKeys<T> = UnionToIntersection<T> extends infer I
  * >;
  * // {
  * //   a: string;
- * //   b?: never;
- * //   c?: never;
+ * //   b?: undefined;
+ * //   c?: undefined;
  * // } | {
- * //   a?: never;
+ * //   a?: undefined;
  * //   b: string;
  * //   c: number;
  * // }
@@ -171,8 +171,10 @@ export type MergeKeys<T> = UnionToIntersection<T> extends infer I
  */
 export type OneOf<T extends AnyObject> = UnionToIntersection<T> extends infer I
   ? T extends infer Ty
-    ? Ty & {
-        [K in Exclude<keyof I, keyof T>]?: never;
-      }
+    ? Eval<
+        Ty & {
+          [K in Exclude<keyof I, keyof T>]?: never;
+        }
+      >
     : never
   : never;
