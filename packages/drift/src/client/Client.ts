@@ -170,7 +170,8 @@ export function createClient<
       });
     },
 
-    getEvents(params) {
+    getEvents({ fromBlock = "earliest", ...restParams }) {
+      const params = { fromBlock, ...restParams };
       return cachedFn({
         cache: this.cache,
         key: this.cache.eventsKey(params),
