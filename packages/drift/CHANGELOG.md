@@ -1,5 +1,13 @@
 # @delvtech/drift
 
+## 0.0.1-beta.28
+
+### Patch Changes
+
+- 602f1a3: Added a default `fromBlock` of `"earliest"` and `toBlock` of `latest` to `getEvents`
+- 602f1a3: BREAKING CHANGE: Switched all clients to factory functions, e.g., `new Drift()` -> `createDrift()`.
+- 602f1a3: BREAKING CHANGE: Refactored the Contract clients and added a `createContract` factory
+
 ## 0.0.1-beta.27
 
 ### Patch Changes
