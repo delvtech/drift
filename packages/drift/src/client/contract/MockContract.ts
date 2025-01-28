@@ -21,38 +21,39 @@ import type {
   FunctionReturn,
 } from "src/adapter/types/Function";
 import type { SimpleCache } from "src/cache/types";
-import type { Client, ClientOptions } from "src/client/Client";
+import type { AdapterType, CacheType, ClientOptions } from "src/client/Client";
 import { type MockClient, createMockClient } from "src/client/MockClient";
-import { Contract } from "src/client/contract/Contract";
+import { ReadWriteContract } from "src/client/contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
 import type { Eval, FunctionKey, OneOf, OptionalKeys } from "src/utils/types";
 
 export type MockContractConfig<
   TAbi extends Abi = Abi,
-  TAdapter extends MockAdapter = MockAdapter,
-  TCache extends SimpleCache = SimpleCache,
-  TClient extends MockClient<TAdapter, TCache> = MockClient<TAdapter, TCache>,
+  TClient extends MockClient | undefined = MockClient | undefined,
+  TAdapter extends MockAdapter | undefined =
+    | AdapterType<TClient, MockAdapter>
+    | undefined,
+  TCache extends SimpleCache | undefined = CacheType<TClient> | undefined,
 > = Eval<
   Partial<ContractParams<TAbi>> &
-    MockContractClientOptions<TAdapter, TCache, TClient>
+    MockContractClientOptions<TClient, TAdapter, TCache>
 >;
 
 export class MockContract<
   TAbi extends Abi = Abi,
-  TAdapter extends MockAdapter = MockAdapter,
-  TCache extends SimpleCache = SimpleCache,
-  TClient extends MockClient<TAdapter, TCache> = MockClient<TAdapter, TCache>,
-> extends Contract<TAbi, TAdapter, TCache, TClient> {
+  TClient extends MockClient = MockClient,
+> extends ReadWriteContract<TAbi, TClient> {
   constructor({
     abi = [] as unknown as TAbi,
     address = ZERO_ADDRESS,
     client,
     ...clientOptions
-  }: MockContractConfig<TAbi, TAdapter, TCache, TClient> = {}) {
+  }: MockContractConfig<TAbi, TClient> = {}) {
     super({
       abi,
       address,
-      client: client ?? (createMockClient(clientOptions) as TClient),
+      client:
+        client ?? (createMockClient(clientOptions as ClientOptions) as TClient),
     });
   }
 
@@ -166,9 +167,11 @@ export class MockContract<
 }
 
 export type MockContractClientOptions<
-  TAdapter extends MockAdapter = MockAdapter,
-  TCache extends SimpleCache = SimpleCache,
-  TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
+  TClient extends MockClient | undefined = MockClient | undefined,
+  TAdapter extends MockAdapter | undefined =
+    | AdapterType<TClient, MockAdapter>
+    | undefined,
+  TCache extends SimpleCache | undefined = CacheType<TClient> | undefined,
 > = OneOf<
   | {
       client?: TClient;

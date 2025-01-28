@@ -9,7 +9,7 @@ import {
   type ClientConfig,
   createClient,
 } from "src/client/Client";
-import { Contract } from "src/client/contract/Contract";
+import { type Contract, createContract } from "src/client/contract/Contract";
 
 export type Drift<
   TAdapter extends Adapter = Adapter,
@@ -18,12 +18,7 @@ export type Drift<
   contract<TAbi extends Abi>({
     abi,
     address,
-  }: ContractParams<TAbi>): Contract<
-    TAbi,
-    TAdapter,
-    TCache,
-    Drift<TAdapter, TCache>
-  >;
+  }: ContractParams<TAbi>): Contract<TAbi, Drift<TAdapter, TCache>>;
 };
 
 export function createDrift<
@@ -32,10 +27,10 @@ export function createDrift<
 >(config: ClientConfig<TAdapter, TCache> = {}): Drift<TAdapter, TCache> {
   return createClient(config).extend({
     contract({ abi, address }) {
-      return new Contract({
+      return createContract({
         abi,
         address,
-        client: this,
+        adapter: this,
       });
     },
   });

@@ -224,3 +224,8 @@ export type OneOf<T extends AnyObject> = UnionToIntersection<T> extends infer I
  */
 export type Extended<T extends AnyObject> = T &
   Record<Exclude<PropertyKey, keyof T>, any>;
+
+/**
+ * Return `T` if defined, otherwise return `U`.
+ */
+export type Fallback<T, U> = undefined extends T ? U : Exclude<T, undefined>;

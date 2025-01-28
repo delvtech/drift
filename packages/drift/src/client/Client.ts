@@ -29,7 +29,7 @@ export type Client<
   adapter: TAdapter;
   cache: ClientCache<TCache>;
   hooks: HookRegistry<MethodHooks<TAdapter>>;
-  isReadWrite(): this is Client<ReadWriteAdapter, TCache>;
+  isReadWrite(): this is Client<ReadWriteAdapter>;
   extend<T extends Partial<Extended<Client>>>(
     props: T & ThisType<T & Client<TAdapter, TCache>>,
   ): T & Client<TAdapter, TCache>;
@@ -54,15 +54,20 @@ export type ReadWriteClient<
 /**
  * Base options for configuring a {@linkcode Client}.
  */
-export interface ClientOptions<TCache extends SimpleCache = SimpleCache> {
-  cache?: TCache | LruSimpleCacheConfig;
+export interface ClientOptions<
+  T extends SimpleCache | undefined = SimpleCache | undefined,
+> {
+  // Accept LRU config if LRU can be assigned to TCache
+  cache?: LruSimpleCache extends T ? T | LruSimpleCacheConfig : T;
   chainId?: number;
 }
 
 /**
- * Options for configuring the adapter of a {@linkcode Client}.
+ * Options for configuring the {@linkcode Adapter} of a {@linkcode Client}.
  */
-export type ClientAdapterOptions<T extends Adapter = Adapter> = OneOf<
+export type ClientAdapterOptions<
+  T extends Adapter | undefined = Adapter | undefined,
+> = OneOf<
   | {
       /**
        * The adapter to use for network interactions. The resulting client will
@@ -75,11 +80,11 @@ export type ClientAdapterOptions<T extends Adapter = Adapter> = OneOf<
 >;
 
 /**
- * Configuration for creating a {@linkcode Client}.
+ * Configuration options for creating a {@linkcode Client}.
  */
 export type ClientConfig<
-  TAdapter extends Adapter = Adapter,
-  TCache extends SimpleCache = SimpleCache,
+  TAdapter extends Adapter | undefined = Adapter | undefined,
+  TCache extends SimpleCache | undefined = SimpleCache | undefined,
 > = Eval<ClientOptions<TCache> & ClientAdapterOptions<TAdapter>>;
 
 /**
@@ -91,19 +96,24 @@ export type ClientConfig<
 export function createClient<
   TAdapter extends Adapter = OxAdapter,
   TCache extends SimpleCache = LruSimpleCache,
->({
-  adapter,
-  cache,
-  chainId,
-  ...adapterConfig
-}: ClientConfig<TAdapter, TCache> = {}): Client<TAdapter, TCache> {
-  adapter ||= new OxAdapter(adapterConfig) as Adapter as TAdapter;
+>(
+  {
+    adapter: maybeAdapter,
+    cache: cacheOrConfig,
+    chainId,
+    ...adapterConfig
+  }: ClientConfig<TAdapter, TCache> = {} as any,
+): Client<TAdapter, TCache> {
   const interceptor = new MethodInterceptor<TAdapter>();
 
+  // Handle adapter config
+  const adapter = (maybeAdapter || new OxAdapter(adapterConfig)) as TAdapter;
+
   // Handle cache config
-  if (cache && !("clear" in cache)) {
-    cache = new LruSimpleCache(cache) as SimpleCache as TCache;
-  }
+  const isCache = cacheOrConfig && "clear" in cacheOrConfig;
+  const cache = (
+    isCache ? cacheOrConfig : new LruSimpleCache(cacheOrConfig)
+  ) as TCache;
 
   // Prepare client properties
   const clientProps: Client<TAdapter, TCache> = {
@@ -223,3 +233,13 @@ export function createClient<
 
   return interceptor.createProxy(client);
 }
+
+export type AdapterType<
+  TClient extends Client | undefined,
+  Fallback extends Adapter = Adapter,
+> = TClient extends { adapter: infer A } ? A : Fallback;
+
+export type CacheType<
+  TClient extends Client | undefined,
+  Fallback extends SimpleCache = SimpleCache,
+> = TClient extends { cache: { store: infer C } } ? C : Fallback;

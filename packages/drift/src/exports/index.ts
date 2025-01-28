@@ -110,15 +110,12 @@ export {
 export { type Drift, createDrift } from "src/client/Drift";
 
 export {
-  Contract,
-  type ContractEncodeFunctionDataArgs,
+  createContract,
+  ReadContract,
+  ReadWriteContract,
+  type Contract,
   type ContractConfig,
-  type ContractReadArgs,
-  type ContractWriteArgs,
-  type ReadContract,
-  type ReadWriteContract,
   type ContractClientOptions,
-  type ContractSimulateWriteArgs,
 } from "src/client/contract/Contract";
 
 export {

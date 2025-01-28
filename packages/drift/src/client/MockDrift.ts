@@ -4,7 +4,6 @@ import type { ContractParams } from "src/adapter/types/Contract";
 import type { LruSimpleCache } from "src/cache/LruSimpleCache";
 import type { SimpleCache } from "src/cache/types";
 import type { Client } from "src/client/Client";
-import type { Drift } from "src/client/Drift";
 import { type MockClientConfig, createMockClient } from "src/client/MockClient";
 import { MockContract } from "src/client/contract/MockContract";
 
@@ -15,12 +14,7 @@ export type MockDrift<
   contract<TAbi extends Abi>({
     abi,
     address,
-  }: ContractParams<TAbi>): MockContract<
-    TAbi,
-    TAdapter,
-    TCache,
-    Drift<TAdapter, TCache>
-  >;
+  }: ContractParams<TAbi>): MockContract<TAbi, MockDrift<TAdapter, TCache>>;
 };
 
 export function createMockDrift<
