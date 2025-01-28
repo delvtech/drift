@@ -180,8 +180,8 @@ export function createClient<
       });
     },
 
-    getEvents({ fromBlock = "earliest", ...restParams }) {
-      const params = { fromBlock, ...restParams };
+    getEvents({ fromBlock = "earliest", toBlock = "latest", ...restParams }) {
+      const params = { fromBlock, toBlock, ...restParams };
       return cachedFn({
         cache: this.cache,
         key: this.cache.eventsKey(params),

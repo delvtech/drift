@@ -224,7 +224,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
     event,
     filter,
     fromBlock = "earliest",
-    toBlock,
+    toBlock = "latest",
   }: GetEventsParams<TAbi, TEventName>): Promise<SerializableKey> {
     return this.createNamespacedKey("events", {
       address,
