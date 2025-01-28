@@ -2,7 +2,7 @@ import { MockAdapter } from "src/adapter/MockAdapter";
 import type { EventLog } from "src/adapter/types/Event";
 import { createContract } from "src/client/contract/Contract";
 import { erc20 } from "src/utils/testing/erc20";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 describe("Contract", () => {
   const abi = erc20.abi;
@@ -51,5 +51,20 @@ describe("Contract", () => {
 
     contract.invalidateRead("symbol");
     await expect(contract.read("symbol")).rejects.toThrow();
+  });
+
+  it("Maintains hooks proxy when extending", async () => {
+    const contract = createContract({ abi, address, adapter }).extend({
+      foo() {},
+    });
+    const beforeHandler = vi.fn(async ({ resolve }) => resolve());
+    const afterHandler = vi.fn();
+
+    contract.client.hooks.on("before:read", beforeHandler);
+    contract.client.hooks.on("after:read", afterHandler);
+    await contract.read("symbol");
+
+    expect(beforeHandler).toHaveBeenCalledTimes(1);
+    expect(afterHandler).toHaveBeenCalledTimes(1);
   });
 });

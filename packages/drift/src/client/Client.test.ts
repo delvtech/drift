@@ -5,11 +5,18 @@ import { ALICE } from "src/utils/testing/accounts";
 import { describe, expect, it, vi } from "vitest";
 
 describe("Client", () => {
-  describe("hooks", () => {
-    const abi = [] as Abi;
-    const adapter = new MockAdapter();
-    adapter.onGetChainId().resolves(0);
+  const abi = [] as Abi;
+  const adapter = new MockAdapter();
+  adapter.onGetChainId().resolves(0);
 
+  it("Maintains the adapter prototype chain", () => {
+    class CustomAdapter extends MockAdapter {}
+    const client = createClient({ adapter: new CustomAdapter() });
+    expect(client).toBeInstanceOf(CustomAdapter);
+    expect(client).toBeInstanceOf(MockAdapter);
+  });
+
+  describe("hooks", () => {
     it("Calls getChainId hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
@@ -232,6 +239,30 @@ describe("Client", () => {
       client.hooks.on("before:getSignerAddress", beforeHandler);
       client.hooks.on("after:getSignerAddress", afterHandler);
       await client.getSignerAddress();
+
+      expect(beforeHandler).toHaveBeenCalledTimes(1);
+      expect(afterHandler).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("extend", () => {
+    it("Extends client", async () => {
+      const client = createClient({ adapter }).extend({
+        foo() {},
+      });
+      expect(client.foo).toBeDefined();
+    });
+
+    it("Maintains hook proxy", async () => {
+      const client = createClient({ adapter }).extend({
+        foo() {},
+      });
+      const beforeHandler = vi.fn(async ({ resolve }) => resolve());
+      const afterHandler = vi.fn();
+
+      client.hooks.on("before:getChainId", beforeHandler);
+      client.hooks.on("after:getChainId", afterHandler);
+      await client.getChainId();
 
       expect(beforeHandler).toHaveBeenCalledTimes(1);
       expect(afterHandler).toHaveBeenCalledTimes(1);
