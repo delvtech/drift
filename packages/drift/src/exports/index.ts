@@ -105,6 +105,8 @@ export {
   type ClientConfig,
   type ReadClient,
   type ReadWriteClient,
+  type AdapterType,
+  type CacheType,
 } from "src/client/Client";
 
 export { type Drift, createDrift } from "src/client/Drift";
@@ -116,6 +118,10 @@ export {
   type Contract,
   type ContractConfig,
   type ContractClientOptions,
+  type ContractEncodeFunctionDataArgs,
+  type ContractReadArgs,
+  type ContractSimulateWriteArgs,
+  type ContractWriteArgs,
 } from "src/client/contract/Contract";
 
 export {
@@ -165,6 +171,8 @@ export type {
   RequiredKeys,
   UnionToIntersection,
   Extended,
+  AwaitedReturnType,
+  Fallback,
 } from "src/utils/types";
 
 // ...rest //
