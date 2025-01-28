@@ -1,5 +1,82 @@
 # @delvtech/drift
 
+## 0.0.1
+
+- 24bb35a: Improve `DriftError` formatting, support minification
+- a60ae6d: Added a `method` argument to the `reset` method of all mocks to reset a specific method (e.g., `read`)
+- 668eff1: Patched the `objectToArray` util to work with outputs
+- 3bb4943: Changed the `hash` field to `transactionHash` on transaction types.
+- 602f1a3: Added a default `fromBlock` of `"earliest"` and `toBlock` of `latest` to `getEvents`
+- 119724d: Remove unused `AutocompleteKey` type
+- c9f8d8f: Added an `OxAdapter` so that drift clients can be instantiated without a web3 client lib already installed.
+- 3a95c5c: Narrowed args type for all read functions to ensure they only accept pure and view functions.
+- be1e986: Patched `getRandomHex` testing util for better distribution and better byte alignment with odd length prefixes.
+- cd1d206: Removed default values from MockAdapter functions
+- 01a8004: Added a `BaseClient` class which contains most of the functionality that used to live in the `Drift` class and centralized logic for cache operations and namespace resolution, using the chain id as a default. This also removes a circular dependency between `Drift` and `Contract`.
+- a92bcf3: Remove abi from mock keys
+- d5fff4e: Replaced the `createClientCache` function with a `ClientCache` class which requires a namespace or namespace resolver. All methods are async to allow for dynamic namespace resolution and external cache implementations.
+- 7bd87cf: Add `Register` type inspired by abitype, change default types back to `0x${string}`
+- 13a5b3c: drift
+- 01a8004: Renamed `ContractEvent` to `EventLog` to be more consistent with other adapter types like `FunctionArgs`.
+- f103ab3: Patch `ReadContract` and `ReadWriteContract` types.
+- 990c8f1: Added `mockErc20` to testing exports
+- e7380c6: Update deps
+- e55910e: Add `name` option to `DriftError`
+- 1bc7d8e: Bump build
+- 119724d: Add support for stubbing functions with partial params and arguments in Mock classes.
+- cd364f4: Remove `PendingBlock` type
+- 4194108: Add `OneOf` type
+- 01a8004: Refactored `Drift` and `MockDrift` to extend `BaseClient` and `MockClient`.
+- 769e427: Update README
+- 01a8004: Renamed constructor `Param` types to `Config`.
+- 7d5196f: Fixed MockDrift to pass it's cache to the contracts it creates via `.contract`
+- 3bb4943: Removed `to` and `input` from `ContractWriteOptions`. These will be set via `address` and `args`.
+- d5fff4e: Added new testing utils: `getRandomInt`, `getRandomHex`, `getRandomAddress`, `createStubBlock`, `createStubTransaction`, `createStubTransactionReceipt`
+- 1cf3f2a: Moved types dep to dev deps.
+- a9f4e67: Added `ReadContract` and `ReadWriteContract` types + misc. type patches and polish.
+- af1d24f: Fix Drift to ensure it uses the cache namespace given to it in it's options or fallback to fetching the chainId.
+- 01a8004: Added a `MockClient` class which mimics `BaseClient`.
+- 01a8004: Removed `isReadWriteAdapter` util which simply checked if the `write` property was a function.
+- 0a288a2: Unified `ReadContract` and `ReadWriteContract` into a single `Contract` client similar to the `Drift` client.
+- c560a32: Add `convertType` util function
+- 01a8004: Removed `Adapter` and `Network` prefix from param types, e.g. `AdapterReadParams` to just `ReadParams`, `NetworkGetBlockParams` to just `GetBlockParams`. Removed redundant types.
+- a842e69: Changed the `OneOf` type to unions of objects
+- f3e9259: Add support for overloaded functions
+- ca85ad8: Added `encodeFunctionData`, `encodeFunctionReturn`, `deocodeFunctionData`, and `decodeFunctionReturn` utils
+- af4bf45: Updated README
+- 01a8004: Replaced the `createLruSimpleCache` function with a `LruSimpleCache` class.
+- 602f1a3: BREAKING CHANGE: Switched all clients to factory functions, e.g., `new Drift()` -> `createDrift()`.
+- 13a5b3c: Misc patches and polish
+  - Update package.json info
+  - Fix exports for CJS
+  - Add `AutocompleteKey` util type
+  - Patch types for utils to make them more flexible
+  - Change `0x${string}` types in ABIs to simple `string` types to work better across web3 libs
+- c81a29e: Simplified `FunctionKey` type.
+- 37e993d: Patched `AbiFriendlyType` to return `unknown` instead of `undefined` when the abi is unknown.
+- f1cf7b4: Patch overload matching `objectToArray` type
+- 3bb4943: Changed the `transactionIndex` type to `bigint`
+- 933fce5: Refactored arrow function properties to methods on `Drift`, `Contract`, `OxAdapter`, and mock classes.
+- b5918c6: Improved error handling for drift
+- 3525e4f: Added `onMined` to `ContractWriteOptions`
+- 79107a6: Fix deps, switch to `safe-stable-stringify`
+- c9f8d8f: Patched types
+- bb13c66: Added `encodeFunctionReturn` and `decodeFunctionReturn` methods
+- 2c91009: Add `prefix` option and doc comments to `DriftError`
+- 041ba62: Renamed `Register` to `BaseTypes` and made it more flexible.
+- 416952b: Added an `arrayToFriendly` util
+- fe64d49: Remove `Pretty` from `ReplaceProps` type
+- 63ee6d2: Added hooks to `BaseClient` (and `Drift`) to add custom bahevior before or after adapter method calls.
+- 19aa433: Cleanup errors
+- 1def3fd: Update package manifests, add `sinon` guidance to README
+- 01a8004: Refactored `Contract` to go through a `BaseClient` instead of repeating cache and adapter logic.
+- 602f1a3: BREAKING CHANGE: Refactored the Contract clients and added a `createContract` factory
+- 786cc9f: Patched overloaded function handling in `objectToArray`
+- 130ddd6: Update README
+- 934d940: Fixed bigint parsing bug in `createStubBlock`
+- a8a4f5f: Patched a bug with the built-in `OxAdapter` in which `onMined` was never called after write operations.
+- 81e5362: Added a `call` method to `Drift` and adapters with support for bytecode (deployless) calls.
+
 ## 0.0.1-beta.27
 
 ### Patch Changes

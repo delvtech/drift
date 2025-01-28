@@ -1,5 +1,103 @@
 # @delvtech/drift-viem
 
+## 0.0.1
+
+- 8f0d309: Remove forced `simulateContract` from viem adapter `write`
+- a5d6b68: Moved `@devltech/drift` dep to peer deps.
+- 7bd87cf: Add `Register` type inspired by abitype, change default types back to `0x${string}`
+- 13a5b3c: drift
+- e7380c6: Update deps
+- 6e8712a: Patched `write` function
+- a9f4e67: Added `ReadContract` and `ReadWriteContract` types + misc. type patches and polish.
+- 8fa67b1: Fixed adapter factory function return type to be `ReadAdapter` when no signer is given.
+- 0a288a2: Unified `ReadContract` and `ReadWriteContract` into a single `Contract` client similar to the `Drift` client.
+- af4bf45: Updated README
+- e52765b: Use the viem version from dev dependencies in peer dependencies
+- 13a5b3c: Misc patches and polish
+  - Update package.json info
+  - Fix exports for CJS
+  - Add `AutocompleteKey` util type
+  - Patch types for utils to make them more flexible
+  - Change `0x${string}` types in ABIs to simple `string` types to work better across web3 libs
+- d582c0a: Add `ViemAdapterParams` to exports
+- 74eb669: Refactored arrow function properties to methods.
+- 8c8d18d: Added a default `PublicClient` type to the `ViemReadAdapter` type param.
+- 1a67fd8: Remove default `getEvents` block tags in viem adapter
+- 1def3fd: Update package manifests, add `sinon` guidance to README
+- b01acd6: Added `call`, `encodeFunctionReturn`, and `decodeFunctionReturn` methods
+- bd83437: Fixed bug where tuple return types were only returning the first item.
+- 485bb77: Made the adapter types generic with params for the public and wallet clients.
+- Updated dependencies [24bb35a]
+- Updated dependencies [a60ae6d]
+- Updated dependencies [668eff1]
+- Updated dependencies [3bb4943]
+- Updated dependencies [602f1a3]
+- Updated dependencies [119724d]
+- Updated dependencies [c9f8d8f]
+- Updated dependencies [3a95c5c]
+- Updated dependencies [be1e986]
+- Updated dependencies [cd1d206]
+- Updated dependencies [01a8004]
+- Updated dependencies [a92bcf3]
+- Updated dependencies [d5fff4e]
+- Updated dependencies [7bd87cf]
+- Updated dependencies [13a5b3c]
+- Updated dependencies [01a8004]
+- Updated dependencies [f103ab3]
+- Updated dependencies [990c8f1]
+- Updated dependencies [e7380c6]
+- Updated dependencies [e55910e]
+- Updated dependencies [1bc7d8e]
+- Updated dependencies [119724d]
+- Updated dependencies [cd364f4]
+- Updated dependencies [4194108]
+- Updated dependencies [01a8004]
+- Updated dependencies [769e427]
+- Updated dependencies [01a8004]
+- Updated dependencies [7d5196f]
+- Updated dependencies [3bb4943]
+- Updated dependencies [d5fff4e]
+- Updated dependencies [1cf3f2a]
+- Updated dependencies [a9f4e67]
+- Updated dependencies [af1d24f]
+- Updated dependencies [01a8004]
+- Updated dependencies [01a8004]
+- Updated dependencies [0a288a2]
+- Updated dependencies [c560a32]
+- Updated dependencies [01a8004]
+- Updated dependencies [a842e69]
+- Updated dependencies [f3e9259]
+- Updated dependencies [ca85ad8]
+- Updated dependencies [af4bf45]
+- Updated dependencies [01a8004]
+- Updated dependencies [602f1a3]
+- Updated dependencies [13a5b3c]
+- Updated dependencies [c81a29e]
+- Updated dependencies [37e993d]
+- Updated dependencies [f1cf7b4]
+- Updated dependencies [3bb4943]
+- Updated dependencies [933fce5]
+- Updated dependencies [b5918c6]
+- Updated dependencies [3525e4f]
+- Updated dependencies [79107a6]
+- Updated dependencies [c9f8d8f]
+- Updated dependencies [bb13c66]
+- Updated dependencies [2c91009]
+- Updated dependencies [041ba62]
+- Updated dependencies [416952b]
+- Updated dependencies [fe64d49]
+- Updated dependencies [63ee6d2]
+- Updated dependencies [19aa433]
+- Updated dependencies [1def3fd]
+- Updated dependencies [01a8004]
+- Updated dependencies [602f1a3]
+- Updated dependencies [786cc9f]
+- Updated dependencies [130ddd6]
+- Updated dependencies [934d940]
+- Updated dependencies [a8a4f5f]
+- Updated dependencies [81e5362]
+  - @delvtech/drift@0.0.1
+
 ## 0.1.0-beta.33
 
 ### Patch Changes

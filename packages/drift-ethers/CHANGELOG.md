@@ -1,5 +1,85 @@
 # @delvtech/drift-ethers
 
+## 0.0.1
+
+- 0ef59ad: Made the `ethersAdapter` function argument optional and made the classes generic with type params for the provider and signer.
+- e7380c6: Update deps
+- 8fa67b1: Fixed adapter factory function return type to be `ReadAdapter` when no signer is given.
+- af4bf45: Updated README
+- 483d60a: Made `provider` optional, in which case `window.ethereum` is used.
+- d362254: Added `call`, `encodeFunctionReturn`, and `decodeFunctionReturn` methods
+- f7084e2: Initial release 🚀
+- Updated dependencies [24bb35a]
+- Updated dependencies [a60ae6d]
+- Updated dependencies [668eff1]
+- Updated dependencies [3bb4943]
+- Updated dependencies [602f1a3]
+- Updated dependencies [119724d]
+- Updated dependencies [c9f8d8f]
+- Updated dependencies [3a95c5c]
+- Updated dependencies [be1e986]
+- Updated dependencies [cd1d206]
+- Updated dependencies [01a8004]
+- Updated dependencies [a92bcf3]
+- Updated dependencies [d5fff4e]
+- Updated dependencies [7bd87cf]
+- Updated dependencies [13a5b3c]
+- Updated dependencies [01a8004]
+- Updated dependencies [f103ab3]
+- Updated dependencies [990c8f1]
+- Updated dependencies [e7380c6]
+- Updated dependencies [e55910e]
+- Updated dependencies [1bc7d8e]
+- Updated dependencies [119724d]
+- Updated dependencies [cd364f4]
+- Updated dependencies [4194108]
+- Updated dependencies [01a8004]
+- Updated dependencies [769e427]
+- Updated dependencies [01a8004]
+- Updated dependencies [7d5196f]
+- Updated dependencies [3bb4943]
+- Updated dependencies [d5fff4e]
+- Updated dependencies [1cf3f2a]
+- Updated dependencies [a9f4e67]
+- Updated dependencies [af1d24f]
+- Updated dependencies [01a8004]
+- Updated dependencies [01a8004]
+- Updated dependencies [0a288a2]
+- Updated dependencies [c560a32]
+- Updated dependencies [01a8004]
+- Updated dependencies [a842e69]
+- Updated dependencies [f3e9259]
+- Updated dependencies [ca85ad8]
+- Updated dependencies [af4bf45]
+- Updated dependencies [01a8004]
+- Updated dependencies [602f1a3]
+- Updated dependencies [13a5b3c]
+- Updated dependencies [c81a29e]
+- Updated dependencies [37e993d]
+- Updated dependencies [f1cf7b4]
+- Updated dependencies [3bb4943]
+- Updated dependencies [933fce5]
+- Updated dependencies [b5918c6]
+- Updated dependencies [3525e4f]
+- Updated dependencies [79107a6]
+- Updated dependencies [c9f8d8f]
+- Updated dependencies [bb13c66]
+- Updated dependencies [2c91009]
+- Updated dependencies [041ba62]
+- Updated dependencies [416952b]
+- Updated dependencies [fe64d49]
+- Updated dependencies [63ee6d2]
+- Updated dependencies [19aa433]
+- Updated dependencies [1def3fd]
+- Updated dependencies [01a8004]
+- Updated dependencies [602f1a3]
+- Updated dependencies [786cc9f]
+- Updated dependencies [130ddd6]
+- Updated dependencies [934d940]
+- Updated dependencies [a8a4f5f]
+- Updated dependencies [81e5362]
+  - @delvtech/drift@0.0.1
+
 ## 0.0.0-beta.12
 
 ### Patch Changes
