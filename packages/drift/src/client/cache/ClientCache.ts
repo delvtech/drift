@@ -58,7 +58,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
 
   constructor({
     namespace,
-    store = new LruSimpleCache({ max: 500 }) as SimpleCache as T,
+    store = new LruSimpleCache() as SimpleCache as T,
   }: ClientCacheConfig<T>) {
     this.namespace = namespace;
     this.store = store;
@@ -223,8 +223,8 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
     address,
     event,
     filter,
-    fromBlock,
-    toBlock,
+    fromBlock = "earliest",
+    toBlock = "latest",
   }: GetEventsParams<TAbi, TEventName>): Promise<SerializableKey> {
     return this.createNamespacedKey("events", {
       address,

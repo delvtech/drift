@@ -7,6 +7,22 @@ export type MaybePromise<T> = T | Promise<T>;
 export type MaybeAwaited<T> = T extends Promise<infer U> ? MaybePromise<U> : T;
 
 /**
+ * Unwrap the return type of a function that may return a promise.
+ *
+ * @internal
+ * @privateRemarks
+ * This fixes type errors that arise when trying to return
+ * `Awaited<ReturnType<T>>` even though it's basically the same thing. I need to
+ * do some more research to understand why this is necessary. I'm guessing it
+ * has to do with distributing conditional types.
+ */
+export type AwaitedReturnType<T extends AnyFunction> = T extends (
+  ...args: any
+) => MaybePromise<infer U>
+  ? U
+  : never;
+
+/**
  * Combines members of an intersection into a readable type.
  * @see https://x.com/mattpocockuk/status/1622730173446557697?s=20&t=NdpAcmEFXY01xkqU3KO0Mg
  */
@@ -160,10 +176,10 @@ export type MergeKeys<T> = UnionToIntersection<T> extends infer I
  * >;
  * // {
  * //   a: string;
- * //   b?: never;
- * //   c?: never;
+ * //   b?: undefined;
+ * //   c?: undefined;
  * // } | {
- * //   a?: never;
+ * //   a?: undefined;
  * //   b: string;
  * //   c: number;
  * // }
@@ -171,8 +187,45 @@ export type MergeKeys<T> = UnionToIntersection<T> extends infer I
  */
 export type OneOf<T extends AnyObject> = UnionToIntersection<T> extends infer I
   ? T extends infer Ty
-    ? Ty & {
-        [K in Exclude<keyof I, keyof T>]?: never;
-      }
+    ? Eval<
+        Ty & {
+          [K in Exclude<keyof I, keyof T>]?: never;
+        }
+      >
     : never
   : never;
+
+/**
+ * Get a superset of `T` that allows for arbitrary properties.
+ *
+ * @example
+ *
+ * ```ts
+ * interface Order {
+ *   account: `0x${string}`;
+ *   amount: bigint;
+ * }
+ *
+ * const order1: Order = {
+ *   account: "0x123",
+ *   amount: 100n,
+ *   getStatus() { ... }
+ * // ^ Object literal may only specify known properties, and 'getStatus does not exist in type 'Order'.
+ * };
+ *
+ * // No errors! 🎉
+ * const order2: Extended<Order> = {
+ *   account: "0x123",
+ *   amount: 100n,
+ *   getStatus() { ... }
+ * };
+ * ```
+ *
+ */
+export type Extended<T extends AnyObject> = T &
+  Record<Exclude<PropertyKey, keyof T>, any>;
+
+/**
+ * Return `T` if defined, otherwise return `U`.
+ */
+export type Fallback<T, U> = undefined extends T ? U : Exclude<T, undefined>;

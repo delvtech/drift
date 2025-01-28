@@ -1,6 +1,6 @@
 import type { Abi } from "abitype";
 import type {
-  AbiEntry,
+  AbiEntryName,
   AbiObjectType,
   AbiParameters,
   AbiParametersToObject,
@@ -12,7 +12,7 @@ import type {
 /**
  * Get a union of event names from an abi
  */
-export type EventName<TAbi extends Abi> = AbiEntry<TAbi, "event">["name"];
+export type EventName<TAbi extends Abi> = AbiEntryName<TAbi, "event">;
 
 /**
  * Get a union of named input parameters for an event from an abi

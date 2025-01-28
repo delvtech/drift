@@ -31,7 +31,8 @@
         }
       },
       "suspicious": {
-        "noExplicitAny": "info"
+        "noExplicitAny": "off",
+        "noAssignInExpressions": "off"
       }
     }
   },

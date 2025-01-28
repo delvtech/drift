@@ -260,7 +260,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
 
     return convertType(
       await contract[fn](...argsArray, { blockTag: block }),
-      (value): value is BigNumber => value instanceof BigNumber,
+      (value) => value instanceof BigNumber,
       (value) => value.toBigInt(),
     );
   }

@@ -1,12 +1,12 @@
 import type { Abi } from "abitype";
+import type { OxAdapter } from "src/adapter/OxAdapter";
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
   GetEventsParams,
   OnMinedParam,
-  ReadAdapter,
   ReadParams,
-  ReadWriteAdapter,
+  WriteAdapter,
 } from "src/adapter/types/Adapter";
 import type {
   ContractGetEventsOptions,
@@ -21,30 +21,46 @@ import type {
   FunctionName,
   FunctionReturn,
 } from "src/adapter/types/Function";
+import type { LruSimpleCache } from "src/cache/LruSimpleCache";
 import type { SimpleCache } from "src/cache/types";
 import {
-  BaseClient,
+  type AdapterType,
+  type CacheType,
+  type Client,
   type ClientConfig,
+  type ReadClient,
   type ReadWriteClient,
-  ReadonlyError,
-} from "src/client/BaseClient";
+  createClient,
+} from "src/client/Client";
 import type { SerializableKey } from "src/utils/createSerializableKey";
-import type { AnyObject, EmptyObject, Eval, OneOf } from "src/utils/types";
+import type {
+  AnyObject,
+  EmptyObject,
+  Eval,
+  Extended,
+  OneOf,
+} from "src/utils/types";
 
-export type ContractConfig<
+/**
+ * An interface for interacting with a smart contract through a drift
+ * {@linkcode Client}.
+ */
+export type Contract<
   TAbi extends Abi = Abi,
-  TAdapter extends Adapter = Adapter,
-  TCache extends SimpleCache = SimpleCache,
-  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
-> = Eval<
-  ContractParams<TAbi> & ContractClientOptions<TAdapter, TCache, TClient>
->;
+  TClient extends Client = Client,
+> = TClient extends ReadWriteClient
+  ? ReadWriteContract<TAbi, TClient>
+  : AdapterType<TClient> extends Partial<WriteAdapter>
+    ? AmbiguousContract<TAbi, TClient>
+    : ReadContract<TAbi, TClient>;
 
-export class Contract<
+/**
+ * A read-only {@linkcode Contract} instance for fetching data from a smart
+ * contract through a drift {@linkcode Client}.
+ */
+export class ReadContract<
   TAbi extends Abi = Abi,
-  TAdapter extends Adapter = ReadWriteAdapter,
-  TCache extends SimpleCache = SimpleCache,
-  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
+  TClient extends ReadClient = ReadClient,
 > {
   abi: TAbi;
   address: Address;
@@ -55,27 +71,22 @@ export class Contract<
     address,
     client,
     ...clientConfig
-  }: ContractConfig<TAbi, TAdapter, TCache, TClient>) {
+  }: ContractConfig<TAbi, TClient, AdapterType<TClient>, CacheType<TClient>>) {
     this.abi = abi;
     this.address = address;
-    this.client = client ?? (new BaseClient(clientConfig) as TClient);
+    this.client = (client ?? createClient(clientConfig)) as TClient;
   }
 
-  get adapter() {
-    return this.client.adapter;
-  }
-
-  get cache() {
+  get cache(): TClient["cache"] {
     return this.client.cache;
   }
 
-  isReadWrite(): this is Contract<
-    TAbi,
-    ReadWriteAdapter,
-    TCache,
-    BaseClient<ReadWriteAdapter, TCache>
-  > {
+  isReadWrite(): this is Contract<TAbi, ReadWriteClient> {
     return this.client.isReadWrite();
+  }
+
+  extend<T extends Partial<Extended<this>>>(props: T): T & this {
+    return Object.assign(this, props);
   }
 
   // Encoding //
@@ -212,7 +223,7 @@ export class Contract<
       value: FunctionReturn<TAbi, TFunctionName>;
     },
   ) {
-    this.cache.preloadRead({
+    return this.cache.preloadRead({
       abi: this.abi as Abi,
       address: this.address,
       ...params,
@@ -262,8 +273,6 @@ export class Contract<
     });
   }
 
-  // Write //
-
   /**
    * Simulates a write operation on a specified function of the contract.
    */
@@ -280,67 +289,94 @@ export class Contract<
       ...params,
     });
   }
+}
 
+/**
+ * A read-write {@linkcode Contract} with access to a signer for fetching data
+ * and submitting transactions through a drift {@linkcode Client}.
+ */
+export class ReadWriteContract<
+  TAbi extends Abi = Abi,
+  TClient extends ReadWriteClient = ReadWriteClient,
+> extends ReadContract<TAbi, TClient> {
   /**
-   * Writes to a specified function on the contract.
    * @returns The transaction hash of the submitted transaction.
-   * @throws A {@linkcode ReadonlyError} if not connected to a signer.
    */
   write<TFunctionName extends FunctionName<TAbi, "payable" | "nonpayable">>(
-    ...[fn, args, params]: TClient extends ReadWriteClient
-      ? ContractWriteArgs<TAbi, TFunctionName>
-      : never
-  ): TClient extends ReadWriteClient ? Promise<Hash> : never {
-    if (!this.client.isReadWrite()) {
-      throw new ReadonlyError();
-    }
+    ...[fn, args, params]: ContractWriteArgs<TAbi, TFunctionName>
+  ): Promise<Hash> {
     return this.client.write({
       abi: this.abi,
       address: this.address,
       fn,
       args: args as FunctionArgs<TAbi, TFunctionName>,
       ...params,
-    }) as Promise<Hash> as any;
+    });
   }
 
   /**
    * Get the address of the signer for this contract.
-   * @throws A {@linkcode ReadonlyError} if not connected to a signer.
    */
-  getSignerAddress(
-    ..._: TClient extends ReadWriteClient ? [] : never
-  ): TClient extends ReadWriteClient ? Promise<Address> : never {
-    if (!this.client.isReadWrite()) {
-      throw new ReadonlyError();
-    }
-    return this.client.getSignerAddress() as Promise<Address> as any;
+  getSignerAddress(): Promise<Address> {
+    return this.client.getSignerAddress();
   }
 }
 
-export type ReadContract<
-  TAbi extends Abi = Abi,
-  TAdapter extends ReadAdapter = ReadAdapter,
-  TCache extends SimpleCache = SimpleCache,
-  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
-> = Contract<TAbi, TAdapter, TCache, TClient>;
-
-export type ReadWriteContract<
-  TAbi extends Abi = Abi,
-  TAdapter extends ReadWriteAdapter = ReadWriteAdapter,
-  TCache extends SimpleCache = SimpleCache,
-  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
-> = Contract<TAbi, TAdapter, TCache, TClient>;
-
+/**
+ * Options for configuring the {@linkcode Client} of a {@linkcode Contract}.
+ */
 export type ContractClientOptions<
-  TAdapter extends Adapter = Adapter,
-  TCache extends SimpleCache = SimpleCache,
-  TClient extends BaseClient<TAdapter, TCache> = BaseClient<TAdapter, TCache>,
+  TClient extends Client | undefined = Client | undefined,
+  TAdapter extends Adapter | undefined = AdapterType<TClient> | undefined,
+  TCache extends SimpleCache | undefined = CacheType<TClient> | undefined,
 > = OneOf<
   | {
       client?: TClient;
     }
   | ClientConfig<TAdapter, TCache>
 >;
+
+/**
+ * Configuration options for creating a {@linkcode Contract}.
+ */
+export type ContractConfig<
+  TAbi extends Abi,
+  TClient extends Client | undefined = Client | undefined,
+  TAdapter extends Adapter | undefined = AdapterType<TClient> | undefined,
+  TCache extends SimpleCache | undefined = CacheType<TClient> | undefined,
+> = Eval<
+  ContractParams<TAbi> & ContractClientOptions<TClient, TAdapter, TCache>
+>;
+
+/**
+ * Creates a new {@linkcode Contract} instance for interacting with a smart
+ * contract through a drift {@linkcode Client}.
+ *
+ * @param config - The configuration to use for the contract.
+ * @returns
+ */
+export function createContract<
+  TAbi extends Abi,
+  TClient extends Client<TAdapter, TCache>,
+  TAdapter extends Adapter = AdapterType<TClient, OxAdapter>,
+  TCache extends SimpleCache = CacheType<TClient, LruSimpleCache>,
+>({
+  abi,
+  address,
+  client,
+  ...clientConfig
+}: ContractConfig<TAbi, TClient, TAdapter, TCache>): Contract<TAbi, TClient> {
+  client ||= createClient(clientConfig) as TClient;
+
+  if (client.isReadWrite()) {
+    return new ReadWriteContract({ abi, address, client }) as Contract<
+      TAbi,
+      TClient
+    >;
+  }
+
+  return new ReadContract({ abi, address, client }) as Contract<TAbi, TClient>;
+}
 
 export type ContractEncodeFunctionDataArgs<
   TAbi extends Abi = Abi,
@@ -419,3 +455,16 @@ export type ContractWriteArgs<
         args: FunctionArgs<TAbi, TFunctionName>,
         options?: ContractWriteOptions & OnMinedParam,
       ];
+
+// Internal //
+
+type WriteContract<TAbi extends Abi = Abi> = Omit<
+  ReadWriteContract<TAbi>,
+  keyof ReadContract<TAbi>
+>;
+
+interface AmbiguousContract<
+  TAbi extends Abi = Abi,
+  TClient extends Client = Client,
+> extends ReadContract<TAbi, TClient>,
+    Partial<WriteContract<TAbi>> {}

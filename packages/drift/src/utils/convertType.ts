@@ -16,7 +16,7 @@
  * // Convert all bigints to string.
  * convertType(
  *   { a: 100n, b: { c: 200n }, d: [300n] },
- *   (value): value is bigint => typeof value === "bigint",
+ *   (value) => typeof value === "bigint",
  *   (value) => value.toString(),
  * );
  * // => { a: "100", b: { c: "200" }, d: ["300"] }

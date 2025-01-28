@@ -1,11 +1,11 @@
-import { MockDrift } from "src/client/drift/MockDrift";
+import { createMockDrift } from "src/client/MockDrift";
 import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
 
 describe("MockDrift", () => {
   describe("contract", () => {
     it("Creates mock read-write contracts", async () => {
-      const mockDrift = new MockDrift();
+      const mockDrift = createMockDrift();
       const mockContract = mockDrift.contract({
         abi: erc20.abi,
         address: "0xVaultAddress",
@@ -27,7 +27,7 @@ describe("MockDrift", () => {
     });
 
     it("Creates contracts that share mock values", async () => {
-      const mockDrift = new MockDrift();
+      const mockDrift = createMockDrift();
       const contract = mockDrift.contract({
         abi: erc20.abi,
         address: "0xVaultAddress",
@@ -55,7 +55,7 @@ describe("MockDrift", () => {
     });
 
     it("Creates contracts that share cache values", async () => {
-      const mockDrift = new MockDrift();
+      const mockDrift = createMockDrift();
       const contract = mockDrift.contract({
         abi: erc20.abi,
         address: "0xVaultAddress",

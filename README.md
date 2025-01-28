@@ -102,12 +102,12 @@ npm install @delvtech/drift-ethers-v5
 
 ## Start Drifting
 
-### 1. Initialize Drift
+### 1. Create a Drift client
 
 ```typescript
-import { Drift } from "@delvtech/drift";
+import { createDrift } from "@delvtech/drift";
 
-const drift = new Drift({
+const drift = createDrift({
   rpcUrl: "[YOUR_RPC_URL]",
 });
 ```
@@ -115,7 +115,7 @@ const drift = new Drift({
 **Viem adapter example:**
 
 ```typescript
-import { Drift } from "@delvtech/drift";
+import { createDrift } from "@delvtech/drift";
 import { viemAdapter } from "@delvtech/drift-viem";
 import { createPublicClient, createWalletClient, http } from "viem";
 
@@ -128,7 +128,7 @@ const walletClient = createWalletClient({
   transport: http(),
 });
 
-const drift = new Drift({
+const drift = createDrift({
   adapter: viemAdapter({ publicClient, walletClient }),
 });
 ```
@@ -225,6 +225,7 @@ import {
   ReadContract,
   ReadWriteAdapter,
   ReadWriteContract,
+  createDrift,
 } from "@delvtech/drift";
 import { vaultAbi } from "./abis/VaultAbi";
 
@@ -233,7 +234,7 @@ type VaultAbi = typeof vaultAbi;
 export class ReadVault {
   contract: ReadContract<VaultAbi>;
 
-  constructor(address: string, drift: Drift<ReadAdapter> = new Drift()) {
+  constructor(address: string, drift: Drift = createDrift()) {
     this.contract = drift.contract({
       abi: vaultAbi,
       address,
@@ -288,7 +289,7 @@ Using an adapter, you can integrate Drift with your chosen web3 library. Here's
 an example using `viem`:
 
 ```typescript
-import { Drift } from "@delvtech/drift";
+import { createDrift } from "@delvtech/drift";
 import { viemAdapter } from "@delvtech/drift-viem";
 import { createPublicClient, http } from "viem";
 import { ReadVault } from "sdk-core";
@@ -298,7 +299,7 @@ const publicClient = createPublicClient({
   // ...other options
 });
 
-const drift = new Drift({
+const drift = createDrift({
   adapter: viemAdapter({ publicClient }),
 });
 
@@ -333,13 +334,13 @@ import {
   ReadVault as CoreReadVault,
   ReadWriteVault as CoreReadWriteVault,
 } from "sdk-core";
-import { Drift } from "@delvtech/drift";
+import { createDrift } from "@delvtech/drift";
 import { viemAdapter } from "@delvtech/drift-viem";
 import { PublicClient, WalletClient } from "viem";
 
 export class ReadVault extends CoreReadVault {
   constructor(address: string, publicClient: PublicClient) {
-    const drift = new Drift({
+    const drift = createDrift({
       adapter: viemAdapter({ publicClient }),
     });
     super(address, drift);
@@ -352,7 +353,7 @@ export class ReadWriteVault extends CoreReadWriteVault {
     publicClient: PublicClient,
     walletClient: WalletClient,
   ) {
-    const drift = new Drift({
+    const drift = createDrift({
       adapter: viemAdapter({ publicClient, walletClient }),
     });
     super(address, drift);
@@ -402,13 +403,13 @@ method:
 
 ```typescript
 // sdk-core/src/ReadVault.test.ts
-import { MockDrift } from "@delvtech/drift/testing";
+import { createMockDrift } from "@delvtech/drift/testing";
 import { vaultAbi } from "./abis/VaultAbi";
 import { ReadVault } from "./VaultClient";
 
 test("getUserAssetValue should return the total asset value for a user", async () => {
   // Set up mocks
-  const mockDrift = new MockDrift();
+  const mockDrift = createMockDrift();
   const mockContract = mockDrift.contract({
     abi: vaultAbi,
     address: "0xVaultAddress",
@@ -514,7 +515,7 @@ Data such as immutables from token lists can be preloaded into the cache to
 avoid network requests without changing how the data is accessed.
 
 ```ts
-const drift = new Drift(/* ... */);
+const drift = createDrift(/* ... */);
 const contract = drift.contract({
   abi: erc20Abi,
   // ...
@@ -567,10 +568,11 @@ If you have specific caching needs, you can provide your own cache
 implementation:
 
 ```typescript
+import { createDrift } from "@delvtech/drift";
 import { LRUCache } from "lru-cache";
 
 const customCache = new LRUCache({ max: 500 });
-const drift = new Drift({
+const drift = createDrift({
   cache: customCache,
 });
 ```

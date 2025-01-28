@@ -1,14 +1,18 @@
+import { MockAdapter } from "src/adapter/MockAdapter";
 import type { EventLog } from "src/adapter/types/Event";
-import { MockContract } from "src/client/contract/MockContract";
+import { createContract } from "src/client/contract/Contract";
 import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
 
-const abi = erc20.abi;
-type Erc20Abi = typeof abi;
-
 describe("Contract", () => {
+  const abi = erc20.abi;
+  type Erc20Abi = typeof abi;
+  const address = "0xAddress";
+  const adapter = new MockAdapter();
+  adapter.onGetChainId().resolves(0);
+
   it("Preloads events", async () => {
-    const contract = new MockContract({ abi });
+    const contract = createContract({ abi, address, adapter });
 
     const events: EventLog<Erc20Abi, "Transfer">[] = [
       {
@@ -34,13 +38,13 @@ describe("Contract", () => {
   });
 
   it("Preloads reads", async () => {
-    const contract = new MockContract({ abi });
+    const contract = createContract({ abi, address, adapter });
     contract.preloadRead({ fn: "symbol", value: "DAI" });
     expect(await contract.read("symbol")).toBe("DAI");
   });
 
   it("Invalidates reads", async () => {
-    const contract = new MockContract({ abi });
+    const contract = createContract({ abi, address, adapter });
 
     contract.preloadRead({ fn: "symbol", value: "DAI" });
     expect(await contract.read("symbol")).toBe("DAI");

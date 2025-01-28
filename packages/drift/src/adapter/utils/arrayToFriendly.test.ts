@@ -26,10 +26,6 @@ describe("arrayToFriendly", () => {
       "0": "0x123",
       "1": 0n,
     });
-    expect(votesArgsObject).toEqual({
-      "0": "0x123",
-      "1": 0n,
-    });
 
     const balanceInput = arrayToFriendly({
       abi: erc20.abi,

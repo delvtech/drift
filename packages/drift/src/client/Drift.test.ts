@@ -1,11 +1,11 @@
-import { Drift } from "src/client/drift/Drift";
+import { createDrift } from "src/client/Drift";
 import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
 
 describe("Drift", () => {
   describe("contract", () => {
     it("Creates contracts that share cache values", async () => {
-      const drift = new Drift({
+      const drift = createDrift({
         chainId: 0,
         rpcUrl: "__test__",
       });

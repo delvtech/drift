@@ -1,17 +1,17 @@
 import type { Abi } from "abitype";
 import { MockAdapter } from "src/adapter/MockAdapter";
-import { BaseClient } from "src/client/BaseClient";
+import { createClient } from "src/client/Client";
 import { ALICE } from "src/utils/testing/accounts";
 import { describe, expect, it, vi } from "vitest";
 
-describe("BaseClient", () => {
+describe("Client", () => {
   describe("hooks", () => {
     const abi = [] as Abi;
     const adapter = new MockAdapter();
     adapter.onGetChainId().resolves(0);
 
     it("Calls getChainId hooks", async () => {
-      const client = new BaseClient({ adapter });
+      const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
 
@@ -24,7 +24,7 @@ describe("BaseClient", () => {
     });
 
     it("Calls getBlockNumber hooks", async () => {
-      const client = new BaseClient({ adapter });
+      const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
 
@@ -37,7 +37,7 @@ describe("BaseClient", () => {
     });
 
     it("Calls getBlock hooks", async () => {
-      const client = new BaseClient({ adapter });
+      const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
 
@@ -50,7 +50,7 @@ describe("BaseClient", () => {
     });
 
     it("Calls getBalance hooks", async () => {
-      const client = new BaseClient({ adapter });
+      const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
 
@@ -63,7 +63,7 @@ describe("BaseClient", () => {
     });
 
     it("Calls getTransaction hooks", async () => {
-      const client = new BaseClient({ adapter });
+      const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
 
@@ -76,7 +76,7 @@ describe("BaseClient", () => {
     });
 
     it("Calls waitForTransaction hooks", async () => {
-      const client = new BaseClient({ adapter });
+      const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
 
@@ -89,7 +89,7 @@ describe("BaseClient", () => {
     });
 
     it("Calls encodeFunctionData hooks", async () => {
-      const client = new BaseClient({ adapter });
+      const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
 
@@ -102,7 +102,7 @@ describe("BaseClient", () => {
     });
 
     it("Calls encodeFunctionReturn hooks", async () => {
-      const client = new BaseClient({ adapter });
+      const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
 
@@ -115,7 +115,7 @@ describe("BaseClient", () => {
     });
 
     it("Calls decodeFunctionData hooks", async () => {
-      const client = new BaseClient({ adapter });
+      const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
 
@@ -128,7 +128,7 @@ describe("BaseClient", () => {
     });
 
     it("Calls decodeFunctionReturn hooks", async () => {
-      const client = new BaseClient({ adapter });
+      const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
 
@@ -141,7 +141,7 @@ describe("BaseClient", () => {
     });
 
     it("Calls call hooks", async () => {
-      const client = new BaseClient({ adapter });
+      const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
 
@@ -154,7 +154,7 @@ describe("BaseClient", () => {
     });
 
     it("Calls getEvents hooks", async () => {
-      const client = new BaseClient({ adapter });
+      const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
 
@@ -167,7 +167,7 @@ describe("BaseClient", () => {
     });
 
     it("Calls read hooks", async () => {
-      const client = new BaseClient({ adapter });
+      const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
 
@@ -180,7 +180,7 @@ describe("BaseClient", () => {
     });
 
     it("Calls simulateWrite hooks", async () => {
-      const client = new BaseClient({ adapter });
+      const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
 
@@ -193,7 +193,7 @@ describe("BaseClient", () => {
     });
 
     it("Calls write hooks", async () => {
-      const client = new BaseClient({
+      const client = createClient({
         adapter: new MockAdapter(),
       });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
@@ -208,7 +208,7 @@ describe("BaseClient", () => {
     });
 
     it("Calls write hooks", async () => {
-      const client = new BaseClient({
+      const client = createClient({
         adapter: new MockAdapter(),
       });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
@@ -223,7 +223,7 @@ describe("BaseClient", () => {
     });
 
     it("Calls getSignerAddress hooks", async () => {
-      const client = new BaseClient({
+      const client = createClient({
         adapter: new MockAdapter(),
       });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
