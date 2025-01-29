@@ -1,5 +1,12 @@
 # @delvtech/drift
 
+## 0.0.3
+
+### Patch Changes
+
+- 8eebfdf: Patched hooks type to ensure autocomplete works in contexts where the adapter is generic.
+- 5e0c162: Patched `MethodHooks` type to remove unnecessary type param and allow non-promise returns in 'after' hooks.
+
 ## 0.0.2
 
 ### Patch Changes
