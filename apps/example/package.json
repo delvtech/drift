@@ -9,7 +9,7 @@
     "watch": "tsx -r dotenv/config --watch src/index.ts"
   },
   "dependencies": {
-    "@delvtech/drift": "^0.0.1",
+    "@delvtech/drift": "^0.0.2",
     "@delvtech/fixed-point-wasm": "^0.0.6"
   },
   "devDependencies": {
