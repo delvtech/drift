@@ -210,7 +210,7 @@ export type OneOf<T extends AnyObject> = UnionToIntersection<T> extends infer I
  *   account: "0x123",
  *   amount: 100n,
  *   getStatus() { ... }
- * // ^ Object literal may only specify known properties, and 'getStatus does not exist in type 'Order'.
+ *   // ^ Error: Object literal may only specify known properties, and 'getStatus' does not exist in type 'Order'.
  * };
  *
  * // No errors! 🎉

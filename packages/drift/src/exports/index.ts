@@ -153,7 +153,6 @@ export {
   createSerializableKey,
   type SerializableKey,
 } from "src/utils/createSerializableKey";
-export { extendInstance } from "src/utils/extendInstance";
 export { getRandomHex } from "src/utils/testing/getRandomHex";
 export type {
   AnyFunction,
