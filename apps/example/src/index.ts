@@ -1,14 +1,47 @@
-import { Contract } from "@delvtech/drift";
+import { type Address, createDrift } from "@delvtech/drift";
 import { erc20 } from "@delvtech/drift/testing";
+import { fixed, initSync, wasmBuffer } from "@delvtech/fixed-point-wasm";
 
-const contract = new Contract({
-  abi: erc20.abi,
-  address: "0xAc37729B76db6438CE62042AE1270ee574CA7571",
+initSync(wasmBuffer);
+
+const tokenAddress = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
+
+// Create a Drift client
+const drift = createDrift({
   rpcUrl: process.env.RPC_URL,
 });
 
-const balance = await contract.read("balanceOf", {
-  account: contract.address,
+// Make read calls
+const tokenName = await drift.read({
+  abi: erc20.abi,
+  address: tokenAddress,
+  fn: "name",
 });
 
-console.log("Balance:", balance);
+// Create a contract instance
+const token = drift.contract({
+  abi: erc20.abi,
+  address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+});
+
+const balance = await token.read("balanceOf", {
+  account: token.address,
+});
+
+// Extend the contract instance with custom methods
+const extendedToken = token.extend({
+  async getFormattedBalance(account: Address) {
+    const balance = await this.read("balanceOf", { account });
+    const decimals = await this.read("decimals");
+    return fixed(balance, decimals).format();
+  },
+});
+
+const formattedBalance = await extendedToken.getFormattedBalance(token.address);
+
+console.table({
+  name: tokenName,
+  address: token.address,
+  balance,
+  formatted: formattedBalance,
+});
