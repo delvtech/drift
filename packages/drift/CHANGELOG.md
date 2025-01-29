@@ -1,5 +1,13 @@
 # @delvtech/drift
 
+## 0.0.2
+
+### Patch Changes
+
+- 2c59ee0: Fixed hook forwarding for contracts and extended clients.
+- 9c13b68: Removed `extendInstance` utility function
+- 0b1f8f0: Fixed a bug where extending clients returned the client without the proxy, causing hooks to be skipped.
+
 ## 0.0.1
 
 - 24bb35a: Improve `DriftError` formatting, support minification
