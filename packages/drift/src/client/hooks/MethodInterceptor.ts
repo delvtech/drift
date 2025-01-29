@@ -132,27 +132,23 @@ export class MethodInterceptor<T extends AnyObject = AnyObject> {
  * ```
  */
 export type MethodHooks<T extends AnyObject = AnyObject> = {
-  [K in FunctionKey<T> as `before:${K & string}`]: <
-    TArgs extends Parameters<T[K]>,
-  >(payload: {
+  [K in FunctionKey<T> as `before:${K & string}`]: (payload: {
     /** The arguments passed to the method */
-    readonly args: TArgs;
+    readonly args: Parameters<T[K]>;
     /** Override the arguments and continue */
     setArgs: <TArgs extends Parameters<T[K]>>(...args: TArgs) => void;
     /** Set the result and return early */
     resolve: (value: Awaited<ReturnType<T[K]>>) => void;
   }) => ReturnType<T[K]> extends Promise<any> ? MaybePromise<void> : void;
 } & {
-  [K in FunctionKey<T> as `after:${K & string}`]: <
-    TArgs extends Parameters<T[K]>,
-  >(payload: {
+  [K in FunctionKey<T> as `after:${K & string}`]: (payload: {
     /** The arguments that were passed to the method */
-    readonly args: TArgs;
+    readonly args: Parameters<T[K]>;
     /** The result returned by the method */
     readonly result: MaybeAwaited<ReturnType<T[K]>>;
     /** Override the result and continue */
     setResult: <TReturn extends ReturnType<T[K]>>(
       value: MaybeAwaited<TReturn>,
     ) => void;
-  }) => ReturnType<T[K]> extends Promise<any> ? Promise<void> : void;
+  }) => ReturnType<T[K]> extends Promise<any> ? MaybePromise<void> : void;
 };
