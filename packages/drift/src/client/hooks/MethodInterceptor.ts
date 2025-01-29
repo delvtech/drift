@@ -136,7 +136,7 @@ export type MethodHooks<T extends AnyObject = AnyObject> = {
     /** The arguments passed to the method */
     readonly args: Parameters<T[K]>;
     /** Override the arguments and continue */
-    setArgs: <TArgs extends Parameters<T[K]>>(...args: TArgs) => void;
+    setArgs: (...args: Parameters<T[K]>) => void;
     /** Set the result and return early */
     resolve: (value: Awaited<ReturnType<T[K]>>) => void;
   }) => ReturnType<T[K]> extends Promise<any> ? MaybePromise<void> : void;
@@ -147,8 +147,6 @@ export type MethodHooks<T extends AnyObject = AnyObject> = {
     /** The result returned by the method */
     readonly result: MaybeAwaited<ReturnType<T[K]>>;
     /** Override the result and continue */
-    setResult: <TReturn extends ReturnType<T[K]>>(
-      value: MaybeAwaited<TReturn>,
-    ) => void;
+    setResult: (value: MaybeAwaited<ReturnType<T[K]>>) => void;
   }) => ReturnType<T[K]> extends Promise<any> ? MaybePromise<void> : void;
 };
