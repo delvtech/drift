@@ -8,7 +8,9 @@ import type { AwaitedReturnType, MaybePromise } from "src/utils/types";
  * Checks the cache for the key and returns the value if found, otherwise
  * executes the function and stores the result in the cache before returning it.
  */
-export async function cachedFn<T extends (...args: any[]) => MaybePromise<any>>({
+export async function cachedFn<
+  T extends (...args: any[]) => MaybePromise<any>,
+>({
   cache,
   key,
   fn,
