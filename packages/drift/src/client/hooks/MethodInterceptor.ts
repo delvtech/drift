@@ -36,7 +36,7 @@ export class MethodInterceptor<T extends AnyObject = AnyObject> {
         const wrapped = (...args: unknown[]) =>
           this._useMethodHooks({
             method: prop,
-            fn: value.bind(target),
+            fn: value.bind(receiver),
             args,
           });
 

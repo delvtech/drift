@@ -130,7 +130,7 @@ export function createClient<
     },
 
     extend(props) {
-      return interceptor.createProxy(Object.assign(this, props) as any);
+      return Object.assign(this, props) as any;
     },
 
     // Cached methods //

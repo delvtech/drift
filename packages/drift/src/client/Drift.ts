@@ -27,10 +27,10 @@ export function createDrift<
 >(config: ClientConfig<TAdapter, TCache> = {}): Drift<TAdapter, TCache> {
   return createClient(config).extend({
     contract({ abi, address }) {
-      return createContract({
+      return createContract<any, Drift<TAdapter, TCache>, TAdapter, TCache>({
         abi,
         address,
-        adapter: this,
+        client: this,
       });
     },
   });

@@ -61,20 +61,21 @@ export type Contract<
 export class ReadContract<
   TAbi extends Abi = Abi,
   TClient extends ReadClient = ReadClient,
+  TAdapter extends AdapterType<TClient> = AdapterType<TClient, OxAdapter>,
 > {
   abi: TAbi;
   address: Address;
-  client: TClient;
+  client: TClient & Client<TAdapter>;
 
   constructor({
     abi,
     address,
     client,
     ...clientConfig
-  }: ContractConfig<TAbi, TClient, AdapterType<TClient>, CacheType<TClient>>) {
+  }: ContractConfig<TAbi, TClient, TAdapter, CacheType<TClient>>) {
     this.abi = abi;
     this.address = address;
-    this.client = (client ?? createClient(clientConfig)) as TClient;
+    this.client = (client ?? createClient(clientConfig)) as any;
   }
 
   get cache(): TClient["cache"] {
@@ -85,7 +86,9 @@ export class ReadContract<
     return this.client.isReadWrite();
   }
 
-  extend<T extends Partial<Extended<this>>>(props: T): T & this {
+  extend<T extends Partial<Extended<this>>>(
+    props: T & ThisType<T & this>,
+  ): T & this {
     return Object.assign(this, props);
   }
 
