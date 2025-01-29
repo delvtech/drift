@@ -28,8 +28,7 @@ export type Client<
 > = TAdapter & {
   adapter: TAdapter;
   cache: ClientCache<TCache>;
-  hooks: HookRegistry<MethodHooks<TAdapter>> &
-    HookRegistry<MethodHooks<ReadAdapter>>;
+  hooks: HookRegistry<MethodHooks<TAdapter>>;
   isReadWrite(): this is Client<ReadWriteAdapter>;
   extend<T extends Partial<Extended<Client>>>(
     props: T & ThisType<T & Client<TAdapter, TCache>>,
