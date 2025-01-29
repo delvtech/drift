@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.0.4
+
+### Patch Changes
+
+- 6d80f97: Reverted the autocomplete fix introduced in the last release which actually caused build errors
+
 ## 0.0.3
 
 ### Patch Changes
