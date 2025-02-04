@@ -1,11 +1,11 @@
 import type {
-  Abi,
   AbiItemType,
   AbiParameter,
   AbiParameterKind,
   AbiParameterToPrimitiveType,
   AbiParametersToPrimitiveTypes,
   AbiStateMutability,
+  Abi as _Abi,
 } from "abitype";
 import type {
   EmptyObject,
@@ -39,16 +39,18 @@ import type {
  */
 export interface BaseTypes extends _BaseTypes {}
 interface _BaseTypes {
-  addressType: `0x${string}`;
-  bytesType: `0x${string}`;
-  hashType: `0x${string}`;
-  hexStringType: `0x${string}`;
+  Abi: _Abi;
+  Address: `0x${string}`;
+  Bytes: `0x${string}`;
+  Hash: `0x${string}`;
+  HexString: `0x${string}`;
 }
 
-export type HexString = BaseTypes["hexStringType"];
-export type Address = BaseTypes["addressType"];
-export type Bytes = BaseTypes["bytesType"];
-export type Hash = BaseTypes["hashType"];
+export type Abi = BaseTypes["Abi"];
+export type Address = BaseTypes["Address"];
+export type Bytes = BaseTypes["Bytes"];
+export type Hash = BaseTypes["Hash"];
+export type HexString = BaseTypes["HexString"];
 
 // Override the types in `abitype`.
 declare module "abitype" {

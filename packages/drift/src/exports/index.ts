@@ -1,6 +1,7 @@
 // adapter //
 
 export type {
+  Abi,
   AbiArrayType,
   AbiEntry,
   AbiEntryName,
@@ -73,10 +74,7 @@ export type {
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
 
-export {
-  OxAdapter,
-  type OxAdapterConfig,
-} from "src/adapter/OxAdapter";
+export { OxAdapter, type OxAdapterConfig } from "src/adapter/OxAdapter";
 
 export { arrayToFriendly } from "src/adapter/utils/arrayToFriendly";
 export { arrayToObject } from "src/adapter/utils/arrayToObject";
