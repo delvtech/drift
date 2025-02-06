@@ -14,7 +14,12 @@ export type MockDrift<
   contract<TAbi extends Abi>({
     abi,
     address,
-  }: ContractParams<TAbi>): MockContract<TAbi, MockDrift<TAdapter, TCache>>;
+  }: ContractParams<TAbi>): MockContract<
+    TAbi,
+    TAdapter,
+    TCache,
+    MockDrift<TAdapter, TCache>
+  >;
 };
 
 export function createMockDrift<
