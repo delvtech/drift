@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.24;
+pragma solidity ^0.8.24;
 
 /**
  * @title CodeCaller
@@ -9,7 +9,7 @@ contract CodeCaller {
     error BytecodeDeploymentFailed();
 
     constructor(bytes memory bytecode, bytes memory callParams) {
-        // Deploy the contract with the CREATE opcode
+        // Deploy the contract with the create opcode
         address deployed;
         assembly {
             deployed := create(0, add(bytecode, 32), mload(bytecode))
@@ -25,9 +25,7 @@ contract CodeCaller {
 
         // Forward the return data
         assembly {
-            if iszero(success) {
-                revert(add(returnData, 32), mload(returnData))
-            }
+            if iszero(success) { revert(add(returnData, 32), mload(returnData)) }
             return(add(returnData, 32), mload(returnData))
         }
     }
