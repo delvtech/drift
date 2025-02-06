@@ -101,6 +101,7 @@ export {
   createClient,
   type Client,
   type ClientAdapterOptions,
+  type ClientConfigType,
   type ClientOptions,
   type ClientConfig,
   type ReadClient,

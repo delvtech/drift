@@ -239,3 +239,11 @@ export function createClient<
 
   return interceptor.createProxy(client);
 }
+
+/**
+ * Get the {@linkcode ClientConfig} type for a given {@linkcode Client} type.
+ */
+export type ClientConfigType<TClient extends Client> = ClientConfig<
+  TClient["adapter"],
+  TClient["cache"]["store"]
+>;
