@@ -1,4 +1,4 @@
-import { getRandomHex } from "src/exports/testing";
+import { getRandomHex } from "src/utils/testing/getRandomHex";
 import { describe, expect, it } from "vitest";
 
 describe("getRandomHex", () => {

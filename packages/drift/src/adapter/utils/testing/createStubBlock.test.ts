@@ -1,5 +1,5 @@
 import type { Block } from "src/adapter/types/Block";
-import { createStubBlock } from "src/exports/testing";
+import { createStubBlock } from "src/adapter/utils/testing/createStubBlock";
 import { describe, expect, it } from "vitest";
 
 describe("createStubBlock", () => {
