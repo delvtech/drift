@@ -18,7 +18,12 @@ export type Drift<
   contract<TAbi extends Abi>({
     abi,
     address,
-  }: ContractParams<TAbi>): Contract<TAbi, Drift<TAdapter, TCache>>;
+  }: ContractParams<TAbi>): Contract<
+    TAbi,
+    TAdapter,
+    TCache,
+    Drift<TAdapter, TCache>
+  >;
 };
 
 export function createDrift<
@@ -27,7 +32,7 @@ export function createDrift<
 >(config: ClientConfig<TAdapter, TCache> = {}): Drift<TAdapter, TCache> {
   return createClient(config).extend({
     contract({ abi, address }) {
-      return createContract<any, Drift<TAdapter, TCache>, TAdapter, TCache>({
+      return createContract({
         abi,
         address,
         client: this,

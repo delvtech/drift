@@ -25,15 +25,25 @@ import type { Eval, Extended, OneOf } from "src/utils/types";
 export type Client<
   TAdapter extends Adapter = Adapter,
   TCache extends SimpleCache = SimpleCache,
+  TExtension extends object = {},
 > = TAdapter & {
   adapter: TAdapter;
   cache: ClientCache<TCache>;
   hooks: HookRegistry<MethodHooks<TAdapter>>;
   isReadWrite(): this is Client<ReadWriteAdapter>;
-  extend<T extends Partial<Extended<Client>>>(
-    props: T & ThisType<T & Client<TAdapter, TCache>>,
-  ): T & Client<TAdapter, TCache>;
-};
+  extend<T extends object>(
+    props: Extended<
+      // Using distributive conditional types here ensures that T is inferred as
+      // all properties not present by default on the Client, which when
+      // intersected with Client<TAdapter, TCache, TExtension> results in the
+      // full expected return type. This is necessary to correctly infer the
+      // required props and return type on a dynamic interface.
+      T extends any ? Omit<T, keyof Client> : T
+    > &
+      Partial<Client> &
+      ThisType<Client<TAdapter, TCache, TExtension & T>>,
+  ): Client<TAdapter, TCache, Eval<TExtension & T>>;
+} & TExtension;
 
 /**
  * A read-only {@linkcode Client} for fetching data from a network.
@@ -54,9 +64,7 @@ export type ReadWriteClient<
 /**
  * Base options for configuring a {@linkcode Client}.
  */
-export interface ClientOptions<
-  T extends SimpleCache | undefined = SimpleCache | undefined,
-> {
+export interface ClientOptions<T extends SimpleCache = SimpleCache> {
   // Accept LRU config if LRU can be assigned to TCache
   cache?: LruSimpleCache extends T ? T | LruSimpleCacheConfig : T;
   chainId?: number;
@@ -65,9 +73,7 @@ export interface ClientOptions<
 /**
  * Options for configuring the {@linkcode Adapter} of a {@linkcode Client}.
  */
-export type ClientAdapterOptions<
-  T extends Adapter | undefined = Adapter | undefined,
-> = OneOf<
+export type ClientAdapterOptions<T extends Adapter = Adapter> = OneOf<
   | {
       /**
        * The adapter to use for network interactions. The resulting client will
@@ -83,8 +89,8 @@ export type ClientAdapterOptions<
  * Configuration options for creating a {@linkcode Client}.
  */
 export type ClientConfig<
-  TAdapter extends Adapter | undefined = Adapter | undefined,
-  TCache extends SimpleCache | undefined = SimpleCache | undefined,
+  TAdapter extends Adapter = Adapter,
+  TCache extends SimpleCache = SimpleCache,
 > = Eval<ClientOptions<TCache> & ClientAdapterOptions<TAdapter>>;
 
 /**
