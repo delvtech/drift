@@ -239,13 +239,3 @@ export function createClient<
 
   return interceptor.createProxy(client);
 }
-
-export type AdapterType<
-  TClient extends Client | undefined,
-  Fallback extends Adapter = Adapter,
-> = TClient extends { adapter: infer A } ? A : Fallback;
-
-export type CacheType<
-  TClient extends Client | undefined,
-  Fallback extends SimpleCache = SimpleCache,
-> = TClient extends { cache: { store: infer C } } ? C : Fallback;

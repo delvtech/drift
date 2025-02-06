@@ -105,8 +105,6 @@ export {
   type ClientConfig,
   type ReadClient,
   type ReadWriteClient,
-  type AdapterType,
-  type CacheType,
 } from "src/client/Client";
 
 export { type Drift, createDrift } from "src/client/Drift";
