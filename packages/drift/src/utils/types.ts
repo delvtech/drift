@@ -14,7 +14,7 @@ export type MaybeAwaited<T> = T extends Promise<infer U> ? MaybePromise<U> : T;
  * This fixes type errors that arise when trying to return
  * `Awaited<ReturnType<T>>` even though it's basically the same thing. I need to
  * do some more research to understand why this is necessary. I'm guessing it
- * has to do with distributing conditional types.
+ * has to do with distributive conditional types.
  */
 export type AwaitedReturnType<T extends AnyFunction> = T extends (
   ...args: any
@@ -52,33 +52,20 @@ export type ReplaceProps<T, U> = Omit<T, keyof U> & U;
  * Make all properties in `T` whose keys are in the union `K` required and
  * non-nullable.
  */
-export type RequiredKeys<T, K extends keyof T> = ReplaceProps<
-  T,
-  {
-    [U in K]-?: NonNullable<T[U]>;
-  }
->;
+export type RequiredKeys<T, K extends keyof T> = Omit<T, K> &
+  Required<Pick<T, K>>;
 
 /**
  * Make all properties in `T` whose keys are in the union `K` optional.
  */
-export type OptionalKeys<T, K extends keyof T> = ReplaceProps<
-  T,
-  {
-    [OptionalKey in K]?: T[OptionalKey];
-  }
->;
-
-/** Recursively make all properties in T partial. */
-export type DeepPartial<T> = {
-  [K in keyof T]?: DeepPartial<T[K]>;
-};
+export type OptionalKeys<T, K extends keyof T> = Omit<T, K> &
+  Partial<Pick<T, K>>;
 
 /**
  * Get a union of all property keys on `T` that are functions
  */
 export type FunctionKey<T> = keyof {
-  [K in keyof T as T[K] extends AnyFunction ? K : never]: never;
+  [K in keyof T as T[K] extends Function ? K : never]: never;
 };
 
 /**
@@ -121,22 +108,22 @@ export type UnionToIntersection<T> = (
  * @example
  * ```ts
  * type GetBlockOptions = {
- *   includeTransactions?: boolean | undefined
+ *   includeTransactions?: boolean;
  * } & (
  *   | {
- *       blockHash?: string | undefined;
- *       blockNumber?: never | undefined;
- *       blockTag?: never | undefined;
+ *       blockHash: string;
+ *       blockNumber?: undefined;
+ *       blockTag?: undefined;
  *     }
  *   | {
- *       blockHash?: never | undefined;
- *       blockNumber?: bigint | undefined;
- *       blockTag?: never | undefined;
+ *       blockHash?: undefined;
+ *       blockNumber: bigint;
+ *       blockTag?: undefined;
  *     }
  *   | {
- *       blockHash?: never | undefined;
- *       blockNumber?: never | undefined;
- *       blockTag?: string | undefined;
+ *       blockHash?: undefined;
+ *       blockNumber?: undefined;
+ *       blockTag: string;
  *     }
  * )
  *
@@ -149,14 +136,9 @@ export type UnionToIntersection<T> = (
  * // }
  * ```
  */
-export type MergeKeys<T> = UnionToIntersection<T> extends infer I
+export type MergeKeys<T> = keyof T extends PropertyKey
   ? {
-      // Each key of the intersection is first checked against the union type,
-      // T. If it exists in every member of T, then T[K] will be a union of
-      // the value types. Otherwise, I[K] is used. I[K] is the value type of
-      // the key in the intersection which will be `never` for keys with
-      // conflicting value types.
-      [K in keyof I]: K extends keyof T ? T[K] : I[K];
+      [K in keyof T]: T[K];
     }
   : never;
 
@@ -224,8 +206,3 @@ export type OneOf<T extends AnyObject> = UnionToIntersection<T> extends infer I
  */
 export type Extended<T extends AnyObject> = T &
   Record<Exclude<PropertyKey, keyof T>, any>;
-
-/**
- * Return `T` if defined, otherwise return `U`.
- */
-export type Fallback<T, U> = undefined extends T ? U : Exclude<T, undefined>;

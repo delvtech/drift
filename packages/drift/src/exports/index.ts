@@ -135,11 +135,11 @@ export {
   type MethodHooks,
 } from "src/client/hooks/MethodInterceptor";
 
-export {
-  type HookHandler,
-  type HookName,
-  type HookPayload,
-  type HookRegistry,
+export type {
+  HookHandler,
+  HookName,
+  HookPayload,
+  HookRegistry,
 } from "src/client/hooks/HookRegistry";
 
 // error //
@@ -157,7 +157,6 @@ export { getRandomHex } from "src/utils/testing/getRandomHex";
 export type {
   AnyFunction,
   AnyObject,
-  DeepPartial,
   EmptyObject,
   FunctionKey,
   MaybeAwaited,
@@ -171,7 +170,6 @@ export type {
   UnionToIntersection,
   Extended,
   AwaitedReturnType,
-  Fallback,
 } from "src/utils/types";
 
 // ...rest //
