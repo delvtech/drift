@@ -6,10 +6,10 @@ export type EthersAbi = Exclude<ContractInterface, Interface>;
 
 declare module "@delvtech/drift" {
   interface BaseTypes {
-    addressType: string;
-    bytesType: string;
-    hashType: string;
-    hexStringType: string;
+    Address: string;
+    Bytes: string;
+    Hash: string;
+    HexString: string;
   }
 
   interface Block {
