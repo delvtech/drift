@@ -29,7 +29,10 @@ export type Client<
 > = TAdapter & {
   adapter: TAdapter;
   cache: ClientCache<TCache>;
-  hooks: HookRegistry<MethodHooks<TAdapter>>;
+  hooks: HookRegistry<MethodHooks<TAdapter>> &
+    // Intersect with the default adapter to avoid type errors in generic
+    // contexts where the keys of the adapter are unknown.
+    HookRegistry<MethodHooks<Adapter>>;
   isReadWrite(): this is Client<ReadWriteAdapter>;
   extend<T extends object>(
     props: Extended<
