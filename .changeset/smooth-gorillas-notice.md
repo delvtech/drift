@@ -2,4 +2,4 @@
 "@delvtech/drift": patch
 ---
 
-Improved unitility types
+Improved utility types
