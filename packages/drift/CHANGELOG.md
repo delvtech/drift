@@ -1,5 +1,16 @@
 # @delvtech/drift
 
+## 0.1.0
+
+### Minor Changes
+
+- d5a0493: Refactored the type params on clients and contracts to improve inference in generic contexts
+
+### Patch Changes
+
+- e1a0d54: Added `ClientConfigType` type to get the `ClientConfig` type from a `Client` type.
+- 2743287: Improved utility types
+
 ## 0.0.4
 
 ### Patch Changes
