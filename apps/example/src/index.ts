@@ -21,7 +21,7 @@ const tokenName = await drift.read({
 // Create a contract instance
 const token = drift.contract({
   abi: erc20.abi,
-  address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+  address: tokenAddress,
 });
 
 const balance = await token.read("balanceOf", {
