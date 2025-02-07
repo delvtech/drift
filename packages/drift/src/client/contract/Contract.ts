@@ -71,7 +71,8 @@ export class ReadContract<
   }: ContractConfig<TAbi, TAdapter, TCache, TClient>) {
     this.abi = abi;
     this.address = address;
-    this.client = (client ?? createClient(clientConfig as ClientConfig)) as any;
+    this.client = (client ??
+      createClient(clientConfig as ClientConfig)) as TClient;
   }
 
   get cache(): TClient["cache"] {

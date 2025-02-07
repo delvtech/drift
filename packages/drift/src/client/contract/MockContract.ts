@@ -56,7 +56,7 @@ export class MockContract<
     super({
       abi,
       address,
-      client: (client ?? createMockClient(clientOptions as any)) as TClient,
+      client: (client ?? createMockClient(clientOptions)) as TClient,
     });
   }
 

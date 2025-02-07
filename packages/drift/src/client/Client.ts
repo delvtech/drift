@@ -102,14 +102,12 @@ export type ClientConfig<
 export function createClient<
   TAdapter extends Adapter = OxAdapter,
   TCache extends SimpleCache = LruSimpleCache,
->(
-  {
-    adapter: maybeAdapter,
-    cache: cacheOrConfig,
-    chainId,
-    ...adapterConfig
-  }: ClientConfig<TAdapter, TCache> = {} as any,
-): Client<TAdapter, TCache> {
+>({
+  adapter: maybeAdapter,
+  cache: cacheOrConfig,
+  chainId,
+  ...adapterConfig
+}: ClientConfig<TAdapter, TCache> = {}): Client<TAdapter, TCache> {
   const interceptor = new MethodInterceptor<TAdapter>();
 
   // Handle adapter config
