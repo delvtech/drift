@@ -1,5 +1,12 @@
 # @delvtech/drift
 
+## 0.1.1
+
+### Patch Changes
+
+- 85898ae: Added `Abi` type to exports and `BaseTypes` register.
+- 934c84f: Patched `Client.hooks` type to work when the adapter type is generic
+
 ## 0.1.0
 
 ### Minor Changes
