@@ -345,10 +345,7 @@ export type ContractConfig<
   TAbi extends Abi = Abi,
   TAdapter extends Adapter = Adapter,
   TCache extends SimpleCache = SimpleCache,
-  TClient extends Client<NonNullable<TAdapter>, TCache> = Client<
-    NonNullable<TAdapter>,
-    TCache
-  >,
+  TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
 > = Eval<
   ContractParams<TAbi> & ContractClientOptions<TAdapter, TCache, TClient>
 >;
