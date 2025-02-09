@@ -220,39 +220,43 @@ using Drift's `ReadContract` and `ReadWriteContract` abstractions.
 ```typescript
 // sdk-core/src/VaultClient.ts
 import {
-  ContractEvent,
-  Drift,
-  ReadContract,
-  ReadWriteAdapter,
-  ReadWriteContract,
+  type Address,
+  type Drift,
+  type EventLog,
+  type Hash,
+  type ReadContract,
+  type ReadWriteAdapter,
+  type ReadWriteContract,
   createDrift,
 } from "@delvtech/drift";
-import { vaultAbi } from "./abis/VaultAbi";
+import { erc4626Abi } from "./abis/Erc4626";
 
-type VaultAbi = typeof vaultAbi;
+type VaultAbi = typeof erc4626Abi;
 
+/** A Read-Only Vault client */
 export class ReadVault {
   contract: ReadContract<VaultAbi>;
-
-  constructor(address: string, drift: Drift = createDrift()) {
+  
+  constructor(address: Address, drift: Drift = createDrift()) {
     this.contract = drift.contract({
-      abi: vaultAbi,
+      abi: ERC4626.abi,
       address,
     });
   }
 
-  // Read balance with internal caching
-  async getBalance(account: string): Promise<bigint> {
+  // Make read calls with internal caching
+  getBalance(account: Address): Promise<bigint> {
     return this.contract.read("balanceOf", { account });
   }
+  getDecimals(): Promise<number> {
+    return this.contract.read("decimals");
+  }
 
-  // Get all deposit events for an account with internal caching
-  async getDeposits(
-    account?: string,
-  ): Promise<ContractEvent<VaultAbi, "Deposit">[]> {
+  // Fetch events with internal caching
+  getDeposits(account?: Address): Promise<EventLog<VaultAbi, "Deposit">[]> {
     return this.contract.getEvents("Deposit", {
       filter: {
-        depositor: account,
+        sender: account,
       },
     });
   }
@@ -261,24 +265,28 @@ export class ReadVault {
 export class ReadWriteVault extends ReadVault {
   declare contract: ReadWriteContract<VaultAbi>;
 
-  constructor(address: string, drift?: Drift<ReadWriteAdapter>) {
+  constructor(
+    address: Address,
+    drift: Drift<ReadWriteAdapter> = createDrift(),
+  ) {
     super(address, drift);
   }
 
   // Make a deposit
-  async deposit(amount: bigint, recipient: string): Promise<string> {
-    const txHash = await this.contract.write(
+  deposit(amount: bigint, account: Address): Promise<Hash> {
+    return this.contract.write(
       "deposit",
-      { amount, recipient },
+      {
+        assets: amount,
+        receiver: account,
+      },
       {
         // Optionally wait for the transaction to be mined and invalidate cache
         onMined: () => {
-          this.contract.invalidateRead("balanceOf", { recipient });
+          this.contract.invalidateRead("balanceOf", { account });
         },
       },
     );
-
-    return txHash;
   }
 }
 ```
