@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.1.2
+
+### Patch Changes
+
+- 84b7a6d: Updated all references of the `Abi` type to use the one exported from drift to ensure registery overrides work consistently across the packages.
+
 ## 0.1.1
 
 ### Patch Changes
