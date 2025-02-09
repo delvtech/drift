@@ -69,40 +69,6 @@ export type FunctionKey<T> = keyof {
 };
 
 /**
- * Convert members of a union to an intersection.
- *
- * @example
- * ```ts
- * type Union = { a: number } | { b: string };
- * type Intersection = UnionToIntersection<Union>;
- * // { a: number } & { b: string }
- * ```
- *
- * @privateRemarks
- * This works by taking advantage of [distributive conditional
- * types](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types),
- * which allows conditional types to be applied to each member of a union type
- * individually, and [contravarience in function argument
- * types](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-6.html#strict-function-types).
- *
- * The conditional type `T extends any ? (x: T) => any : never` is used to
- * create a function type for each member of the union that takes the member as
- * an argument.
- *
- * Then, the union of function types is checked to see if it can be assigned to
- * a single function type with an inferred argument type. TypeScript infers the
- * argument type as the intersection of the union members since it's the only
- * argument type that satisfies all members of the function type union.
- */
-export type UnionToIntersection<T> = (
-  T extends any
-    ? (member: T) => any
-    : never
-) extends (member: infer R) => any
-  ? R
-  : never;
-
-/**
  * Merge the keys of a union or intersection of objects into a single type.
  *
  * @example
@@ -143,6 +109,70 @@ export type MergeKeys<T> = keyof T extends PropertyKey
   : never;
 
 /**
+ * Get a superset of `T` that allows for arbitrary properties.
+ *
+ * @example
+ *
+ * ```ts
+ * interface Order {
+ *   account: `0x${string}`;
+ *   amount: bigint;
+ * }
+ *
+ * const order1: Order = {
+ *   account: "0x123",
+ *   amount: 100n,
+ *   getStatus() { ... }
+ *   // ^ Error: Object literal may only specify known properties, and 'getStatus' does not exist in type 'Order'.
+ * };
+ *
+ * // No errors! 🎉
+ * const order2: Extended<Order> = {
+ *   account: "0x123",
+ *   amount: 100n,
+ *   getStatus() { ... }
+ * };
+ * ```
+ *
+ */
+export type Extended<T extends AnyObject> = T &
+  Record<Exclude<PropertyKey, keyof T>, any>;
+
+/**
+ * Convert members of a union to an intersection.
+ *
+ * @example
+ * ```ts
+ * type Union = { a: number } | { b: string };
+ * type Intersection = UnionToIntersection<Union>;
+ * // { a: number } & { b: string }
+ * ```
+ *
+ * @privateRemarks
+ * This works by taking advantage of [distributive conditional
+ * types](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types),
+ * which allows conditional types to be applied to each member of a union type
+ * individually, and [contravarience in function argument
+ * types](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-6.html#strict-function-types).
+ *
+ * The conditional type `T extends any ? (x: T) => any : never` is used to
+ * create a function type for each member of the union that takes the member as
+ * an argument.
+ *
+ * Then, the union of function types is checked to see if it can be assigned to
+ * a single function type with an inferred argument type. TypeScript infers the
+ * argument type as the intersection of the union members since it's the only
+ * argument type that satisfies all members of the function type union.
+ */
+export type UnionToIntersection<T> = (
+  T extends any
+    ? (member: T) => any
+    : never
+) extends (member: infer R) => any
+  ? R
+  : never;
+
+/**
  * Construct a type in which only a single member of `T` is valid at a time.
  *
  * @example
@@ -176,33 +206,3 @@ export type OneOf<T extends AnyObject> = UnionToIntersection<T> extends infer I
       >
     : never
   : never;
-
-/**
- * Get a superset of `T` that allows for arbitrary properties.
- *
- * @example
- *
- * ```ts
- * interface Order {
- *   account: `0x${string}`;
- *   amount: bigint;
- * }
- *
- * const order1: Order = {
- *   account: "0x123",
- *   amount: 100n,
- *   getStatus() { ... }
- *   // ^ Error: Object literal may only specify known properties, and 'getStatus' does not exist in type 'Order'.
- * };
- *
- * // No errors! 🎉
- * const order2: Extended<Order> = {
- *   account: "0x123",
- *   amount: 100n,
- *   getStatus() { ... }
- * };
- * ```
- *
- */
-export type Extended<T extends AnyObject> = T &
-  Record<Exclude<PropertyKey, keyof T>, any>;
