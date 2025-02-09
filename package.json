@@ -12,7 +12,7 @@
     "lint": "biome lint --diagnostic-level error .",
     "lint:fix": "yarn lint --fix",
     "lint:fix:unsafe": "yarn lint:fix --unsafe",
-    "release": "turbo build && changeset publish",
+    "release": "sh scripts/release.sh",
     "test": "turbo test",
     "typecheck": "turbo typecheck",
     "reset-node-modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && yarn cache clean && yarn"
