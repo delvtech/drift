@@ -10,7 +10,7 @@
     "sdk": "tsx -r dotenv/config src/sdk.ts"
   },
   "dependencies": {
-    "@delvtech/drift": "^0.1.1",
+    "@delvtech/drift": "^0.1.2",
     "@delvtech/fixed-point-wasm": "^0.0.6"
   },
   "devDependencies": {
