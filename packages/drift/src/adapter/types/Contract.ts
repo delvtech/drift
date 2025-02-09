@@ -1,5 +1,10 @@
-import type { Abi } from "abitype";
-import type { Address, Bytes, Hash, HexString } from "src/adapter/types/Abi";
+import type {
+  Abi,
+  Address,
+  Bytes,
+  Hash,
+  HexString,
+} from "src/adapter/types/Abi";
 import type { BlockTag } from "src/adapter/types/Block";
 import type { EventFilter, EventName } from "src/adapter/types/Event";
 

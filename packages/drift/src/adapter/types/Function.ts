@@ -1,5 +1,6 @@
-import type { Abi, AbiStateMutability } from "abitype";
+import type { AbiStateMutability } from "abitype";
 import type {
+  Abi,
   AbiEntry,
   AbiFriendlyType,
   AbiObjectType,

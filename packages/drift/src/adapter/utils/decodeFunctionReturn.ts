@@ -1,6 +1,5 @@
-import type { Abi } from "abitype";
 import { AbiFunction } from "ox";
-import type { AbiArrayType } from "src/adapter/types/Abi";
+import type { Abi, AbiArrayType } from "src/adapter/types/Abi";
 import type { DecodeFunctionReturnParams } from "src/adapter/types/Adapter";
 import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
 import { arrayToFriendly } from "src/adapter/utils/arrayToFriendly";

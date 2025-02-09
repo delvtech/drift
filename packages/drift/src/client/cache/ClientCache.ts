@@ -1,6 +1,5 @@
-import type { Abi } from "abitype";
 import isMatch from "lodash.ismatch";
-import type { Bytes } from "src/adapter/types/Abi";
+import type { Abi, Bytes } from "src/adapter/types/Abi";
 import type {
   CallParams,
   GetEventsParams,

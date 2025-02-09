@@ -1,5 +1,5 @@
-import type { Abi } from "abitype";
 import type { MockAdapter } from "src/adapter/MockAdapter";
+import type { Abi } from "src/adapter/types/Abi";
 import type { ContractParams } from "src/adapter/types/Contract";
 import type { LruSimpleCache } from "src/cache/LruSimpleCache";
 import type { SimpleCache } from "src/cache/types";

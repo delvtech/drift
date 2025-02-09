@@ -1,4 +1,5 @@
 import {
+  type Abi,
   type Address,
   type AnyObject,
   type Block,
@@ -31,7 +32,6 @@ import {
   objectToArray,
   prepareBytecodeCallData,
 } from "@delvtech/drift";
-import type { Abi } from "abitype";
 import { type AbiFragment, type AccessList, default as Web3 } from "web3";
 
 export class Web3Adapter<TWeb3 extends Web3 = Web3>

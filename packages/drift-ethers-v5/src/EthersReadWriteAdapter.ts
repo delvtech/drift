@@ -1,4 +1,5 @@
 import {
+  type Abi,
   type Address,
   type FunctionName,
   type Hash,
@@ -8,7 +9,6 @@ import {
   type WriteParams,
   objectToArray,
 } from "@delvtech/drift";
-import type { Abi } from "abitype";
 import type { ContractTransaction, Signer } from "ethers";
 import { Contract } from "ethers";
 import {

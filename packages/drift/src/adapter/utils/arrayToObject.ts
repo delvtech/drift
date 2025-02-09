@@ -1,6 +1,7 @@
-import type { Abi, AbiFunction, AbiItemType, AbiParameterKind } from "abitype";
+import type { AbiFunction, AbiItemType, AbiParameterKind } from "abitype";
 import { AbiItem } from "ox";
 import type {
+  Abi,
   AbiArrayType,
   AbiEntryName,
   AbiObjectType,

@@ -1,11 +1,11 @@
 import {
+  type Abi,
   type FunctionName,
   type HexString,
   type ReadWriteAdapter,
   type WriteParams,
   objectToArray,
 } from "@delvtech/drift";
-import type { Abi } from "abitype";
 import type { Provider, Signer } from "ethers";
 import { Contract } from "ethers";
 import type { InterfaceAbi } from "ethers";

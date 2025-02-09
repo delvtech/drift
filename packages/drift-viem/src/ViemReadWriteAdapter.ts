@@ -1,4 +1,5 @@
 import {
+  type Abi,
   type FunctionName,
   type ReadWriteAdapter,
   type WriteParams,
@@ -8,7 +9,7 @@ import {
   ViemReadAdapter,
   type ViemReadAdapterParams,
 } from "src/ViemReadAdapter";
-import type { Abi, Address, PublicClient, WalletClient } from "viem";
+import type { Address, PublicClient, WalletClient } from "viem";
 
 export interface ViemReadWriteAdapterParams<
   TPublicClient extends PublicClient = PublicClient,

@@ -1,4 +1,5 @@
 import {
+  type Abi,
   type Block,
   type Bytes,
   type CallParams,
@@ -28,7 +29,6 @@ import {
   objectToArray,
   prepareBytecodeCallData,
 } from "@delvtech/drift";
-import type { Abi } from "abitype";
 import {
   BigNumber,
   Contract,

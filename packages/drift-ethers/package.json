@@ -33,7 +33,6 @@
   "devDependencies": {
     "@delvtech/drift": "0.1.1",
     "@repo/typescript-config": "*",
-    "abitype": "^1.0.8",
     "ethers": "^6.13.5",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.3.6",

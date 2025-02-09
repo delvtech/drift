@@ -1,5 +1,5 @@
-import type { Abi } from "abitype";
 import { AbiFunction, AbiParameters, Hex } from "ox";
+import type { Abi } from "src/adapter/types/Abi";
 import type { DecodeFunctionDataParams } from "src/adapter/types/Adapter";
 import type {
   DecodedFunctionData,

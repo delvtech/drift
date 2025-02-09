@@ -1,4 +1,3 @@
-import type { Abi } from "abitype";
 import {
   AbiEvent,
   AbiFunction,
@@ -10,7 +9,7 @@ import {
   Transaction,
   TransactionReceipt,
 } from "ox";
-import type { Bytes, HexString } from "src/adapter/types/Abi";
+import type { Abi, Bytes, HexString } from "src/adapter/types/Abi";
 import type {
   CallParams,
   DecodeFunctionDataParams,

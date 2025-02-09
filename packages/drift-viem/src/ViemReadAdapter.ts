@@ -1,4 +1,5 @@
 import {
+  type Abi,
   type AbiObjectType,
   type Block,
   type Bytes,
@@ -26,7 +27,6 @@ import {
 } from "@delvtech/drift";
 import {
   http,
-  type Abi,
   type CallParameters,
   type GetBalanceParameters,
   type GetBlockParameters,

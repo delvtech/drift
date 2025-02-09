@@ -1,5 +1,4 @@
-import type { Abi } from "abitype";
-import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
+import type { Abi, Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   ContractCallOptions,
   ContractGetEventsOptions,

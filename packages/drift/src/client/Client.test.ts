@@ -1,5 +1,5 @@
-import type { Abi } from "abitype";
 import { MockAdapter } from "src/adapter/MockAdapter";
+import type { Abi } from "src/adapter/types/Abi";
 import type { GetEventsParams } from "src/adapter/types/Adapter";
 import type { EventLog } from "src/adapter/types/Event";
 import { createClient } from "src/client/Client";

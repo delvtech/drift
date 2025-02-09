@@ -1,4 +1,5 @@
 import {
+  type Abi,
   type Address,
   type Block,
   type Bytes,
@@ -30,7 +31,6 @@ import {
   objectToArray,
   prepareBytecodeCallData,
 } from "@delvtech/drift";
-import type { Abi } from "abitype";
 import type { AccessList } from "ethers";
 import { Interface } from "ethers";
 import {

@@ -1,5 +1,5 @@
-import type { Abi } from "abitype";
 import type {
+  Abi,
   AbiEntryName,
   AbiObjectType,
   AbiParameters,
