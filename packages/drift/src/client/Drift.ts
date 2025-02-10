@@ -26,10 +26,15 @@ export type Drift<
   >;
 };
 
+export type DriftConfig<
+  TAdapter extends Adapter = Adapter,
+  TCache extends SimpleCache = SimpleCache,
+> = ClientConfig<TAdapter, TCache>;
+
 export function createDrift<
   TAdapter extends Adapter = OxAdapter,
   TCache extends SimpleCache = LruSimpleCache,
->(config: ClientConfig<TAdapter, TCache> = {}): Drift<TAdapter, TCache> {
+>(config: DriftConfig<TAdapter, TCache> = {}): Drift<TAdapter, TCache> {
   return createClient(config).extend({
     contract({ abi, address }) {
       return createContract({

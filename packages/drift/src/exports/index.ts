@@ -106,7 +106,7 @@ export {
   type ReadWriteClient,
 } from "src/client/Client";
 
-export { type Drift, createDrift } from "src/client/Drift";
+export { type Drift, type DriftConfig, createDrift } from "src/client/Drift";
 
 export {
   createContract,
