@@ -140,7 +140,7 @@ export type SimulateWriteParams<
   ContractWriteOptions;
 
 export interface OnMinedParam {
-  onMined?: (receipt?: TransactionReceipt) => void;
+  onMined?: (receipt: TransactionReceipt | undefined) => void;
 }
 
 export type WriteParams<
