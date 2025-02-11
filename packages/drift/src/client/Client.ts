@@ -41,9 +41,9 @@ export type Client<
       // intersected with Client<TAdapter, TCache, TExtension> results in the
       // full expected return type. This is necessary to correctly infer the
       // required props and return type on a dynamic interface.
-      T extends any ? Omit<T, keyof Client> : T
+      T extends any ? Omit<T, keyof Client | keyof TExtension> : T
     > &
-      Partial<Client> &
+      Partial<Client & TExtension> &
       ThisType<Client<TAdapter, TCache, TExtension & T>>,
   ): Client<TAdapter, TCache, Eval<TExtension & T>>;
 } & TExtension;

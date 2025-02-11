@@ -10,17 +10,21 @@ import { MockContract } from "src/client/contract/MockContract";
 export type MockDrift<
   TAdapter extends MockAdapter = MockAdapter,
   TCache extends SimpleCache = SimpleCache,
-> = Client<TAdapter, TCache> & {
-  contract<TAbi extends Abi>({
-    abi,
-    address,
-  }: ContractParams<TAbi>): MockContract<
-    TAbi,
-    TAdapter,
-    TCache,
-    MockDrift<TAdapter, TCache>
-  >;
-};
+> = Client<
+  TAdapter,
+  TCache,
+  {
+    contract<TAbi extends Abi>({
+      abi,
+      address,
+    }: ContractParams<TAbi>): MockContract<
+      TAbi,
+      TAdapter,
+      TCache,
+      MockDrift<TAdapter, TCache>
+    >;
+  }
+>;
 
 export function createMockDrift<
   TAdapter extends MockAdapter = MockAdapter,

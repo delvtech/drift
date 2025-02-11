@@ -14,17 +14,21 @@ import { type Contract, createContract } from "src/client/contract/Contract";
 export type Drift<
   TAdapter extends Adapter = Adapter,
   TCache extends SimpleCache = SimpleCache,
-> = Client<TAdapter, TCache> & {
-  contract<TAbi extends Abi>({
-    abi,
-    address,
-  }: ContractParams<TAbi>): Contract<
-    TAbi,
-    TAdapter,
-    TCache,
-    Drift<TAdapter, TCache>
-  >;
-};
+> = Client<
+  TAdapter,
+  TCache,
+  {
+    contract<TAbi extends Abi>({
+      abi,
+      address,
+    }: ContractParams<TAbi>): Contract<
+      TAbi,
+      TAdapter,
+      TCache,
+      Drift<TAdapter, TCache>
+    >;
+  }
+>;
 
 export type DriftConfig<
   TAdapter extends Adapter = Adapter,
