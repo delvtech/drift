@@ -1,5 +1,13 @@
 # @delvtech/drift
 
+## 0.1.3
+
+### Patch Changes
+
+- bf084c6: Updated READMEs
+- 02cdc41: Added `DriftConfig` to exports
+- 1269538: Made the `receipt` argument of the `onMined` param required. The value will either be a receipt or undefined explicitly, but this prevents the function from being called with no arguments.
+
 ## 0.1.2
 
 ### Patch Changes
