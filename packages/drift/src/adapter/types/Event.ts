@@ -55,7 +55,7 @@ export type EventFilter<
  * A strongly typed event object based on an abi
  */
 export interface EventLog<
-  TAbi extends Abi,
+  TAbi extends Abi = Abi,
   TEventName extends EventName<TAbi> = EventName<TAbi>,
 > {
   eventName: TEventName;
