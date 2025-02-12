@@ -11,18 +11,25 @@ export interface EthersAdapterParams<
   signer?: TSigner;
 }
 
-export function ethersAdapter<
-  TProvider extends Provider = Provider,
-  TSigner extends Signer | undefined = undefined,
->({
-  provider,
-  signer,
-}: EthersAdapterParams<TProvider, TSigner> = {}): TSigner extends Signer
-  ? EthersReadWriteAdapter<TProvider, TSigner>
-  : EthersReadAdapter<TProvider> {
+export function ethersAdapter<const TConfig extends EthersAdapterParams>(
+  { provider, signer } = {} as TConfig,
+): EthersAdapter<TConfig["provider"], TConfig["signer"]> {
   return signer
     ? (new EthersReadWriteAdapter({ provider, signer }) as any)
     : (new EthersReadAdapter({
         provider,
       }) as any);
 }
+
+export type EthersAdapter<
+  TProvider extends Provider | undefined = Provider,
+  TSigner extends Signer | undefined = undefined,
+> = (
+  TProvider extends Provider
+    ? TProvider
+    : Provider
+) extends infer TProvider extends Provider
+  ? TSigner extends Signer
+    ? EthersReadWriteAdapter<TProvider, TSigner>
+    : EthersReadAdapter<TProvider>
+  : never;

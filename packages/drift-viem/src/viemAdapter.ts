@@ -10,21 +10,20 @@ export interface ViemAdapterParams<
   walletClient?: TWalletClient;
 }
 
-export function viemAdapter<
-  TPublicClient extends PublicClient,
-  TWalletClient extends WalletClient | undefined = undefined,
->({
+export function viemAdapter<const TConfig extends ViemAdapterParams>({
   publicClient,
   walletClient,
-}: ViemAdapterParams<
-  TPublicClient,
-  TWalletClient
->): TWalletClient extends WalletClient
-  ? ViemReadWriteAdapter<TPublicClient, TWalletClient>
-  : ViemReadAdapter<TPublicClient> {
+}: TConfig): ViemAdapter<TConfig["publicClient"], TConfig["walletClient"]> {
   return walletClient
     ? (new ViemReadWriteAdapter({ publicClient, walletClient }) as any)
     : (new ViemReadAdapter({
         publicClient,
       }) as any);
 }
+
+export type ViemAdapter<
+  TPublicClient extends PublicClient = PublicClient,
+  TWalletClient extends WalletClient | undefined = WalletClient | undefined,
+> = TWalletClient extends WalletClient
+  ? ViemReadWriteAdapter<TPublicClient, TWalletClient>
+  : ViemReadAdapter<TPublicClient>;

@@ -6,4 +6,8 @@ export {
   type EthersReadWriteAdapterParams,
   EthersReadWriteAdapter,
 } from "./EthersReadWriteAdapter";
-export { ethersAdapter, type EthersAdapterParams } from "./ethersAdapter";
+export {
+  ethersAdapter,
+  type EthersAdapter,
+  type EthersAdapterParams,
+} from "./ethersAdapter";
