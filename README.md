@@ -48,7 +48,7 @@ Building on Ethereum often means dealing with:
 
 - [Installation](#installation)
 - [Start Drifting](#start-drifting)
-  - [1. Initialize Drift](#1-initialize-drift)
+  - [1. Create a Drift client](#1-create-a-drift-client)
   - [2. Interact with your Contracts](#2-interact-with-your-contracts)
     - [Read Operations with Caching](#read-operations-with-caching)
     - [Write Operations](#write-operations)
