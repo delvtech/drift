@@ -1,5 +1,5 @@
 ---
-"@delvtech/drift-ethers-5": patch
+"@delvtech/drift-ethers-v5": patch
 "@delvtech/drift-ethers": patch
 "@delvtech/drift-viem": patch
 ---
