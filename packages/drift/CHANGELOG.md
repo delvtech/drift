@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.1.5
+
+### Patch Changes
+
+- 035136d: Fixed decoding of unnamed tuples and tuple params
+
 ## 0.1.4
 
 ### Patch Changes
