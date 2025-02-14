@@ -1,6 +1,5 @@
 import {
   AbiEvent,
-  AbiFunction,
   type AbiItem,
   Address,
   Block,
@@ -38,7 +37,10 @@ import type {
 } from "src/adapter/types/Network";
 import type { TransactionReceipt as TransactionReceiptType } from "src/adapter/types/Transaction";
 import { decodeFunctionData } from "src/adapter/utils/decodeFunctionData";
-import { decodeFunctionReturn } from "src/adapter/utils/decodeFunctionReturn";
+import {
+  _decodeFunctionReturn,
+  decodeFunctionReturn,
+} from "src/adapter/utils/decodeFunctionReturn";
 import { encodeFunctionData } from "src/adapter/utils/encodeFunctionData";
 import { encodeFunctionReturn } from "src/adapter/utils/encodeFunctionReturn";
 import { handleError } from "src/adapter/utils/internal/handleError";
@@ -261,7 +263,7 @@ export class OxAdapter implements ReadWriteAdapter {
       args: args as FunctionArgs<TAbi, TFunctionName>,
     });
 
-    const result = await this.provider
+    const returnData = await this.provider
       .request({
         method: "eth_call",
         params: [
@@ -274,9 +276,11 @@ export class OxAdapter implements ReadWriteAdapter {
       })
       .catch(handleError);
 
-    return AbiFunction.decodeResult(abiFn, result) as Promise<
-      FunctionReturn<TAbi, TFunctionName>
-    >;
+    return _decodeFunctionReturn<TAbi, TFunctionName>({
+      abi,
+      data: returnData,
+      fn: abiFn,
+    });
   }
 
   async simulateWrite<
@@ -308,9 +312,11 @@ export class OxAdapter implements ReadWriteAdapter {
       })
       .catch(handleError);
 
-    return AbiFunction.decodeResult(abiFn, result) as Promise<
-      FunctionReturn<TAbi, TFunctionName>
-    >;
+    return _decodeFunctionReturn<TAbi, TFunctionName>({
+      abi,
+      data: result,
+      fn: abiFn,
+    });
   }
 
   async getSignerAddress() {

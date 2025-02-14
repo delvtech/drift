@@ -217,11 +217,15 @@ describe("OxAdapter", () => {
     expect(encoded).toBeTypeOf("string");
   });
 
-  const tupleReturnAbi = [
+  // Ensures edge cases are handled correctly
+  const tupleParamsAbi = [
     {
       name: "names",
       type: "function",
-      inputs: [],
+      inputs: [
+        { name: "", type: "string" },
+        { name: "", type: "string" },
+      ],
       outputs: [
         { name: "", type: "string" },
         { name: "", type: "string" },
@@ -233,7 +237,7 @@ describe("OxAdapter", () => {
   it("encodes function return data", async () => {
     const adapter = new OxAdapter({ rpcUrl });
     const encoded = adapter.encodeFunctionReturn({
-      abi: tupleReturnAbi,
+      abi: tupleParamsAbi,
       fn: "names",
       value: {
         0: "delv",
@@ -247,29 +251,29 @@ describe("OxAdapter", () => {
 
   it("decodes function data", async () => {
     const adapter = new OxAdapter({ rpcUrl });
-    const args: FunctionArgs<typeof erc20.abi, "transfer"> = {
-      amount: 123n,
-      to: address,
+    const args: FunctionArgs<typeof tupleParamsAbi, "names"> = {
+      0: "delv",
+      1: "drift",
     };
     const decoded = adapter.decodeFunctionData({
-      abi: erc20.abi,
-      fn: "transfer",
+      abi: tupleParamsAbi,
+      fn: "names",
       data: adapter.encodeFunctionData({
-        abi: erc20.abi,
-        fn: "transfer",
+        abi: tupleParamsAbi,
+        fn: "names",
         args,
       }),
     });
     expect(decoded).toEqual({
       args,
-      functionName: "transfer",
-    } as DecodedFunctionData<typeof erc20.abi, "transfer">);
+      functionName: "names",
+    } as DecodedFunctionData<typeof tupleParamsAbi, "names">);
   });
 
   it("decodes function return data", async () => {
     const adapter = new OxAdapter({ rpcUrl });
     const decoded = adapter.decodeFunctionReturn({
-      abi: tupleReturnAbi,
+      abi: tupleParamsAbi,
       fn: "names",
       data: "0x00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000464656c760000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000056472696674000000000000000000000000000000000000000000000000000000",
     });
