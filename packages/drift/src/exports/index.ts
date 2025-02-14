@@ -166,7 +166,6 @@ export type {
   RequiredKeys,
   UnionToIntersection,
   Extended,
-  AwaitedReturnType,
 } from "src/utils/types";
 
 // ...rest //
