@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.1.4
+
+### Patch Changes
+
+- 23245a5: Fixed a bug in `OxAdapter` which was incorrectly preparing params for `call`, `simulateWrite`, and `write`.
+
 ## 0.1.3
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @delvtech/drift-web3
 
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies [23245a5]
+  - @delvtech/drift@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes
