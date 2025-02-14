@@ -413,41 +413,38 @@ function prepareCallParams({
   value,
   ...rest
 }: ContractCallOptions) {
-  return [
-    {
-      ...rest,
-      chainId:
-        chainId === undefined
-          ? undefined
-          : (`0x${chainId.toString(16)}` as HexString),
-      gas:
-        gas === undefined ? undefined : (`0x${gas.toString(16)}` as HexString),
-      gasPrice:
-        gasPrice === undefined
-          ? undefined
-          : (`0x${gasPrice.toString(16)}` as HexString),
-      maxFeePerBlobGas:
-        maxFeePerBlobGas === undefined
-          ? undefined
-          : (`0x${maxFeePerBlobGas.toString(16)}` as HexString),
-      maxFeePerGas:
-        maxFeePerGas === undefined
-          ? undefined
-          : (`0x${maxFeePerGas.toString(16)}` as HexString),
-      maxPriorityFeePerGas:
-        maxPriorityFeePerGas === undefined
-          ? undefined
-          : (`0x${maxPriorityFeePerGas.toString(16)}` as HexString),
-      nonce:
-        nonce === undefined
-          ? undefined
-          : (`0x${nonce.toString(16)}` as HexString),
-      value:
-        value === undefined
-          ? undefined
-          : (`0x${value.toString(16)}` as HexString),
-    },
-  ] as const;
+  return {
+    ...rest,
+    chainId:
+      chainId === undefined
+        ? undefined
+        : (`0x${chainId.toString(16)}` as HexString),
+    gas: gas === undefined ? undefined : (`0x${gas.toString(16)}` as HexString),
+    gasPrice:
+      gasPrice === undefined
+        ? undefined
+        : (`0x${gasPrice.toString(16)}` as HexString),
+    maxFeePerBlobGas:
+      maxFeePerBlobGas === undefined
+        ? undefined
+        : (`0x${maxFeePerBlobGas.toString(16)}` as HexString),
+    maxFeePerGas:
+      maxFeePerGas === undefined
+        ? undefined
+        : (`0x${maxFeePerGas.toString(16)}` as HexString),
+    maxPriorityFeePerGas:
+      maxPriorityFeePerGas === undefined
+        ? undefined
+        : (`0x${maxPriorityFeePerGas.toString(16)}` as HexString),
+    nonce:
+      nonce === undefined
+        ? undefined
+        : (`0x${nonce.toString(16)}` as HexString),
+    value:
+      value === undefined
+        ? undefined
+        : (`0x${value.toString(16)}` as HexString),
+  } as const;
 }
 
 declare global {
