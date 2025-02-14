@@ -1,5 +1,14 @@
 # @delvtech/drift-viem
 
+## 0.1.4
+
+### Patch Changes
+
+- 1c10e06: Fixed a bug in `simulateWrite` and `decodeFunctionData` that caused only the first element of arrays to be returned.
+- e9ffb14: Patched the return type of `viemAdapter` and `ethersAdapter` to return `ReadAdapter | ReadWriteAdapter` when `walletClient`/`signer` is possibly undefined instead of just returning a `ReadWriteAdapter` any time a `walletClient`/`signer` prop is present.
+- Updated dependencies [23245a5]
+  - @delvtech/drift@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes
