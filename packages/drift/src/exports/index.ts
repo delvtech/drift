@@ -157,17 +157,17 @@ export type {
   AnyFunction,
   AnyObject,
   EmptyObject,
+  Extended,
   FunctionKey,
   MaybeAwaited,
   MaybePromise,
   MergeKeys,
   OneOf,
-  OptionalKeys,
+  PartialBy,
   Pretty,
-  ReplaceProps,
-  RequiredKeys,
+  Replace,
+  RequiredBy,
   UnionToIntersection,
-  Extended,
 } from "src/utils/types";
 
 // ...rest //

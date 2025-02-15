@@ -23,7 +23,7 @@ import type {
 } from "src/adapter/types/Transaction";
 import { createSerializableKey } from "src/utils/createSerializableKey";
 import { StubStore } from "src/utils/testing/StubStore";
-import type { AnyObject, FunctionKey, OptionalKeys } from "src/utils/types";
+import type { AnyObject, FunctionKey, PartialBy } from "src/utils/types";
 
 export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   stubs = new StubStore<ReadWriteAdapter>();
@@ -170,7 +170,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   // getEvents //
 
   onGetEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
-    params: OptionalKeys<GetEventsParams<TAbi, TEventName>, "address">,
+    params: PartialBy<GetEventsParams<TAbi, TEventName>, "address">,
   ) {
     return this.stubs.get<
       [GetEventsParams<TAbi, TEventName>],
@@ -199,7 +199,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   onRead<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(params: OptionalKeys<ReadParams<TAbi, TFunctionName>, "args" | "address">) {
+  >(params: PartialBy<ReadParams<TAbi, TFunctionName>, "args" | "address">) {
     return this.stubs.get<
       [ReadParams<TAbi, TFunctionName>],
       Promise<FunctionReturn<TAbi, TFunctionName>>
@@ -229,7 +229,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
-    params: OptionalKeys<
+    params: PartialBy<
       SimulateWriteParams<TAbi, TFunctionName>,
       "args" | "address"
     >,
@@ -262,9 +262,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   onWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(
-    params?: OptionalKeys<WriteParams<TAbi, TFunctionName>, "args" | "address">,
-  ) {
+  >(params?: PartialBy<WriteParams<TAbi, TFunctionName>, "args" | "address">) {
     return this.stubs.get<[WriteParams<TAbi, TFunctionName>], Promise<Hash>>({
       method: "write",
       key: params ? this.createKey(params) : undefined,

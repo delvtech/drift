@@ -7,12 +7,7 @@ import type {
   AbiStateMutability,
   Abi as _Abi,
 } from "abitype";
-import type {
-  EmptyObject,
-  MergeKeys,
-  Pretty,
-  ReplaceProps,
-} from "src/utils/types";
+import type { EmptyObject, MergeKeys, Pretty, Replace } from "src/utils/types";
 
 // https://docs.soliditylang.org/en/latest/abi-spec.html#json
 // https://github.com/ethereum/execution-apis/blob/f9cdb15b23c60342dd6f97731382358d817287e3/src/schemas/base-types.yaml
@@ -66,7 +61,7 @@ declare module "abitype" {
 export type NamedAbiParameter = AbiParameter extends infer TAbiParameter
   ? TAbiParameter extends { name: string }
     ? TAbiParameter
-    : ReplaceProps<TAbiParameter, { name: string }>
+    : Replace<TAbiParameter, { name: string }>
   : never;
 
 /**
@@ -144,7 +139,7 @@ type WithDefaultNames<TParameters extends readonly AbiParameter[]> = {
     AbiParameter
     ? TParameter extends NamedAbiParameter
       ? TParameter
-      : ReplaceProps<MergeKeys<TParameter>, { name: `${K}` | string }>
+      : Replace<MergeKeys<TParameter>, { name: `${K}` | string }>
     : never;
 };
 

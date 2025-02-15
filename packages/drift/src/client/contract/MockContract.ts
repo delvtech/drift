@@ -18,7 +18,7 @@ import type { ClientOptions } from "src/client/Client";
 import { type MockClient, createMockClient } from "src/client/MockClient";
 import { ReadWriteContract } from "src/client/contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
-import type { Eval, FunctionKey, OneOf, OptionalKeys } from "src/utils/types";
+import type { Eval, FunctionKey, OneOf, PartialBy } from "src/utils/types";
 
 export type MockContractConfig<
   TAbi extends Abi = Abi,
@@ -85,7 +85,7 @@ export class MockContract<
       fn,
       args,
       ...options,
-    } as OptionalKeys<ReadParams<TAbi, TFunctionName>, "args" | "address">);
+    } as PartialBy<ReadParams<TAbi, TFunctionName>, "args" | "address">);
   }
 
   onSimulateWrite<
@@ -101,7 +101,7 @@ export class MockContract<
       fn,
       args,
       ...options,
-    } as OptionalKeys<WriteParams<TAbi, TFunctionName>, "args" | "address">);
+    } as PartialBy<WriteParams<TAbi, TFunctionName>, "args" | "address">);
   }
 
   onGetSignerAddress() {
@@ -119,7 +119,7 @@ export class MockContract<
       fn,
       args,
       ...options,
-    } as OptionalKeys<WriteParams<TAbi, TFunctionName>, "args" | "address">);
+    } as PartialBy<WriteParams<TAbi, TFunctionName>, "args" | "address">);
   }
 }
 
