@@ -1,8 +1,6 @@
 import type { MockAdapter } from "src/adapter/MockAdapter";
-import type { Abi, Bytes } from "src/adapter/types/Abi";
+import type { Abi } from "src/adapter/types/Abi";
 import type {
-  EncodeFunctionDataParams,
-  EncodeFunctionReturnParams,
   ReadParams,
   ReadWriteAdapter,
   WriteParams,
@@ -14,11 +12,7 @@ import type {
   ContractWriteOptions,
 } from "src/adapter/types/Contract";
 import type { EventName } from "src/adapter/types/Event";
-import type {
-  FunctionArgs,
-  FunctionName,
-  FunctionReturn,
-} from "src/adapter/types/Function";
+import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
 import type { SimpleCache } from "src/cache/types";
 import type { ClientOptions } from "src/client/Client";
 import { type MockClient, createMockClient } from "src/client/MockClient";
@@ -108,46 +102,6 @@ export class MockContract<
       args,
       ...options,
     } as OptionalKeys<WriteParams<TAbi, TFunctionName>, "args" | "address">);
-  }
-
-  onEncodeFunctionData<TFunctionName extends FunctionName<TAbi>>(
-    fn?: TFunctionName,
-    args?: FunctionArgs<TAbi, TFunctionName>,
-  ) {
-    return this.adapter.onEncodeFunctionData({
-      abi: this.abi,
-      fn,
-      args,
-    } as EncodeFunctionDataParams<TAbi, TFunctionName>);
-  }
-
-  onEncodeFunctionReturn<TFunctionName extends FunctionName<TAbi>>(
-    fn?: TFunctionName,
-    value?: FunctionReturn<TAbi, TFunctionName>,
-  ) {
-    return this.adapter.onEncodeFunctionReturn({
-      abi: this.abi,
-      fn,
-      value,
-    } as EncodeFunctionReturnParams<TAbi, TFunctionName>);
-  }
-
-  onDecodeFunctionData<TFunctionName extends FunctionName<TAbi>>(data?: Bytes) {
-    return this.adapter.onDecodeFunctionData<TAbi, TFunctionName>({
-      abi: this.abi,
-      data,
-    });
-  }
-
-  onDecodeFunctionReturn<TFunctionName extends FunctionName<TAbi>>(
-    fn: TFunctionName,
-    data?: Bytes,
-  ) {
-    return this.adapter.onDecodeFunctionReturn({
-      abi: this.abi,
-      fn,
-      data,
-    });
   }
 
   onGetSignerAddress() {

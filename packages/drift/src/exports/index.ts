@@ -74,6 +74,8 @@ export type {
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
 
+export { AbiEncoder } from "src/adapter/AbiEncoder";
+
 export { OxAdapter, type OxAdapterConfig } from "src/adapter/OxAdapter";
 
 export { arrayToFriendly } from "src/adapter/utils/arrayToFriendly";
