@@ -5,7 +5,7 @@ import type { DecodeFunctionReturnParams } from "src/adapter/types/Adapter";
 import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
 import { arrayToFriendly } from "src/adapter/utils/arrayToFriendly";
 import { handleError } from "src/adapter/utils/internal/handleError";
-import type { ReplaceProps } from "src/utils/types";
+import type { Replace } from "src/utils/types";
 
 export function decodeFunctionReturn<
   TAbi extends Abi,
@@ -42,7 +42,7 @@ export function _decodeFunctionReturn<
   abi,
   data,
   fn,
-}: ReplaceProps<
+}: Replace<
   DecodeFunctionReturnParams<TAbi, TFunctionName>,
   {
     fn: AbiFunctionType;

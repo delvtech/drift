@@ -7,43 +7,43 @@ import type {
   AbiStateMutability,
   Abi as _Abi,
 } from "abitype";
-import type {
-  EmptyObject,
-  MergeKeys,
-  Pretty,
-  ReplaceProps,
-} from "src/utils/types";
+import type { EmptyObject, MergeKeys, Pretty, Replace } from "src/utils/types";
 
 // https://docs.soliditylang.org/en/latest/abi-spec.html#json
 // https://github.com/ethereum/execution-apis/blob/f9cdb15b23c60342dd6f97731382358d817287e3/src/schemas/base-types.yaml
 
 /**
  * An interface of common types that might be typed differently in different
- * implementations. Defining these types in an interface makes it possible to
- * override them via [`declaration
+ * implementations. These types can be overridden via [`declaration
  * merging`](https://www.typescriptlang.org/docs/handbook/declaration-merging.html).
+ *
+ * **Overridable Types**:
+ *
+ * - {@linkcode Abi} - The type of an ABI array.
+ * - {@linkcode Address} - The type of an Ethereum address.
+ * - {@linkcode Bytes} - The type of byte data.
+ * - {@linkcode Hash} - The type of a keccak256 hash.
+ * - {@linkcode HexString} - The type of a hexadecimal string.
  *
  * @example
  * ```ts
  * declare module "@delvtech/drift" {
  *   export interface BaseTypes {
- *     addressType: string;
- *     bytesType: string;
- *     hashType: string;
- *     hexStringType: string;
+ *     HexString: string;
  *   }
  * }
  * ```
- *
- * @see https://abitype.dev/config#overview
+ * **Note**: The `Address`, `Bytes`, and `Hash` types are all aliases of the
+ * `HexString` type by default. Overriding `HexString` will override all three
+ * types. Each type can be further customized individually as needed.
  */
 export interface BaseTypes extends _BaseTypes {}
 interface _BaseTypes {
   Abi: _Abi;
-  Address: `0x${string}`;
-  Bytes: `0x${string}`;
-  Hash: `0x${string}`;
   HexString: `0x${string}`;
+  Address: this["HexString"];
+  Bytes: this["HexString"];
+  Hash: this["HexString"];
 }
 
 export type Abi = BaseTypes["Abi"];
@@ -66,7 +66,7 @@ declare module "abitype" {
 export type NamedAbiParameter = AbiParameter extends infer TAbiParameter
   ? TAbiParameter extends { name: string }
     ? TAbiParameter
-    : ReplaceProps<TAbiParameter, { name: string }>
+    : Replace<TAbiParameter, { name: string }>
   : never;
 
 /**
@@ -152,7 +152,7 @@ type WithDefaultNames<TParameters extends readonly AbiParameter[]> = {
     AbiParameter
     ? TParameter extends NamedAbiParameter
       ? TParameter
-      : ReplaceProps<MergeKeys<TParameter>, { name: `${K}` | string }>
+      : Replace<MergeKeys<TParameter>, { name: `${K}` | string }>
     : never;
 };
 

@@ -46,20 +46,20 @@ export type Eval<T> = { [K in keyof T]: T[K] } & {};
 /**
  * Replace properties in `T` with properties in `U`.
  */
-export type ReplaceProps<T, U> = Omit<T, keyof U> & U;
+export type Replace<T, U> = Omit<T, keyof U> & U;
 
 /**
  * Make all properties in `T` whose keys are in the union `K` required and
- * non-nullable.
+ * non-nullable. Similar to `Required` but only applies to a subset of keys.
  */
-export type RequiredKeys<T, K extends keyof T> = Omit<T, K> &
+export type RequiredBy<T, K extends keyof T> = Omit<T, K> &
   Required<Pick<T, K>>;
 
 /**
- * Make all properties in `T` whose keys are in the union `K` optional.
+ * Make all properties in `T` whose keys are in the union `K` optional. Similar
+ * to `Partial` but only applies to a subset of keys.
  */
-export type OptionalKeys<T, K extends keyof T> = Omit<T, K> &
-  Partial<Pick<T, K>>;
+export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 /**
  * Get a union of all property keys on `T` that are functions
