@@ -8,13 +8,10 @@ import {
   Transaction,
   TransactionReceipt,
 } from "ox";
-import type { Abi, Bytes, HexString } from "src/adapter/types/Abi";
+import { AbiEncoder } from "src/adapter/AbiEncoder";
+import type { Abi, HexString } from "src/adapter/types/Abi";
 import type {
   CallParams,
-  DecodeFunctionDataParams,
-  DecodeFunctionReturnParams,
-  EncodeFunctionDataParams,
-  EncodeFunctionReturnParams,
   GetEventsParams,
   ReadParams,
   ReadWriteAdapter,
@@ -24,11 +21,7 @@ import type {
 import type { BlockTag } from "src/adapter/types/Block";
 import type { ContractCallOptions } from "src/adapter/types/Contract";
 import type { EventArgs, EventName } from "src/adapter/types/Event";
-import type {
-  FunctionArgs,
-  FunctionName,
-  FunctionReturn,
-} from "src/adapter/types/Function";
+import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
 import type {
   GetBalanceParams,
   GetBlockParams,
@@ -36,13 +29,7 @@ import type {
   WaitForTransactionParams,
 } from "src/adapter/types/Network";
 import type { TransactionReceipt as TransactionReceiptType } from "src/adapter/types/Transaction";
-import { decodeFunctionData } from "src/adapter/utils/decodeFunctionData";
-import {
-  _decodeFunctionReturn,
-  decodeFunctionReturn,
-} from "src/adapter/utils/decodeFunctionReturn";
-import { encodeFunctionData } from "src/adapter/utils/encodeFunctionData";
-import { encodeFunctionReturn } from "src/adapter/utils/encodeFunctionReturn";
+import { _decodeFunctionReturn } from "src/adapter/utils/decodeFunctionReturn";
 import { handleError } from "src/adapter/utils/internal/handleError";
 import { prepareFunctionData } from "src/adapter/utils/internal/prepareFunctionData";
 import { prepareBytecodeCallData } from "src/adapter/utils/prepareBytecodeCallData";
@@ -58,7 +45,7 @@ export interface OxAdapterConfig {
   pollingInterval?: number;
 }
 
-export class OxAdapter implements ReadWriteAdapter {
+export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
   provider: Provider.Provider;
   pollingInterval: number;
 
@@ -69,6 +56,7 @@ export class OxAdapter implements ReadWriteAdapter {
     rpcUrl,
     pollingInterval = OxAdapter.DEFAULT_POLLING_INTERVAL,
   }: OxAdapterConfig = {}) {
+    super();
     try {
       const provider = rpcUrl
         ? RpcTransport.fromHttp(rpcUrl)
@@ -364,36 +352,6 @@ export class OxAdapter implements ReadWriteAdapter {
     }
 
     return hash;
-  }
-
-  encodeFunctionData<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >(params: EncodeFunctionDataParams<TAbi, TFunctionName>) {
-    return encodeFunctionData(params);
-  }
-
-  encodeFunctionReturn<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >(params: EncodeFunctionReturnParams<TAbi, TFunctionName>): Bytes {
-    return encodeFunctionReturn(params);
-  }
-
-  decodeFunctionData<
-    TAbi extends Abi = Abi,
-    TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-  >(params: DecodeFunctionDataParams<TAbi, TFunctionName>) {
-    return decodeFunctionData(params);
-  }
-
-  decodeFunctionReturn<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-  >(
-    params: DecodeFunctionReturnParams<TAbi, TFunctionName>,
-  ): FunctionReturn<TAbi, TFunctionName> {
-    return decodeFunctionReturn(params);
   }
 }
 
