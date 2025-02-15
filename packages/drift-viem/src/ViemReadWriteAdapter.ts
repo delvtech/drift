@@ -3,7 +3,7 @@ import {
   type FunctionName,
   type ReadWriteAdapter,
   type WriteParams,
-  objectToArray,
+  prepareParamsArray,
 } from "@delvtech/drift";
 import {
   ViemReadAdapter,
@@ -54,7 +54,7 @@ export class ViemReadWriteAdapter<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(params: WriteParams<TAbi, TFunctionName>) {
-    const argsArray = objectToArray({
+    const prepared = prepareParamsArray({
       abi: params.abi as Abi,
       type: "function",
       name: params.fn,
@@ -76,7 +76,7 @@ export class ViemReadWriteAdapter<
       abi: params.abi as Abi,
       address: params.address,
       functionName: params.fn,
-      args: argsArray,
+      args: prepared.params,
       accessList: params.accessList,
       account: params.from ?? (await this.getSignerAddress()) ?? null,
       gas: params.gas,

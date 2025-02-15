@@ -1,29 +1,22 @@
 import {
   type Abi,
+  AbiEncoder,
   type AbiObjectType,
   type Block,
   type Bytes,
   type CallParams,
-  type DecodeFunctionDataParams,
-  type DecodeFunctionReturnParams,
-  type DecodedFunctionData,
-  type EncodeFunctionDataParams,
-  type EncodeFunctionReturnParams,
   type EventName,
+  type FunctionArgs,
   type FunctionName,
-  type FunctionReturn,
   type GetBalanceParams,
   type GetBlockParams,
   type GetEventsParams,
   type GetTransactionParams,
   type ReadAdapter,
   type ReadParams,
+  type SimulateWriteParams,
   type TransactionReceipt,
   type WaitForTransactionParams,
-  type WriteParams,
-  arrayToFriendly,
-  arrayToObject,
-  objectToArray,
 } from "@delvtech/drift";
 import {
   http,
@@ -33,10 +26,6 @@ import {
   type PublicClient,
   createPublicClient,
   decodeEventLog,
-  decodeFunctionData,
-  decodeFunctionResult,
-  encodeFunctionData,
-  encodeFunctionResult,
   rpcTransactionType,
 } from "viem";
 
@@ -47,6 +36,7 @@ export interface ViemReadAdapterParams<
 }
 
 export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
+  extends AbiEncoder
   implements ReadAdapter
 {
   publicClient: TClient;
@@ -56,6 +46,7 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
       transport: http(),
     }) as TClient,
   }: ViemReadAdapterParams<TClient>) {
+    super();
     this.publicClient = publicClient;
   }
 
@@ -139,18 +130,6 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
     } as TransactionReceipt;
   }
 
-  async call({ block, bytecode, from, nonce, ...rest }: CallParams) {
-    const { data } = await this.publicClient.call({
-      blockNumber: typeof block === "bigint" ? block : undefined,
-      blockTag: typeof block === "string" ? block : (undefined as any),
-      code: bytecode,
-      account: from,
-      nonce: typeof nonce === "bigint" ? Number(nonce) : nonce,
-      ...rest,
-    } as CallParameters);
-    return data as Bytes;
-  }
-
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
     abi,
     address,
@@ -191,144 +170,69 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
     );
   }
 
+  async call({ block, bytecode, from, nonce, ...rest }: CallParams) {
+    const { data } = await this.publicClient.call({
+      blockNumber: typeof block === "bigint" ? block : undefined,
+      blockTag: typeof block === "string" ? block : (undefined as any),
+      code: bytecode,
+      account: from,
+      nonce: typeof nonce === "bigint" ? Number(nonce) : nonce,
+      ...rest,
+    } as CallParameters);
+    return data as Bytes;
+  }
+
   async read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >({ abi, address, fn, args, block }: ReadParams<TAbi, TFunctionName>) {
-    const argsArray = objectToArray({
-      abi: abi as Abi,
-      type: "function",
-      name: fn,
-      kind: "inputs",
-      value: args,
-    });
-
-    const output = await this.publicClient.readContract({
-      abi: abi as Abi,
-      address,
-      functionName: fn,
-      args: argsArray,
-      blockNumber: typeof block === "bigint" ? block : undefined,
-      blockTag: typeof block === "string" ? block : undefined,
-    });
-
-    return arrayToFriendly({
+    const callData = this.encodeFunctionData({
       abi,
-      values: [output] as any,
-      kind: "outputs",
-      name: fn,
-    }) as FunctionReturn<TAbi, TFunctionName>;
+      fn,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
+    });
+
+    // Using call instead of readContract to ensure consistent return decoding
+    const returnData = await this.call({
+      to: address,
+      data: callData,
+      block,
+    });
+
+    return this.decodeFunctionReturn({
+      abi,
+      data: returnData,
+      fn,
+    });
   }
 
   async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>) {
-    const argsArray = objectToArray({
-      abi: params.abi as Abi,
-      type: "function",
-      name: params.fn,
-      kind: "inputs",
-      value: params.args,
+  >({
+    abi,
+    address,
+    fn,
+    args,
+    ...params
+  }: SimulateWriteParams<TAbi, TFunctionName>) {
+    const callData = this.encodeFunctionData({
+      abi,
+      fn,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
     });
 
-    const gasPriceOptions =
-      params.gasPrice !== undefined
-        ? {
-            gasPrice: params.gasPrice,
-          }
-        : {
-            maxFeePerGas: params.maxFeePerGas,
-            maxPriorityFeePerGas: params.maxPriorityFeePerGas,
-          };
-
-    const { result } = await this.publicClient.simulateContract({
-      abi: params.abi as Abi,
-      address: params.address,
-      functionName: params.fn,
-      args: argsArray,
-      accessList: params.accessList,
-      account: params.from,
-      gas: params.gas,
-      nonce: params.nonce !== undefined ? Number(params.nonce) : undefined,
-      value: params.value,
-      chain: this.publicClient.chain,
-      type: params.type as any,
-      ...gasPriceOptions,
+    // Using call instead of simulateWrite to ensure consistent return decoding
+    const returnData = await this.call({
+      to: address,
+      data: callData,
+      ...params,
     });
 
-    return arrayToFriendly({
-      abi: params.abi,
-      values: [result] as any,
-      kind: "outputs",
-      name: params.fn,
-    }) as FunctionReturn<TAbi, TFunctionName>;
-  }
-
-  encodeFunctionData<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >({ abi, fn, args }: EncodeFunctionDataParams<TAbi, TFunctionName>) {
-    const arrayArgs = objectToArray({
-      abi: abi as Abi,
-      type: "function",
-      name: fn,
-      kind: "inputs",
-      value: args,
+    return this.decodeFunctionReturn({
+      abi,
+      data: returnData,
+      fn,
     });
-
-    return encodeFunctionData({
-      abi: abi as Abi,
-      functionName: fn as string,
-      args: arrayArgs,
-    });
-  }
-
-  encodeFunctionReturn<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >({ abi, fn, value }: EncodeFunctionReturnParams<TAbi, TFunctionName>) {
-    return encodeFunctionResult({
-      abi: abi as Abi,
-      functionName: fn as string,
-      result: [value] as any,
-    });
-  }
-
-  decodeFunctionData<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >({ abi, data }: DecodeFunctionDataParams<TAbi, TFunctionName>) {
-    const { args, functionName } = decodeFunctionData({ abi, data });
-    const arrayArgs = Array.isArray(args) ? args : [args];
-
-    return {
-      args: arrayToObject({
-        // Cast to allow any array type for values
-        abi: abi as Abi,
-        kind: "inputs",
-        name: functionName,
-        values: arrayArgs,
-      }),
-      functionName,
-    } as DecodedFunctionData<TAbi, TFunctionName>;
-  }
-
-  decodeFunctionReturn<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >({ abi, data, fn }: DecodeFunctionReturnParams<TAbi, TFunctionName>) {
-    const result = decodeFunctionResult({
-      abi: abi as Abi,
-      data,
-      functionName: fn as string,
-    });
-
-    return arrayToFriendly({
-      abi: abi as Abi,
-      values: [result] as any,
-      kind: "outputs",
-      name: fn,
-    }) as FunctionReturn<TAbi, TFunctionName>;
   }
 }
