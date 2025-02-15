@@ -3,7 +3,7 @@ import {
   type FunctionName,
   type ReadWriteAdapter,
   type WriteParams,
-  objectToArray,
+  toArrayParams,
 } from "@delvtech/drift";
 import {
   ViemReadAdapter,
@@ -54,7 +54,7 @@ export class ViemReadWriteAdapter<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(params: WriteParams<TAbi, TFunctionName>) {
-    const argsArray = objectToArray({
+    const argsArray = toArrayParams({
       abi: params.abi as Abi,
       type: "function",
       name: params.fn,
