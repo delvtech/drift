@@ -45,8 +45,8 @@ import { encodeFunctionData } from "src/adapter/utils/encodeFunctionData";
 import { encodeFunctionReturn } from "src/adapter/utils/encodeFunctionReturn";
 import { handleError } from "src/adapter/utils/internal/handleError";
 import { prepareFunctionData } from "src/adapter/utils/internal/prepareFunctionData";
-import { objectToArray } from "src/adapter/utils/objectToArray";
 import { prepareBytecodeCallData } from "src/adapter/utils/prepareBytecodeCallData";
+import { toArrayParams } from "src/adapter/utils/toArrayParams";
 import { DriftError } from "src/error/DriftError";
 
 export interface OxAdapterConfig {
@@ -218,7 +218,7 @@ export class OxAdapter implements ReadWriteAdapter {
       abi,
       event as any,
       {
-        args: objectToArray({
+        args: toArrayParams({
           abi,
           type: "event",
           name: event,

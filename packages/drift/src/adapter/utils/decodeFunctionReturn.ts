@@ -56,21 +56,23 @@ export function _decodeFunctionReturn<
       as: "Array",
     });
 
-    if (Array.isArray(decoded)) {
-      return arrayToFriendly({
-        abi,
-        name: fn.name as TFunctionName,
-        kind: "outputs",
-        values: decoded as AbiArrayType<
-          TAbi,
-          "function",
-          TFunctionName,
-          "outputs"
-        >,
-      });
+    // If there is only one output, Ox will return it as a single value, so we
+    // return it directly
+    if (fn.outputs.length === 1) {
+      return decoded as FunctionReturn<TAbi, TFunctionName>;
     }
 
-    return decoded as FunctionReturn<TAbi, TFunctionName>;
+    return arrayToFriendly({
+      abi,
+      name: fn.name as TFunctionName,
+      kind: "outputs",
+      values: decoded as AbiArrayType<
+        TAbi,
+        "function",
+        TFunctionName,
+        "outputs"
+      >,
+    });
   } catch (e) {
     handleError(e);
   }

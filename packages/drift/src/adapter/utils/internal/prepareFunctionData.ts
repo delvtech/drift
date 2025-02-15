@@ -2,7 +2,7 @@ import { AbiFunction, type AbiItem } from "ox";
 import type { Abi } from "src/adapter/types/Abi";
 import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
 import { handleError } from "src/adapter/utils/internal/handleError";
-import { objectToArray } from "src/adapter/utils/objectToArray";
+import { toArrayParams } from "src/adapter/utils/toArrayParams";
 
 /** @internal */
 export function prepareFunctionData<
@@ -14,7 +14,7 @@ export function prepareFunctionData<
   fn,
 }: { abi: TAbi; fn: TFunctionName; args: FunctionArgs<TAbi, TFunctionName> }) {
   try {
-    const argsArray = objectToArray({
+    const argsArray = toArrayParams({
       abi,
       type: "function",
       name: fn,

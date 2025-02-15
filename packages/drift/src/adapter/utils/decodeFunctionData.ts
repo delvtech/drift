@@ -3,9 +3,10 @@ import type { Abi } from "src/adapter/types/Abi";
 import type { DecodeFunctionDataParams } from "src/adapter/types/Adapter";
 import type {
   DecodedFunctionData,
+  FunctionArgs,
   FunctionName,
 } from "src/adapter/types/Function";
-import { arrayToFriendly } from "src/adapter/utils/arrayToFriendly";
+import { arrayToObject } from "src/adapter/utils/arrayToObject";
 import { handleError } from "src/adapter/utils/internal/handleError";
 
 export function decodeFunctionData<
@@ -20,25 +21,21 @@ export function decodeFunctionData<
 > {
   try {
     const sig = Hex.slice(data, 0, 4);
-    const abiFn = AbiFunction.fromAbi(abi, sig);
     const argsData = Hex.slice(data, 4);
-
-    let args: any = AbiParameters.decode(abiFn.inputs, argsData, {
+    const abiFn = AbiFunction.fromAbi(abi, sig);
+    const arrayArgs = AbiParameters.decode(abiFn.inputs, argsData, {
       // Ox can also decode as "Object", but will key unnamed params as `''`, so
-      // we decode as "Array" and run through arrayToFriendly to ensure
-      // consistent output.
+      // we decode as "Array" and run through arrayToObject to ensure consistent
+      // output.
       as: "Array",
+      checksumAddress: true,
+    }) as any;
+    const args: FunctionArgs<TAbi, TFunctionName> = arrayToObject({
+      abi,
+      name: abiFn.name as TFunctionName,
+      kind: "inputs",
+      values: arrayArgs,
     });
-
-    if (Array.isArray(args)) {
-      args = arrayToFriendly({
-        abi,
-        name: abiFn.name as any,
-        kind: "inputs",
-        values: args as any,
-      });
-    }
-
     return {
       functionName: abiFn.name as TFunctionName,
       args,
