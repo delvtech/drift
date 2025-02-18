@@ -1,16 +1,12 @@
 import {
   type Abi,
+  AbiEncoder,
   type Block,
   type Bytes,
   type CallParams,
-  type DecodeFunctionDataParams,
-  type DecodeFunctionReturnParams,
-  type DecodedFunctionData,
-  DriftError,
-  type EncodeFunctionDataParams,
-  type EncodeFunctionReturnParams,
   type EventLog,
   type EventName,
+  type FunctionArgs,
   type FunctionName,
   type GetBalanceParams,
   type GetBlockParams,
@@ -23,11 +19,8 @@ import {
   type WaitForTransactionParams,
   type WriteParams,
   arrayToObject,
-  convertType,
-  decodeFunctionReturn,
-  encodeFunctionReturn,
-  objectToArray,
-  prepareBytecodeCallData,
+  encodeBytecodeCallData,
+  prepareParamsArray,
 } from "@delvtech/drift";
 import {
   BigNumber,
@@ -36,7 +29,7 @@ import {
   getDefaultProvider,
   providers,
 } from "ethers";
-import { type AccessList, Interface } from "ethers/lib/utils";
+import type { AccessList } from "ethers/lib/utils";
 import type { EthersAbi, Provider } from "src/types";
 
 export interface EthersReadAdapterParams<
@@ -49,6 +42,7 @@ export interface EthersReadAdapterParams<
 }
 
 export class EthersReadAdapter<TProvider extends Provider = Provider>
+  extends AbiEncoder
   implements ReadAdapter
 {
   provider: TProvider;
@@ -58,6 +52,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
       ? (new providers.Web3Provider(window.ethereum) as Provider as TProvider)
       : (getDefaultProvider() as Provider as TProvider),
   }: EthersReadAdapterParams<TProvider> = {}) {
+    super();
     this.provider =
       typeof provider === "string"
         ? (new providers.JsonRpcProvider(provider) as Provider as TProvider)
@@ -173,7 +168,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     value,
   }: CallParams) {
     if (bytecode && data) {
-      data = prepareBytecodeCallData(bytecode, data);
+      data = encodeBytecodeCallData(bytecode, data);
     }
     if (typeof block === "bigint") {
       block = await this.getBlockNumber();
@@ -209,14 +204,14 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
 
     let eventFilter: string | EventFilter = eventName;
     if (filter) {
-      const arrayArgs = objectToArray({
+      const { params } = prepareParamsArray({
         abi: abi as Abi,
         type: "event",
         name: eventName,
         kind: "inputs",
         value: filter,
       });
-      eventFilter = contract.filters[eventName]!(...arrayArgs);
+      eventFilter = contract.filters[eventName]!(...params);
     }
 
     const events = await contract.queryFilter(
@@ -248,107 +243,48 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >({ abi, address, fn, args, block }: ReadParams<TAbi, TFunctionName>) {
-    const contract = new Contract(address, abi as EthersAbi, this.provider);
-
-    const argsArray = objectToArray({
-      abi: abi as Abi,
-      type: "function",
-      name: fn,
-      kind: "inputs",
-      value: args,
+    const callData = this.encodeFunctionData({
+      abi,
+      fn,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
     });
 
-    return convertType(
-      await contract[fn](...argsArray, { blockTag: block }),
-      (value) => value instanceof BigNumber,
-      (value) => value.toBigInt(),
-    );
+    // Using call instead of readContract to ensure consistent return decoding
+    const returnData = await this.call({
+      to: address,
+      data: callData,
+      block,
+    });
+
+    return this.decodeFunctionReturn({
+      abi,
+      data: returnData,
+      fn,
+    });
   }
 
   async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>) {
-    const { abi, address, args, fn, onMined, ...options } = params;
-    const contract = new Contract(address, abi as EthersAbi, this.provider);
-
-    const arrayArgs = objectToArray({
-      abi: abi as Abi,
-      type: "function",
-      name: fn,
-      kind: "inputs",
-      value: args,
+  >({ abi, address, fn, args, ...params }: WriteParams<TAbi, TFunctionName>) {
+    const callData = this.encodeFunctionData({
+      abi,
+      fn,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
     });
 
-    return contract.callStatic[fn]!(...arrayArgs, {
-      accessList: options.accessList,
-      chainId: options.chainId,
-      from: options.from,
-      gasLimit: options.gas,
-      gasPrice: options.gasPrice,
-      maxFeePerGas: options.maxFeePerGas,
-      maxPriorityFeePerGas: options.maxPriorityFeePerGas,
-      nonce: options.nonce ? Number(options.nonce) : undefined,
-      type: options.type ? Number(options.type) : undefined,
-      value: options.value,
-    });
-  }
-
-  encodeFunctionData<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >({ abi, fn, args }: EncodeFunctionDataParams<TAbi, TFunctionName>) {
-    const iface = new Interface(abi as EthersAbi);
-
-    const arrayArgs = objectToArray({
-      abi: abi as Abi,
-      type: "function",
-      name: fn,
-      kind: "inputs",
-      value: args,
+    // Using call instead of simulateWrite to ensure consistent return decoding
+    const returnData = await this.call({
+      to: address,
+      data: callData,
+      ...params,
     });
 
-    return iface.encodeFunctionData(fn, arrayArgs);
-  }
-
-  encodeFunctionReturn<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >(params: EncodeFunctionReturnParams<TAbi, TFunctionName>) {
-    return encodeFunctionReturn(params);
-  }
-
-  decodeFunctionData<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >({ abi, data, fn }: DecodeFunctionDataParams<TAbi, TFunctionName>) {
-    const iface = new Interface(abi as EthersAbi);
-    const { args, name } = iface.parseTransaction({ data }) || {};
-
-    if (!args || !name) {
-      throw new DriftError(
-        `Failed to decode function data${fn ? ` for ${fn}` : ""}: ${data}`,
-      );
-    }
-
-    return {
-      functionName: name,
-      args: arrayToObject({
-        abi: abi as Abi,
-        kind: "inputs",
-        name,
-        values: args.map((arg) =>
-          arg instanceof BigNumber ? arg.toBigInt() : arg,
-        ),
-      }),
-    } as DecodedFunctionData<TAbi, TFunctionName>;
-  }
-
-  decodeFunctionReturn<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >(params: DecodeFunctionReturnParams<TAbi, TFunctionName>) {
-    return decodeFunctionReturn(params);
+    return this.decodeFunctionReturn({
+      abi,
+      data: returnData,
+      fn,
+    });
   }
 }
 

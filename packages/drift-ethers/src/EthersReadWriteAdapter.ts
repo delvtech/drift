@@ -4,7 +4,7 @@ import {
   type HexString,
   type ReadWriteAdapter,
   type WriteParams,
-  objectToArray,
+  prepareParamsArray,
 } from "@delvtech/drift";
 import type { Provider, Signer } from "ethers";
 import { Contract } from "ethers";
@@ -55,19 +55,18 @@ export class EthersReadWriteAdapter<
   async write<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>) {
-    const {
-      abi,
-      address,
-      args,
-      fn,
-      from = await this.signer.getAddress(),
-      onMined,
-      ...options
-    } = params;
+  >({
+    abi,
+    address,
+    args,
+    fn,
+    from,
+    onMined,
+    ...options
+  }: WriteParams<TAbi, TFunctionName>) {
     const contract = new Contract(address, abi as InterfaceAbi, this.signer);
 
-    const arrayArgs = objectToArray({
+    const { params } = prepareParamsArray({
       abi: abi as Abi,
       type: "function",
       name: fn,
@@ -75,10 +74,10 @@ export class EthersReadWriteAdapter<
       value: args,
     });
 
-    const writePromise = contract.getFunction(fn)(...arrayArgs, {
+    const writePromise = contract.getFunction(fn)(...params, {
       accessList: options.accessList,
       chainId: options.chainId,
-      from,
+      from: from ?? (await this.signer.getAddress()),
       gasLimit: options.gas,
       gasPrice: options.gasPrice,
       maxFeePerGas: options.maxFeePerGas,
@@ -88,9 +87,9 @@ export class EthersReadWriteAdapter<
       value: options.value,
     });
 
-    if (params.onMined) {
+    if (onMined) {
       writePromise.then((hash) => {
-        this.waitForTransaction({ hash }).then(params.onMined);
+        this.waitForTransaction({ hash }).then(onMined);
         return hash;
       });
     }

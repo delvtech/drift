@@ -7,7 +7,7 @@ import {
   type ReadWriteAdapter,
   type TransactionReceipt,
   type WriteParams,
-  objectToArray,
+  prepareParamsArray,
 } from "@delvtech/drift";
 import type { ContractTransaction, Signer } from "ethers";
 import { Contract } from "ethers";
@@ -58,19 +58,18 @@ export class EthersReadWriteAdapter<
   async write<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>) {
-    const {
-      abi,
-      address,
-      args,
-      fn,
-      from = await this.signer.getAddress(),
-      onMined,
-      ...options
-    } = params;
+  >({
+    abi,
+    address,
+    args,
+    fn,
+    from,
+    onMined,
+    ...options
+  }: WriteParams<TAbi, TFunctionName>) {
     const contract = new Contract(address, abi as EthersAbi, this.signer);
 
-    const arrayArgs = objectToArray({
+    const { params } = prepareParamsArray({
       abi: abi as Abi,
       type: "function",
       name: fn,
@@ -78,10 +77,10 @@ export class EthersReadWriteAdapter<
       value: args,
     });
 
-    const tx: ContractTransaction = await contract[fn](...arrayArgs, {
+    const tx: ContractTransaction = await contract[fn](...params, {
       accessList: options.accessList,
       chainId: options.chainId,
-      from,
+      from: from ?? (await this.signer.getAddress()),
       gasLimit: options.gas,
       gasPrice: options.gasPrice,
       maxFeePerGas: options.maxFeePerGas,
