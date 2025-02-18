@@ -84,7 +84,8 @@ export type AbiEntryName<
 > = Extract<TAbi[number], { type: TItemType; name?: string }>["name"];
 
 /**
- * Get the ABI entry for a specific type, name, and state mutability.
+ * Get the ABI entry for a specific type, name, state mutability, and that
+ * includes a specific parameter kind.
  *
  * @example
  * ```ts
@@ -104,9 +105,16 @@ export type AbiEntry<
   TItemType extends AbiItemType = AbiItemType,
   TName extends AbiEntryName<TAbi, TItemType> = AbiEntryName<TAbi, TItemType>,
   TStateMutability extends AbiStateMutability = AbiStateMutability,
+  TParameterKind extends AbiParameterKind | undefined = undefined,
 > = Extract<
   TAbi[number],
-  { type: TItemType; name?: TName; stateMutability?: TStateMutability }
+  {
+    type: TItemType;
+    name?: TName;
+    stateMutability?: TStateMutability;
+  } & {
+    [K in NonNullable<TParameterKind>]: readonly AbiParameter[];
+  }
 >;
 
 /**

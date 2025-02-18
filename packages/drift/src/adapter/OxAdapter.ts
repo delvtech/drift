@@ -1,6 +1,5 @@
 import {
   AbiEvent,
-  type AbiItem,
   Address,
   Block,
   Provider,
@@ -41,12 +40,14 @@ import {
   _decodeFunctionReturn,
   decodeFunctionReturn,
 } from "src/adapter/utils/decodeFunctionReturn";
-import { encodeFunctionData } from "src/adapter/utils/encodeFunctionData";
+import { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
+import {
+  encodeFunctionData,
+  prepareFunctionData,
+} from "src/adapter/utils/encodeFunctionData";
 import { encodeFunctionReturn } from "src/adapter/utils/encodeFunctionReturn";
 import { handleError } from "src/adapter/utils/internal/handleError";
-import { prepareFunctionData } from "src/adapter/utils/internal/prepareFunctionData";
-import { prepareBytecodeCallData } from "src/adapter/utils/prepareBytecodeCallData";
-import { toArrayParams } from "src/adapter/utils/toArrayParams";
+import { prepareParamsArray } from "src/adapter/utils/prepareParamsArray";
 import { DriftError } from "src/error/DriftError";
 
 export interface OxAdapterConfig {
@@ -190,7 +191,7 @@ export class OxAdapter implements ReadWriteAdapter {
 
   call({ to, data, bytecode, block, ...options }: CallParams) {
     if (bytecode && data) {
-      data = prepareBytecodeCallData(bytecode, data);
+      data = encodeBytecodeCallData(bytecode, data);
     }
 
     return this.provider.request({
@@ -214,19 +215,13 @@ export class OxAdapter implements ReadWriteAdapter {
     fromBlock,
     toBlock,
   }: GetEventsParams<TAbi, TEventName>) {
-    const abiEvent = AbiEvent.fromAbi(
+    const { abiEntry } = prepareParamsArray({
       abi,
-      event as any,
-      {
-        args: toArrayParams({
-          abi,
-          type: "event",
-          name: event,
-          kind: "inputs",
-          value: filter as EventArgs<TAbi, TEventName>,
-        }),
-      } as AbiItem.fromAbi.Options,
-    );
+      type: "event",
+      name: event,
+      kind: "inputs",
+      value: filter as EventArgs<TAbi, TEventName>,
+    });
 
     const logs = await this.provider
       .request({
@@ -236,7 +231,7 @@ export class OxAdapter implements ReadWriteAdapter {
             address,
             fromBlock: prepareBlockParam(fromBlock),
             toBlock: prepareBlockParam(toBlock),
-            topics: AbiEvent.encode(abiEvent, filter || {}).topics,
+            topics: AbiEvent.encode(abiEntry, filter || {}).topics,
           },
         ],
       })
@@ -244,7 +239,7 @@ export class OxAdapter implements ReadWriteAdapter {
 
     return logs.map((log) => {
       return {
-        args: AbiEvent.decode(abiEvent, log) as EventArgs<TAbi, TEventName>,
+        args: AbiEvent.decode(abiEntry, log) as EventArgs<TAbi, TEventName>,
         blockNumber: BigInt(log.blockNumber),
         data: log.data,
         eventName: event,

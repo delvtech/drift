@@ -11,10 +11,10 @@ import type {
  */
 export type FunctionName<
   TAbi extends Abi,
-  TAbiStateMutability extends AbiStateMutability = AbiStateMutability,
+  TStateMutability extends AbiStateMutability = AbiStateMutability,
 > = Abi extends TAbi
   ? string
-  : AbiEntry<TAbi, "function", string, TAbiStateMutability>["name"];
+  : AbiEntry<TAbi, "function", string, TStateMutability>["name"];
 
 /**
  * Get an object type for an abi function's arguments.

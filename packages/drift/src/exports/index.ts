@@ -78,12 +78,15 @@ export { OxAdapter, type OxAdapterConfig } from "src/adapter/OxAdapter";
 
 export { arrayToFriendly } from "src/adapter/utils/arrayToFriendly";
 export { arrayToObject } from "src/adapter/utils/arrayToObject";
-export { toArrayParams } from "src/adapter/utils/toArrayParams";
+export { prepareParamsArray } from "src/adapter/utils/prepareParamsArray";
 export { decodeFunctionData } from "src/adapter/utils/decodeFunctionData";
 export { decodeFunctionReturn } from "src/adapter/utils/decodeFunctionReturn";
-export { encodeFunctionData } from "src/adapter/utils/encodeFunctionData";
+export {
+  encodeFunctionData,
+  prepareFunctionData,
+} from "src/adapter/utils/encodeFunctionData";
 export { encodeFunctionReturn } from "src/adapter/utils/encodeFunctionReturn";
-export { prepareBytecodeCallData } from "src/adapter/utils/prepareBytecodeCallData";
+export { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
 
 // cache //
 
