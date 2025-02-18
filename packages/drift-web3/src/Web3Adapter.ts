@@ -1,40 +1,34 @@
 import {
   type Abi,
+  AbiEncoder,
   type Address,
   type AnyObject,
   type Block,
   type Bytes,
   type CallParams,
-  type DecodeFunctionDataParams,
-  type DecodeFunctionReturnParams,
-  type DecodedFunctionData,
   DriftError,
-  type EncodeFunctionDataParams,
-  type EncodeFunctionReturnParams,
   type EventLog,
   type EventName,
+  type FunctionArgs,
   type FunctionName,
-  type FunctionReturn,
   type GetBalanceParams,
   type GetBlockParams,
   type GetEventsParams,
   type GetTransactionParams,
   type Hash,
-  type HexString,
   type ReadParams,
   type ReadWriteAdapter,
   type Transaction,
   type TransactionReceipt,
   type WaitForTransactionParams,
   type WriteParams,
-  decodeFunctionReturn,
-  encodeFunctionReturn,
-  objectToArray,
-  prepareBytecodeCallData,
+  encodeBytecodeCallData,
+  prepareParamsArray,
 } from "@delvtech/drift";
 import { type AbiFragment, type AccessList, default as Web3 } from "web3";
 
 export class Web3Adapter<TWeb3 extends Web3 = Web3>
+  extends AbiEncoder
   implements ReadWriteAdapter
 {
   web3: TWeb3;
@@ -44,6 +38,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
       | TWeb3
       | ConstructorParameters<typeof Web3>[0] = new Web3() as TWeb3,
   ) {
+    super();
     this.web3 =
       web3OrProvider instanceof Web3
         ? web3OrProvider
@@ -173,7 +168,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     value,
   }: CallParams) {
     if (bytecode && data) {
-      data = prepareBytecodeCallData(bytecode, data);
+      data = encodeBytecodeCallData(bytecode, data);
     }
 
     return this.web3.eth.call(
@@ -233,107 +228,52 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     });
   }
 
-  read<
+  async read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >({ abi, address, fn, args, block }: ReadParams<TAbi, TFunctionName>) {
-    const argsArray = objectToArray({
-      abi: abi as Abi,
-      type: "function",
-      name: fn,
-      kind: "inputs",
-      value: args,
+    const callData = this.encodeFunctionData({
+      abi,
+      fn,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
     });
-    const { method } = this._getMethod({ abi, fn, address });
 
-    return method(...argsArray).call(undefined, block) as Promise<
-      FunctionReturn<TAbi, TFunctionName>
-    >;
+    // Using call instead of readContract to ensure consistent return decoding
+    const returnData = await this.call({
+      to: address,
+      data: callData,
+      block,
+    });
+
+    return this.decodeFunctionReturn({
+      abi,
+      data: returnData,
+      fn,
+    });
   }
 
   async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>) {
-    const { abi, address, args, fn } = params;
-    const arrayArgs = objectToArray({
-      abi: abi as Abi,
-      type: "function",
-      name: fn,
-      kind: "inputs",
-      value: args,
+  >({ abi, address, fn, args, ...params }: WriteParams<TAbi, TFunctionName>) {
+    const callData = this.encodeFunctionData({
+      abi,
+      fn,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
     });
 
-    let from = params.from;
-    if (!from) {
-      try {
-        from = await this.getSignerAddress();
-      } catch {}
-    }
-
-    const toHex = this.web3.utils.toHex;
-    const { method } = this._getMethod({ abi, fn, address });
-    const methodObj = method(...arrayArgs);
-    const outputObj = await methodObj.call({
-      data: methodObj.encodeABI(),
-      from,
-      gas: params.gas ? toHex(params.gas) : undefined,
-      gasPrice: params.gasPrice ? toHex(params.gasPrice) : undefined,
-      maxFeePerGas: params.maxFeePerGas
-        ? toHex(params.maxFeePerGas)
-        : undefined,
-      maxPriorityFeePerGas: params.maxPriorityFeePerGas
-        ? toHex(params.maxPriorityFeePerGas)
-        : undefined,
-      nonce: params.nonce ? toHex(params.nonce) : undefined,
-      type: params.type ? toHex(params.type) : undefined,
-      value: params.value ? toHex(16) : undefined,
+    // Using call instead of simulateWrite to ensure consistent return decoding
+    const returnData = await this.call({
+      to: address,
+      data: callData,
+      ...params,
     });
 
-    return outputObj as FunctionReturn<TAbi, TFunctionName>;
-  }
-
-  encodeFunctionData<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >({ abi, fn, args }: EncodeFunctionDataParams<TAbi, TFunctionName>) {
-    const arrayArgs = objectToArray({
-      abi: abi as Abi,
-      type: "function",
-      name: fn,
-      kind: "inputs",
-      value: args,
+    return this.decodeFunctionReturn({
+      abi,
+      data: returnData,
+      fn,
     });
-    const { method } = this._getMethod({ abi, fn });
-    return method(...arrayArgs).encodeABI() as HexString;
-  }
-
-  encodeFunctionReturn<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >(params: EncodeFunctionReturnParams<TAbi, TFunctionName>) {
-    return encodeFunctionReturn(params);
-  }
-
-  decodeFunctionData<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >({ abi, data }: DecodeFunctionDataParams<TAbi, TFunctionName>) {
-    const { __method__, ...args } = new this.web3.eth.Contract(
-      abi as readonly AbiFragment[],
-    ).decodeMethodData(data);
-
-    return {
-      args: args as AnyObject,
-      functionName: __method__.split("(")[0],
-    } as DecodedFunctionData<TAbi, TFunctionName>;
-  }
-
-  decodeFunctionReturn<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi>,
-  >(params: DecodeFunctionReturnParams<TAbi, TFunctionName>) {
-    return decodeFunctionReturn(params);
   }
 
   async getSignerAddress() {
@@ -345,27 +285,25 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   async write<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>) {
-    const {
-      abi,
-      accessList,
-      address,
-      args,
-      fn,
-      from = await this.getSignerAddress(),
-      onMined,
-      ...rest
-    } = params;
-
-    const arrayArgs = objectToArray({
+  >({
+    abi,
+    accessList,
+    address,
+    args,
+    fn,
+    from,
+    onMined,
+    ...rest
+  }: WriteParams<TAbi, TFunctionName>) {
+    const { params } = prepareParamsArray({
       abi: abi as Abi,
       type: "function",
       name: fn,
       kind: "inputs",
       value: args,
     });
-
     const { method } = this._getMethod({ abi, fn, address });
+    from ??= await this.getSignerAddress();
 
     return new Promise<Hash>((resolve, reject) => {
       const req = this.web3.eth
@@ -373,7 +311,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
           ...rest,
           accessList: accessList as AccessList,
           to: address,
-          data: method(...arrayArgs).encodeABI(),
+          data: method(...params).encodeABI(),
           from,
         })
         .on("error", reject)
