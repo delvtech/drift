@@ -1,5 +1,20 @@
 # @delvtech/drift-web3
 
+## 0.2.0
+
+### Patch Changes
+
+- 4895c3f: Refactored `read` and `simulateWrite` methods to use `call` to ensure consistent return types via unified decoding logic in `AbiEncoder`.
+- 4895c3f: Modified the web3 adapter to extend the new `AbiEncoder` from drift core to ensure consistent encoding/decoding.
+- Updated dependencies [6e91e3b]
+- Updated dependencies [100523a]
+- Updated dependencies [07ed486]
+- Updated dependencies [07ed486]
+- Updated dependencies [6e91e3b]
+- Updated dependencies [0dc9748]
+- Updated dependencies [100523a]
+  - @delvtech/drift@0.2.0
+
 ## 0.1.5
 
 ### Patch Changes

@@ -1,5 +1,20 @@
 # @delvtech/drift
 
+## 0.2.0
+
+### Minor Changes
+
+- 07ed486: Deleted the `objectToArray` type in favor of `prepareParamsArray` which can also handle `AbiFriendlyType` (unwrapped single param values).
+- 6e91e3b: Removed mocking features for encoding and decoding methods since they don't require network interactions. Mock classes now extend the new `AbiEncoder`.
+- 0dc9748: Renamed util types: `ReplaceProps` -> `Replace`, `RequiredKeys` -> `RequiredBy`, `OptionalKeys` -> `PartialBy`.
+- 100523a: Renamed `prepareBytecodeCallData` to `encodeBytecodeCallData`
+
+### Patch Changes
+
+- 6e91e3b: Added a new `AbiEncoder` class which can be extended by adapters to inherit default implementations of encoding/decoding methods which have been patched to ensure the correct return type logic.
+- 100523a: Added `prepareFunctionData` util to exports
+- 07ed486: Refactored param parsing to handle more edge cases in encode/decode utils.
+
 ## 0.1.5
 
 ### Patch Changes
