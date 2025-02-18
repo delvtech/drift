@@ -32,7 +32,7 @@ export function decodeFunctionReturn<
 
 /**
  * An internal version of {@linkcode decodeFunctionReturn} that takes an
- * {@linkcode AbiFunction} instance instead of function name.
+ * {@linkcode AbiFunction} instance instead of just a function name.
  * @internal
  */
 export function _decodeFunctionReturn<
