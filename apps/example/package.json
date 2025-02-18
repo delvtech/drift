@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@delvtech/drift": "^0.2.0",
-    "@delvtech/fixed-point-wasm": "^0.0.6"
+    "@delvtech/fixed-point-wasm": "^0.0.7"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",

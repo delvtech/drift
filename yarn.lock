@@ -307,10 +307,10 @@
     human-id "^1.0.2"
     prettier "^2.7.1"
 
-"@delvtech/fixed-point-wasm@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@delvtech/fixed-point-wasm/-/fixed-point-wasm-0.0.6.tgz#ad9c46226f6550647f27e6cd3364bd11172adc62"
-  integrity sha512-+uZGfD7B0y1KzjNBLYC8SD9zuFBuMY0WF5l9chqgoF+oXUpmsGpdVJYi9nJSc2pN7KXZCtFis/K45V418hIv6A==
+"@delvtech/fixed-point-wasm@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@delvtech/fixed-point-wasm/-/fixed-point-wasm-0.0.7.tgz#616e7e5056eaa6f9c4f0d91445d4e8dbc95a9a08"
+  integrity sha512-cGMlCccGqVMiPBtA1vvic/fc5ZoKBcYun9qma/MktKAn92obhbs0ib6it0Ev2mCD+pwKLOY0Ar+kIqWncEkq4A==
 
 "@esbuild/aix-ppc64@0.23.1":
   version "0.23.1"
