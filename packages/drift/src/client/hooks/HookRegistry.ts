@@ -39,10 +39,9 @@ export class HookRegistry<T extends AnyObject = AnyObject> {
     hook: THook,
     handler: HookHandler<T, THook>,
   ): boolean {
-    const handlers = this._handlers[hook];
-    if (!handlers) return false;
-
     let didRemove = false;
+    const handlers = this._handlers[hook];
+    if (!handlers) return didRemove;
     this._handlers[hook] = handlers.filter((existing) => {
       if (existing === handler) {
         didRemove = true;
@@ -79,11 +78,11 @@ export class HookRegistry<T extends AnyObject = AnyObject> {
   call<THook extends HookName<T>>(
     hook: THook,
     ...args: Parameters<HookHandler<T, THook>>
-  ): ReturnType<HookHandler<T, THook>> extends Promise<any>
-    ? Promise<void>
+  ): Promise<any> extends ReturnType<HookHandler<T, THook>>
+    ? MaybePromise<void>
     : void {
-    const handlers = this._handlers[hook];
     let result: MaybePromise<any> = undefined;
+    const handlers = this._handlers[hook];
     if (!handlers) return result;
     for (const handler of handlers) {
       if (result instanceof Promise) {

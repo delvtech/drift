@@ -12,10 +12,12 @@ import type {
  * execution. Uses a Proxy to automatically intercept method calls.
  */
 export class MethodInterceptor<T extends AnyObject = AnyObject> {
-  private _hooks = new HookRegistry<MethodHooks>();
+  // Untyped to make private usage easier
+  #hooks = new HookRegistry<MethodHooks>();
 
+  // Typed getter for public usage
   get hooks() {
-    return this._hooks as HookRegistry<MethodHooks<T>>;
+    return this.#hooks as HookRegistry<MethodHooks<T>>;
   }
 
   /**
@@ -34,7 +36,7 @@ export class MethodInterceptor<T extends AnyObject = AnyObject> {
 
         // Wrap the method
         const wrapped = (...args: unknown[]) =>
-          this._useMethodHooks({
+          this.#runWithHooks({
             method: prop,
             fn: value.bind(receiver),
             args,
@@ -49,7 +51,7 @@ export class MethodInterceptor<T extends AnyObject = AnyObject> {
     });
   };
 
-  private _useMethodHooks({
+  #runWithHooks({
     method,
     fn,
     args,
@@ -62,14 +64,14 @@ export class MethodInterceptor<T extends AnyObject = AnyObject> {
     let result: any = undefined;
 
     // Call before hook handlers
-    const beforeHook: unknown = this._hooks.call(`before:${String(method)}`, {
+    const beforeHook = this.#hooks.call(`before:${String(method)}`, {
       get args() {
         return args;
       },
-      setArgs: (...newArgs: any) => {
+      setArgs(...newArgs: any) {
         args = newArgs;
       },
-      resolve: (value: any) => {
+      resolve(value: any) {
         if (!skipped) {
           skipped = true;
           result = value;
@@ -84,12 +86,12 @@ export class MethodInterceptor<T extends AnyObject = AnyObject> {
       }
 
       // Call after hook handlers
-      const afterHook: unknown = this._hooks.call(`after:${String(method)}`, {
+      const afterHook = this.#hooks.call(`after:${String(method)}`, {
         args,
         get result() {
           return result;
         },
-        setResult: (newResult: any) => {
+        setResult(newResult: any) {
           result = newResult;
         },
       });
@@ -136,9 +138,9 @@ export type MethodHooks<T extends AnyObject = AnyObject> = {
     /** The arguments passed to the method */
     readonly args: Parameters<T[K]>;
     /** Override the arguments and continue */
-    setArgs: (...args: Parameters<T[K]>) => void;
+    setArgs(...args: Parameters<T[K]>): void;
     /** Set the result and return early */
-    resolve: (value: Awaited<ReturnType<T[K]>>) => void;
+    resolve(value: Awaited<ReturnType<T[K]>>): void;
   }) => ReturnType<T[K]> extends Promise<any> ? MaybePromise<void> : void;
 } & {
   [K in FunctionKey<T> as `after:${K & string}`]: (payload: {
@@ -147,6 +149,6 @@ export type MethodHooks<T extends AnyObject = AnyObject> = {
     /** The result returned by the method */
     readonly result: MaybeAwaited<ReturnType<T[K]>>;
     /** Override the result and continue */
-    setResult: (value: MaybeAwaited<ReturnType<T[K]>>) => void;
+    setResult(value: MaybeAwaited<ReturnType<T[K]>>): void;
   }) => ReturnType<T[K]> extends Promise<any> ? MaybePromise<void> : void;
 };
