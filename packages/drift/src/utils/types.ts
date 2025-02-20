@@ -173,6 +173,11 @@ export type UnionToIntersection<T> = (
   : never;
 
 /**
+ * Get a union of all keys from all members of `T`.
+ */
+export type UnionKey<T> = T extends T ? keyof T : never;
+
+/**
  * Construct a type in which only a single member of `T` is valid at a time.
  *
  * @example
@@ -197,11 +202,12 @@ export type UnionToIntersection<T> = (
  * // }
  * ```
  */
-export type OneOf<T extends AnyObject> = UnionToIntersection<T> extends infer I
-  ? T extends infer Ty
+export type OneOf<T extends AnyObject> = UnionKey<T> extends infer K extends
+  PropertyKey
+  ? T extends T
     ? Eval<
-        Ty & {
-          [K in Exclude<keyof I, keyof T>]?: never;
+        T & {
+          [_ in Exclude<K, keyof T>]?: never;
         }
       >
     : never

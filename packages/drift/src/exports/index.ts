@@ -170,6 +170,7 @@ export type {
   Pretty,
   Replace,
   RequiredBy,
+  UnionKey,
   UnionToIntersection,
 } from "src/utils/types";
 
