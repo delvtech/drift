@@ -25,11 +25,9 @@ export type AwaitedReturnType<T extends AnyFunction> = T extends (
 /**
  * Forces TypeScript to evaluate and expand a type instead of displaying it as a
  * reference.
- *
- * @remarks
- * The `& {}` intersection trick works because it forces TypeScript to create a
- * new object type rather than just reference the existing one.
  */
+// The `& {}` intersection trick works because it forces TypeScript to create a
+// new object type rather than just reference the existing one.
 export type Eval<T> = { [K in keyof T]: T[K] } & {};
 
 /**
