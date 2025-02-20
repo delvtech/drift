@@ -17,7 +17,7 @@ import type {
   SimulateWriteParams,
   WriteParams,
 } from "src/adapter/types/Adapter";
-import type { BlockTag } from "src/adapter/types/Block";
+import type { BlockIdentifier, BlockTag } from "src/adapter/types/Block";
 import type { ContractCallOptions } from "src/adapter/types/Contract";
 import type { EventArgs, EventName } from "src/adapter/types/Event";
 import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
@@ -348,7 +348,7 @@ export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
   }
 }
 
-function prepareBlockParam(block?: BlockTag | bigint): HexString | BlockTag {
+function prepareBlockParam(block?: BlockIdentifier): HexString | BlockTag {
   if (block === undefined) {
     return "latest";
   }

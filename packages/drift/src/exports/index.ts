@@ -34,8 +34,9 @@ export type {
   WriteParams,
 } from "src/adapter/types/Adapter";
 export type {
-  BlockBase,
   Block,
+  BlockBase,
+  BlockIdentifier,
   BlockTag,
   MinedBlock,
   MinedBlockProps,

@@ -5,7 +5,7 @@ import type {
   Hash,
   HexString,
 } from "src/adapter/types/Abi";
-import type { BlockTag } from "src/adapter/types/Block";
+import type { BlockIdentifier, BlockTag } from "src/adapter/types/Block";
 import type { EventFilter, EventName } from "src/adapter/types/Event";
 
 // https://ethereum.github.io/execution-apis/api-documentation/
@@ -17,7 +17,7 @@ export interface ContractParams<TAbi extends Abi = Abi> {
 
 // https://github.com/ethereum/execution-apis/blob/main/src/eth/execute.yaml#L1
 export interface ContractReadOptions {
-  block?: BlockTag | bigint;
+  block?: BlockIdentifier;
 }
 
 export interface ContractGetEventsOptions<

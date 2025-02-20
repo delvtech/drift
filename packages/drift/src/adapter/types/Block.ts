@@ -34,3 +34,8 @@ export interface MinedBlock extends BlockBase, Required<MinedBlockProps> {}
 
 // https://github.com/ethereum/execution-apis/blob/3ae3d29fc9900e5c48924c238dff7643fdc3680e/src/schemas/block.yaml#L114
 export type BlockTag = "latest" | "earliest" | "pending" | "safe" | "finalized";
+
+/**
+ * A block number, hash, or tag that can be used to identify a block.
+ */
+export type BlockIdentifier = bigint | Hash | BlockTag;

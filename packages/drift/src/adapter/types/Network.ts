@@ -1,5 +1,5 @@
 import type { Address, Hash, HexString } from "src/adapter/types/Abi";
-import type { Block, BlockTag } from "src/adapter/types/Block";
+import type { Block, BlockIdentifier, BlockTag } from "src/adapter/types/Block";
 import type {
   Transaction,
   TransactionReceipt,
@@ -50,7 +50,7 @@ export interface Network {
 
 export interface GetBalanceParams {
   address: Address;
-  block?: BlockTag | bigint;
+  block?: BlockIdentifier;
 }
 
 export type GetBlockParams = OneOf<
