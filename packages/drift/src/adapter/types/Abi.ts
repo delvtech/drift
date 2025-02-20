@@ -7,7 +7,7 @@ import type {
   AbiStateMutability,
   Abi as _Abi,
 } from "abitype";
-import type { EmptyObject, MergeKeys, Pretty, Replace } from "src/utils/types";
+import type { EmptyObject, Eval, Replace } from "src/utils/types";
 
 // https://docs.soliditylang.org/en/latest/abi-spec.html#json
 // https://github.com/ethereum/execution-apis/blob/f9cdb15b23c60342dd6f97731382358d817287e3/src/schemas/base-types.yaml
@@ -149,10 +149,10 @@ export type AbiParameters<
  */
 type WithDefaultNames<TParameters extends readonly AbiParameter[]> = {
   [K in keyof TParameters]: TParameters[K] extends infer TParameter extends
-    AbiParameter
+    AbiParameter // <- Inferred to distribute union params
     ? TParameter extends NamedAbiParameter
       ? TParameter
-      : Replace<MergeKeys<TParameter>, { name: `${K}` | string }>
+      : TParameter & { name: `${K}` }
     : never;
 };
 
@@ -172,7 +172,7 @@ type NamedParametersToObject<
   TParameterKind extends AbiParameterKind = AbiParameterKind,
 > = NamedAbiParameter[] extends TParameters
   ? Record<number | string, any>
-  : Pretty<
+  : Eval<
       {
         // For every parameter name, excluding empty names, add a key to the
         // object for the parameter name

@@ -160,18 +160,16 @@ export type {
   AnyFunction,
   AnyObject,
   EmptyObject,
+  Eval,
   Extended,
   FunctionKey,
   MaybeAwaited,
   MaybePromise,
-  MergeKeys,
   OneOf,
   PartialBy,
-  Pretty,
   Replace,
   RequiredBy,
   UnionKey,
-  UnionToIntersection,
 } from "src/utils/types";
 
 // ...rest //
