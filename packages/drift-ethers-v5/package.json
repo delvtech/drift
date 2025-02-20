@@ -1,7 +1,7 @@
 {
   "name": "@delvtech/drift-ethers-v5",
   "description": "Ethers.js v5 adapter for Drift",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "license": "Apache-2.0",
   "type": "module",
   "main": "dist/index.cjs",
@@ -27,11 +27,11 @@
     "watch": "tsup --watch"
   },
   "peerDependencies": {
-    "@delvtech/drift": "^0.2.0",
+    "@delvtech/drift": "^0.3.0",
     "ethers": "^5.7.2"
   },
   "devDependencies": {
-    "@delvtech/drift": "^0.2.0",
+    "@delvtech/drift": "^0.3.0",
     "@repo/typescript-config": "*",
     "ethers": "^5.7.2",
     "tsconfig-paths": "^4.2.0",
