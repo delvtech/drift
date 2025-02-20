@@ -152,7 +152,7 @@ type WithDefaultNames<TParameters extends readonly AbiParameter[]> = {
     AbiParameter // <- Inferred to distribute union params
     ? TParameter extends NamedAbiParameter
       ? TParameter
-      : TParameter & { name: `${K}` }
+      : TParameter & { name: K }
     : never;
 };
 
@@ -170,7 +170,7 @@ type WithDefaultNames<TParameters extends readonly AbiParameter[]> = {
 type NamedParametersToObject<
   TParameters extends readonly NamedAbiParameter[],
   TParameterKind extends AbiParameterKind = AbiParameterKind,
-> = NamedAbiParameter[] extends TParameters
+> = readonly NamedAbiParameter[] extends TParameters
   ? Record<number | string, any>
   : Eval<
       {
@@ -238,7 +238,7 @@ export type AbiParametersToObject<
   TParameterKind extends AbiParameterKind = AbiParameterKind,
 > = TParameters extends readonly []
   ? EmptyObject
-  : TParameters extends NamedAbiParameter[]
+  : TParameters extends readonly NamedAbiParameter[]
     ? NamedParametersToObject<TParameters, TParameterKind>
     : NamedParametersToObject<WithDefaultNames<TParameters>, TParameterKind>;
 
