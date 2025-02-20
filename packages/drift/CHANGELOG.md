@@ -1,5 +1,16 @@
 # @delvtech/drift
 
+## 0.3.0
+
+### Minor Changes
+
+- 6080580: Removed `MergeKeys` and `UnionToIntersection` types.
+- 6080580: Replaced `Pretty` type with `Eval` type.
+
+### Patch Changes
+
+- 48cbe86: Patched `OneOf` type to handle keys with conflicting values.
+
 ## 0.2.0
 
 ### Minor Changes
