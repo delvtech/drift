@@ -27,11 +27,11 @@
     "watch": "tsup --watch"
   },
   "peerDependencies": {
-    "@delvtech/drift": "0.2.0",
+    "@delvtech/drift": "^0.2.0",
     "web3": "^4.16.0"
   },
   "devDependencies": {
-    "@delvtech/drift": "0.2.0",
+    "@delvtech/drift": "^0.2.0",
     "@repo/typescript-config": "*",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.3.6",
@@ -50,7 +50,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist"
-  ]
+  "files": ["dist"]
 }
