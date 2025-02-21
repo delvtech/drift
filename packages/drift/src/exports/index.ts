@@ -35,11 +35,9 @@ export type {
 } from "src/adapter/types/Adapter";
 export type {
   Block,
-  BlockBase,
   BlockIdentifier,
+  BlockStatus,
   BlockTag,
-  MinedBlock,
-  MinedBlockProps,
 } from "src/adapter/types/Block";
 export type {
   ContractParams,
