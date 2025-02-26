@@ -3,6 +3,7 @@ import {
   AbiEncoder,
   type AbiObjectType,
   type Block,
+  type BlockIdentifier,
   type Bytes,
   type CallParams,
   type EventName,
@@ -12,6 +13,7 @@ import {
   type GetBlockParams,
   type GetEventsParams,
   type GetTransactionParams,
+  type MinedBlockIdentifier,
   type ReadAdapter,
   type ReadParams,
   type SimulateWriteParams,
@@ -58,10 +60,13 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
     return this.publicClient.getBlockNumber();
   }
 
-  async getBlock(params: GetBlockParams = {}) {
+  async getBlock<T extends BlockIdentifier = MinedBlockIdentifier>(
+    params: GetBlockParams = {},
+  ) {
     const block = await this.publicClient.getBlock(
       params as GetBlockParameters,
     );
+
     return {
       extraData: block.extraData,
       gasLimit: block.gasLimit,
@@ -70,7 +75,7 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
       logsBloom: block.logsBloom ?? undefined,
       miner: block.miner,
       mixHash: block.mixHash,
-      nonce: block.nonce ?? undefined,
+      nonce: block.nonce === null ? undefined : BigInt(block.nonce),
       number: block.number ?? undefined,
       parentHash: block.parentHash,
       receiptsRoot: block.receiptsRoot,
@@ -80,7 +85,7 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
       timestamp: block.timestamp,
       transactions: block.transactions,
       transactionsRoot: block.transactionsRoot,
-    } as Block;
+    } as Block<T>;
   }
 
   getBalance({ address, block }: GetBalanceParams) {
