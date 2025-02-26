@@ -5,17 +5,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "cli": "yarn workspace @delvtech/drift-cli dev",
-    "build:packages": "turbo build --filter=./packages/*",
-    "build": "turbo build",
-    "dev": "turbo dev",
+    "build": "turbo run build --filter=./packages/*",
+    "watch": "turbo run watch --filter=./packages/*",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
     "format": "biome format --write",
     "lint": "biome lint --diagnostic-level error .",
     "lint:fix": "yarn lint --fix",
     "lint:fix:unsafe": "yarn lint:fix --unsafe",
+    "typecheck": "turbo run typecheck",
+    "typecheck:watch": "turbo run typecheck:watch",
     "release": "sh scripts/release.sh",
-    "test": "turbo test",
-    "typecheck": "turbo typecheck",
     "reset-node-modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && yarn cache clean && yarn"
   },
   "devDependencies": {

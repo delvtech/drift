@@ -21,10 +21,11 @@
   },
   "scripts": {
     "build": "tsup",
-    "test:watch": "vitest --reporter=verbose",
+    "watch": "tsup --watch",
     "test": "vitest run",
+    "test:watch": "vitest --reporter=verbose",
     "typecheck": "tsc --noEmit",
-    "watch": "tsup --watch"
+    "typecheck:watch": "tsc --noEmit --watch"
   },
   "peerDependencies": {
     "@delvtech/drift": "^0.3.0",

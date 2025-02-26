@@ -6,17 +6,26 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "watch": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "test:watch": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
     "typecheck": {
       "dependsOn": ["^build"],
       "outputs": []
     },
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
-    "test": {
-      "dependsOn": ["^build"]
-    },
-    "dev": {
+    "typecheck:watch": {
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
     }
