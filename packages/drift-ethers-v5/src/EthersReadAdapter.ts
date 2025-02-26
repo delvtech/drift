@@ -2,6 +2,7 @@ import {
   type Abi,
   AbiEncoder,
   type Block,
+  type BlockIdentifier,
   type Bytes,
   type CallParams,
   type EventLog,
@@ -12,6 +13,7 @@ import {
   type GetBlockParams,
   type GetEventsParams,
   type GetTransactionParams,
+  type MinedBlockIdentifier,
   type ReadAdapter,
   type ReadParams,
   type Transaction,
@@ -69,12 +71,16 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     return BigInt(num);
   }
 
-  async getBlock({ blockHash, blockNumber, blockTag }: GetBlockParams = {}) {
+  async getBlock<T extends BlockIdentifier = MinedBlockIdentifier>({
+    blockHash,
+    blockNumber,
+    blockTag,
+  }: GetBlockParams = {}) {
     const ethersBlock = await this.provider.getBlock(
       blockParam(blockHash ?? blockNumber ?? blockTag ?? "latest"),
     );
-    const block: Block | undefined = ethersBlock
-      ? {
+    return ethersBlock
+      ? ({
           extraData: ethersBlock.extraData,
           gasLimit: ethersBlock.gasLimit.toBigInt(),
           gasUsed: ethersBlock.gasUsed.toBigInt(),
@@ -92,9 +98,8 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
           timestamp: BigInt(ethersBlock.timestamp),
           transactions: ethersBlock.transactions,
           transactionsRoot: undefined,
-        }
+        } as Block<T>)
       : undefined;
-    return block;
   }
 
   async getBalance({ address, block }: GetBalanceParams) {
