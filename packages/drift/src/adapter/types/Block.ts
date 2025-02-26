@@ -26,28 +26,21 @@ export type BlockStatus<T extends BlockIdentifier = BlockIdentifier> =
 
 // https://github.com/ethereum/execution-apis/blob/3ae3d29fc9900e5c48924c238dff7643fdc3680e/src/schemas/block.yaml#L1
 
-/**
- * A block in the chain, assumed to be mined unless specified otherwise.
- */
-export type Block<T extends BlockIdentifier = MinedBlockIdentifier> = Eval<
-  {
-    extraData?: Bytes;
-    gasLimit: bigint;
-    gasUsed: bigint;
-    miner: Address;
-    mixHash: Hash;
-    parentHash: Hash;
-    receiptsRoot: Hash;
-    sha3Uncles: Hash;
-    size: bigint;
-    stateRoot: Hash;
-    timestamp: bigint;
-    transactions: Hash[];
-    transactionsRoot: Hash;
-  } & ("pending" extends BlockStatus<T>
-    ? MinedBlockProps<T>
-    : Required<MinedBlockProps<T>>)
->;
+export interface BaseBlockProps {
+  extraData?: Bytes;
+  gasLimit: bigint;
+  gasUsed: bigint;
+  miner: Address;
+  mixHash: Hash;
+  parentHash: Hash;
+  receiptsRoot: Hash;
+  sha3Uncles: Hash;
+  size: bigint;
+  stateRoot: Hash;
+  timestamp: bigint;
+  transactions: Hash[];
+  transactionsRoot: Hash;
+}
 
 export interface MinedBlockProps<T extends BlockIdentifier = BlockIdentifier> {
   /** `undefined` if pending */
@@ -59,3 +52,13 @@ export interface MinedBlockProps<T extends BlockIdentifier = BlockIdentifier> {
   /** `undefined` if pending */
   number?: T extends bigint ? T : bigint;
 }
+
+/**
+ * A block in the chain, assumed to be mined unless specified otherwise.
+ */
+export type Block<T extends BlockIdentifier = MinedBlockIdentifier> = Eval<
+  BaseBlockProps &
+    ("pending" extends BlockStatus<T>
+      ? MinedBlockProps<T>
+      : Required<MinedBlockProps<T>>)
+>;
