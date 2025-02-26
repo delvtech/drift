@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.4.1
+
+### Patch Changes
+
+- ae8dd57: Added `RangeBlock` and `MinedRangeBlock` types
+
 ## 0.4.0
 
 ### Minor Changes
