@@ -34,12 +34,14 @@ export type {
   WriteParams,
 } from "src/adapter/types/Adapter";
 export type {
+  BaseBlockProps,
   Block,
   BlockIdentifier,
+  BlockOverrides,
   BlockStatus,
   BlockTag,
   MinedBlockIdentifier,
-  BlockOverrides,
+  MinedBlockProps,
 } from "src/adapter/types/Block";
 export type {
   ContractParams,

@@ -28,7 +28,6 @@ export type BlockStatus<T extends BlockIdentifier = BlockIdentifier> =
 
 /**
  * Core block properties
- * @internal
  */
 export interface BaseBlockProps {
   extraData?: Bytes;
@@ -48,7 +47,6 @@ export interface BaseBlockProps {
 
 /**
  * Block properties that are conditionally available (undefined if pending)
- * @internal
  */
 export interface MinedBlockProps<T extends BlockIdentifier = BlockIdentifier> {
   /** `undefined` if pending */

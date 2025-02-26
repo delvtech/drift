@@ -3,6 +3,7 @@ import {
   AbiEncoder,
   type Address,
   type Block,
+  type BlockIdentifier,
   type Bytes,
   type CallParams,
   type EventLog,
@@ -15,6 +16,7 @@ import {
   type GetTransactionParams,
   type Hash,
   type HexString,
+  type MinedBlockIdentifier,
   type ReadAdapter,
   type ReadParams,
   type Transaction,
@@ -74,12 +76,17 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     return BigInt(num);
   }
 
-  async getBlock({ blockHash, blockNumber, blockTag }: GetBlockParams = {}) {
+  async getBlock<T extends BlockIdentifier = MinedBlockIdentifier>({
+    blockHash,
+    blockNumber,
+    blockTag,
+  }: GetBlockParams = {}) {
     const ethersBlock = await this.provider.getBlock(
       blockHash ?? blockNumber ?? blockTag ?? "latest",
     );
-    const block: Block | undefined = ethersBlock
-      ? {
+
+    return ethersBlock
+      ? ({
           extraData: ethersBlock.extraData as HexString,
           gasLimit: ethersBlock.gasLimit,
           gasUsed: ethersBlock.gasUsed,
@@ -97,9 +104,8 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
           timestamp: BigInt(ethersBlock.timestamp),
           transactions: ethersBlock.transactions as Hash[],
           transactionsRoot: undefined,
-        }
+        } as Block<T>)
       : undefined;
-    return block;
   }
 
   getBalance({ address, block }: GetBalanceParams) {
@@ -292,7 +298,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
 }
 
 declare module "@delvtech/drift" {
-  interface Block {
+  interface BlockOverrides<T> {
     /**
      * Unavailable in ethers.js.
      */
