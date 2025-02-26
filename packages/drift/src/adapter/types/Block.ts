@@ -1,5 +1,5 @@
 import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
-import type { Eval } from "src/utils/types";
+import type { Eval, Replace } from "src/utils/types";
 
 // https://github.com/ethereum/execution-apis/blob/3ae3d29fc9900e5c48924c238dff7643fdc3680e/src/schemas/block.yaml#L114
 export type BlockTag = "latest" | "earliest" | "pending" | "safe" | "finalized";
@@ -26,6 +26,10 @@ export type BlockStatus<T extends BlockIdentifier = BlockIdentifier> =
 
 // https://github.com/ethereum/execution-apis/blob/3ae3d29fc9900e5c48924c238dff7643fdc3680e/src/schemas/block.yaml#L1
 
+/**
+ * Core block properties
+ * @internal
+ */
 export interface BaseBlockProps {
   extraData?: Bytes;
   gasLimit: bigint;
@@ -42,6 +46,10 @@ export interface BaseBlockProps {
   transactionsRoot: Hash;
 }
 
+/**
+ * Block properties that are conditionally available (undefined if pending)
+ * @internal
+ */
 export interface MinedBlockProps<T extends BlockIdentifier = BlockIdentifier> {
   /** `undefined` if pending */
   hash?: T extends Hash ? T : Hash;
@@ -54,11 +62,20 @@ export interface MinedBlockProps<T extends BlockIdentifier = BlockIdentifier> {
 }
 
 /**
+ * Augmentable overrides for the {@linkcode Block} type. Adapter libs can merge
+ * into this interface to customize block properties.
+ */
+export interface BlockOverrides<T extends BlockIdentifier> {}
+
+/**
  * A block in the chain, assumed to be mined unless specified otherwise.
  */
 export type Block<T extends BlockIdentifier = MinedBlockIdentifier> = Eval<
-  BaseBlockProps &
-    ("pending" extends BlockStatus<T>
-      ? MinedBlockProps<T>
-      : Required<MinedBlockProps<T>>)
+  Replace<
+    BaseBlockProps &
+      ("pending" extends BlockStatus<T>
+        ? MinedBlockProps<T>
+        : Required<MinedBlockProps<T>>),
+    BlockOverrides<T>
+  >
 >;
