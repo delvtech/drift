@@ -4,6 +4,8 @@ import {
   type Address,
   type AnyObject,
   type Block,
+  type BlockIdentifier,
+  type MinedBlockIdentifier,
   type Bytes,
   type CallParams,
   DriftError,
@@ -53,7 +55,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     return this.web3.eth.getBlockNumber();
   }
 
-  async getBlock({ blockHash, blockNumber, blockTag }: GetBlockParams = {}) {
+  async getBlock<T extends BlockIdentifier = MinedBlockIdentifier>({ blockHash, blockNumber, blockTag }: GetBlockParams<T> = {} as GetBlockParams<T>) {
     const block = await this.web3.eth.getBlock(
       blockHash ?? blockNumber ?? blockTag,
     );
@@ -78,7 +80,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
             typeof tx === "string" ? tx : tx.hash,
           ) as Hash[],
           transactionsRoot: block.transactionsRoot as Hash,
-        } as Block)
+        } as Block<T>)
       : undefined;
   }
 
