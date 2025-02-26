@@ -49,7 +49,7 @@ export type Block<T extends BlockIdentifier = MinedBlockIdentifier> = Eval<
     : Required<MinedBlockProps<T>>)
 >;
 
-interface MinedBlockProps<T extends BlockIdentifier = BlockIdentifier> {
+export interface MinedBlockProps<T extends BlockIdentifier = BlockIdentifier> {
   /** `undefined` if pending */
   hash?: T extends Hash ? T : Hash;
   /** `undefined` if pending */

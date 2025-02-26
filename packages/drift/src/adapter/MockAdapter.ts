@@ -8,7 +8,11 @@ import type {
   SimulateWriteParams,
   WriteParams,
 } from "src/adapter/types/Adapter";
-import type { Block } from "src/adapter/types/Block";
+import type {
+  Block,
+  BlockIdentifier,
+  MinedBlockIdentifier,
+} from "src/adapter/types/Block";
 import type { EventLog, EventName } from "src/adapter/types/Event";
 import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
 import type {
@@ -74,8 +78,10 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     });
   }
 
-  async getBlock(params?: GetBlockParams) {
-    return this.stubs.get<[GetBlockParams?], Promise<Block | undefined>>({
+  async getBlock<T extends BlockIdentifier = MinedBlockIdentifier>(
+    params?: GetBlockParams<T>,
+  ) {
+    return this.stubs.get<[GetBlockParams?], Promise<Block<T> | undefined>>({
       method: "getBlock",
       key: params ? this.createKey(params) : undefined,
       matchPartial: true,

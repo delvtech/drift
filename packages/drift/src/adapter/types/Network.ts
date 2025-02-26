@@ -1,10 +1,14 @@
-import type { Address, Hash, HexString } from "src/adapter/types/Abi";
-import type { Block, BlockIdentifier, BlockTag } from "src/adapter/types/Block";
+import type { Address, Hash } from "src/adapter/types/Abi";
+import type {
+  Block,
+  BlockIdentifier,
+  BlockTag,
+  MinedBlockIdentifier,
+} from "src/adapter/types/Block";
 import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
-import type { OneOf } from "src/utils/types";
 
 // https://ethereum.github.io/execution-apis/api-documentation/
 
@@ -26,7 +30,9 @@ export interface Network {
    * Get a block from a block tag, number, or hash. If no argument is provided,
    * the latest block is returned.
    */
-  getBlock(params?: GetBlockParams): Promise<Block | undefined>;
+  getBlock<T extends BlockIdentifier = MinedBlockIdentifier>(
+    params?: GetBlockParams<T>,
+  ): Promise<Block<T> | undefined>;
 
   /**
    * Get the balance of native currency for an account.
@@ -53,17 +59,26 @@ export interface GetBalanceParams {
   block?: BlockIdentifier;
 }
 
-export type GetBlockParams = OneOf<
-  | {
-      blockHash?: HexString;
-    }
-  | {
-      blockNumber?: bigint;
-    }
-  | {
-      blockTag?: BlockTag;
-    }
->;
+export type GetBlockParams<T extends BlockIdentifier = BlockIdentifier> =
+  T extends Hash
+    ? {
+        blockHash?: T;
+        blockNumber?: undefined;
+        blockTag?: undefined;
+      }
+    : T extends bigint
+      ? {
+          blockHash?: undefined;
+          blockNumber?: T;
+          blockTag?: undefined;
+        }
+      : T extends BlockTag
+        ? {
+            blockHash?: undefined;
+            blockNumber?: undefined;
+            blockTag?: T;
+          }
+        : never;
 
 export interface GetTransactionParams {
   hash: Hash;

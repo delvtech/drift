@@ -38,6 +38,8 @@ export type {
   BlockIdentifier,
   BlockStatus,
   BlockTag,
+  MinedBlockIdentifier,
+  MinedBlockProps,
 } from "src/adapter/types/Block";
 export type {
   ContractParams,
