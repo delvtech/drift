@@ -12,7 +12,7 @@ export type BlockIdentifier = bigint | Hash | BlockTag;
 /**
  * A block number, hash, or tag that can be used to identify a mined block.
  */
-export type MinedBlockIdentifier = bigint | Hash | Exclude<BlockTag, "pending">;
+export type MinedBlockIdentifier = Exclude<BlockIdentifier, "pending">;
 
 /**
  * The status of a block. (pending | mined)
