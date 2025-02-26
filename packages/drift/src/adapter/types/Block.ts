@@ -10,6 +10,11 @@ export type BlockTag = "latest" | "earliest" | "pending" | "safe" | "finalized";
 export type BlockIdentifier = bigint | Hash | BlockTag;
 
 /**
+ * A block number, hash, or tag that can be used to identify a mined block.
+ */
+export type MinedBlockIdentifier = bigint | Hash | Exclude<BlockTag, "pending">;
+
+/**
  * The status of a block. (pending | mined)
  */
 export type BlockStatus<T extends BlockIdentifier = BlockIdentifier> =
@@ -24,9 +29,7 @@ export type BlockStatus<T extends BlockIdentifier = BlockIdentifier> =
 /**
  * A block in the chain, assumed to be mined unless specified otherwise.
  */
-export type Block<
-  T extends BlockIdentifier = Exclude<BlockIdentifier, "pending">,
-> = Eval<
+export type Block<T extends BlockIdentifier = MinedBlockIdentifier> = Eval<
   {
     extraData?: Bytes;
     gasLimit: bigint;
