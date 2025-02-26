@@ -20,13 +20,23 @@ export interface ContractReadOptions {
   block?: BlockIdentifier;
 }
 
+/**
+ * A block number or tag used to specify the start or end of a range.
+ */
+export type RangeBlock = BlockTag | bigint;
+
+/**
+ * A block number or tag used to specify the start or end of a mined range.
+ */
+export type MinedRangeBlock = Exclude<RangeBlock, "pending">;
+
 export interface ContractGetEventsOptions<
   TAbi extends Abi = Abi,
   TEventName extends EventName<TAbi> = EventName<TAbi>,
 > {
   filter?: EventFilter<TAbi, TEventName>;
-  fromBlock?: bigint | BlockTag;
-  toBlock?: bigint | BlockTag;
+  fromBlock?: RangeBlock;
+  toBlock?: RangeBlock;
 }
 
 // https://github.com/ethereum/execution-apis/blob/main/src/schemas/transaction.yaml#L274

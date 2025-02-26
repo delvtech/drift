@@ -44,11 +44,13 @@ export type {
   MinedBlockProps,
 } from "src/adapter/types/Block";
 export type {
-  ContractParams,
   ContractCallOptions,
   ContractGetEventsOptions,
+  ContractParams,
   ContractReadOptions,
   ContractWriteOptions,
+  MinedRangeBlock,
+  RangeBlock,
 } from "src/adapter/types/Contract";
 export type {
   EventLog,
