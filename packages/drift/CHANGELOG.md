@@ -1,5 +1,18 @@
 # @delvtech/drift
 
+## 0.4.0
+
+### Minor Changes
+
+- 1fcfbda: Renamed the `BlockBase` type to `BaseBlockProps`, removed the `MinedBlock` type from exports.
+
+### Patch Changes
+
+- 779898c: Added `BlockIdentifier` type and added it to `ContractReadOptions` and `GetBalanceParams`. This means the `block` option in `read`, `call`, and `getBalance` methods now support block hashes.
+- 1fcfbda: Added a `BlockStatus` type which returns `"mined"` or `"pending"` based on a `BlockIdentifier`.
+- 1fcfbda: Added a `BlockIdentifier` type param to the `Block` type which makes the `hash`, `logsBloom`, `nonce`, and `number` properties required unless specified as `"pending"`.
+- 67fa97c: Added `BlockOverrides` type to exports to support declaration merging for block fields.
+
 ## 0.3.0
 
 ### Minor Changes
