@@ -32,7 +32,9 @@ export interface Network {
    * the latest block is returned.
    */
   getBlock<T extends BlockIdentifier = MinedBlockIdentifier>(
-    params?: GetBlockParams<T>,
+    // This union ensures `T` is inferred when available without restricting
+    // autocomplete to the default, `MinedBlockIdentifier`.
+    params?: GetBlockParams<T> | GetBlockParams,
   ): Promise<Block<T> | undefined>;
 
   /**
@@ -62,13 +64,13 @@ export interface GetBalanceParams {
 
 export type GetBlockParams<T extends BlockIdentifier = BlockIdentifier> = OneOf<
   | {
-      blockHash: T extends Hash ? T : never;
+      blockHash?: T & Hash;
     }
   | {
-      blockNumber: T extends bigint ? T : never;
+      blockNumber?: T & bigint;
     }
   | {
-      blockTag: T extends BlockTag ? T : never;
+      blockTag?: T & BlockTag;
     }
 >;
 
