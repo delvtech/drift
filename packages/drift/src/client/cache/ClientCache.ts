@@ -27,7 +27,6 @@ import type {
 } from "src/adapter/types/Transaction";
 import { LruSimpleCache } from "src/cache/LruSimpleCache";
 import type { SimpleCache } from "src/cache/types";
-import { DriftError } from "src/error/DriftError";
 import { createSerializableKey } from "src/utils/createSerializableKey";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { MaybePromise } from "src/utils/types";
@@ -362,5 +361,3 @@ interface PartialReadParams<
   fn?: TFunctionName;
   args?: FunctionArgs<TAbi, TFunctionName>;
 }
-
-export class ClientCacheError extends DriftError {}

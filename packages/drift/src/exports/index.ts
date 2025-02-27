@@ -134,7 +134,6 @@ export {
 
 export {
   ClientCache,
-  ClientCacheError,
   type ClientCacheConfig,
 } from "src/client/cache/ClientCache";
 
