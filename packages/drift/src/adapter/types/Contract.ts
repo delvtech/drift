@@ -16,8 +16,10 @@ export interface ContractParams<TAbi extends Abi = Abi> {
 }
 
 // https://github.com/ethereum/execution-apis/blob/main/src/eth/execute.yaml#L1
-export interface ContractReadOptions {
-  block?: BlockIdentifier;
+export interface ContractReadOptions<
+  T extends BlockIdentifier = BlockIdentifier,
+> {
+  block?: T;
 }
 
 /**
