@@ -3,6 +3,7 @@ import type { Abi } from "src/adapter/types/Abi";
 import type { GetEventsParams } from "src/adapter/types/Adapter";
 import type { EventLog } from "src/adapter/types/Event";
 import { createClient } from "src/client/Client";
+import { BlockNotFoundError } from "src/client/errors";
 import { ALICE } from "src/utils/testing/accounts";
 import { describe, expect, it, vi } from "vitest";
 
@@ -16,6 +17,16 @@ describe("Client", () => {
     const client = createClient({ adapter: new CustomAdapter() });
     expect(client).toBeInstanceOf(CustomAdapter);
     expect(client).toBeInstanceOf(MockAdapter);
+  });
+
+  describe("getBlockOrThrow", () => {
+    it("Throws if no block is found", async () => {
+      const client = createClient({ adapter });
+      client.onGetBlock().resolves(undefined);
+      await expect(client.getBlockOrThrow()).rejects.toThrow(
+        BlockNotFoundError,
+      );
+    });
   });
 
   describe("getEvents", () => {

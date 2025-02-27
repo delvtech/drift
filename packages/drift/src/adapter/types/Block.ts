@@ -74,9 +74,9 @@ export interface BlockOverrides<T extends BlockIdentifier | undefined> {}
 export type Block<T extends BlockIdentifier | undefined = undefined> = Eval<
   Replace<
     BaseBlockProps &
-      ("pending" extends BlockStatus<T>
-        ? MinedBlockProps<T>
-        : Required<MinedBlockProps<T>>),
+      (BlockStatus<T> extends "mined"
+        ? Required<MinedBlockProps<T>>
+        : MinedBlockProps<T>),
     BlockOverrides<T>
   >
 >;

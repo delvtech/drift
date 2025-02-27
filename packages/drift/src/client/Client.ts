@@ -4,6 +4,8 @@ import type {
   ReadAdapter,
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
+import type { Block, BlockIdentifier } from "src/adapter/types/Block";
+import type { GetBlockParams } from "src/adapter/types/Network";
 import {
   LruSimpleCache,
   type LruSimpleCacheConfig,
@@ -11,6 +13,7 @@ import {
 import type { SimpleCache } from "src/cache/types";
 import { cachedFn } from "src/cache/utils";
 import { ClientCache } from "src/client/cache/ClientCache";
+import { BlockNotFoundError } from "src/client/errors";
 import type { HookRegistry } from "src/client/hooks/HookRegistry";
 import {
   type MethodHooks,
@@ -26,7 +29,7 @@ export type Client<
   TAdapter extends Adapter = Adapter,
   TCache extends SimpleCache = SimpleCache,
   TExtension extends object = {},
-> = TAdapter & {
+> = {
   adapter: TAdapter;
   cache: ClientCache<TCache>;
   hooks: HookRegistry<MethodHooks<TAdapter>> &
@@ -46,7 +49,11 @@ export type Client<
       Partial<Client & TExtension> &
       ThisType<Client<TAdapter, TCache, TExtension & T>>,
   ): Client<TAdapter, TCache, Eval<TExtension & T>>;
-} & TExtension;
+  getBlockOrThrow<T extends BlockIdentifier | undefined>(
+    params?: GetBlockParams<T>,
+  ): Promise<Block<T>>;
+} & TAdapter &
+  TExtension;
 
 /**
  * A read-only {@linkcode Client} for fetching data from a network.
@@ -153,6 +160,18 @@ export function createClient<
         key: this.cache.blockKey(params),
         fn: () => this.adapter.getBlock(params),
       });
+    },
+
+    async getBlockOrThrow<T extends BlockIdentifier | undefined>(
+      params?: GetBlockParams<T>,
+    ): Promise<Block<T>> {
+      const block = await this.getBlock(params);
+      if (!block) {
+        throw new BlockNotFoundError(
+          params?.blockHash ?? params?.blockNumber ?? params?.blockTag,
+        );
+      }
+      return block as Block<T>;
     },
 
     getBalance(params) {

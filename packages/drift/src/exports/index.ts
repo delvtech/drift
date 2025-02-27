@@ -149,6 +149,8 @@ export type {
   HookRegistry,
 } from "src/client/hooks/HookRegistry";
 
+export { BlockNotFoundError } from "src/client/errors";
+
 // error //
 
 export { DriftError, type DriftErrorOptions } from "src/error/DriftError";
