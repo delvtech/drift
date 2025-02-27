@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.4.3
+
+### Patch Changes
+
+- 492e5db: Fixed `GetBlockParams` patch
+
 ## 0.4.2
 
 ### Patch Changes
