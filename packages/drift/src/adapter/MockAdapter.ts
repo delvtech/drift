@@ -8,16 +8,13 @@ import type {
   SimulateWriteParams,
   WriteParams,
 } from "src/adapter/types/Adapter";
-import type {
-  Block,
-  BlockIdentifier,
-  MinedBlockIdentifier,
-} from "src/adapter/types/Block";
+import type { BlockIdentifier } from "src/adapter/types/Block";
 import type { EventLog, EventName } from "src/adapter/types/Event";
 import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
 import type {
   GetBalanceParams,
   GetBlockParams,
+  GetBlockReturnType,
   GetTransactionParams,
   WaitForTransactionParams,
 } from "src/adapter/types/Network";
@@ -71,17 +68,21 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   // getBlock //
 
-  onGetBlock(params?: Partial<GetBlockParams>) {
-    return this.stubs.get<[GetBlockParams?], Promise<Block | undefined>>({
-      method: "getBlock",
-      key: params ? this.createKey(params) : undefined,
-    });
+  onGetBlock<T extends BlockIdentifier | undefined = undefined>(
+    params?: Partial<GetBlockParams<T>>,
+  ) {
+    return this.stubs.get<[GetBlockParams<T>?], Promise<GetBlockReturnType<T>>>(
+      {
+        method: "getBlock",
+        key: params ? this.createKey(params) : undefined,
+      },
+    );
   }
 
-  async getBlock<T extends BlockIdentifier = MinedBlockIdentifier>(
+  async getBlock<T extends BlockIdentifier | undefined = undefined>(
     params?: GetBlockParams<T>,
   ) {
-    return this.stubs.get<[GetBlockParams?], Promise<Block<T> | undefined>>({
+    return this.stubs.get<[GetBlockParams?], Promise<GetBlockReturnType<T>>>({
       method: "getBlock",
       key: params ? this.createKey(params) : undefined,
       matchPartial: true,

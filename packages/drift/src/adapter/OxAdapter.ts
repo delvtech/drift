@@ -17,17 +17,14 @@ import type {
   SimulateWriteParams,
   WriteParams,
 } from "src/adapter/types/Adapter";
-import type {
-  BlockIdentifier,
-  BlockTag,
-  Block as BlockType,
-} from "src/adapter/types/Block";
+import type { BlockIdentifier, BlockTag } from "src/adapter/types/Block";
 import type { ContractCallOptions } from "src/adapter/types/Contract";
 import type { EventArgs, EventName } from "src/adapter/types/Event";
 import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
 import type {
   GetBalanceParams,
   GetBlockParams,
+  GetBlockReturnType,
   GetTransactionParams,
   WaitForTransactionParams,
 } from "src/adapter/types/Network";
@@ -96,7 +93,9 @@ export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
       .catch(handleError);
   }
 
-  getBlock<T extends BlockIdentifier>(params?: GetBlockParams<T>) {
+  getBlock<T extends BlockIdentifier | undefined = undefined>(
+    params?: GetBlockParams<T>,
+  ) {
     return this.provider
       .request({
         method: params?.blockHash
@@ -118,7 +117,7 @@ export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
             }
           : undefined,
       )
-      .catch(handleError) as Promise<BlockType<T> | undefined>;
+      .catch(handleError) as Promise<GetBlockReturnType<T>>;
   }
 
   getBalance(params: GetBalanceParams) {

@@ -17,12 +17,13 @@ export type MinedBlockIdentifier = Exclude<BlockIdentifier, "pending">;
 /**
  * The status of a block. (pending | mined)
  */
-export type BlockStatus<T extends BlockIdentifier = BlockIdentifier> =
-  T extends "pending"
-    ? "pending"
-    : "pending" extends T
-      ? "mined" | "pending"
-      : "mined";
+export type BlockStatus<
+  T extends BlockIdentifier | undefined = BlockIdentifier,
+> = T extends "pending"
+  ? "pending"
+  : "pending" extends T
+    ? "mined" | "pending"
+    : "mined";
 
 // https://github.com/ethereum/execution-apis/blob/3ae3d29fc9900e5c48924c238dff7643fdc3680e/src/schemas/block.yaml#L1
 
@@ -48,7 +49,9 @@ export interface BaseBlockProps {
 /**
  * Block properties that are conditionally available (undefined if pending)
  */
-export interface MinedBlockProps<T extends BlockIdentifier = BlockIdentifier> {
+export interface MinedBlockProps<
+  T extends BlockIdentifier | undefined = BlockIdentifier,
+> {
   /** `undefined` if pending */
   hash?: T extends Hash ? T : Hash;
   /** `undefined` if pending */
@@ -63,12 +66,12 @@ export interface MinedBlockProps<T extends BlockIdentifier = BlockIdentifier> {
  * Augmentable overrides for the {@linkcode Block} type. Adapter libs can merge
  * into this interface to customize block properties.
  */
-export interface BlockOverrides<T extends BlockIdentifier> {}
+export interface BlockOverrides<T extends BlockIdentifier | undefined> {}
 
 /**
  * A block in the chain, assumed to be mined unless specified otherwise.
  */
-export type Block<T extends BlockIdentifier = MinedBlockIdentifier> = Eval<
+export type Block<T extends BlockIdentifier | undefined = undefined> = Eval<
   Replace<
     BaseBlockProps &
       ("pending" extends BlockStatus<T>

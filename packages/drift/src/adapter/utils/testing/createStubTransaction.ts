@@ -8,7 +8,7 @@ import { getRandomInt } from "src/utils/testing/getRandomInt";
  * @param override - Override default values
  */
 export function createStubTransaction(
-  override: Partial<Transaction> = {},
+  overrides: Partial<Transaction> = {},
 ): Transaction {
   return {
     blockHash: getRandomHex(),
@@ -22,6 +22,6 @@ export function createStubTransaction(
     transactionIndex: 0n,
     value: 0n,
     type: "0x02",
-    ...override,
+    ...overrides,
   };
 }

@@ -1,9 +1,7 @@
 import {
   type Abi,
   AbiEncoder,
-  type AbiObjectType,
-  type Block,
-  type BlockIdentifier,
+  type AbiObjectType, type BlockIdentifier,
   type Bytes,
   type CallParams,
   type EventName,
@@ -11,24 +9,21 @@ import {
   type FunctionName,
   type GetBalanceParams,
   type GetBlockParams,
+  type GetBlockReturnType,
   type GetEventsParams,
-  type GetTransactionParams,
-  type MinedBlockIdentifier,
-  type ReadAdapter,
+  type GetTransactionParams, type ReadAdapter,
   type ReadParams,
   type SimulateWriteParams,
   type TransactionReceipt,
-  type WaitForTransactionParams,
+  type WaitForTransactionParams
 } from "@delvtech/drift";
 import {
   http,
   type CallParameters,
-  type GetBalanceParameters,
-  type GetBlockParameters,
-  type PublicClient,
+  type GetBalanceParameters, type PublicClient,
   createPublicClient,
   decodeEventLog,
-  rpcTransactionType,
+  rpcTransactionType
 } from "viem";
 
 export interface ViemReadAdapterParams<
@@ -60,12 +55,10 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
     return this.publicClient.getBlockNumber();
   }
 
-  async getBlock<T extends BlockIdentifier = MinedBlockIdentifier>(
+  async getBlock<T extends BlockIdentifier | undefined = undefined>(
     params: GetBlockParams = {},
   ) {
-    const block = await this.publicClient.getBlock(
-      params as GetBlockParameters,
-    );
+    const block = await this.publicClient.getBlock(params);
 
     return {
       extraData: block.extraData,
@@ -85,7 +78,7 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
       timestamp: block.timestamp,
       transactions: block.transactions,
       transactionsRoot: block.transactionsRoot,
-    } as Block<T>;
+    } as GetBlockReturnType<T>;
   }
 
   getBalance({ address, block }: GetBalanceParams) {

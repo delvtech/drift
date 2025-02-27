@@ -66,10 +66,11 @@ export type {
   FunctionReturn,
 } from "src/adapter/types/Function";
 export type {
-  Network,
   GetBalanceParams,
   GetBlockParams,
+  GetBlockReturnType,
   GetTransactionParams,
+  Network,
   WaitForTransactionParams,
 } from "src/adapter/types/Network";
 export type {

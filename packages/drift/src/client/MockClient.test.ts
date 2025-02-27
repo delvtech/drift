@@ -10,6 +10,7 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
+import { createStubBlock } from "src/adapter/utils/testing/createStubBlock";
 import { createMockClient } from "src/client/MockClient";
 import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
@@ -58,18 +59,18 @@ describe("MockClient", () => {
 
     it("Can be stubbed with specific params", async () => {
       const client = createMockClient();
-      const block0 = {
+      const block0 = createStubBlock({
         number: 0n,
         timestamp: 0n,
-      } as Block;
-      const block1 = {
+      });
+      const block1 = createStubBlock({
         number: 1n,
         timestamp: 1n,
-      } as Block;
-      const block2 = {
+      });
+      const block2 = createStubBlock({
         number: 2n,
         timestamp: 2n,
-      } as Block;
+      });
       client.onGetBlock().resolves(block0);
       client.onGetBlock({ blockNumber: 1n }).resolves(block1);
       client.onGetBlock({ blockNumber: 2n }).resolves(block2);

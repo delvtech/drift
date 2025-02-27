@@ -59,7 +59,7 @@ describe("OxAdapter", () => {
 
   it("fetches transactions", async () => {
     const adapter = new OxAdapter({ rpcUrl });
-    let block = await adapter.getBlock();
+    let block: Block | undefined = await adapter.getBlock();
     while (block?.transactions.length === 0) {
       console.log(
         `No transactions in block ${block.number}. Fetching parent block.`,

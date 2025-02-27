@@ -7,7 +7,7 @@ import { getRandomHex } from "src/utils/testing/getRandomHex";
  * @param override - Override default values
  */
 export function createStubTransactionReceipt(
-  override: Partial<TransactionReceipt> = {},
+  overrides: Partial<TransactionReceipt> = {},
 ): TransactionReceipt {
   return {
     blockHash: getRandomHex(),
@@ -21,6 +21,6 @@ export function createStubTransactionReceipt(
     to: getRandomAddress(),
     transactionHash: getRandomHex(),
     transactionIndex: 0n,
-    ...override,
+    ...overrides,
   };
 }

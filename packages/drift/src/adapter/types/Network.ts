@@ -1,10 +1,5 @@
 import type { Address, Hash } from "src/adapter/types/Abi";
-import type {
-  Block,
-  BlockIdentifier,
-  BlockTag,
-  MinedBlockIdentifier,
-} from "src/adapter/types/Block";
+import type { Block, BlockIdentifier, BlockTag } from "src/adapter/types/Block";
 import type {
   Transaction,
   TransactionReceipt,
@@ -31,11 +26,9 @@ export interface Network {
    * Get a block from a block tag, number, or hash. If no argument is provided,
    * the latest block is returned.
    */
-  getBlock<T extends BlockIdentifier = MinedBlockIdentifier>(
-    // This union ensures `T` is inferred when available without restricting
-    // autocomplete to the default, `MinedBlockIdentifier`.
-    params?: GetBlockParams<T> | GetBlockParams,
-  ): Promise<Block<T> | undefined>;
+  getBlock<T extends BlockIdentifier | undefined = undefined>(
+    params?: GetBlockParams<T>,
+  ): Promise<GetBlockReturnType<T>>;
 
   /**
    * Get the balance of native currency for an account.
@@ -62,21 +55,27 @@ export interface GetBalanceParams {
   block?: BlockIdentifier;
 }
 
-export type GetBlockParams<T extends BlockIdentifier = BlockIdentifier> = OneOf<
+export type GetBlockParams<
+  T extends BlockIdentifier | undefined = BlockIdentifier | undefined,
+> = OneOf<
   | {
-      blockHash?: T & Hash;
+      blockHash?: T extends Hash ? T : Hash;
     }
   | {
-      blockNumber?: T & bigint;
+      blockNumber?: T extends bigint ? T : bigint;
     }
   | {
-      blockTag?: T & BlockTag;
+      blockTag?: T extends BlockTag ? T : BlockTag;
     }
 >;
 
 export interface GetTransactionParams {
   hash: Hash;
 }
+
+export type GetBlockReturnType<
+  T extends BlockIdentifier | undefined = undefined,
+> = T extends BlockTag | undefined ? Block<T> : Block<T> | undefined;
 
 export interface WaitForTransactionParams extends GetTransactionParams {
   /**

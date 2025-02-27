@@ -1,9 +1,7 @@
 import {
   type Abi,
   AbiEncoder,
-  type Address,
-  type Block,
-  type BlockIdentifier,
+  type Address, type BlockIdentifier,
   type Bytes,
   type CallParams,
   type EventLog,
@@ -12,11 +10,11 @@ import {
   type FunctionName,
   type GetBalanceParams,
   type GetBlockParams,
+  type GetBlockReturnType,
   type GetEventsParams,
   type GetTransactionParams,
   type Hash,
   type HexString,
-  type MinedBlockIdentifier,
   type ReadAdapter,
   type ReadParams,
   type Transaction,
@@ -25,7 +23,7 @@ import {
   type WriteParams,
   arrayToObject,
   encodeBytecodeCallData,
-  prepareParamsArray,
+  prepareParamsArray
 } from "@delvtech/drift";
 import type { AccessList } from "ethers";
 import {
@@ -76,17 +74,17 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     return BigInt(num);
   }
 
-  async getBlock<T extends BlockIdentifier = MinedBlockIdentifier>({
+  async getBlock<T extends BlockIdentifier | undefined = undefined>({
     blockHash,
     blockNumber,
     blockTag,
-  }: GetBlockParams = {}) {
+  }: GetBlockParams<T> = {}) {
     const ethersBlock = await this.provider.getBlock(
       blockHash ?? blockNumber ?? blockTag ?? "latest",
     );
 
-    return ethersBlock
-      ? ({
+    const block = ethersBlock
+      ? {
           extraData: ethersBlock.extraData as HexString,
           gasLimit: ethersBlock.gasLimit,
           gasUsed: ethersBlock.gasUsed,
@@ -104,8 +102,10 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
           timestamp: BigInt(ethersBlock.timestamp),
           transactions: ethersBlock.transactions as Hash[],
           transactionsRoot: undefined,
-        } as Block<T>)
+        }
       : undefined;
+
+    return block as GetBlockReturnType<T>;
   }
 
   getBalance({ address, block }: GetBalanceParams) {

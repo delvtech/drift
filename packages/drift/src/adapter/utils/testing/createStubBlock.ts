@@ -1,12 +1,15 @@
 import type { Block } from "src/adapter/types/Block";
 import { getRandomAddress } from "src/utils/testing/getRandomAddress";
 import { getRandomHex } from "src/utils/testing/getRandomHex";
+import type { Eval, Replace, Writeable } from "src/utils/types";
 
 /**
  * Creates a stub block for testing.
  * @param override - Override default values
  */
-export function createStubBlock(override: Partial<Block> = {}): Block {
+export function createStubBlock<
+  const T extends Partial<Block> = Partial<Block>,
+>(overrides: T = {} as T): Eval<Replace<Block, Writeable<T>>> {
   return {
     extraData: "0x",
     gasLimit: 30000000n,
@@ -25,6 +28,6 @@ export function createStubBlock(override: Partial<Block> = {}): Block {
     timestamp: BigInt(Date.now()) / 1000n,
     transactions: [],
     transactionsRoot: getRandomHex(),
-    ...override,
+    ...overrides,
   };
 }

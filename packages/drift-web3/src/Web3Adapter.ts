@@ -3,9 +3,7 @@ import {
   AbiEncoder,
   type Address,
   type AnyObject,
-  type Block,
   type BlockIdentifier,
-  type MinedBlockIdentifier,
   type Bytes,
   type CallParams,
   DriftError,
@@ -15,6 +13,7 @@ import {
   type FunctionName,
   type GetBalanceParams,
   type GetBlockParams,
+  type GetBlockReturnType,
   type GetEventsParams,
   type GetTransactionParams,
   type Hash,
@@ -55,33 +54,42 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     return this.web3.eth.getBlockNumber();
   }
 
-  async getBlock<T extends BlockIdentifier = MinedBlockIdentifier>({ blockHash, blockNumber, blockTag }: GetBlockParams<T> = {} as GetBlockParams<T>) {
-    const block = await this.web3.eth.getBlock(
+  async getBlock<T extends BlockIdentifier | undefined = undefined>(
+    {
+      blockHash,
+      blockNumber,
+      blockTag,
+    }: GetBlockParams<T> = {} as GetBlockParams<T>,
+  ) {
+    const web3Block = await this.web3.eth.getBlock(
       blockHash ?? blockNumber ?? blockTag,
     );
-    return block
-      ? ({
-          extraData: block.extraData,
-          gasLimit: block.gasLimit,
-          gasUsed: block.gasUsed,
-          hash: block.hash as Hash | undefined,
-          logsBloom: block.logsBloom as Hash | undefined,
-          miner: block.miner as Address,
-          mixHash: block.mixHash as Hash,
-          nonce: block.nonce,
-          number: block.number,
-          parentHash: block.parentHash as Hash,
-          receiptsRoot: block.receiptsRoot as Hash,
-          sha3Uncles: block.sha3Uncles as Hash,
-          size: block.size,
-          stateRoot: block.stateRoot as Hash,
-          timestamp: block.timestamp,
-          transactions: block.transactions.map((tx) =>
+
+    const block = web3Block
+      ? {
+          extraData: web3Block.extraData,
+          gasLimit: web3Block.gasLimit,
+          gasUsed: web3Block.gasUsed,
+          hash: web3Block.hash as Hash | undefined,
+          logsBloom: web3Block.logsBloom as Hash | undefined,
+          miner: web3Block.miner as Address,
+          mixHash: web3Block.mixHash as Hash,
+          nonce: web3Block.nonce,
+          number: web3Block.number,
+          parentHash: web3Block.parentHash as Hash,
+          receiptsRoot: web3Block.receiptsRoot as Hash,
+          sha3Uncles: web3Block.sha3Uncles as Hash,
+          size: web3Block.size,
+          stateRoot: web3Block.stateRoot as Hash,
+          timestamp: web3Block.timestamp,
+          transactions: web3Block.transactions.map((tx) =>
             typeof tx === "string" ? tx : tx.hash,
           ) as Hash[],
-          transactionsRoot: block.transactionsRoot as Hash,
-        } as Block<T>)
+          transactionsRoot: web3Block.transactionsRoot as Hash,
+        }
       : undefined;
+
+    return block as GetBlockReturnType<T>;
   }
 
   getBalance({ address, block }: GetBalanceParams) {

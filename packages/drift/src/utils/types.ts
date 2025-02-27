@@ -49,6 +49,11 @@ export type RequiredBy<T, K extends keyof T> = Omit<T, K> &
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 /**
+ * The opposite of {@linkcode Readonly<T>}. Make all properties in `T` mutable.
+ */
+export type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+
+/**
  * Get a superset of `T` that allows for arbitrary properties.
  *
  * @example
