@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.4.5
+
+### Patch Changes
+
+- de81c0d: Added `getBlockOrThrow` method which throws an error if the request block isn't found rather than returning `undefined`.
+
 ## 0.4.4
 
 ### Patch Changes
