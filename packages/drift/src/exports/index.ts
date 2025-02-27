@@ -67,7 +67,6 @@ export type {
 } from "src/adapter/types/Function";
 export type {
   GetBalanceParams,
-  GetBlockParams,
   GetBlockReturnType,
   GetTransactionParams,
   Network,
@@ -163,6 +162,7 @@ export {
   type SerializableKey,
 } from "src/utils/createSerializableKey";
 export { getRandomHex } from "src/utils/testing/getRandomHex";
+export { isHexString } from "src/utils/isHexString";
 export type {
   AnyFunction,
   AnyObject,

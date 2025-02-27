@@ -5,7 +5,7 @@ import type {
   GetEventsParams,
   ReadParams,
 } from "src/adapter/types/Adapter";
-import type { Block } from "src/adapter/types/Block";
+import type { Block, BlockIdentifier } from "src/adapter/types/Block";
 import type {
   ContractParams,
   ContractReadOptions,
@@ -18,7 +18,6 @@ import type {
 } from "src/adapter/types/Function";
 import type {
   GetBalanceParams,
-  GetBlockParams,
   GetTransactionParams,
 } from "src/adapter/types/Network";
 import type {
@@ -83,21 +82,19 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
 
   // Block //
 
-  async blockKey({
-    blockHash,
-    blockNumber,
-    blockTag,
-  }: GetBlockParams = {}): Promise<SerializableKey> {
-    return this.createNamespacedKey("block", {
-      blockHash,
-      blockNumber,
-      blockTag,
-    });
+  async blockKey(block?: BlockIdentifier): Promise<SerializableKey> {
+    return this.createNamespacedKey("block", { block });
   }
 
-  async preloadBlock(params: GetBlockParams & { value: Block }): Promise<void> {
-    const key = await this.blockKey(params);
-    return this.store.set(key, params.value);
+  async preloadBlock<T extends BlockIdentifier>({
+    value,
+    block,
+  }: {
+    block?: T;
+    value: Block<T>;
+  }): Promise<void> {
+    const key = await this.blockKey(block);
+    return this.store.set(key, value);
   }
 
   // Balance //

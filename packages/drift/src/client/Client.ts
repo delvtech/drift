@@ -5,7 +5,6 @@ import type {
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
-import type { GetBlockParams } from "src/adapter/types/Network";
 import {
   LruSimpleCache,
   type LruSimpleCacheConfig,
@@ -50,7 +49,7 @@ export type Client<
       ThisType<Client<TAdapter, TCache, TExtension & T>>,
   ): Client<TAdapter, TCache, Eval<TExtension & T>>;
   getBlockOrThrow<T extends BlockIdentifier | undefined>(
-    params?: GetBlockParams<T>,
+    block?: T,
   ): Promise<Block<T>>;
 } & TAdapter &
   TExtension;
@@ -163,13 +162,11 @@ export function createClient<
     },
 
     async getBlockOrThrow<T extends BlockIdentifier | undefined>(
-      params?: GetBlockParams<T>,
+      blockId?: T,
     ): Promise<Block<T>> {
-      const block = await this.getBlock(params);
+      const block = await this.getBlock(blockId);
       if (!block) {
-        throw new BlockNotFoundError(
-          params?.blockHash ?? params?.blockNumber ?? params?.blockTag,
-        );
+        throw new BlockNotFoundError(blockId);
       }
       return block as Block<T>;
     },

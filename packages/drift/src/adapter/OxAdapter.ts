@@ -23,7 +23,6 @@ import type { EventArgs, EventName } from "src/adapter/types/Event";
 import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
 import type {
   GetBalanceParams,
-  GetBlockParams,
   GetBlockReturnType,
   GetTransactionParams,
   WaitForTransactionParams,
@@ -35,6 +34,7 @@ import { prepareFunctionData } from "src/adapter/utils/encodeFunctionData";
 import { handleError } from "src/adapter/utils/internal/handleError";
 import { prepareParamsArray } from "src/adapter/utils/prepareParamsArray";
 import { DriftError } from "src/error/DriftError";
+import { isHexString } from "src/utils/isHexString";
 
 export interface OxAdapterConfig {
   rpcUrl?: string;
@@ -93,20 +93,20 @@ export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
       .catch(handleError);
   }
 
-  getBlock<T extends BlockIdentifier | undefined = undefined>(
-    params?: GetBlockParams<T>,
-  ) {
+  getBlock<T extends BlockIdentifier | undefined = undefined>(blockId?: T) {
+    const isBlockHash = isHexString(blockId);
     return this.provider
-      .request({
-        method: params?.blockHash
-          ? "eth_getBlockByHash"
-          : "eth_getBlockByNumber",
-        params: [
-          params?.blockHash ??
-            prepareBlockParam(params?.blockNumber ?? params?.blockTag),
-          false,
-        ],
-      })
+      .request(
+        isHexString(blockId)
+          ? {
+              method: "eth_getBlockByHash",
+              params: [blockId, false],
+            }
+          : {
+              method: "eth_getBlockByNumber",
+              params: [prepareBlockParam(blockId), false],
+            },
+      )
       .then(Block.fromRpc)
       .then((block) =>
         block

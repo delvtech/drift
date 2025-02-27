@@ -72,21 +72,21 @@ describe("MockClient", () => {
         timestamp: 2n,
       });
       client.onGetBlock().resolves(block0);
-      client.onGetBlock({ blockNumber: 1n }).resolves(block1);
-      client.onGetBlock({ blockNumber: 2n }).resolves(block2);
+      client.onGetBlock(1n).resolves(block1);
+      client.onGetBlock(2n).resolves(block2);
       expect(await client.getBlock()).toBe(block0);
-      expect(await client.getBlock({ blockNumber: 1n })).toBe(block1);
-      expect(await client.getBlock({ blockNumber: 2n })).toBe(block2);
+      expect(await client.getBlock(1n)).toBe(block1);
+      expect(await client.getBlock(2n)).toBe(block2);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("Can be stubbed with no params", async () => {
       const client = createMockClient();
       const block = {
         number: 123n,
         timestamp: 123n,
       } as Block;
-      client.onGetBlock({}).resolves(block);
-      expect(await client.getBlock({ blockNumber: 123n })).toBe(block);
+      client.onGetBlock().resolves(block);
+      expect(await client.getBlock(123n)).toBe(block);
     });
 
     it("Can be called with args after being stubbed with no args", async () => {
@@ -96,7 +96,7 @@ describe("MockClient", () => {
         timestamp: 123n,
       } as Block;
       client.onGetBlock().resolves(block);
-      expect(await client.getBlock({ blockNumber: 123n })).toBe(block);
+      expect(await client.getBlock(123n)).toBe(block);
     });
   });
 

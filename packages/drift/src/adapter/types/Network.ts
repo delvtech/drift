@@ -4,7 +4,6 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
-import type { OneOf } from "src/utils/types";
 
 // https://ethereum.github.io/execution-apis/api-documentation/
 
@@ -27,7 +26,7 @@ export interface Network {
    * the latest block is returned.
    */
   getBlock<T extends BlockIdentifier | undefined = undefined>(
-    params?: GetBlockParams<T>,
+    block?: T,
   ): Promise<GetBlockReturnType<T>>;
 
   /**
@@ -54,20 +53,6 @@ export interface GetBalanceParams {
   address: Address;
   block?: BlockIdentifier;
 }
-
-export type GetBlockParams<
-  T extends BlockIdentifier | undefined = BlockIdentifier | undefined,
-> = OneOf<
-  | {
-      blockHash?: T extends Hash ? T : Hash;
-    }
-  | {
-      blockNumber?: T extends bigint ? T : bigint;
-    }
-  | {
-      blockTag?: T extends BlockTag ? T : BlockTag;
-    }
->;
 
 export interface GetTransactionParams {
   hash: Hash;

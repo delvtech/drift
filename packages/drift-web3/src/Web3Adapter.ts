@@ -12,7 +12,6 @@ import {
   type FunctionArgs,
   type FunctionName,
   type GetBalanceParams,
-  type GetBlockParams,
   type GetBlockReturnType,
   type GetEventsParams,
   type GetTransactionParams,
@@ -55,15 +54,9 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   }
 
   async getBlock<T extends BlockIdentifier | undefined = undefined>(
-    {
-      blockHash,
-      blockNumber,
-      blockTag,
-    }: GetBlockParams<T> = {} as GetBlockParams<T>,
+    blockId?: T,
   ) {
-    const web3Block = await this.web3.eth.getBlock(
-      blockHash ?? blockNumber ?? blockTag,
-    );
+    const web3Block = await this.web3.eth.getBlock(blockId);
 
     const block = web3Block
       ? {

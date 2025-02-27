@@ -10,10 +10,10 @@ import {
   type FunctionArgs,
   type FunctionName,
   type GetBalanceParams,
-  type GetBlockParams,
   type GetBlockReturnType,
   type GetEventsParams,
-  type GetTransactionParams, type ReadAdapter,
+  type GetTransactionParams,
+  type ReadAdapter,
   type ReadParams,
   type Transaction,
   type TransactionReceipt,
@@ -21,7 +21,7 @@ import {
   type WriteParams,
   arrayToObject,
   encodeBytecodeCallData,
-  prepareParamsArray
+  prepareParamsArray,
 } from "@delvtech/drift";
 import {
   BigNumber,
@@ -70,14 +70,10 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     return BigInt(num);
   }
 
-  async getBlock<T extends BlockIdentifier | undefined = undefined>({
-    blockHash,
-    blockNumber,
-    blockTag,
-  }: GetBlockParams<T> = {}) {
-    const ethersBlock = await this.provider.getBlock(
-      blockParam(blockHash ?? blockNumber ?? blockTag ?? "latest"),
-    );
+  async getBlock<T extends BlockIdentifier | undefined = undefined>(
+    blockId?: T,
+  ) {
+    const ethersBlock = await this.provider.getBlock(blockParam(blockId));
 
     const block = ethersBlock
       ? ({

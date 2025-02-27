@@ -64,21 +64,21 @@ describe("MockAdapter", () => {
         timestamp: 2n,
       });
       adapter.onGetBlock().resolves(block0);
-      adapter.onGetBlock({ blockNumber: 1n }).resolves(block1);
-      adapter.onGetBlock({ blockNumber: 2n }).resolves(block2);
+      adapter.onGetBlock(1n).resolves(block1);
+      adapter.onGetBlock(2n).resolves(block2);
       expect(await adapter.getBlock()).toBe(block0);
-      expect(await adapter.getBlock({ blockNumber: 1n })).toBe(block1);
-      expect(await adapter.getBlock({ blockNumber: 2n })).toBe(block2);
+      expect(await adapter.getBlock(1n)).toBe(block1);
+      expect(await adapter.getBlock(2n)).toBe(block2);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("Can be stubbed with no params", async () => {
       const adapter = new MockAdapter();
       const block = {
         number: 123n,
         timestamp: 123n,
       } as Block;
-      adapter.onGetBlock({}).resolves(block);
-      expect(await adapter.getBlock({ blockNumber: 123n })).toBe(block);
+      adapter.onGetBlock().resolves(block);
+      expect(await adapter.getBlock(123n)).toBe(block);
     });
 
     it("Can be called with args after being stubbed with no args", async () => {
@@ -88,7 +88,7 @@ describe("MockAdapter", () => {
         timestamp: 123n,
       } as Block;
       adapter.onGetBlock().resolves(block);
-      expect(await adapter.getBlock({ blockNumber: 123n })).toBe(block);
+      expect(await adapter.getBlock(123n)).toBe(block);
     });
   });
 

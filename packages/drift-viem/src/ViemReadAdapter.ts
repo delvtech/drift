@@ -1,29 +1,32 @@
 import {
   type Abi,
   AbiEncoder,
-  type AbiObjectType, type BlockIdentifier,
+  type AbiObjectType,
+  type BlockIdentifier,
   type Bytes,
   type CallParams,
   type EventName,
   type FunctionArgs,
   type FunctionName,
   type GetBalanceParams,
-  type GetBlockParams,
   type GetBlockReturnType,
   type GetEventsParams,
-  type GetTransactionParams, type ReadAdapter,
+  type GetTransactionParams,
+  type ReadAdapter,
   type ReadParams,
   type SimulateWriteParams,
   type TransactionReceipt,
-  type WaitForTransactionParams
+  type WaitForTransactionParams,
 } from "@delvtech/drift";
 import {
   http,
   type CallParameters,
-  type GetBalanceParameters, type PublicClient,
+  type GetBalanceParameters,
+  type PublicClient,
   createPublicClient,
   decodeEventLog,
-  rpcTransactionType
+  isHex,
+  rpcTransactionType,
 } from "viem";
 
 export interface ViemReadAdapterParams<
@@ -56,9 +59,21 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
   }
 
   async getBlock<T extends BlockIdentifier | undefined = undefined>(
-    params: GetBlockParams = {},
+    blockId?: T,
   ) {
-    const block = await this.publicClient.getBlock(params);
+    const block = await this.publicClient.getBlock(
+      isHex(blockId)
+        ? {
+            blockHash: blockId,
+          }
+        : typeof blockId === "string"
+          ? {
+              blockTag: blockId,
+            }
+          : {
+              blockNumber: blockId,
+            },
+    );
 
     return {
       extraData: block.extraData,

@@ -64,7 +64,7 @@ describe("OxAdapter", () => {
       console.log(
         `No transactions in block ${block.number}. Fetching parent block.`,
       );
-      block = await adapter.getBlock({ blockHash: block.parentHash });
+      block = await adapter.getBlock(block.parentHash);
     }
     const tx = await adapter.getTransaction({
       hash: block!.transactions[0]!,
@@ -90,14 +90,12 @@ describe("OxAdapter", () => {
   it("returns receipts for waited transactions", async () => {
     const adapter = new OxAdapter({ rpcUrl });
     const blockNumber = await adapter.getBlockNumber();
-    let block = await adapter.getBlock({
-      blockNumber: blockNumber - 12n * 60n * 24n,
-    });
+    let block = await adapter.getBlock(blockNumber - 12n * 60n * 24n);
     while (block?.transactions.length === 0) {
       console.log(
         `No transactions in block ${block?.number}. Fetching parent block.`,
       );
-      block = await adapter.getBlock({ blockHash: block.parentHash });
+      block = await adapter.getBlock(block.parentHash);
     }
     const tx = await adapter.waitForTransaction({
       hash: block!.transactions[0]!,

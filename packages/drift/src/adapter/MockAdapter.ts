@@ -13,7 +13,6 @@ import type { EventLog, EventName } from "src/adapter/types/Event";
 import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
 import type {
   GetBalanceParams,
-  GetBlockParams,
   GetBlockReturnType,
   GetTransactionParams,
   WaitForTransactionParams,
@@ -68,25 +67,19 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   // getBlock //
 
-  onGetBlock<T extends BlockIdentifier | undefined = undefined>(
-    params?: Partial<GetBlockParams<T>>,
-  ) {
-    return this.stubs.get<[GetBlockParams<T>?], Promise<GetBlockReturnType<T>>>(
-      {
-        method: "getBlock",
-        key: params ? this.createKey(params) : undefined,
-      },
-    );
+  onGetBlock<T extends BlockIdentifier | undefined = undefined>(block?: T) {
+    return this.stubs.get<[block?: T], Promise<GetBlockReturnType<T>>>({
+      method: "getBlock",
+      key: block === undefined ? undefined : this.createKey({ block }),
+    });
   }
 
-  async getBlock<T extends BlockIdentifier | undefined = undefined>(
-    params?: GetBlockParams<T>,
-  ) {
-    return this.stubs.get<[GetBlockParams?], Promise<GetBlockReturnType<T>>>({
+  async getBlock<T extends BlockIdentifier | undefined = undefined>(block?: T) {
+    return this.stubs.get<[block?: T], Promise<GetBlockReturnType<T>>>({
       method: "getBlock",
-      key: params ? this.createKey(params) : undefined,
+      key: block === undefined ? undefined : this.createKey({ block }),
       matchPartial: true,
-    })(params);
+    })(block);
   }
 
   // getBalance //
