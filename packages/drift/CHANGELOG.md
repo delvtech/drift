@@ -1,5 +1,12 @@
 # @delvtech/drift
 
+## 0.4.4
+
+### Patch Changes
+
+- d5cf251: Added `GetBlockReturnType` to remove `undefined` from the return type of `getBlock` in some cases.
+- 5ccd468: Added a `BlockIdentifier` type param to the `ContractReadOptions` type
+
 ## 0.4.3
 
 ### Patch Changes
