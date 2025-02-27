@@ -9,6 +9,7 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
+import type { OneOf } from "src/utils/types";
 
 // https://ethereum.github.io/execution-apis/api-documentation/
 
@@ -59,26 +60,17 @@ export interface GetBalanceParams {
   block?: BlockIdentifier;
 }
 
-export type GetBlockParams<T extends BlockIdentifier = BlockIdentifier> =
-  T extends Hash
-    ? {
-        blockHash?: T;
-        blockNumber?: undefined;
-        blockTag?: undefined;
-      }
-    : T extends bigint
-      ? {
-          blockHash?: undefined;
-          blockNumber?: T;
-          blockTag?: undefined;
-        }
-      : T extends BlockTag
-        ? {
-            blockHash?: undefined;
-            blockNumber?: undefined;
-            blockTag?: T;
-          }
-        : never;
+export type GetBlockParams<T extends BlockIdentifier = BlockIdentifier> = OneOf<
+  | {
+      blockHash: T extends Hash ? T : never;
+    }
+  | {
+      blockNumber: T extends bigint ? T : never;
+    }
+  | {
+      blockTag: T extends BlockTag ? T : never;
+    }
+>;
 
 export interface GetTransactionParams {
   hash: Hash;
