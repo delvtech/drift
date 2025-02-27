@@ -1,5 +1,15 @@
 # @delvtech/drift
 
+## 0.5.0
+
+### Minor Changes
+
+- 94c3c1e: Simplified `getBlock` arguments to just the `BlockIdentifier`.
+
+### Patch Changes
+
+- 94c3c1e: Added `isHexString` util
+
 ## 0.4.5
 
 ### Patch Changes
