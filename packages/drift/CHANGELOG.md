@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.4.2
+
+### Patch Changes
+
+- c7b5ae7: Patched type error in `GetBlockParams`
+
 ## 0.4.1
 
 ### Patch Changes
