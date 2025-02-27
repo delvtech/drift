@@ -1,5 +1,17 @@
 # @delvtech/drift-web3
 
+## 1.0.0
+
+### Minor Changes
+
+- 94c3c1e: Simplified `getBlock` arguments to just the `BlockIdentifier`.
+
+### Patch Changes
+
+- Updated dependencies [94c3c1e]
+- Updated dependencies [94c3c1e]
+  - @delvtech/drift@0.5.0
+
 ## 0.4.5
 
 ## 0.4.4
