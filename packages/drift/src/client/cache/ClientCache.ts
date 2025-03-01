@@ -209,7 +209,7 @@ export class ClientCache<T extends CacheStore = CacheStore>
 
   async invalidateCallsMatching(params: CallParams): Promise<void> {
     const key = await this.callKey(params);
-    return this._deleteMatches(key);
+    return this.#deleteMatches(key);
   }
 
   // Events //
@@ -287,7 +287,7 @@ export class ClientCache<T extends CacheStore = CacheStore>
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(params: PartialReadParams<TAbi, TFunctionName>): Promise<void> {
     const matchKey = await this.partialReadKey(params);
-    return this._deleteMatches(matchKey);
+    return this.#deleteMatches(matchKey);
   }
 
   // Store Operations //
@@ -326,7 +326,7 @@ export class ClientCache<T extends CacheStore = CacheStore>
 
   // Internal //
 
-  private async _deleteMatches(matchKey: SerializableKey): Promise<void> {
+  async #deleteMatches(matchKey: SerializableKey): Promise<void> {
     const operations: MaybePromise<void>[] = [];
 
     for await (const [key] of this.store.entries()) {
