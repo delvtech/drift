@@ -7,9 +7,9 @@ import type { EventLog } from "src/adapter/types/Event";
 import { createStubTransaction } from "src/adapter/utils/testing/createStubTransaction";
 import { createStubTransactionReceipt } from "src/adapter/utils/testing/createStubTransactionReceipt";
 import { IERC20 } from "src/artifacts/IERC20";
-import { LruSimpleCache } from "src/cache/LruSimpleCache";
 import { ClientCache } from "src/client/cache/ClientCache";
 import { ZERO_ADDRESS } from "src/constants";
+import { LruStore } from "src/store/LruStore";
 import { ALICE, BOB, NANCY } from "src/utils/testing/accounts";
 import { describe, expect, it } from "vitest";
 
@@ -18,7 +18,7 @@ type Erc20Abi = typeof IERC20.abi;
 describe("ClientCache", () => {
   describe("balances", () => {
     it("Namespaces balance keys", async () => {
-      const store = new LruSimpleCache();
+      const store = new LruStore();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
 
@@ -54,7 +54,7 @@ describe("ClientCache", () => {
 
   describe("transactions", () => {
     it("Namespaces transaction keys", async () => {
-      const store = new LruSimpleCache();
+      const store = new LruStore();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
 
@@ -78,7 +78,7 @@ describe("ClientCache", () => {
 
   describe("transaction receipts", () => {
     it("Namespaces transaction receipt keys", async () => {
-      const store = new LruSimpleCache();
+      const store = new LruStore();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
 
@@ -102,7 +102,7 @@ describe("ClientCache", () => {
 
   describe("calls", () => {
     it("Namespaces call keys", async () => {
-      const store = new LruSimpleCache();
+      const store = new LruStore();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
 
@@ -183,7 +183,7 @@ describe("ClientCache", () => {
 
   describe("events", () => {
     it("Namespaces event keys", async () => {
-      const store = new LruSimpleCache();
+      const store = new LruStore();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
 
@@ -239,7 +239,7 @@ describe("ClientCache", () => {
 
   describe("Reads", () => {
     it("Namespaces read keys", async () => {
-      const store = new LruSimpleCache();
+      const store = new LruStore();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
 

@@ -5,12 +5,6 @@ import type {
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
-import {
-  LruSimpleCache,
-  type LruSimpleCacheConfig,
-} from "src/cache/LruSimpleCache";
-import type { SimpleCache } from "src/cache/types";
-import { cachedFn } from "src/cache/utils";
 import { ClientCache } from "src/client/cache/ClientCache";
 import { BlockNotFoundError } from "src/client/errors";
 import type { HookRegistry } from "src/client/hooks/HookRegistry";
@@ -18,6 +12,9 @@ import {
   type MethodHooks,
   MethodInterceptor,
 } from "src/client/hooks/MethodInterceptor";
+import { LruStore, type LruStoreConfig } from "src/store/LruStore";
+import type { CacheStore } from "src/store/types";
+import { cachedFn } from "src/store/utils";
 import type { Eval, Extended, OneOf } from "src/utils/types";
 
 /**
@@ -26,7 +23,7 @@ import type { Eval, Extended, OneOf } from "src/utils/types";
  */
 export type Client<
   TAdapter extends Adapter = Adapter,
-  TCache extends SimpleCache = SimpleCache,
+  TCache extends CacheStore = CacheStore,
   TExtension extends object = {},
 > = {
   adapter: TAdapter;
@@ -59,7 +56,7 @@ export type Client<
  */
 export type ReadClient<
   TAdapter extends ReadAdapter = ReadAdapter,
-  TCache extends SimpleCache = SimpleCache,
+  TCache extends CacheStore = CacheStore,
 > = Client<TAdapter, TCache>;
 
 /**
@@ -67,15 +64,15 @@ export type ReadClient<
  */
 export type ReadWriteClient<
   TAdapter extends ReadWriteAdapter = ReadWriteAdapter,
-  TCache extends SimpleCache = SimpleCache,
+  TCache extends CacheStore = CacheStore,
 > = Client<TAdapter, TCache>;
 
 /**
  * Base options for configuring a {@linkcode Client}.
  */
-export interface ClientOptions<T extends SimpleCache = SimpleCache> {
+export interface ClientOptions<T extends CacheStore = CacheStore> {
   // Accept LRU config if LRU can be assigned to TCache
-  cache?: LruSimpleCache extends T ? T | LruSimpleCacheConfig : T;
+  cache?: LruStore extends T ? T | LruStoreConfig : T;
   chainId?: number;
 }
 
@@ -99,7 +96,7 @@ export type ClientAdapterOptions<T extends Adapter = Adapter> = OneOf<
  */
 export type ClientConfig<
   TAdapter extends Adapter = Adapter,
-  TCache extends SimpleCache = SimpleCache,
+  TCache extends CacheStore = CacheStore,
 > = Eval<ClientOptions<TCache> & ClientAdapterOptions<TAdapter>>;
 
 /**
@@ -110,7 +107,7 @@ export type ClientConfig<
  */
 export function createClient<
   TAdapter extends Adapter = OxAdapter,
-  TCache extends SimpleCache = LruSimpleCache,
+  TCache extends CacheStore = LruStore,
 >({
   adapter: maybeAdapter,
   cache: cacheOrConfig,
@@ -125,7 +122,7 @@ export function createClient<
   // Handle cache config
   const isCache = cacheOrConfig && "clear" in cacheOrConfig;
   const cache = (
-    isCache ? cacheOrConfig : new LruSimpleCache(cacheOrConfig)
+    isCache ? cacheOrConfig : new LruStore(cacheOrConfig)
   ) as TCache;
 
   // Prepare client properties

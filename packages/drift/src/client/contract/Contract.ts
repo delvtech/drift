@@ -20,13 +20,13 @@ import type {
   FunctionName,
   FunctionReturn,
 } from "src/adapter/types/Function";
-import type { SimpleCache } from "src/cache/types";
 import {
   type Client,
   type ClientConfig,
   type ReadWriteClient,
   createClient,
 } from "src/client/Client";
+import type { CacheStore } from "src/store/types";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 import type {
   AnyObject,
@@ -43,7 +43,7 @@ import type {
 export type Contract<
   TAbi extends Abi = Abi,
   TAdapter extends Adapter = Adapter,
-  TCache extends SimpleCache = SimpleCache,
+  TCache extends CacheStore = CacheStore,
   TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
 > = TAdapter extends ReadWriteAdapter
   ? ReadWriteContract<TAbi, TAdapter, TCache, TClient>
@@ -56,7 +56,7 @@ export type Contract<
 export class ReadContract<
   TAbi extends Abi = Abi,
   TAdapter extends ReadAdapter = ReadAdapter,
-  TCache extends SimpleCache = SimpleCache,
+  TCache extends CacheStore = CacheStore,
   TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
 > {
   abi: TAbi;
@@ -298,7 +298,7 @@ export class ReadContract<
 export class ReadWriteContract<
   TAbi extends Abi = Abi,
   TAdapter extends ReadWriteAdapter = ReadWriteAdapter,
-  TCache extends SimpleCache = SimpleCache,
+  TCache extends CacheStore = CacheStore,
   TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
 > extends ReadContract<TAbi, TAdapter, TCache, TClient> {
   /**
@@ -329,7 +329,7 @@ export class ReadWriteContract<
  */
 export type ContractClientOptions<
   TAdapter extends Adapter = Adapter,
-  TCache extends SimpleCache = SimpleCache,
+  TCache extends CacheStore = CacheStore,
   TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
 > = OneOf<
   | {
@@ -344,7 +344,7 @@ export type ContractClientOptions<
 export type ContractConfig<
   TAbi extends Abi = Abi,
   TAdapter extends Adapter = Adapter,
-  TCache extends SimpleCache = SimpleCache,
+  TCache extends CacheStore = CacheStore,
   TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
 > = Eval<
   ContractParams<TAbi> & ContractClientOptions<TAdapter, TCache, TClient>
@@ -360,7 +360,7 @@ export type ContractConfig<
 export function createContract<
   TAbi extends Abi,
   TAdapter extends Adapter,
-  TCache extends SimpleCache,
+  TCache extends CacheStore,
   TClient extends Client<TAdapter, TCache>,
 >({
   abi,

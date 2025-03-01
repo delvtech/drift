@@ -98,10 +98,10 @@ export { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData
 // cache //
 
 export {
-  LruSimpleCache,
-  type LruSimpleCacheConfig,
-} from "src/cache/LruSimpleCache";
-export type { SimpleCache } from "src/cache/types";
+  LruStore as LruSimpleCache,
+  type LruStoreConfig as LruSimpleCacheConfig,
+} from "src/store/LruStore";
+export type { CacheStore as SimpleCache } from "src/store/types";
 
 // client //
 

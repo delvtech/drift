@@ -24,13 +24,13 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
-import { LruSimpleCache } from "src/cache/LruSimpleCache";
-import type { SimpleCache } from "src/cache/types";
+import { LruStore } from "src/store/LruStore";
+import type { CacheStore } from "src/store/types";
 import { createSerializableKey } from "src/utils/createSerializableKey";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { MaybePromise } from "src/utils/types";
 
-export type ClientCacheConfig<T extends SimpleCache = SimpleCache> = {
+export type ClientCacheConfig<T extends CacheStore = CacheStore> = {
   /**
    * The namespace to use for client operations or a function that returns the
    * namespace.
@@ -44,18 +44,18 @@ export type ClientCacheConfig<T extends SimpleCache = SimpleCache> = {
 };
 
 /**
- * An extended {@linkcode SimpleCache} with additional API methods for use in
+ * An extended {@linkcode CacheStore} with additional API methods for use in
  * Drift clients.
  */
-export class ClientCache<T extends SimpleCache = SimpleCache>
-  implements SimpleCache
+export class ClientCache<T extends CacheStore = CacheStore>
+  implements CacheStore
 {
   namespace: PropertyKey | (() => MaybePromise<PropertyKey>);
   store: T;
 
   constructor({
     namespace,
-    store = new LruSimpleCache() as SimpleCache as T,
+    store = new LruStore() as CacheStore as T,
   }: ClientCacheConfig<T>) {
     this.namespace = namespace;
     this.store = store;

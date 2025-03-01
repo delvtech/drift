@@ -13,17 +13,17 @@ import type {
 } from "src/adapter/types/Contract";
 import type { EventName } from "src/adapter/types/Event";
 import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
-import type { SimpleCache } from "src/cache/types";
 import type { ClientOptions } from "src/client/Client";
 import { type MockClient, createMockClient } from "src/client/MockClient";
 import { ReadWriteContract } from "src/client/contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
+import type { CacheStore } from "src/store/types";
 import type { Eval, FunctionKey, OneOf, PartialBy } from "src/utils/types";
 
 export type MockContractConfig<
   TAbi extends Abi = Abi,
   TAdapter extends MockAdapter = MockAdapter,
-  TCache extends SimpleCache = SimpleCache,
+  TCache extends CacheStore = CacheStore,
   TClient extends MockClient<TAdapter, TCache> = MockClient<TAdapter, TCache>,
 > = Eval<
   Partial<ContractParams<TAbi>> &
@@ -33,7 +33,7 @@ export type MockContractConfig<
 export class MockContract<
   TAbi extends Abi = Abi,
   TAdapter extends MockAdapter = MockAdapter,
-  TCache extends SimpleCache = SimpleCache,
+  TCache extends CacheStore = CacheStore,
   TClient extends MockClient<TAdapter, TCache> = MockClient<TAdapter, TCache>,
 > extends ReadWriteContract<
   TAbi,
@@ -125,7 +125,7 @@ export class MockContract<
 
 export type MockContractClientOptions<
   TAdapter extends MockAdapter = MockAdapter,
-  TCache extends SimpleCache = SimpleCache,
+  TCache extends CacheStore = CacheStore,
   TClient extends MockClient<TAdapter, TCache> = MockClient<TAdapter, TCache>,
 > = OneOf<
   | {

@@ -1,4 +1,4 @@
-import type { SimpleCache } from "src/cache/types";
+import type { CacheStore } from "src/store/types";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { AwaitedReturnType, MaybePromise } from "src/utils/types";
 
@@ -15,7 +15,7 @@ export async function cachedFn<
   key,
   fn,
 }: {
-  cache: SimpleCache;
+  cache: CacheStore;
   key: MaybePromise<SerializableKey>;
   fn: T;
 }): Promise<AwaitedReturnType<T>> {

@@ -1,30 +1,30 @@
 import { LRUCache } from "lru-cache";
 import stringify from "safe-stable-stringify";
-import type { SimpleCache } from "src/cache/types";
+import type { CacheStore } from "src/store/types";
 import type { SerializableKey } from "src/utils/createSerializableKey";
 
-export type LruSimpleCacheConfig<
+export type LruStoreConfig<
   V extends NonNullable<unknown> = NonNullable<unknown>,
 > = LRUCache.Options<string, V, unknown>;
 
 /**
- * An LRU (Least Recently Used) implementation of {@linkcode SimpleCache} which
+ * An LRU (Least Recently Used) implementation of {@linkcode CacheStore} which
  * handles serialization and deserialization of keys.
  *
- * @template K - The type of key used to access values in the cache.
- * @template V - The type of value to be stored in the cache.
+ * @template K - The type of key used to access values in the store.
+ * @template V - The type of value to be stored.
  * @param options - The options to pass to the underlying LRU cache. Defaults to
  * `{ max: 500 }`.
  * @see [lru-cache](https://www.npmjs.com/package/lru-cache)
  */
-export class LruSimpleCache<
+export class LruStore<
   K extends SerializableKey = SerializableKey,
   V extends NonNullable<unknown> = NonNullable<unknown>,
-> implements SimpleCache<K, V>
+> implements CacheStore<K, V>
 {
   private _lru: LRUCache<string, V, unknown>;
 
-  constructor(config: LruSimpleCacheConfig<V> = { max: 500 }) {
+  constructor(config: LruStoreConfig<V> = { max: 500 }) {
     this._lru = new LRUCache(config);
   }
 
