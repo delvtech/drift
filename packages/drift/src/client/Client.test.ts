@@ -37,7 +37,7 @@ describe("Client", () => {
         address: "0x",
         event: "foo",
       };
-      const events = [{}, {}] as EventLog<Abi>[];
+      const events = [{}, {}] as EventLog[];
       await client.cache.preloadEvents({
         ...params,
         value: events,

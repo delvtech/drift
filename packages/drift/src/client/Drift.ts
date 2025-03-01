@@ -18,15 +18,9 @@ export type Drift<
   TAdapter,
   TCache,
   {
-    contract<TAbi extends Abi>({
-      abi,
-      address,
-    }: ContractParams<TAbi>): Contract<
-      TAbi,
-      TAdapter,
-      TCache,
-      Drift<TAdapter, TCache>
-    >;
+    contract<TAbi extends Abi>(
+      params: ContractParams<TAbi>,
+    ): Contract<TAbi, TAdapter, TCache, Drift<TAdapter, TCache>>;
   }
 >;
 
