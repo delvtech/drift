@@ -1,5 +1,5 @@
+import { IERC20 } from "src/artifacts/IERC20";
 import { createMockDrift } from "src/client/MockDrift";
-import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
 
 describe("MockDrift", () => {
@@ -7,7 +7,7 @@ describe("MockDrift", () => {
     it("Creates mock read-write contracts", async () => {
       const mockDrift = createMockDrift();
       const mockContract = mockDrift.contract({
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: "0xVaultAddress",
       });
 
@@ -29,13 +29,13 @@ describe("MockDrift", () => {
     it("Creates contracts that share mock values", async () => {
       const mockDrift = createMockDrift();
       const contract = mockDrift.contract({
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: "0xVaultAddress",
       });
 
       mockDrift
         .onRead({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0xVaultAddress",
           fn: "symbol",
         })
@@ -47,7 +47,7 @@ describe("MockDrift", () => {
 
       expect(
         await mockDrift.read({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0xVaultAddress",
           fn: "name",
         }),
@@ -57,12 +57,12 @@ describe("MockDrift", () => {
     it("Creates contracts that share cache values", async () => {
       const mockDrift = createMockDrift();
       const contract = mockDrift.contract({
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: "0xVaultAddress",
       });
 
       mockDrift.cache.preloadRead({
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: "0xVaultAddress",
         fn: "symbol",
         value: "VAULT",

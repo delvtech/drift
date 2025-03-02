@@ -6,14 +6,14 @@ import type {
 import type { EventLog } from "src/adapter/types/Event";
 import { createStubTransaction } from "src/adapter/utils/testing/createStubTransaction";
 import { createStubTransactionReceipt } from "src/adapter/utils/testing/createStubTransactionReceipt";
+import { IERC20 } from "src/artifacts/IERC20";
 import { LruSimpleCache } from "src/cache/LruSimpleCache";
 import { ClientCache } from "src/client/cache/ClientCache";
 import { ZERO_ADDRESS } from "src/constants";
 import { ALICE, BOB, NANCY } from "src/utils/testing/accounts";
-import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
 
-type Erc20Abi = typeof erc20.abi;
+type Erc20Abi = typeof IERC20.abi;
 
 describe("ClientCache", () => {
   describe("balances", () => {
@@ -188,7 +188,7 @@ describe("ClientCache", () => {
       const cache2 = new ClientCache({ store, namespace: "ns2" });
 
       const params: GetEventsParams<Erc20Abi, "Approval"> = {
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: ZERO_ADDRESS,
         event: "Approval",
       };
@@ -204,7 +204,7 @@ describe("ClientCache", () => {
       const cache = new ClientCache({ namespace: "test" });
 
       const params: GetEventsParams<Erc20Abi, "Approval"> = {
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: ZERO_ADDRESS,
         event: "Approval",
         filter: {
@@ -244,7 +244,7 @@ describe("ClientCache", () => {
       const cache2 = new ClientCache({ store, namespace: "ns2" });
 
       const params: ReadParams<Erc20Abi, "allowance"> = {
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: ZERO_ADDRESS,
         fn: "allowance",
         args: {
@@ -264,7 +264,7 @@ describe("ClientCache", () => {
       const cache = new ClientCache({ namespace: "test" });
 
       const params: ReadParams<Erc20Abi, "allowance"> = {
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: ZERO_ADDRESS,
         fn: "allowance",
         args: {
@@ -283,7 +283,7 @@ describe("ClientCache", () => {
       const cache = new ClientCache({ namespace: "test" });
 
       const params: ReadParams<Erc20Abi, "allowance"> = {
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: ZERO_ADDRESS,
         fn: "allowance",
         args: {
@@ -306,7 +306,7 @@ describe("ClientCache", () => {
       const cache = new ClientCache({ namespace: "test" });
 
       const params1: ReadParams<Erc20Abi, "allowance"> = {
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: ZERO_ADDRESS,
         fn: "allowance",
         args: {
@@ -315,7 +315,7 @@ describe("ClientCache", () => {
         },
       };
       const params2: ReadParams<Erc20Abi, "allowance"> = {
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: ZERO_ADDRESS,
         fn: "allowance",
         args: {
@@ -336,7 +336,7 @@ describe("ClientCache", () => {
       expect(value2).toBe(456n);
 
       await cache.invalidateReadsMatching({
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: ZERO_ADDRESS,
         fn: "allowance",
       });

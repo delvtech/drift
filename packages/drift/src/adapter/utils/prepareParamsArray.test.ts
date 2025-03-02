@@ -1,10 +1,10 @@
 import { prepareParamsArray } from "src/adapter/utils/prepareParamsArray";
-import { erc20 } from "src/utils/testing/erc20";
+import { IERC20 } from "src/artifacts/IERC20";
 import { expect, test } from "vitest";
 
 test("prepareParamsArray", () => {
   const fromEmptyObject = prepareParamsArray({
-    abi: erc20.abi,
+    abi: IERC20.abi,
     type: "function",
     name: "symbol",
     kind: "inputs",
@@ -13,7 +13,7 @@ test("prepareParamsArray", () => {
   expect(fromEmptyObject.params).toEqual([]);
 
   const fromUndefined = prepareParamsArray({
-    abi: erc20.abi,
+    abi: IERC20.abi,
     type: "function",
     name: "symbol",
     kind: "inputs",
@@ -22,7 +22,7 @@ test("prepareParamsArray", () => {
   expect(fromUndefined.params).toEqual([]);
 
   const fromUnpackedValue = prepareParamsArray({
-    abi: erc20.abi,
+    abi: IERC20.abi,
     type: "function",
     name: "symbol",
     kind: "outputs",
@@ -31,7 +31,7 @@ test("prepareParamsArray", () => {
   expect(fromUnpackedValue.params).toEqual(["ETH"]);
 
   const fromObject = prepareParamsArray({
-    abi: erc20.abi,
+    abi: IERC20.abi,
     type: "function",
     name: "symbol",
     kind: "outputs",
@@ -40,7 +40,7 @@ test("prepareParamsArray", () => {
   expect(fromObject.params).toEqual(["ETH"]);
 
   const fromArray = prepareParamsArray({
-    abi: erc20.abi,
+    abi: IERC20.abi,
     type: "function",
     name: "symbol",
     kind: "outputs",
@@ -49,7 +49,7 @@ test("prepareParamsArray", () => {
   expect(fromArray.params).toEqual(["ETH"]);
 
   const fromObjectWithNamedKeys = prepareParamsArray({
-    abi: erc20.abi,
+    abi: IERC20.abi,
     type: "function",
     name: "transfer",
     kind: "inputs",

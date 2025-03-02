@@ -1,11 +1,11 @@
 import { MockAdapter } from "src/adapter/MockAdapter";
 import type { EventLog } from "src/adapter/types/Event";
+import { IERC20 } from "src/artifacts/IERC20";
 import { createContract } from "src/client/contract/Contract";
-import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it, vi } from "vitest";
 
 describe("Contract", () => {
-  const abi = erc20.abi;
+  const abi = IERC20.abi;
   type Erc20Abi = typeof abi;
   const address = "0xAddress";
   const adapter = new MockAdapter();

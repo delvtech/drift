@@ -10,9 +10,9 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
+import { IERC20 } from "src/artifacts/IERC20";
 import { MockErc20Example } from "src/artifacts/MockErc20Example";
 import { ZERO_ADDRESS } from "src/constants";
-import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
 
 const address = (
@@ -121,7 +121,7 @@ describe("OxAdapter", () => {
     it("reads from deployed contracts", async () => {
       const adapter = new OxAdapter({ rpcUrl });
       const data = adapter.encodeFunctionData({
-        abi: erc20.abi,
+        abi: IERC20.abi,
         fn: "symbol",
       });
       const result = await adapter.call({
@@ -149,7 +149,7 @@ describe("OxAdapter", () => {
     const adapter = new OxAdapter({ rpcUrl });
     const currentBlock = await adapter.getBlockNumber();
     const events = await adapter.getEvents({
-      abi: erc20.abi,
+      abi: IERC20.abi,
       address,
       event: "Transfer",
       fromBlock: currentBlock - 100n,
@@ -161,7 +161,7 @@ describe("OxAdapter", () => {
         blockNumber: expect.any(BigInt),
         data: expect.any(String),
         transactionHash: expect.any(String),
-      } as EventLog<typeof erc20.abi, "Transfer">),
+      } as EventLog<typeof IERC20.abi, "Transfer">),
     );
   });
 
@@ -169,7 +169,7 @@ describe("OxAdapter", () => {
     it("reads from contracts", async () => {
       const adapter = new OxAdapter({ rpcUrl });
       const symbol = await adapter.read({
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address,
         fn: "symbol",
       });
@@ -179,7 +179,7 @@ describe("OxAdapter", () => {
     it("reads from contracts with args", async () => {
       const adapter = new OxAdapter({ rpcUrl });
       const balance = await adapter.read({
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address,
         fn: "balanceOf",
         args: { account: address },
@@ -191,7 +191,7 @@ describe("OxAdapter", () => {
   it("simulates writes to a contracts", async () => {
     const adapter = new OxAdapter({ rpcUrl });
     const balance = await adapter.simulateWrite({
-      abi: erc20.abi,
+      abi: IERC20.abi,
       address,
       fn: "transfer",
       args: {
@@ -205,7 +205,7 @@ describe("OxAdapter", () => {
   it("encodes function data", async () => {
     const adapter = new OxAdapter({ rpcUrl });
     const encoded = adapter.encodeFunctionData({
-      abi: erc20.abi,
+      abi: IERC20.abi,
       fn: "transfer",
       args: {
         amount: 123n,

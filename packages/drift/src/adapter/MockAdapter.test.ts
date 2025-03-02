@@ -12,10 +12,10 @@ import type {
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
 import { createStubBlock } from "src/adapter/utils/testing/createStubBlock";
-import { erc20 } from "src/utils/testing/erc20";
+import { IERC20 } from "src/artifacts/IERC20";
 import { describe, expect, it } from "vitest";
 
-type Erc20Abi = typeof erc20.abi;
+type Erc20Abi = typeof IERC20.abi;
 
 describe("MockAdapter", () => {
   describe("getChainId", () => {
@@ -313,7 +313,7 @@ describe("MockAdapter", () => {
       let error: unknown;
       try {
         await adapter.getEvents({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x",
           event: "Transfer",
         });
@@ -326,7 +326,7 @@ describe("MockAdapter", () => {
     it("Can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
       const params1: GetEventsParams<Erc20Abi, "Transfer"> = {
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: "0x1",
         event: "Transfer",
         filter: { from: "0x1" },
@@ -375,13 +375,13 @@ describe("MockAdapter", () => {
       ];
       adapter
         .onGetEvents({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           event: "Transfer",
         })
         .resolves(events);
       expect(
         await adapter.getEvents({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x1",
           event: "Transfer",
           filter: { from: "0x1" },
@@ -396,7 +396,7 @@ describe("MockAdapter", () => {
       let error: unknown;
       try {
         await adapter.read({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x",
           fn: "symbol",
         });
@@ -409,7 +409,7 @@ describe("MockAdapter", () => {
     it("Can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
       const params1: ReadParams<Erc20Abi, "allowance"> = {
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: "0x1",
         fn: "allowance",
         args: { owner: "0x1", spender: "0x1" },
@@ -428,13 +428,13 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       adapter
         .onRead({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           fn: "balanceOf",
         })
         .resolves(123n);
       expect(
         await adapter.read({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x",
           fn: "balanceOf",
           args: { account: "0x" },
@@ -449,7 +449,7 @@ describe("MockAdapter", () => {
       let error: unknown;
       try {
         await adapter.simulateWrite({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x",
           fn: "transfer",
           args: { to: "0x", amount: 123n },
@@ -463,7 +463,7 @@ describe("MockAdapter", () => {
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
       const params1: WriteParams<Erc20Abi, "transfer"> = {
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: "0x1",
         fn: "transfer",
         args: { to: "0x1", amount: 123n },
@@ -482,13 +482,13 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       adapter
         .onSimulateWrite({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           fn: "transfer",
         })
         .resolves(true);
       expect(
         await adapter.simulateWrite({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x1",
           fn: "transfer",
           args: { to: "0x1", amount: 123n },
@@ -503,7 +503,7 @@ describe("MockAdapter", () => {
       let error: unknown;
       try {
         await adapter.write({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x",
           fn: "transfer",
           args: { to: "0x", amount: 123n },
@@ -517,7 +517,7 @@ describe("MockAdapter", () => {
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
       const params1: WriteParams<Erc20Abi, "transfer"> = {
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: "0x",
         fn: "transfer",
         args: { to: "0x1", amount: 123n },
@@ -536,13 +536,13 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       adapter
         .onWrite({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           fn: "transfer",
         })
         .resolves("0x123");
       expect(
         await adapter.write({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x",
           fn: "transfer",
           args: { to: "0x", amount: 123n },
@@ -555,7 +555,7 @@ describe("MockAdapter", () => {
       adapter.onWrite().resolves("0x123");
       expect(
         await adapter.write({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x",
           fn: "transfer",
           args: { to: "0x", amount: 123n },

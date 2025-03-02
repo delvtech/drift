@@ -11,11 +11,11 @@ import type {
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
 import { createStubBlock } from "src/adapter/utils/testing/createStubBlock";
+import { IERC20 } from "src/artifacts/IERC20";
 import { createMockClient } from "src/client/MockClient";
-import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
 
-type Erc20Abi = typeof erc20.abi;
+type Erc20Abi = typeof IERC20.abi;
 
 describe("MockClient", () => {
   describe("getChainId", () => {
@@ -320,7 +320,7 @@ describe("MockClient", () => {
       let error: unknown;
       try {
         await client.getEvents({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x",
           event: "Transfer",
         });
@@ -333,7 +333,7 @@ describe("MockClient", () => {
     it("Can be stubbed with specific params", async () => {
       const client = createMockClient();
       const params1: GetEventsParams<Erc20Abi, "Transfer"> = {
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: "0x1",
         event: "Transfer",
         filter: { from: "0x1" },
@@ -382,13 +382,13 @@ describe("MockClient", () => {
       ];
       client
         .onGetEvents({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           event: "Transfer",
         })
         .resolves(events);
       expect(
         await client.getEvents({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x1",
           event: "Transfer",
           filter: { from: "0x1" },
@@ -403,7 +403,7 @@ describe("MockClient", () => {
       let error: unknown;
       try {
         await client.read({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x",
           fn: "symbol",
         });
@@ -416,7 +416,7 @@ describe("MockClient", () => {
     it("Can be stubbed with specific params", async () => {
       const client = createMockClient();
       const params1: ReadParams<Erc20Abi, "allowance"> = {
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: "0x1",
         fn: "allowance",
         args: { owner: "0x1", spender: "0x1" },
@@ -435,13 +435,13 @@ describe("MockClient", () => {
       const client = createMockClient();
       client
         .onRead({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           fn: "balanceOf",
         })
         .resolves(123n);
       expect(
         await client.read({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x",
           fn: "balanceOf",
           args: { account: "0x" },
@@ -456,7 +456,7 @@ describe("MockClient", () => {
       let error: unknown;
       try {
         await client.simulateWrite({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x",
           fn: "transfer",
           args: { to: "0x", amount: 123n },
@@ -470,7 +470,7 @@ describe("MockClient", () => {
     it("Can be stubbed with specific params", async () => {
       const client = createMockClient();
       const params1: WriteParams<Erc20Abi, "transfer"> = {
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: "0x1",
         fn: "transfer",
         args: { to: "0x1", amount: 123n },
@@ -489,13 +489,13 @@ describe("MockClient", () => {
       const client = createMockClient();
       client
         .onSimulateWrite({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           fn: "transfer",
         })
         .resolves(true);
       expect(
         await client.simulateWrite({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x1",
           fn: "transfer",
           args: { to: "0x1", amount: 123n },
@@ -510,7 +510,7 @@ describe("MockClient", () => {
       let error: unknown;
       try {
         await client.write({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x",
           fn: "transfer",
           args: { to: "0x", amount: 123n },
@@ -524,7 +524,7 @@ describe("MockClient", () => {
     it("Can be stubbed with specific params", async () => {
       const client = createMockClient();
       const params1: WriteParams<Erc20Abi, "transfer"> = {
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: "0x",
         fn: "transfer",
         args: { to: "0x1", amount: 123n },
@@ -543,13 +543,13 @@ describe("MockClient", () => {
       const client = createMockClient();
       client
         .onWrite({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           fn: "transfer",
         })
         .resolves("0x123");
       expect(
         await client.write({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x",
           fn: "transfer",
           args: { to: "0x", amount: 123n },
@@ -562,7 +562,7 @@ describe("MockClient", () => {
       client.onWrite().resolves("0x123");
       expect(
         await client.write({
-          abi: erc20.abi,
+          abi: IERC20.abi,
           address: "0x",
           fn: "transfer",
           args: { to: "0x", amount: 123n },

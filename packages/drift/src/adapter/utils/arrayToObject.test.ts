@@ -1,11 +1,11 @@
 import { arrayToObject } from "src/adapter/utils/arrayToObject";
-import { erc20 } from "src/utils/testing/erc20";
+import { IERC20 } from "src/artifacts/IERC20";
 import { describe, expect, it } from "vitest";
 
 describe("arrayToObject", () => {
   it("correctly converts arrays into objects", async () => {
     const transferArgsObject = arrayToObject({
-      abi: erc20.abi,
+      abi: IERC20.abi,
       name: "transfer",
       kind: "inputs",
       values: ["0x123", 123n],
@@ -28,7 +28,7 @@ describe("arrayToObject", () => {
     });
 
     const balanceInput = arrayToObject({
-      abi: erc20.abi,
+      abi: IERC20.abi,
       name: "balanceOf",
       kind: "inputs",
       values: ["0x123"],

@@ -1,5 +1,5 @@
+import { IERC20 } from "src/artifacts/IERC20";
 import { createDrift } from "src/client/Drift";
-import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it, vi } from "vitest";
 
 describe("Drift", () => {
@@ -10,12 +10,12 @@ describe("Drift", () => {
         rpcUrl: "__test__",
       });
       const contract = drift.contract({
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: "0xVaultAddress",
       });
 
       drift.cache.preloadRead({
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: "0xVaultAddress",
         fn: "symbol",
         value: "VAULT",
@@ -30,7 +30,7 @@ describe("Drift", () => {
         rpcUrl: "__test__",
       });
       const contract = drift.contract({
-        abi: erc20.abi,
+        abi: IERC20.abi,
         address: "0xVaultAddress",
       });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());

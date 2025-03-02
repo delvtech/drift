@@ -1,9 +1,9 @@
 import type { EventLog } from "src/adapter/types/Event";
+import { IERC20 } from "src/artifacts/IERC20";
 import { MockContract } from "src/client/contract/MockContract";
-import { erc20 } from "src/utils/testing/erc20";
 import { describe, expect, it } from "vitest";
 
-const abi = erc20.abi;
+const abi = IERC20.abi;
 type Erc20Abi = typeof abi;
 
 describe("MockContract", () => {
