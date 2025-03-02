@@ -2,37 +2,37 @@ import type { OxAdapter } from "src/adapter/OxAdapter";
 import type { Abi } from "src/adapter/types/Abi";
 import type { Adapter } from "src/adapter/types/Adapter";
 import type { ContractParams } from "src/adapter/types/Contract";
-import type { LruSimpleCache } from "src/cache/LruSimpleCache";
-import type { SimpleCache } from "src/cache/types";
 import {
   type Client,
   type ClientConfig,
   createClient,
 } from "src/client/Client";
 import { type Contract, createContract } from "src/client/contract/Contract";
+import type { LruStore } from "src/store/LruStore";
+import type { Store } from "src/store/types";
 
 export type Drift<
   TAdapter extends Adapter = Adapter,
-  TCache extends SimpleCache = SimpleCache,
+  TStore extends Store = Store,
 > = Client<
   TAdapter,
-  TCache,
+  TStore,
   {
     contract<TAbi extends Abi>(
       params: ContractParams<TAbi>,
-    ): Contract<TAbi, TAdapter, TCache, Drift<TAdapter, TCache>>;
+    ): Contract<TAbi, TAdapter, TStore, Drift<TAdapter, TStore>>;
   }
 >;
 
 export type DriftConfig<
   TAdapter extends Adapter = Adapter,
-  TCache extends SimpleCache = SimpleCache,
-> = ClientConfig<TAdapter, TCache>;
+  TStore extends Store = Store,
+> = ClientConfig<TAdapter, TStore>;
 
 export function createDrift<
   TAdapter extends Adapter = OxAdapter,
-  TCache extends SimpleCache = LruSimpleCache,
->(config: DriftConfig<TAdapter, TCache> = {}): Drift<TAdapter, TCache> {
+  TStore extends Store = LruStore,
+>(config: DriftConfig<TAdapter, TStore> = {}): Drift<TAdapter, TStore> {
   return createClient(config).extend({
     contract({ abi, address }) {
       return createContract({

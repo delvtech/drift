@@ -13,28 +13,28 @@ import type {
 } from "src/adapter/types/Contract";
 import type { EventName } from "src/adapter/types/Event";
 import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
-import type { SimpleCache } from "src/cache/types";
 import type { ClientOptions } from "src/client/Client";
 import { type MockClient, createMockClient } from "src/client/MockClient";
 import { ReadWriteContract } from "src/client/contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
+import type { Store } from "src/store/types";
 import type { Eval, FunctionKey, OneOf, PartialBy } from "src/utils/types";
 
 export type MockContractConfig<
   TAbi extends Abi = Abi,
   TAdapter extends MockAdapter = MockAdapter,
-  TCache extends SimpleCache = SimpleCache,
-  TClient extends MockClient<TAdapter, TCache> = MockClient<TAdapter, TCache>,
+  TStore extends Store = Store,
+  TClient extends MockClient<TAdapter, TStore> = MockClient<TAdapter, TStore>,
 > = Eval<
   Partial<ContractParams<TAbi>> &
-    MockContractClientOptions<TAdapter, TCache, TClient>
+    MockContractClientOptions<TAdapter, TStore, TClient>
 >;
 
 export class MockContract<
   TAbi extends Abi = Abi,
   TAdapter extends MockAdapter = MockAdapter,
-  TCache extends SimpleCache = SimpleCache,
-  TClient extends MockClient<TAdapter, TCache> = MockClient<TAdapter, TCache>,
+  TStore extends Store = Store,
+  TClient extends MockClient<TAdapter, TStore> = MockClient<TAdapter, TStore>,
 > extends ReadWriteContract<
   TAbi,
   TClient["adapter"],
@@ -46,7 +46,7 @@ export class MockContract<
     address = ZERO_ADDRESS,
     client,
     ...clientOptions
-  }: MockContractConfig<TAbi, TAdapter, TCache, TClient> = {}) {
+  }: MockContractConfig<TAbi, TAdapter, TStore, TClient> = {}) {
     super({
       abi,
       address,
@@ -125,13 +125,13 @@ export class MockContract<
 
 export type MockContractClientOptions<
   TAdapter extends MockAdapter = MockAdapter,
-  TCache extends SimpleCache = SimpleCache,
-  TClient extends MockClient<TAdapter, TCache> = MockClient<TAdapter, TCache>,
+  TStore extends Store = Store,
+  TClient extends MockClient<TAdapter, TStore> = MockClient<TAdapter, TStore>,
 > = OneOf<
   | {
       client?: TClient;
     }
   | ({
       adapter?: TAdapter;
-    } & ClientOptions<TCache>)
+    } & ClientOptions<TStore>)
 >;

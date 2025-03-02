@@ -1,10 +1,10 @@
-import type { SimpleCache } from "src/cache/types";
 import { HookRegistry } from "src/client/hooks/HookRegistry";
+import type { Store } from "src/store/types";
 import { describe, expect, it, vi } from "vitest";
 
 describe("HookRegistry", () => {
   it("Calls all registered handlers", async () => {
-    const hooks = new HookRegistry<SimpleCache>();
+    const hooks = new HookRegistry<Store>();
 
     const handler = vi.fn();
     const handler2 = vi.fn();
@@ -37,7 +37,7 @@ describe("HookRegistry", () => {
   });
 
   it("Does not call handlers that have been removed", async () => {
-    const hooks = new HookRegistry<SimpleCache>();
+    const hooks = new HookRegistry<Store>();
     const handler = vi.fn();
 
     hooks.on("clear", handler);
@@ -50,7 +50,7 @@ describe("HookRegistry", () => {
   });
 
   it("Only calls one-time handlers once", async () => {
-    const hooks = new HookRegistry<SimpleCache>();
+    const hooks = new HookRegistry<Store>();
     const handler = vi.fn();
     const onceHandler = vi.fn();
 

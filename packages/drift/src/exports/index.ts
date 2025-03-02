@@ -95,13 +95,14 @@ export {
 export { encodeFunctionReturn } from "src/adapter/utils/encodeFunctionReturn";
 export { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
 
-// cache //
+// store //
 
 export {
-  LruSimpleCache,
-  type LruSimpleCacheConfig,
-} from "src/cache/LruSimpleCache";
-export type { SimpleCache } from "src/cache/types";
+  LruStore,
+  type LruStoreConfig,
+} from "src/store/LruStore";
+export type { Store } from "src/store/types";
+export type { getOrSet } from "src/store/utils";
 
 // client //
 
@@ -157,10 +158,7 @@ export { DriftError, type DriftErrorOptions } from "src/error/DriftError";
 // utils //
 
 export { type Converted, convertType } from "src/utils/convertType";
-export {
-  createSerializableKey,
-  type SerializableKey,
-} from "src/utils/createSerializableKey";
+export { stringifyKey } from "src/utils/stringifyKey";
 export { getRandomHex } from "src/utils/testing/getRandomHex";
 export { isHexString } from "src/utils/isHexString";
 export type {

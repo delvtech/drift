@@ -1,31 +1,31 @@
 import { MockAdapter } from "src/adapter/MockAdapter";
 import type { OxAdapterConfig } from "src/adapter/OxAdapter";
-import type { LruSimpleCache } from "src/cache/LruSimpleCache";
-import type { SimpleCache } from "src/cache/types";
 import {
   type Client,
   type ClientConfig,
   createClient,
 } from "src/client/Client";
+import type { LruStore } from "src/store/LruStore";
+import type { Store } from "src/store/types";
 
 export type MockClient<
   TAdapter extends MockAdapter = MockAdapter,
-  TCache extends SimpleCache = SimpleCache,
-> = Client<TAdapter, TCache>;
+  TStore extends Store = Store,
+> = Client<TAdapter, TStore>;
 
 export type MockClientConfig<
   TAdapter extends MockAdapter = MockAdapter,
-  TCache extends SimpleCache = SimpleCache,
-> = Partial<Omit<ClientConfig<TAdapter, TCache>, keyof OxAdapterConfig>>;
+  TStore extends Store = Store,
+> = Partial<Omit<ClientConfig<TAdapter, TStore>, keyof OxAdapterConfig>>;
 
 export function createMockClient<
   TAdapter extends MockAdapter = MockAdapter,
-  TCache extends SimpleCache = LruSimpleCache,
+  TStore extends Store = LruStore,
 >({
   adapter = new MockAdapter() as TAdapter,
   chainId,
   ...config
-}: MockClientConfig<TAdapter, TCache> = {}): MockClient<TAdapter, TCache> {
+}: MockClientConfig<TAdapter, TStore> = {}): MockClient<TAdapter, TStore> {
   if (!adapter.stubs.has("getChainId")) {
     adapter.onGetChainId().resolves(chainId ?? 0);
   }

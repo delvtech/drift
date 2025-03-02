@@ -2,7 +2,6 @@ import isMatch from "lodash.ismatch";
 import stringify from "safe-stable-stringify";
 import { type SinonStub, stub as sinonStub } from "sinon";
 import { DriftError } from "src/error/DriftError";
-import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { FunctionKey } from "src/utils/types";
 
 export interface GetStubParams<T, TArgs extends any[], TReturnType> {
@@ -27,7 +26,7 @@ export interface GetStubParams<T, TArgs extends any[], TReturnType> {
    * });
    * ```
    */
-  key?: SerializableKey;
+  key?: string;
 
   /**
    * Whether to allow partial matching of the key. If `true`, the first stub
@@ -96,29 +95,18 @@ export class StubStore<T> {
       return methodStore.defaultStub as any;
     }
 
-    const stubKey = stringify(key);
-
-    if (methodStore.keyedStubs.has(stubKey)) {
-      return methodStore.keyedStubs.get(stubKey) as any;
+    if (methodStore.keyedStubs.has(key)) {
+      return methodStore.keyedStubs.get(key) as any;
     }
 
     if (matchPartial) {
       // Try to compare the keys to find a partial match
-      switch (typeof key) {
-        case "string":
-          for (const [storedKey, storedStub] of methodStore.keyedStubs) {
-            if (storedKey.startsWith(key)) {
-              return storedStub as any;
-            }
-          }
-          break;
-        case "object":
-          for (const [storedKey, storedStub] of methodStore.keyedStubs) {
-            const storedKeyData = JSON.parse(storedKey);
-            if (isMatch(key, storedKeyData)) {
-              return storedStub as any;
-            }
-          }
+      const parsedKey = JSON.parse(key);
+      for (const [storedKey, storedStub] of methodStore.keyedStubs) {
+        const storedKeyData = JSON.parse(storedKey);
+        if (isMatch(parsedKey, storedKeyData)) {
+          return storedStub as any;
+        }
       }
 
       return methodStore.defaultStub as any;
@@ -127,7 +115,7 @@ export class StubStore<T> {
     let newStub = sinonStub().callsFake((...args) => {
       throw new NotImplementedError({
         method: String(method),
-        key: stubKey,
+        key,
         args,
       });
     });
@@ -136,7 +124,7 @@ export class StubStore<T> {
       newStub = create(newStub as any);
     }
 
-    methodStore.keyedStubs.set(stubKey, newStub);
+    methodStore.keyedStubs.set(key, newStub);
     return newStub as any;
   }
 

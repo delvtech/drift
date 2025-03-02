@@ -24,13 +24,12 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
-import { LruSimpleCache } from "src/cache/LruSimpleCache";
-import type { SimpleCache } from "src/cache/types";
-import { createSerializableKey } from "src/utils/createSerializableKey";
-import type { SerializableKey } from "src/utils/createSerializableKey";
+import { LruStore } from "src/store/LruStore";
+import type { Store } from "src/store/types";
+import { stringifyKey } from "src/utils/stringifyKey";
 import type { MaybePromise } from "src/utils/types";
 
-export type ClientCacheConfig<T extends SimpleCache = SimpleCache> = {
+export type ClientCacheConfig<T extends Store = Store> = {
   /**
    * The namespace to use for client operations or a function that returns the
    * namespace.
@@ -44,18 +43,16 @@ export type ClientCacheConfig<T extends SimpleCache = SimpleCache> = {
 };
 
 /**
- * An extended {@linkcode SimpleCache} with additional API methods for use in
+ * An extended {@linkcode Store} with additional API methods for use in
  * Drift clients.
  */
-export class ClientCache<T extends SimpleCache = SimpleCache>
-  implements SimpleCache
-{
+export class ClientCache<T extends Store = Store> implements Store {
   namespace: PropertyKey | (() => MaybePromise<PropertyKey>);
   store: T;
 
   constructor({
     namespace,
-    store = new LruSimpleCache() as SimpleCache as T,
+    store = new LruStore() as Store as T,
   }: ClientCacheConfig<T>) {
     this.namespace = namespace;
     this.store = store;
@@ -73,16 +70,14 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
     return this.namespace;
   }
 
-  async createNamespacedKey(
-    ...parts: NonNullable<unknown>[]
-  ): Promise<SerializableKey> {
+  async createNamespacedKey(...parts: NonNullable<unknown>[]): Promise<string> {
     const namespace = await this.resolveNamespace();
-    return createSerializableKey([namespace, ...parts]);
+    return stringifyKey([namespace, ...parts]);
   }
 
   // Block //
 
-  async blockKey(block?: BlockIdentifier): Promise<SerializableKey> {
+  async blockKey(block?: BlockIdentifier): Promise<string> {
     return this.createNamespacedKey("block", { block });
   }
 
@@ -99,10 +94,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
 
   // Balance //
 
-  async balanceKey({
-    address,
-    block,
-  }: GetBalanceParams): Promise<SerializableKey> {
+  async balanceKey({ address, block }: GetBalanceParams): Promise<string> {
     return this.createNamespacedKey("balance", { address, block });
   }
 
@@ -123,9 +115,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
 
   // Transaction //
 
-  async transactionKey({
-    hash,
-  }: GetTransactionParams): Promise<SerializableKey> {
+  async transactionKey({ hash }: GetTransactionParams): Promise<string> {
     return this.createNamespacedKey("transaction", { hash });
   }
 
@@ -141,9 +131,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
 
   // Transaction Receipt //
 
-  async transactionReceiptKey({
-    hash,
-  }: GetTransactionParams): Promise<SerializableKey> {
+  async transactionReceiptKey({ hash }: GetTransactionParams): Promise<string> {
     return this.createNamespacedKey("transactionReceipt", { hash });
   }
 
@@ -171,7 +159,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
     blobs,
     bytecode,
     nonce,
-  }: CallParams): Promise<SerializableKey> {
+  }: CallParams): Promise<string> {
     return this.createNamespacedKey("call", {
       to,
       data,
@@ -209,7 +197,8 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
 
   async invalidateCallsMatching(params: CallParams): Promise<void> {
     const key = await this.callKey(params);
-    return this._deleteMatches(key);
+    console.log("key", key);
+    return this.#deleteMatches(key);
   }
 
   // Events //
@@ -220,7 +209,7 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
     filter,
     fromBlock = "earliest",
     toBlock = "latest",
-  }: GetEventsParams<TAbi, TEventName>): Promise<SerializableKey> {
+  }: GetEventsParams<TAbi, TEventName>): Promise<string> {
     return this.createNamespacedKey("events", {
       address,
       event,
@@ -287,36 +276,36 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(params: PartialReadParams<TAbi, TFunctionName>): Promise<void> {
     const matchKey = await this.partialReadKey(params);
-    return this._deleteMatches(matchKey);
+    return this.#deleteMatches(matchKey);
   }
 
   // Store Operations //
 
-  async *entries<T>(): AsyncGenerator<[SerializableKey, T]> {
+  async *entries<T>(): AsyncGenerator<[string, T]> {
     for await (const entry of this.store.entries()) {
       yield entry;
     }
   }
 
   async find<T>(
-    predicate: (value: T, key: SerializableKey) => boolean,
+    predicate: (value: T, key: string) => boolean,
   ): Promise<T | undefined> {
     return this.store.find(predicate);
   }
 
-  async has(key: SerializableKey): Promise<boolean> {
+  async has(key: string): Promise<boolean> {
     return this.store.has(key);
   }
 
-  async get<T>(key: SerializableKey): Promise<T | undefined> {
+  async get<T>(key: string): Promise<T | undefined> {
     return this.store.get(key);
   }
 
-  async set<T>(key: SerializableKey, value: T): Promise<void> {
+  async set<T>(key: string, value: T): Promise<void> {
     return this.store.set(key, value);
   }
 
-  async delete(key: SerializableKey): Promise<void> {
+  async delete(key: string): Promise<void> {
     return this.store.delete(key);
   }
 
@@ -326,17 +315,16 @@ export class ClientCache<T extends SimpleCache = SimpleCache>
 
   // Internal //
 
-  private async _deleteMatches(matchKey: SerializableKey): Promise<void> {
+  async #deleteMatches(matchKey: string): Promise<void> {
+    const parsedMatchKey = JSON.parse(matchKey);
     const operations: MaybePromise<void>[] = [];
 
     for await (const [key] of this.store.entries()) {
       if (key === matchKey) {
         operations.push(this.store.delete(key));
-      } else if (
-        typeof key === "object" &&
-        typeof matchKey === "object" &&
-        isMatch(key, matchKey)
-      ) {
+      }
+      const parsedKey = JSON.parse(key);
+      if (isMatch(parsedKey, parsedMatchKey)) {
         operations.push(this.store.delete(key));
       }
     }

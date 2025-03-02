@@ -21,7 +21,7 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
-import { createSerializableKey } from "src/utils/createSerializableKey";
+import { stringifyKey } from "src/utils/stringifyKey";
 import { StubStore } from "src/utils/testing/StubStore";
 import type { AnyObject, FunctionKey, PartialBy } from "src/utils/types";
 
@@ -34,7 +34,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   // Remove the abi from the key
   protected createKey({ abi, ...params }: AnyObject) {
-    return createSerializableKey(params);
+    return stringifyKey(params);
   }
 
   // getChainId //

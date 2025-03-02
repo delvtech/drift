@@ -1,18 +1,18 @@
 import type { MockAdapter } from "src/adapter/MockAdapter";
 import type { Abi } from "src/adapter/types/Abi";
 import type { ContractParams } from "src/adapter/types/Contract";
-import type { LruSimpleCache } from "src/cache/LruSimpleCache";
-import type { SimpleCache } from "src/cache/types";
 import type { Client } from "src/client/Client";
 import { type MockClientConfig, createMockClient } from "src/client/MockClient";
 import { MockContract } from "src/client/contract/MockContract";
+import type { LruStore } from "src/store/LruStore";
+import type { Store } from "src/store/types";
 
 export type MockDrift<
   TAdapter extends MockAdapter = MockAdapter,
-  TCache extends SimpleCache = SimpleCache,
+  TStore extends Store = Store,
 > = Client<
   TAdapter,
-  TCache,
+  TStore,
   {
     contract<TAbi extends Abi>({
       abi,
@@ -20,18 +20,18 @@ export type MockDrift<
     }: ContractParams<TAbi>): MockContract<
       TAbi,
       TAdapter,
-      TCache,
-      MockDrift<TAdapter, TCache>
+      TStore,
+      MockDrift<TAdapter, TStore>
     >;
   }
 >;
 
 export function createMockDrift<
   TAdapter extends MockAdapter = MockAdapter,
-  TCache extends SimpleCache = LruSimpleCache,
+  TStore extends Store = LruStore,
 >(
-  config: MockClientConfig<TAdapter, TCache> = {},
-): MockDrift<TAdapter, TCache> {
+  config: MockClientConfig<TAdapter, TStore> = {},
+): MockDrift<TAdapter, TStore> {
   return createMockClient(config).extend({
     contract({ abi, address }) {
       return new MockContract({
