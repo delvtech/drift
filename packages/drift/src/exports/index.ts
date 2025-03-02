@@ -95,13 +95,14 @@ export {
 export { encodeFunctionReturn } from "src/adapter/utils/encodeFunctionReturn";
 export { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
 
-// cache //
+// store //
 
 export {
-  LruStore as LruSimpleCache,
-  type LruStoreConfig as LruSimpleCacheConfig,
+  LruStore,
+  type LruStoreConfig,
 } from "src/store/LruStore";
-export type { Store as SimpleCache } from "src/store/types";
+export type { Store } from "src/store/types";
+export type { getOrSet } from "src/store/utils";
 
 // client //
 
