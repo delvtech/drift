@@ -1,10 +1,10 @@
 import type { MaybePromise } from "src/utils/types";
 
 /**
- * An interface for storing and retrieving values in a cache. The store may be
+ * An interface for storing and retrieving values in a cache. The methods may be
  * synchronous or asynchronous.
  */
-export interface CacheStore {
+export interface Store {
   /**
    * Returns an iterable of key-value pairs for every entry in the store.
    */

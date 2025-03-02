@@ -1,4 +1,4 @@
-import type { CacheStore } from "src/store/types";
+import type { Store } from "src/store/types";
 import type { AwaitedReturnType, MaybePromise } from "src/utils/types";
 
 // TODO: Ensure the use of `await` here doesn't break batching.
@@ -10,20 +10,20 @@ import type { AwaitedReturnType, MaybePromise } from "src/utils/types";
 export async function cachedFn<
   T extends (...args: any[]) => MaybePromise<any>,
 >({
-  cache,
+  store,
   key,
   fn,
 }: {
-  cache: CacheStore;
+  store: Store;
   key: MaybePromise<string>;
   fn: T;
 }): Promise<AwaitedReturnType<T>> {
   key = await key;
-  if (await cache.has(key)) return cache.get(key);
+  if (await store.has(key)) return store.get(key);
 
   const value = await fn();
   if (!value) return value;
 
-  const setOp = cache.set(key, value);
+  const setOp = store.set(key, value);
   return setOp instanceof Promise ? setOp.then(() => value) : value;
 }

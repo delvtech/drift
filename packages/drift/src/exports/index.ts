@@ -101,7 +101,7 @@ export {
   LruStore as LruSimpleCache,
   type LruStoreConfig as LruSimpleCacheConfig,
 } from "src/store/LruStore";
-export type { CacheStore as SimpleCache } from "src/store/types";
+export type { Store as SimpleCache } from "src/store/types";
 
 // client //
 

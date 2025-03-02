@@ -13,7 +13,7 @@ import {
   MethodInterceptor,
 } from "src/client/hooks/MethodInterceptor";
 import { LruStore, type LruStoreConfig } from "src/store/LruStore";
-import type { CacheStore } from "src/store/types";
+import type { Store } from "src/store/types";
 import { cachedFn } from "src/store/utils";
 import type { Eval, Extended, OneOf } from "src/utils/types";
 
@@ -23,11 +23,11 @@ import type { Eval, Extended, OneOf } from "src/utils/types";
  */
 export type Client<
   TAdapter extends Adapter = Adapter,
-  TCache extends CacheStore = CacheStore,
+  TStore extends Store = Store,
   TExtension extends object = {},
 > = {
   adapter: TAdapter;
-  cache: ClientCache<TCache>;
+  cache: ClientCache<TStore>;
   hooks: HookRegistry<MethodHooks<TAdapter>> &
     // Intersect with the default adapter to avoid type errors in generic
     // contexts where the keys of the adapter are unknown.
@@ -37,14 +37,14 @@ export type Client<
     props: Extended<
       // Using distributive conditional types here ensures that T is inferred as
       // all properties not present by default on the Client, which when
-      // intersected with Client<TAdapter, TCache, TExtension> results in the
+      // intersected with Client<TAdapter, TStore, TExtension> results in the
       // full expected return type. This is necessary to correctly infer the
       // required props and return type on a dynamic interface.
       T extends any ? Omit<T, keyof Client | keyof TExtension> : T
     > &
       Partial<Client & TExtension> &
-      ThisType<Client<TAdapter, TCache, TExtension & T>>,
-  ): Client<TAdapter, TCache, Eval<TExtension & T>>;
+      ThisType<Client<TAdapter, TStore, TExtension & T>>,
+  ): Client<TAdapter, TStore, Eval<TExtension & T>>;
   getBlockOrThrow<T extends BlockIdentifier | undefined>(
     block?: T,
   ): Promise<Block<T>>;
@@ -56,23 +56,23 @@ export type Client<
  */
 export type ReadClient<
   TAdapter extends ReadAdapter = ReadAdapter,
-  TCache extends CacheStore = CacheStore,
-> = Client<TAdapter, TCache>;
+  TStore extends Store = Store,
+> = Client<TAdapter, TStore>;
 
 /**
  * A read-write {@linkcode Client} with access to a signer.
  */
 export type ReadWriteClient<
   TAdapter extends ReadWriteAdapter = ReadWriteAdapter,
-  TCache extends CacheStore = CacheStore,
-> = Client<TAdapter, TCache>;
+  TStore extends Store = Store,
+> = Client<TAdapter, TStore>;
 
 /**
  * Base options for configuring a {@linkcode Client}.
  */
-export interface ClientOptions<T extends CacheStore = CacheStore> {
-  // Accept LRU config if LRU can be assigned to TCache
-  cache?: LruStore extends T ? T | LruStoreConfig : T;
+export interface ClientOptions<T extends Store = Store> {
+  // Accept LRU config if LRU can be assigned to T
+  store?: LruStore extends T ? T | LruStoreConfig : T;
   chainId?: number;
 }
 
@@ -96,8 +96,8 @@ export type ClientAdapterOptions<T extends Adapter = Adapter> = OneOf<
  */
 export type ClientConfig<
   TAdapter extends Adapter = Adapter,
-  TCache extends CacheStore = CacheStore,
-> = Eval<ClientOptions<TCache> & ClientAdapterOptions<TAdapter>>;
+  TStore extends Store = Store,
+> = Eval<ClientOptions<TStore> & ClientAdapterOptions<TAdapter>>;
 
 /**
  * Creates a new {@linkcode Client} instance that extends the provided adapter
@@ -107,35 +107,35 @@ export type ClientConfig<
  */
 export function createClient<
   TAdapter extends Adapter = OxAdapter,
-  TCache extends CacheStore = LruStore,
+  TStore extends Store = LruStore,
 >({
   adapter: maybeAdapter,
-  cache: cacheOrConfig,
+  store: storeOrConfig,
   chainId,
   ...adapterConfig
-}: ClientConfig<TAdapter, TCache> = {}): Client<TAdapter, TCache> {
+}: ClientConfig<TAdapter, TStore> = {}): Client<TAdapter, TStore> {
   const interceptor = new MethodInterceptor<TAdapter>();
 
   // Handle adapter config
   const adapter = (maybeAdapter || new OxAdapter(adapterConfig)) as TAdapter;
 
   // Handle cache config
-  const isCache = cacheOrConfig && "clear" in cacheOrConfig;
-  const cache = (
-    isCache ? cacheOrConfig : new LruStore(cacheOrConfig)
-  ) as TCache;
+  const isConfig = !storeOrConfig || !("clear" in storeOrConfig);
+  const store = (
+    isConfig ? new LruStore(storeOrConfig) : storeOrConfig
+  ) as TStore;
 
   // Prepare client properties
-  const clientProps: Client<TAdapter, TCache> = {
+  const clientProps: Client<TAdapter, TStore> = {
     ...adapter,
     adapter,
     hooks: interceptor.hooks,
     cache: new ClientCache({
-      store: cache,
+      store,
       namespace: () => clientProps.getChainId(),
     }),
 
-    isReadWrite(): this is Client<ReadWriteAdapter, TCache> {
+    isReadWrite(): this is Client<ReadWriteAdapter, TStore> {
       return typeof this.adapter.write === "function";
     },
 
@@ -152,7 +152,7 @@ export function createClient<
 
     getBlock(params) {
       return cachedFn({
-        cache: this.cache,
+        store: this.cache,
         key: this.cache.blockKey(params),
         fn: () => this.adapter.getBlock(params),
       });
@@ -170,7 +170,7 @@ export function createClient<
 
     getBalance(params) {
       return cachedFn({
-        cache: this.cache,
+        store: this.cache,
         key: this.cache.balanceKey(params),
         fn: () => this.adapter.getBalance(params),
       });
@@ -178,7 +178,7 @@ export function createClient<
 
     getTransaction(params) {
       return cachedFn({
-        cache: this.cache,
+        store: this.cache,
         key: this.cache.transactionKey(params),
         fn: () => this.adapter.getTransaction(params),
       });
@@ -186,7 +186,7 @@ export function createClient<
 
     waitForTransaction(params) {
       return cachedFn({
-        cache: this.cache,
+        store: this.cache,
         key: this.cache.transactionReceiptKey(params),
         fn: () => this.adapter.waitForTransaction(params),
       });
@@ -194,7 +194,7 @@ export function createClient<
 
     call(params) {
       return cachedFn({
-        cache: this.cache,
+        store: this.cache,
         key: this.cache.callKey(params),
         fn: () => this.adapter.call(params),
       });
@@ -203,7 +203,7 @@ export function createClient<
     getEvents({ fromBlock = "earliest", toBlock = "latest", ...restParams }) {
       const params = { fromBlock, toBlock, ...restParams };
       return cachedFn({
-        cache: this.cache,
+        store: this.cache,
         key: this.cache.eventsKey(params),
         fn: async () => this.adapter.getEvents(params),
       });
@@ -211,7 +211,7 @@ export function createClient<
 
     read(params) {
       return cachedFn({
-        cache: this.cache,
+        store: this.cache,
         key: this.cache.readKey(params),
         fn: () => this.adapter.read(params),
       });
@@ -246,7 +246,7 @@ export function createClient<
     },
   });
 
-  const client: Client<TAdapter, TCache> = Object.create(
+  const client: Client<TAdapter, TStore> = Object.create(
     Client.prototype,
     Object.getOwnPropertyDescriptors(clientProps),
   );

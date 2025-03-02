@@ -26,7 +26,7 @@ import {
   type ReadWriteClient,
   createClient,
 } from "src/client/Client";
-import type { CacheStore } from "src/store/types";
+import type { Store } from "src/store/types";
 import type {
   AnyObject,
   EmptyObject,
@@ -42,11 +42,11 @@ import type {
 export type Contract<
   TAbi extends Abi = Abi,
   TAdapter extends Adapter = Adapter,
-  TCache extends CacheStore = CacheStore,
-  TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
+  TStore extends Store = Store,
+  TClient extends Client<TAdapter, TStore> = Client<TAdapter, TStore>,
 > = TAdapter extends ReadWriteAdapter
-  ? ReadWriteContract<TAbi, TAdapter, TCache, TClient>
-  : ReadContract<TAbi, TAdapter, TCache, TClient>;
+  ? ReadWriteContract<TAbi, TAdapter, TStore, TClient>
+  : ReadContract<TAbi, TAdapter, TStore, TClient>;
 
 /**
  * A read-only {@linkcode Contract} instance for fetching data from a smart
@@ -55,8 +55,8 @@ export type Contract<
 export class ReadContract<
   TAbi extends Abi = Abi,
   TAdapter extends ReadAdapter = ReadAdapter,
-  TCache extends CacheStore = CacheStore,
-  TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
+  TStore extends Store = Store,
+  TClient extends Client<TAdapter, TStore> = Client<TAdapter, TStore>,
 > {
   abi: TAbi;
   address: Address;
@@ -67,7 +67,7 @@ export class ReadContract<
     address,
     client,
     ...clientConfig
-  }: ContractConfig<TAbi, TAdapter, TCache, TClient>) {
+  }: ContractConfig<TAbi, TAdapter, TStore, TClient>) {
     this.abi = abi;
     this.address = address;
     this.client = (client ??
@@ -297,9 +297,9 @@ export class ReadContract<
 export class ReadWriteContract<
   TAbi extends Abi = Abi,
   TAdapter extends ReadWriteAdapter = ReadWriteAdapter,
-  TCache extends CacheStore = CacheStore,
-  TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
-> extends ReadContract<TAbi, TAdapter, TCache, TClient> {
+  TStore extends Store = Store,
+  TClient extends Client<TAdapter, TStore> = Client<TAdapter, TStore>,
+> extends ReadContract<TAbi, TAdapter, TStore, TClient> {
   /**
    * @returns The transaction hash of the submitted transaction.
    */
@@ -328,13 +328,13 @@ export class ReadWriteContract<
  */
 export type ContractClientOptions<
   TAdapter extends Adapter = Adapter,
-  TCache extends CacheStore = CacheStore,
-  TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
+  TStore extends Store = Store,
+  TClient extends Client<TAdapter, TStore> = Client<TAdapter, TStore>,
 > = OneOf<
   | {
       client?: TClient;
     }
-  | ClientConfig<TAdapter, TCache>
+  | ClientConfig<TAdapter, TStore>
 >;
 
 /**
@@ -343,10 +343,10 @@ export type ContractClientOptions<
 export type ContractConfig<
   TAbi extends Abi = Abi,
   TAdapter extends Adapter = Adapter,
-  TCache extends CacheStore = CacheStore,
-  TClient extends Client<TAdapter, TCache> = Client<TAdapter, TCache>,
+  TStore extends Store = Store,
+  TClient extends Client<TAdapter, TStore> = Client<TAdapter, TStore>,
 > = Eval<
-  ContractParams<TAbi> & ContractClientOptions<TAdapter, TCache, TClient>
+  ContractParams<TAbi> & ContractClientOptions<TAdapter, TStore, TClient>
 >;
 
 /**
@@ -359,14 +359,14 @@ export type ContractConfig<
 export function createContract<
   TAbi extends Abi,
   TAdapter extends Adapter,
-  TCache extends CacheStore,
-  TClient extends Client<TAdapter, TCache>,
+  TStore extends Store,
+  TClient extends Client<TAdapter, TStore>,
 >({
   abi,
   address,
   client: maybeClient,
   ...clientConfig
-}: ContractConfig<TAbi, TAdapter, TCache, TClient>): Contract<
+}: ContractConfig<TAbi, TAdapter, TStore, TClient>): Contract<
   TAbi,
   TClient["adapter"],
   TClient["cache"]["store"],
@@ -386,7 +386,7 @@ export function createContract<
   return new ReadContract({ abi, address, client }) as Contract<
     TAbi,
     TAdapter,
-    TCache,
+    TStore,
     TClient
   >;
 }

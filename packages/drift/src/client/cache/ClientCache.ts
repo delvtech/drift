@@ -25,11 +25,11 @@ import type {
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
 import { LruStore } from "src/store/LruStore";
-import type { CacheStore } from "src/store/types";
+import type { Store } from "src/store/types";
 import { stringifyKey } from "src/utils/stringifyKey";
 import type { MaybePromise } from "src/utils/types";
 
-export type ClientCacheConfig<T extends CacheStore = CacheStore> = {
+export type ClientCacheConfig<T extends Store = Store> = {
   /**
    * The namespace to use for client operations or a function that returns the
    * namespace.
@@ -43,18 +43,16 @@ export type ClientCacheConfig<T extends CacheStore = CacheStore> = {
 };
 
 /**
- * An extended {@linkcode CacheStore} with additional API methods for use in
+ * An extended {@linkcode Store} with additional API methods for use in
  * Drift clients.
  */
-export class ClientCache<T extends CacheStore = CacheStore>
-  implements CacheStore
-{
+export class ClientCache<T extends Store = Store> implements Store {
   namespace: PropertyKey | (() => MaybePromise<PropertyKey>);
   store: T;
 
   constructor({
     namespace,
-    store = new LruStore() as CacheStore as T,
+    store = new LruStore() as Store as T,
   }: ClientCacheConfig<T>) {
     this.namespace = namespace;
     this.store = store;

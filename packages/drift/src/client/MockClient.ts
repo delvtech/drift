@@ -6,26 +6,26 @@ import {
   createClient,
 } from "src/client/Client";
 import type { LruStore } from "src/store/LruStore";
-import type { CacheStore } from "src/store/types";
+import type { Store } from "src/store/types";
 
 export type MockClient<
   TAdapter extends MockAdapter = MockAdapter,
-  TCache extends CacheStore = CacheStore,
-> = Client<TAdapter, TCache>;
+  TStore extends Store = Store,
+> = Client<TAdapter, TStore>;
 
 export type MockClientConfig<
   TAdapter extends MockAdapter = MockAdapter,
-  TCache extends CacheStore = CacheStore,
-> = Partial<Omit<ClientConfig<TAdapter, TCache>, keyof OxAdapterConfig>>;
+  TStore extends Store = Store,
+> = Partial<Omit<ClientConfig<TAdapter, TStore>, keyof OxAdapterConfig>>;
 
 export function createMockClient<
   TAdapter extends MockAdapter = MockAdapter,
-  TCache extends CacheStore = LruStore,
+  TStore extends Store = LruStore,
 >({
   adapter = new MockAdapter() as TAdapter,
   chainId,
   ...config
-}: MockClientConfig<TAdapter, TCache> = {}): MockClient<TAdapter, TCache> {
+}: MockClientConfig<TAdapter, TStore> = {}): MockClient<TAdapter, TStore> {
   if (!adapter.stubs.has("getChainId")) {
     adapter.onGetChainId().resolves(chainId ?? 0);
   }
