@@ -1,7 +1,7 @@
 {
   "name": "@delvtech/drift",
   "description": "Effortless ethereum development across Web3 libraries",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "license": "Apache-2.0",
   "type": "module",
   "main": "dist/index.cjs",
@@ -31,8 +31,12 @@
   },
   "typesVersions": {
     "*": {
-      ".": ["./dist/index.d.ts"],
-      "testing": ["./dist/testing.d.ts"]
+      ".": [
+        "./dist/index.d.ts"
+      ],
+      "testing": [
+        "./dist/testing.d.ts"
+      ]
     }
   },
   "scripts": {
@@ -85,5 +89,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": ["dist"]
+  "files": [
+    "dist"
+  ]
 }
