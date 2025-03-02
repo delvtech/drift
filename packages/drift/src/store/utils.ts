@@ -4,10 +4,10 @@ import type { AwaitedReturnType, MaybePromise } from "src/utils/types";
 // TODO: Ensure the use of `await` here doesn't break batching.
 
 /**
- * Checks the cache for the key and returns the value if found, otherwise
- * executes the function and stores the result in the cache before returning it.
+ * Checks the store for the key and returns the value if found, otherwise
+ * executes the function and stores the result before returning it.
  */
-export async function cachedFn<
+export async function getOrSet<
   T extends (...args: any[]) => MaybePromise<any>,
 >({
   store,

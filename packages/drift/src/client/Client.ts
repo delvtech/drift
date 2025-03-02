@@ -14,7 +14,7 @@ import {
 } from "src/client/hooks/MethodInterceptor";
 import { LruStore, type LruStoreConfig } from "src/store/LruStore";
 import type { Store } from "src/store/types";
-import { cachedFn } from "src/store/utils";
+import { getOrSet } from "src/store/utils";
 import type { Eval, Extended, OneOf } from "src/utils/types";
 
 /**
@@ -151,7 +151,7 @@ export function createClient<
     },
 
     getBlock(params) {
-      return cachedFn({
+      return getOrSet({
         store: this.cache,
         key: this.cache.blockKey(params),
         fn: () => this.adapter.getBlock(params),
@@ -169,7 +169,7 @@ export function createClient<
     },
 
     getBalance(params) {
-      return cachedFn({
+      return getOrSet({
         store: this.cache,
         key: this.cache.balanceKey(params),
         fn: () => this.adapter.getBalance(params),
@@ -177,7 +177,7 @@ export function createClient<
     },
 
     getTransaction(params) {
-      return cachedFn({
+      return getOrSet({
         store: this.cache,
         key: this.cache.transactionKey(params),
         fn: () => this.adapter.getTransaction(params),
@@ -185,7 +185,7 @@ export function createClient<
     },
 
     waitForTransaction(params) {
-      return cachedFn({
+      return getOrSet({
         store: this.cache,
         key: this.cache.transactionReceiptKey(params),
         fn: () => this.adapter.waitForTransaction(params),
@@ -193,7 +193,7 @@ export function createClient<
     },
 
     call(params) {
-      return cachedFn({
+      return getOrSet({
         store: this.cache,
         key: this.cache.callKey(params),
         fn: () => this.adapter.call(params),
@@ -202,7 +202,7 @@ export function createClient<
 
     getEvents({ fromBlock = "earliest", toBlock = "latest", ...restParams }) {
       const params = { fromBlock, toBlock, ...restParams };
-      return cachedFn({
+      return getOrSet({
         store: this.cache,
         key: this.cache.eventsKey(params),
         fn: async () => this.adapter.getEvents(params),
@@ -210,7 +210,7 @@ export function createClient<
     },
 
     read(params) {
-      return cachedFn({
+      return getOrSet({
         store: this.cache,
         key: this.cache.readKey(params),
         fn: () => this.adapter.read(params),
