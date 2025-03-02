@@ -1,5 +1,4 @@
 import type { CacheStore } from "src/store/types";
-import type { SerializableKey } from "src/utils/createSerializableKey";
 import type { AwaitedReturnType, MaybePromise } from "src/utils/types";
 
 // TODO: Ensure the use of `await` here doesn't break batching.
@@ -16,7 +15,7 @@ export async function cachedFn<
   fn,
 }: {
   cache: CacheStore;
-  key: MaybePromise<SerializableKey>;
+  key: MaybePromise<string>;
   fn: T;
 }): Promise<AwaitedReturnType<T>> {
   key = await key;

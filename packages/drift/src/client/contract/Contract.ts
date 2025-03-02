@@ -27,7 +27,6 @@ import {
   createClient,
 } from "src/client/Client";
 import type { CacheStore } from "src/store/types";
-import type { SerializableKey } from "src/utils/createSerializableKey";
 import type {
   AnyObject,
   EmptyObject,
@@ -193,7 +192,7 @@ export class ReadContract<
     fn?: TFunctionName,
     args?: FunctionArgs<TAbi, TFunctionName>,
     params?: ContractReadOptions,
-  ): Promise<SerializableKey> {
+  ) {
     return this.cache.partialReadKey({
       abi: this.abi,
       address: this.address,
@@ -205,7 +204,7 @@ export class ReadContract<
 
   readKey<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     ...[fn, args, params]: ContractReadArgs<TAbi, TFunctionName>
-  ): Promise<SerializableKey> {
+  ) {
     return this.cache.readKey({
       abi: this.abi,
       address: this.address,

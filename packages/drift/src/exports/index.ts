@@ -157,10 +157,7 @@ export { DriftError, type DriftErrorOptions } from "src/error/DriftError";
 // utils //
 
 export { type Converted, convertType } from "src/utils/convertType";
-export {
-  createSerializableKey,
-  type SerializableKey,
-} from "src/utils/createSerializableKey";
+export { stringifyKey } from "src/utils/stringifyKey";
 export { getRandomHex } from "src/utils/testing/getRandomHex";
 export { isHexString } from "src/utils/isHexString";
 export type {
