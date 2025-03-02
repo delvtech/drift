@@ -16,9 +16,7 @@ export interface CacheStore {
    *
    * @param predicate - A function to test each key-value pair in the store.
    */
-  find: (
-    predicate: (value: any, key: string) => boolean,
-  ) => MaybePromise<any | undefined>;
+  find: (predicate: (value: any, key: string) => boolean) => MaybePromise<any>;
 
   /**
    * Returns a boolean indicating whether an entry exists for the specified key.
@@ -28,22 +26,22 @@ export interface CacheStore {
   /**
    * Retrieves the value associated with the specified key.
    */
-  get: (key: string) => MaybePromise<any | undefined>;
+  get: (key: string) => MaybePromise<any>;
 
   /**
    * Associates the specified value with the specified key in the store. If the
    * store previously contained a mapping for the key, the old value is
    * replaced.
    */
-  set: (key: string, value: any) => MaybePromise<void>;
+  set: (key: string, value: any) => MaybePromise<any>;
 
   /**
    * Removes the mapping for the specified key from this store if present.
    */
-  delete: (key: string) => MaybePromise<void>;
+  delete: (key: string) => MaybePromise<any>;
 
   /**
    * Removes all of the mappings from this store.
    */
-  clear: () => MaybePromise<void>;
+  clear: () => MaybePromise<any>;
 }
