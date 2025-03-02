@@ -3,9 +3,7 @@
 ---
 
 Polished up caching APIs:
-- Renames `SimpleCache` to `Store` to better reflect its purpose.
-- Renamed `LruSimpleCache` to `LruStore` and `cache` params to `store` to match the new naming convention.
+- Renamed `SimpleCache` to `Store` and `LruSimpleCache` to `LruStore` to better reflect their purposes. Updated associated parameters and imports to match the new naming convention.
 - Removed unnecessary type parameters from the `Store` interface.
-- Moved key stringifying to the `ClientCache` class so stores only have to operate on strings.
-- Simplified the `LruStore` to simply extend `LRUCache` since it no longer needs to stringify and parse keys.
-- Added `getOrSet` util function to the exports.
+- Moved key stringifying to the `ClientCache` class and simplified the `LruStore` to extend `LRUCache` directly.
+- Added a `getOrSet` utility function to the exports.
