@@ -83,7 +83,7 @@ export type ClientAdapterOptions<T extends Adapter = Adapter> = OneOf<
   | {
       /**
        * The adapter to use for network interactions. The resulting client will
-       * extend the adapter's prototype, picking up all of its methods and
+       * extend the adapter's prototype, inheriting all of its methods and
        * copying all of its properties.
        */
       adapter?: T;

@@ -364,3 +364,20 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     return { contract, method };
   }
 }
+
+declare module "@delvtech/drift" {
+  interface ContractCallOptions {
+    /**
+     * Unavailable in web3.js.
+     */
+    blobs?: undefined;
+    /**
+     * Unavailable in web3.js.
+     */
+    blobVersionedHashes?: undefined;
+    /**
+     * Unavailable in web3.js.
+     */
+    maxFeePerBlobGas?: undefined;
+  }
+}

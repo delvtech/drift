@@ -69,7 +69,7 @@ Building on Ethereum often means dealing with:
   - [Cache Invalidation](#cache-invalidation)
   - [Preloading Cache Data](#preloading-cache-data)
 - [Advanced Usage](#advanced-usage)
-  - [Custom Cache Implementation](#custom-cache-implementation)
+  - [Custom Store Implementation](#custom-store-implementation)
   - [Extending Drift for Your Needs](#extending-drift-for-your-needs)
 - [Contributing](#contributing)
 - [License](#license)
@@ -570,18 +570,18 @@ contract.preloadEvents({
 
 ## Advanced Usage
 
-### Custom Cache Implementation
+### Custom Store Implementation
 
-If you have specific caching needs, you can provide your own cache
-implementation:
+If you have specific caching needs, you can provide your own store
+implementation which can be either synchronous or asynchronous.
 
 ```typescript
 import { createDrift } from "@delvtech/drift";
 import { LRUCache } from "lru-cache";
 
-const customCache = new LRUCache({ max: 500 });
+const customStore = new LRUCache({ max: 500 });
 const drift = createDrift({
-  cache: customCache,
+  store: customStore,
 });
 ```
 

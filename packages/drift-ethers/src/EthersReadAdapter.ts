@@ -319,7 +319,7 @@ declare module "@delvtech/drift" {
 
   interface TransactionReceipt {
     /**
-     *
+     * ___
      * __Note:__ The ethers.js implementation of this field maps to the
      * `gasPrice` field of a {@linkcode TransactionResponse} object.
      *
