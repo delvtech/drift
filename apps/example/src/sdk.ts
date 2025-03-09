@@ -5,10 +5,8 @@ import {
   type ReadContract,
   createDrift,
 } from "@delvtech/drift";
-import { fixed, initSync, wasmBuffer } from "@delvtech/fixed-point-wasm";
+import { fixed } from "@delvtech/fixed-point-wasm";
 import { ERC4626 } from "src/abis/Erc4626";
-
-initSync(wasmBuffer);
 
 type VaultAbi = typeof ERC4626.abi;
 

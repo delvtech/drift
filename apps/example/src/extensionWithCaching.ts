@@ -1,8 +1,6 @@
 import { type Address, createDrift } from "@delvtech/drift";
 import { erc20 } from "@delvtech/drift/testing";
-import { fixed, initSync, wasmBuffer } from "@delvtech/fixed-point-wasm";
-
-initSync(wasmBuffer);
+import { fixed } from "@delvtech/fixed-point-wasm";
 
 // Create a Drift client
 const drift = createDrift({

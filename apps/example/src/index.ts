@@ -1,8 +1,6 @@
 import { type Address, createDrift } from "@delvtech/drift";
 import { erc20 } from "@delvtech/drift/testing";
-import { fixed, initSync, wasmBuffer } from "@delvtech/fixed-point-wasm";
-
-initSync(wasmBuffer);
+import { fixed } from "@delvtech/fixed-point-wasm";
 
 const tokenAddress = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
 
