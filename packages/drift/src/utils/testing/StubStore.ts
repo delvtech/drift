@@ -103,8 +103,8 @@ export class StubStore<T> {
       // Try to compare the keys to find a partial match
       const parsedKey = JSON.parse(key);
       for (const [storedKey, storedStub] of methodStore.keyedStubs) {
-        const storedKeyData = JSON.parse(storedKey);
-        if (isMatch(parsedKey, storedKeyData)) {
+        const parsedStoredKey = JSON.parse(storedKey);
+        if (isMatch(parsedKey, parsedStoredKey)) {
           return storedStub as any;
         }
       }

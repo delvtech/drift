@@ -23,11 +23,10 @@ describe("DriftError", () => {
   it("Displays wrapped error names if not `Error`", () => {
     class CustomError extends Error {}
     const wrappedCustomError = new DriftError(new CustomError());
+    const wrappedError = new DriftError(new Error());
 
     // The custom error name is included in the stack trace.
     expect(wrappedCustomError.stack).toMatch("[CustomError]");
-
-    const wrappedError = new DriftError(new Error());
 
     // The default name, "Error", is ignored.
     expect(wrappedError.stack).not.toMatch("[Error]");
