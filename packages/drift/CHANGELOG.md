@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.6.1
+
+### Patch Changes
+
+- 0d20425: Fixed formatting for nested `DriftError`s by filtering out repeated lines.
+
 ## 0.6.0
 
 ### Minor Changes

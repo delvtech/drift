@@ -1,5 +1,7 @@
 # @delvtech/drift-web3
 
+## 0.6.1
+
 ## 0.6.0
 
 ### Patch Changes
