@@ -10,9 +10,9 @@ export interface EthersAdapterParams<
   signer?: TSigner;
 }
 
-export function ethersAdapter<const TConfig extends EthersAdapterParams>(
-  { provider, signer } = {} as TConfig,
-): EthersAdapter<TConfig["provider"], TConfig["signer"]> {
+export function ethersAdapter<const TParams extends EthersAdapterParams>(
+  { provider, signer } = {} as TParams,
+): EthersAdapter<TParams["provider"], TParams["signer"]> {
   return signer
     ? (new EthersReadWriteAdapter({ provider, signer }) as any)
     : (new EthersReadAdapter({

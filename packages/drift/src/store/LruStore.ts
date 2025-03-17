@@ -1,7 +1,7 @@
 import { LRUCache } from "lru-cache";
 import type { Store } from "src/store/types";
 
-export type LruStoreConfig<
+export type LruStoreOptions<
   V extends NonNullable<unknown> = NonNullable<unknown>,
 > = LRUCache.Options<string, V, unknown>;
 
@@ -14,7 +14,7 @@ export type LruStoreConfig<
  * @see [NPM - lru-cache](https://www.npmjs.com/package/lru-cache).
  */
 export class LruStore extends LRUCache<string, any, unknown> implements Store {
-  constructor(options: LruStoreConfig = { max: 500 }) {
+  constructor(options: LruStoreOptions = { max: 500 }) {
     super(options);
   }
 }

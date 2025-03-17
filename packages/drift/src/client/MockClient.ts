@@ -1,8 +1,8 @@
 import { MockAdapter } from "src/adapter/MockAdapter";
-import type { OxAdapterConfig } from "src/adapter/OxAdapter";
+import type { OxAdapterOptions } from "src/adapter/OxAdapter";
 import {
   type Client,
-  type ClientConfig,
+  type ClientOptions,
   createClient,
 } from "src/client/Client";
 import type { LruStore } from "src/store/LruStore";
@@ -13,10 +13,10 @@ export type MockClient<
   TStore extends Store = Store,
 > = Client<TAdapter, TStore>;
 
-export type MockClientConfig<
+export type MockClientOptions<
   TAdapter extends MockAdapter = MockAdapter,
   TStore extends Store = Store,
-> = Partial<Omit<ClientConfig<TAdapter, TStore>, keyof OxAdapterConfig>>;
+> = Partial<Omit<ClientOptions<TAdapter, TStore>, keyof OxAdapterOptions>>;
 
 export function createMockClient<
   TAdapter extends MockAdapter = MockAdapter,
@@ -25,7 +25,7 @@ export function createMockClient<
   adapter = new MockAdapter() as TAdapter,
   chainId,
   ...config
-}: MockClientConfig<TAdapter, TStore> = {}): MockClient<TAdapter, TStore> {
+}: MockClientOptions<TAdapter, TStore> = {}): MockClient<TAdapter, TStore> {
   if (!adapter.stubs.has("getChainId")) {
     adapter.onGetChainId().resolves(chainId ?? 0);
   }

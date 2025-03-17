@@ -81,7 +81,10 @@ export type {
 
 export { AbiEncoder } from "src/adapter/AbiEncoder";
 
-export { OxAdapter, type OxAdapterConfig } from "src/adapter/OxAdapter";
+export {
+  OxAdapter,
+  type OxAdapterOptions,
+} from "src/adapter/OxAdapter";
 
 export { arrayToFriendly } from "src/adapter/utils/arrayToFriendly";
 export { arrayToObject } from "src/adapter/utils/arrayToObject";
@@ -99,7 +102,7 @@ export { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData
 
 export {
   LruStore,
-  type LruStoreConfig,
+  type LruStoreOptions,
 } from "src/store/LruStore";
 export type { Store } from "src/store/types";
 export type { getOrSet } from "src/store/utils";
@@ -109,22 +112,23 @@ export type { getOrSet } from "src/store/utils";
 export {
   createClient,
   type Client,
-  type ClientAdapterOptions,
-  type ClientConfigType,
   type ClientOptions,
-  type ClientConfig,
   type ReadClient,
   type ReadWriteClient,
 } from "src/client/Client";
 
-export { type Drift, type DriftConfig, createDrift } from "src/client/Drift";
+export {
+  type Drift,
+  type DriftOptions,
+  createDrift,
+} from "src/client/Drift";
 
 export {
   createContract,
   ReadContract,
   ReadWriteContract,
   type Contract,
-  type ContractConfig,
+  type ContractOptions,
   type ContractClientOptions,
   type ContractEncodeFunctionDataArgs,
   type ContractReadArgs,
@@ -134,7 +138,7 @@ export {
 
 export {
   ClientCache,
-  type ClientCacheConfig,
+  type ClientCacheOptions,
 } from "src/client/cache/ClientCache";
 
 export {

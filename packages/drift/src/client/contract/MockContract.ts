@@ -13,14 +13,17 @@ import type {
 } from "src/adapter/types/Contract";
 import type { EventName } from "src/adapter/types/Event";
 import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
-import type { ClientOptions } from "src/client/Client";
-import { type MockClient, createMockClient } from "src/client/MockClient";
+import {
+  type MockClient,
+  type MockClientOptions,
+  createMockClient,
+} from "src/client/MockClient";
 import { ReadWriteContract } from "src/client/contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
 import type { Store } from "src/store/types";
 import type { Eval, FunctionKey, OneOf, PartialBy } from "src/utils/types";
 
-export type MockContractConfig<
+export type MockContractOptions<
   TAbi extends Abi = Abi,
   TAdapter extends MockAdapter = MockAdapter,
   TStore extends Store = Store,
@@ -46,7 +49,7 @@ export class MockContract<
     address = ZERO_ADDRESS,
     client,
     ...clientOptions
-  }: MockContractConfig<TAbi, TAdapter, TStore, TClient> = {}) {
+  }: MockContractOptions<TAbi, TAdapter, TStore, TClient> = {}) {
     super({
       abi,
       address,
@@ -131,7 +134,5 @@ export type MockContractClientOptions<
   | {
       client?: TClient;
     }
-  | ({
-      adapter?: TAdapter;
-    } & ClientOptions<TStore>)
+  | MockClientOptions<TAdapter, TStore>
 >;

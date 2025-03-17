@@ -4,7 +4,7 @@ import type { Adapter } from "src/adapter/types/Adapter";
 import type { ContractParams } from "src/adapter/types/Contract";
 import {
   type Client,
-  type ClientConfig,
+  type ClientOptions,
   createClient,
 } from "src/client/Client";
 import { type Contract, createContract } from "src/client/contract/Contract";
@@ -24,15 +24,15 @@ export type Drift<
   }
 >;
 
-export type DriftConfig<
+export type DriftOptions<
   TAdapter extends Adapter = Adapter,
   TStore extends Store = Store,
-> = ClientConfig<TAdapter, TStore>;
+> = ClientOptions<TAdapter, TStore>;
 
 export function createDrift<
   TAdapter extends Adapter = OxAdapter,
   TStore extends Store = LruStore,
->(config: DriftConfig<TAdapter, TStore> = {}): Drift<TAdapter, TStore> {
+>(config: DriftOptions<TAdapter, TStore> = {}): Drift<TAdapter, TStore> {
   return createClient(config).extend({
     contract({ abi, address }) {
       return createContract({

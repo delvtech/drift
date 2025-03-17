@@ -9,13 +9,13 @@ export { createStubTransactionReceipt } from "src/adapter/utils/testing/createSt
 
 export {
   type MockClient,
-  type MockClientConfig,
+  type MockClientOptions,
   createMockClient,
 } from "src/client/MockClient";
 
 export {
   MockContract,
-  type MockContractConfig,
+  type MockContractOptions,
   type MockContractClientOptions,
 } from "src/client/contract/MockContract";
 

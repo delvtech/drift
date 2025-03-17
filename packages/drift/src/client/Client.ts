@@ -1,4 +1,4 @@
-import { OxAdapter, type OxAdapterConfig } from "src/adapter/OxAdapter";
+import { OxAdapter, type OxAdapterOptions } from "src/adapter/OxAdapter";
 import type {
   Adapter,
   ReadAdapter,
@@ -12,7 +12,7 @@ import {
   type MethodHooks,
   MethodInterceptor,
 } from "src/client/hooks/MethodInterceptor";
-import { LruStore, type LruStoreConfig } from "src/store/LruStore";
+import { LruStore, type LruStoreOptions } from "src/store/LruStore";
 import type { Store } from "src/store/types";
 import { getOrSet } from "src/store/utils";
 import type { Eval, Extended, OneOf } from "src/utils/types";
@@ -68,36 +68,28 @@ export type ReadWriteClient<
 > = Client<TAdapter, TStore>;
 
 /**
- * Base options for configuring a {@linkcode Client}.
- */
-export interface ClientOptions<T extends Store = Store> {
-  // Accept LRU config if LRU can be assigned to T
-  store?: LruStore extends T ? T | LruStoreConfig : T;
-  chainId?: number;
-}
-
-/**
- * Options for configuring the {@linkcode Adapter} of a {@linkcode Client}.
- */
-export type ClientAdapterOptions<T extends Adapter = Adapter> = OneOf<
-  | {
-      /**
-       * The adapter to use for network interactions. The resulting client will
-       * extend the adapter's prototype, inheriting all of its methods and
-       * copying all of its properties.
-       */
-      adapter?: T;
-    }
-  | OxAdapterConfig
->;
-
-/**
  * Configuration options for creating a {@linkcode Client}.
  */
-export type ClientConfig<
+export type ClientOptions<
   TAdapter extends Adapter = Adapter,
   TStore extends Store = Store,
-> = Eval<ClientOptions<TStore> & ClientAdapterOptions<TAdapter>>;
+> = Eval<
+  OneOf<
+    | {
+        /**
+         * The adapter to use for network interactions. The resulting client will
+         * extend the adapter's prototype, inheriting all of its methods and
+         * copying all of its properties.
+         */
+        adapter?: TAdapter;
+      }
+    | OxAdapterOptions
+  > & {
+    // Accept LRU config if LRU can be assigned to T
+    store?: LruStore extends TStore ? TStore | LruStoreOptions : TStore;
+    chainId?: number;
+  }
+>;
 
 /**
  * Creates a new {@linkcode Client} instance that extends the provided adapter
@@ -110,19 +102,19 @@ export function createClient<
   TStore extends Store = LruStore,
 >({
   adapter: maybeAdapter,
-  store: storeOrConfig,
+  store: storeOrOptions,
   chainId,
-  ...adapterConfig
-}: ClientConfig<TAdapter, TStore> = {}): Client<TAdapter, TStore> {
+  ...adapterOptions
+}: ClientOptions<TAdapter, TStore> = {}): Client<TAdapter, TStore> {
   const interceptor = new MethodInterceptor<TAdapter>();
 
-  // Handle adapter config
-  const adapter = (maybeAdapter || new OxAdapter(adapterConfig)) as TAdapter;
+  // Handle adapter options
+  const adapter = (maybeAdapter || new OxAdapter(adapterOptions)) as TAdapter;
 
-  // Handle cache config
-  const isConfig = !storeOrConfig || !("clear" in storeOrConfig);
+  // Handle cache options
+  const isInstance = storeOrOptions && "clear" in storeOrOptions;
   const store = (
-    isConfig ? new LruStore(storeOrConfig) : storeOrConfig
+    isInstance ? storeOrOptions : new LruStore(storeOrOptions)
   ) as TStore;
 
   // Prepare client properties
@@ -253,11 +245,3 @@ export function createClient<
 
   return interceptor.createProxy(client);
 }
-
-/**
- * Get the {@linkcode ClientConfig} type for a given {@linkcode Client} type.
- */
-export type ClientConfigType<TClient extends Client> = ClientConfig<
-  TClient["adapter"],
-  TClient["cache"]["store"]
->;

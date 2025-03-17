@@ -22,7 +22,7 @@ import type {
 } from "src/adapter/types/Function";
 import {
   type Client,
-  type ClientConfig,
+  type ClientOptions,
   type ReadWriteClient,
   createClient,
 } from "src/client/Client";
@@ -66,12 +66,11 @@ export class ReadContract<
     abi,
     address,
     client,
-    ...clientConfig
-  }: ContractConfig<TAbi, TAdapter, TStore, TClient>) {
+    ...clientOptions
+  }: ContractOptions<TAbi, TAdapter, TStore, TClient>) {
     this.abi = abi;
     this.address = address;
-    this.client = (client ??
-      createClient(clientConfig as ClientConfig)) as TClient;
+    this.client = (client ?? createClient(clientOptions)) as TClient;
   }
 
   get cache(): TClient["cache"] {
@@ -334,13 +333,13 @@ export type ContractClientOptions<
   | {
       client?: TClient;
     }
-  | ClientConfig<TAdapter, TStore>
+  | ClientOptions<TAdapter, TStore>
 >;
 
 /**
  * Configuration options for creating a {@linkcode Contract}.
  */
-export type ContractConfig<
+export type ContractOptions<
   TAbi extends Abi = Abi,
   TAdapter extends Adapter = Adapter,
   TStore extends Store = Store,
@@ -365,15 +364,14 @@ export function createContract<
   abi,
   address,
   client: maybeClient,
-  ...clientConfig
-}: ContractConfig<TAbi, TAdapter, TStore, TClient>): Contract<
+  ...clientOptions
+}: ContractOptions<TAbi, TAdapter, TStore, TClient>): Contract<
   TAbi,
   TClient["adapter"],
   TClient["cache"]["store"],
   TClient
 > {
-  const client = (maybeClient ||
-    createClient(clientConfig as ClientConfig)) as TClient;
+  const client = (maybeClient || createClient(clientOptions)) as TClient;
 
   if (client.isReadWrite()) {
     return new ReadWriteContract({

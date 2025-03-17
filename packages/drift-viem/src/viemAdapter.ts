@@ -10,10 +10,10 @@ export interface ViemAdapterParams<
   walletClient?: TWalletClient;
 }
 
-export function viemAdapter<const TConfig extends ViemAdapterParams>({
+export function viemAdapter<const TParams extends ViemAdapterParams>({
   publicClient,
   walletClient,
-}: TConfig): ViemAdapter<TConfig["publicClient"], TConfig["walletClient"]> {
+}: TParams): ViemAdapter<TParams["publicClient"], TParams["walletClient"]> {
   return walletClient
     ? (new ViemReadWriteAdapter({ publicClient, walletClient }) as any)
     : (new ViemReadAdapter({

@@ -36,7 +36,7 @@ import { prepareParamsArray } from "src/adapter/utils/prepareParamsArray";
 import { DriftError } from "src/error/DriftError";
 import { isHexString } from "src/utils/isHexString";
 
-export interface OxAdapterConfig {
+export interface OxAdapterOptions {
   rpcUrl?: string;
   /**
    * Polling frequency in milliseconds
@@ -55,7 +55,7 @@ export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
   constructor({
     rpcUrl,
     pollingInterval = OxAdapter.DEFAULT_POLLING_INTERVAL,
-  }: OxAdapterConfig = {}) {
+  }: OxAdapterOptions = {}) {
     super();
     try {
       const provider = rpcUrl
