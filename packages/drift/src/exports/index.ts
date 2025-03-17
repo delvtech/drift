@@ -1,4 +1,4 @@
-// adapter //
+// Adapter //
 
 export type {
   Abi,
@@ -98,29 +98,29 @@ export {
 export { encodeFunctionReturn } from "src/adapter/utils/encodeFunctionReturn";
 export { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
 
-// store //
+// Store //
 
 export {
   LruStore,
   type LruStoreOptions,
 } from "src/store/LruStore";
 export type { Store } from "src/store/types";
-export type { getOrSet } from "src/store/utils";
 
-// client //
+export { getOrSet } from "src/store/utils/getOrSet";
+export { deleteMatches } from "src/store/utils/deleteMatches";
+
+// Client //
 
 export {
   createClient,
   type Client,
   type ClientOptions,
-  type ReadClient,
-  type ReadWriteClient,
 } from "src/client/Client";
 
 export {
+  createDrift,
   type Drift,
   type DriftOptions,
-  createDrift,
 } from "src/client/Drift";
 
 export {
@@ -142,6 +142,11 @@ export {
 } from "src/client/cache/ClientCache";
 
 export {
+  ContractCache,
+  type ContractCacheOptions,
+} from "src/client/contract/cache/ContractCache";
+
+export {
   MethodInterceptor,
   type MethodHooks,
 } from "src/client/hooks/MethodInterceptor";
@@ -155,11 +160,11 @@ export type {
 
 export { BlockNotFoundError } from "src/client/errors";
 
-// error //
+// DriftError //
 
 export { DriftError, type DriftErrorOptions } from "src/error/DriftError";
 
-// utils //
+// Utils //
 
 export { type Converted, convertType } from "src/utils/convertType";
 export { stringifyKey } from "src/utils/stringifyKey";
@@ -181,6 +186,6 @@ export type {
   UnionKey,
 } from "src/utils/types";
 
-// ...rest //
+// ...Rest //
 
 export { ZERO_ADDRESS } from "src/constants";

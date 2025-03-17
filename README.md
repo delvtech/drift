@@ -201,7 +201,7 @@ const txHash = await vault.write(
   },
   {
     onMined: () => {
-      vault.invalidateRead("balanceOf", { account: "0xReceiverAddress" });
+      vault.cache.invalidateRead("balanceOf", { account: "0xReceiverAddress" });
     },
   },
 );
@@ -282,8 +282,10 @@ export class ReadWriteVault extends ReadVault {
       },
       {
         // Optionally wait for the transaction to be mined and invalidate cache
-        onMined: () => {
-          this.contract.invalidateRead("balanceOf", { account });
+        onMined: (receipt) => {
+          if (receipt?.status === "success") {
+            this.contract.cache.invalidateRead("balanceOf", { account });
+          }
         },
       },
     );
@@ -508,10 +510,10 @@ const balance2 = await contract.read("balanceOf", { account });
 
 ```typescript
 // Invalidate the cache for a specific read
-contract.invalidateRead("balanceOf", { account });
+contract.cache.invalidateRead("balanceOf", { account });
 
 // Invalidate all reads matching partial arguments
-contract.invalidateReadsMatching("balanceOf");
+contract.cache.invalidateReadsMatching("balanceOf");
 
 // Let it all go...
 contract.cache.clear();
@@ -529,36 +531,21 @@ const contract = drift.contract({
   // ...
 });
 
-// Preloading read data //
+// Preloading read data
+contract.cache.preloadRead({ fn: "symbol", value: "DAI" });
 
-// Drift
-drift.cache.preloadRead({
-  abi: erc20.abi,
-  fn: "symbol",
-  value: "DAI",
-  // ...
-});
-
-// Contract
-contract.preloadRead({ fn: "symbol", value: "DAI" });
-
-// Preloading event data //
-
-// Drift
-drift.cache.preloadEvents({
-  abi: erc20.abi,
-  event: "Transfer",
-  value: [],
-  // ...
-});
-
-// Contract
-contract.preloadEvents({
+// Preloading event data
+contract.cache.preloadEvents({
   event: "Transfer",
   value: [],
   // ...
 });
 ```
+
+The `preload*` and `invalidate*` methods are available on both the `Drift.cache`
+and `Contract.cache` instances. The signatures for both match the respective
+methods on the instance; The `Contract.cache.preloadRead`  signature is the same
+as `Contract.read` and `Drift.cache.preloadRead` is the same as `Drift.read`.
 
 > [!IMPORTANT]
 >

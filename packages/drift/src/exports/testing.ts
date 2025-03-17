@@ -1,6 +1,7 @@
 // Adapter
 
 export { MockAdapter } from "src/adapter/MockAdapter";
+
 export { createStubBlock } from "src/adapter/utils/testing/createStubBlock";
 export { createStubTransaction } from "src/adapter/utils/testing/createStubTransaction";
 export { createStubTransactionReceipt } from "src/adapter/utils/testing/createStubTransactionReceipt";
@@ -13,13 +14,13 @@ export {
   createMockClient,
 } from "src/client/MockClient";
 
+export { type MockDrift, createMockDrift } from "src/client/MockDrift";
+
 export {
   MockContract,
   type MockContractOptions,
   type MockContractClientOptions,
 } from "src/client/contract/MockContract";
-
-export { type MockDrift, createMockDrift } from "src/client/MockDrift";
 
 // Artifacts
 

@@ -1,9 +1,5 @@
 import { OxAdapter, type OxAdapterOptions } from "src/adapter/OxAdapter";
-import type {
-  Adapter,
-  ReadAdapter,
-  ReadWriteAdapter,
-} from "src/adapter/types/Adapter";
+import type { Adapter, ReadWriteAdapter } from "src/adapter/types/Adapter";
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
 import { ClientCache } from "src/client/cache/ClientCache";
 import { BlockNotFoundError } from "src/client/errors";
@@ -14,7 +10,7 @@ import {
 } from "src/client/hooks/MethodInterceptor";
 import { LruStore, type LruStoreOptions } from "src/store/LruStore";
 import type { Store } from "src/store/types";
-import { getOrSet } from "src/store/utils";
+import { getOrSet } from "src/store/utils/getOrSet";
 import type { Eval, Extended, OneOf } from "src/utils/types";
 
 /**
@@ -50,22 +46,6 @@ export type Client<
   ): Promise<Block<T>>;
 } & TAdapter &
   TExtension;
-
-/**
- * A read-only {@linkcode Client} for fetching data from a network.
- */
-export type ReadClient<
-  TAdapter extends ReadAdapter = ReadAdapter,
-  TStore extends Store = Store,
-> = Client<TAdapter, TStore>;
-
-/**
- * A read-write {@linkcode Client} with access to a signer.
- */
-export type ReadWriteClient<
-  TAdapter extends ReadWriteAdapter = ReadWriteAdapter,
-  TStore extends Store = Store,
-> = Client<TAdapter, TStore>;
 
 /**
  * Configuration options for creating a {@linkcode Client}.
@@ -144,7 +124,7 @@ export function createClient<
 
     getBlock(params) {
       return getOrSet({
-        store: this.cache,
+        store: this.cache.store,
         key: this.cache.blockKey(params),
         fn: () => this.adapter.getBlock(params),
       });
@@ -162,7 +142,7 @@ export function createClient<
 
     getBalance(params) {
       return getOrSet({
-        store: this.cache,
+        store: this.cache.store,
         key: this.cache.balanceKey(params),
         fn: () => this.adapter.getBalance(params),
       });
@@ -170,7 +150,7 @@ export function createClient<
 
     getTransaction(params) {
       return getOrSet({
-        store: this.cache,
+        store: this.cache.store,
         key: this.cache.transactionKey(params),
         fn: () => this.adapter.getTransaction(params),
       });
@@ -178,7 +158,7 @@ export function createClient<
 
     waitForTransaction(params) {
       return getOrSet({
-        store: this.cache,
+        store: this.cache.store,
         key: this.cache.transactionReceiptKey(params),
         fn: () => this.adapter.waitForTransaction(params),
       });
@@ -186,7 +166,7 @@ export function createClient<
 
     call(params) {
       return getOrSet({
-        store: this.cache,
+        store: this.cache.store,
         key: this.cache.callKey(params),
         fn: () => this.adapter.call(params),
       });
@@ -195,7 +175,7 @@ export function createClient<
     getEvents({ fromBlock = "earliest", toBlock = "latest", ...restParams }) {
       const params = { fromBlock, toBlock, ...restParams };
       return getOrSet({
-        store: this.cache,
+        store: this.cache.store,
         key: this.cache.eventsKey(params),
         fn: async () => this.adapter.getEvents(params),
       });
@@ -203,7 +183,7 @@ export function createClient<
 
     read(params) {
       return getOrSet({
-        store: this.cache,
+        store: this.cache.store,
         key: this.cache.readKey(params),
         fn: () => this.adapter.read(params),
       });

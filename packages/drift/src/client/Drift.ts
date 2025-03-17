@@ -7,10 +7,20 @@ import {
   type ClientOptions,
   createClient,
 } from "src/client/Client";
+import type { ClientCache } from "src/client/cache/ClientCache";
 import { type Contract, createContract } from "src/client/contract/Contract";
+import type { HookRegistry } from "src/client/hooks/HookRegistry";
 import type { LruStore } from "src/store/LruStore";
 import type { Store } from "src/store/types";
 
+/**
+ * A client for interacting with an Ethereum network through an
+ * {@linkcode Adapter} with {@link ClientCache caching} and
+ * {@link HookRegistry hooks}.
+ *
+ * Streamlined clients for interacting with specific contracts can be created
+ * using the {@linkcode Drift.contract} method.
+ */
 export type Drift<
   TAdapter extends Adapter = Adapter,
   TStore extends Store = Store,

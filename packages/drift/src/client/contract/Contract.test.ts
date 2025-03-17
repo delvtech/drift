@@ -33,23 +33,23 @@ describe("Contract", () => {
       },
     ];
 
-    contract.preloadEvents({ event: "Transfer", value: events });
+    contract.cache.preloadEvents({ event: "Transfer", value: events });
     expect(await contract.getEvents("Transfer")).toBe(events);
   });
 
   it("Preloads reads", async () => {
     const contract = createContract({ abi, address, adapter });
-    contract.preloadRead({ fn: "symbol", value: "DAI" });
+    contract.cache.preloadRead({ fn: "symbol", value: "DAI" });
     expect(await contract.read("symbol")).toBe("DAI");
   });
 
   it("Invalidates reads", async () => {
     const contract = createContract({ abi, address, adapter });
 
-    contract.preloadRead({ fn: "symbol", value: "DAI" });
+    contract.cache.preloadRead({ fn: "symbol", value: "DAI" });
     expect(await contract.read("symbol")).toBe("DAI");
 
-    contract.invalidateRead("symbol");
+    contract.cache.invalidateRead("symbol");
     await expect(contract.read("symbol")).rejects.toThrow();
   });
 

@@ -1,4 +1,3 @@
-import isMatch from "lodash.ismatch";
 import type { Abi, Bytes } from "src/adapter/types/Abi";
 import type {
   CallParams,
@@ -24,8 +23,10 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
+import type { Client } from "src/client/Client";
 import { LruStore } from "src/store/LruStore";
 import type { Store } from "src/store/types";
+import { deleteMatches } from "src/store/utils/deleteMatches";
 import { stringifyKey } from "src/utils/stringifyKey";
 import type { MaybePromise } from "src/utils/types";
 
@@ -43,11 +44,10 @@ export type ClientCacheOptions<T extends Store = Store> = {
 };
 
 /**
- * An extended {@linkcode Store} with additional API methods for use in
- * Drift clients.
+ * A cache for drift {@linkcode Client} operations.
  */
-export class ClientCache<T extends Store = Store> implements Store {
-  namespace: PropertyKey | (() => MaybePromise<PropertyKey>);
+export class ClientCache<T extends Store = Store> {
+  namespace: ClientCacheOptions["namespace"];
   store: T;
 
   constructor({
@@ -61,24 +61,24 @@ export class ClientCache<T extends Store = Store> implements Store {
   // NOTE: These methods are all async to allow for dynamic namespace
   // resolution and external cache implementations.
 
-  // Namespace //
+  // Keys //
 
-  async resolveNamespace(): Promise<PropertyKey> {
+  async #resolveChainId(): Promise<PropertyKey> {
     if (typeof this.namespace === "function") {
       this.namespace = await this.namespace();
     }
     return this.namespace;
   }
 
-  async createNamespacedKey(...parts: NonNullable<unknown>[]): Promise<string> {
-    const namespace = await this.resolveNamespace();
+  async #createKey(...parts: NonNullable<unknown>[]): Promise<string> {
+    const namespace = await this.#resolveChainId();
     return stringifyKey([namespace, ...parts]);
   }
 
   // Block //
 
   async blockKey(block?: BlockIdentifier): Promise<string> {
-    return this.createNamespacedKey("block", { block });
+    return this.#createKey("block", { block });
   }
 
   async preloadBlock<T extends BlockIdentifier>({
@@ -95,7 +95,7 @@ export class ClientCache<T extends Store = Store> implements Store {
   // Balance //
 
   async balanceKey({ address, block }: GetBalanceParams): Promise<string> {
-    return this.createNamespacedKey("balance", { address, block });
+    return this.#createKey("balance", { address, block });
   }
 
   async preloadBalance({
@@ -116,7 +116,7 @@ export class ClientCache<T extends Store = Store> implements Store {
   // Transaction //
 
   async transactionKey({ hash }: GetTransactionParams): Promise<string> {
-    return this.createNamespacedKey("transaction", { hash });
+    return this.#createKey("transaction", { hash });
   }
 
   async preloadTransaction({
@@ -132,7 +132,7 @@ export class ClientCache<T extends Store = Store> implements Store {
   // Transaction Receipt //
 
   async transactionReceiptKey({ hash }: GetTransactionParams): Promise<string> {
-    return this.createNamespacedKey("transactionReceipt", { hash });
+    return this.#createKey("transactionReceipt", { hash });
   }
 
   async preloadTransactionReceipt({
@@ -160,7 +160,7 @@ export class ClientCache<T extends Store = Store> implements Store {
     bytecode,
     nonce,
   }: CallParams): Promise<string> {
-    return this.createNamespacedKey("call", {
+    return this.#createKey("call", {
       to,
       data,
       value,
@@ -198,7 +198,7 @@ export class ClientCache<T extends Store = Store> implements Store {
   async invalidateCallsMatching(params: CallParams): Promise<void> {
     const key = await this.callKey(params);
     console.log("key", key);
-    return this.#deleteMatches(key);
+    return deleteMatches(this.store, key);
   }
 
   // Events //
@@ -210,7 +210,7 @@ export class ClientCache<T extends Store = Store> implements Store {
     fromBlock = "earliest",
     toBlock = "latest",
   }: GetEventsParams<TAbi, TEventName>): Promise<string> {
-    return this.createNamespacedKey("events", {
+    return this.#createKey("events", {
       address,
       event,
       filter,
@@ -235,7 +235,7 @@ export class ClientCache<T extends Store = Store> implements Store {
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >({ address, args, block, fn }: PartialReadParams<TAbi, TFunctionName>) {
-    return this.createNamespacedKey("read", {
+    return this.#createKey("read", {
       address,
       args,
       block,
@@ -276,65 +276,13 @@ export class ClientCache<T extends Store = Store> implements Store {
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(params: PartialReadParams<TAbi, TFunctionName>): Promise<void> {
     const matchKey = await this.partialReadKey(params);
-    return this.#deleteMatches(matchKey);
-  }
-
-  // Store Operations //
-
-  async *entries<T>(): AsyncGenerator<[string, T]> {
-    for await (const entry of this.store.entries()) {
-      yield entry;
-    }
-  }
-
-  async find<T>(
-    predicate: (value: T, key: string) => boolean,
-  ): Promise<T | undefined> {
-    return this.store.find(predicate);
-  }
-
-  async has(key: string): Promise<boolean> {
-    return this.store.has(key);
-  }
-
-  async get<T>(key: string): Promise<T | undefined> {
-    return this.store.get(key);
-  }
-
-  async set<T>(key: string, value: T): Promise<void> {
-    return this.store.set(key, value);
-  }
-
-  async delete(key: string): Promise<void> {
-    return this.store.delete(key);
-  }
-
-  async clear(): Promise<void> {
-    return this.store.clear();
-  }
-
-  // Internal //
-
-  async #deleteMatches(matchKey: string): Promise<void> {
-    const parsedMatchKey = JSON.parse(matchKey);
-    const operations: MaybePromise<void>[] = [];
-
-    for await (const [key] of this.store.entries()) {
-      if (key === matchKey) {
-        operations.push(this.store.delete(key));
-      }
-      const parsedKey = JSON.parse(key);
-      if (isMatch(parsedKey, parsedMatchKey)) {
-        operations.push(this.store.delete(key));
-      }
-    }
-
-    await Promise.all(operations);
+    return deleteMatches(this.store, matchKey);
   }
 }
 
 // Required due to incompatibility between the conditional `FunctionArgsParam`
 // type and `Partial` type.
+// TODO: Is this still needed?
 interface PartialReadParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi, "pure" | "view"> = FunctionName<
