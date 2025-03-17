@@ -5,7 +5,7 @@ export type {
   AbiArrayType,
   AbiEntry,
   AbiEntryName,
-  AbiFriendlyType,
+  AbiSimplifiedType,
   AbiObjectType,
   AbiParameters,
   AbiParametersToObject,
@@ -86,7 +86,7 @@ export {
   type OxAdapterOptions,
 } from "src/adapter/OxAdapter";
 
-export { arrayToFriendly } from "src/adapter/utils/arrayToFriendly";
+export { arrayToSimplified } from "src/adapter/utils/arrayToSimplified";
 export { arrayToObject } from "src/adapter/utils/arrayToObject";
 export { prepareParamsArray } from "src/adapter/utils/prepareParamsArray";
 export { decodeFunctionData } from "src/adapter/utils/decodeFunctionData";

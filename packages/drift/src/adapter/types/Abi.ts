@@ -292,8 +292,8 @@ export type AbiObjectType<
 >;
 
 /**
- * Get a user-friendly primitive type for any ABI parameters, which is
- * determined by the number of parameters:
+ * Get a simplified primitive type for any ABI parameters, which is determined
+ * by the number of parameters:
  * - __Single parameter:__ the primitive type of the parameter.
  * - __Multiple parameters:__ an object with the parameter names as keys and the
  *   their primitive types as values. If a parameter has no name, it's index is
@@ -302,17 +302,17 @@ export type AbiObjectType<
  *
  * @example
  * ```ts
- * type ApproveArgs = AbiFriendlyType<Erc20Abi, "function", "approve", "inputs">;
+ * type ApproveArgs = AbiSimplifiedType<Erc20Abi, "function", "approve", "inputs">;
  * // -> { spender: `${string}`, value: bigint }
  *
- * type Balance = AbiFriendlyType<Erc20Abi, "function", "balanceOf", "outputs">;
+ * type Balance = AbiSimplifiedType<Erc20Abi, "function", "balanceOf", "outputs">;
  * // -> bigint
  *
- * type DecimalArgs = AbiFriendlyType<Erc20Abi, "function", "decimals", "inputs">;
+ * type DecimalArgs = AbiSimplifiedType<Erc20Abi, "function", "decimals", "inputs">;
  * // -> undefined
  * ```
  */
-export type AbiFriendlyType<
+export type AbiSimplifiedType<
   TAbi extends Abi,
   TItemType extends AbiItemType = AbiItemType,
   TName extends AbiEntryName<TAbi, TItemType> = AbiEntryName<TAbi, TItemType>,

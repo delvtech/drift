@@ -9,8 +9,8 @@ import type {
   AbiArrayType,
   AbiEntry,
   AbiEntryName,
-  AbiFriendlyType,
   AbiObjectType,
+  AbiSimplifiedType,
   NamedAbiParameter,
 } from "src/adapter/types/Abi";
 import { handleError } from "src/adapter/utils/internal/handleError";
@@ -47,7 +47,7 @@ export function prepareParamsArray<
   TParameterKind extends AbiParameterKind,
   TValue extends Partial<
     | AbiObjectType<TAbi, TItemType, TName, TParameterKind>
-    | AbiFriendlyType<TAbi, TItemType, TName, TParameterKind>
+    | AbiSimplifiedType<TAbi, TItemType, TName, TParameterKind>
   >,
 >({
   abi,
@@ -166,7 +166,7 @@ export function prepareParamsArray<
 
 /**
  * Checks if the given value is an unpacked value for a single parameter, i.e.,
- * the `AbiFriendlyType` of a single parameter.
+ * the `AbiSimplifiedType` of a single parameter.
  */
 function isUnpacked(value: unknown, params: readonly AbiParameter[]) {
   if (params.length !== 1) return false;

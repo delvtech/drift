@@ -3,7 +3,7 @@ import { AbiFunction } from "ox";
 import type { Abi, AbiArrayType } from "src/adapter/types/Abi";
 import type { DecodeFunctionReturnParams } from "src/adapter/types/Adapter";
 import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
-import { arrayToFriendly } from "src/adapter/utils/arrayToFriendly";
+import { arrayToSimplified } from "src/adapter/utils/arrayToSimplified";
 import { handleError } from "src/adapter/utils/internal/handleError";
 import type { Replace } from "src/utils/types";
 
@@ -52,7 +52,7 @@ export function _decodeFunctionReturn<
     const decoded = AbiFunction.decodeResult(fn, data, {
       // Ox can also decode as "Object", but will still return arrays for tuples
       // with unnamed fields, so we decode as "Array" and run through
-      // arrayToFriendly to ensure consistent output
+      // arrayToSimplified to ensure consistent output
       as: "Array",
     });
 
@@ -62,7 +62,7 @@ export function _decodeFunctionReturn<
       return decoded as FunctionReturn<TAbi, TFunctionName>;
     }
 
-    return arrayToFriendly({
+    return arrayToSimplified({
       abi,
       name: fn.name as TFunctionName,
       kind: "outputs",

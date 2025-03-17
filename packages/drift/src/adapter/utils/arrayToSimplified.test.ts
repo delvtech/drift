@@ -1,10 +1,10 @@
-import { arrayToFriendly } from "src/adapter/utils/arrayToFriendly";
+import { arrayToSimplified } from "src/adapter/utils/arrayToSimplified";
 import { IERC20 } from "src/artifacts/IERC20";
 import { describe, expect, it } from "vitest";
 
-describe("arrayToFriendly", () => {
-  it("correctly converts arrays into friendly types", async () => {
-    const transferArgsObject = arrayToFriendly({
+describe("arrayToSimplified", () => {
+  it("correctly converts arrays into simplified types", async () => {
+    const transferArgsObject = arrayToSimplified({
       abi: IERC20.abi,
       name: "transfer",
       kind: "inputs",
@@ -16,7 +16,7 @@ describe("arrayToFriendly", () => {
     });
 
     // empty parameter names (index keys)
-    const votesArgsObject = arrayToFriendly({
+    const votesArgsObject = arrayToSimplified({
       abi: exampleAbi,
       name: "votes",
       kind: "inputs",
@@ -27,7 +27,7 @@ describe("arrayToFriendly", () => {
       "1": 0n,
     });
 
-    const balanceInput = arrayToFriendly({
+    const balanceInput = arrayToSimplified({
       abi: IERC20.abi,
       name: "balanceOf",
       kind: "outputs",

@@ -2,8 +2,8 @@ import type { AbiStateMutability } from "abitype";
 import type {
   Abi,
   AbiEntry,
-  AbiFriendlyType,
   AbiObjectType,
+  AbiSimplifiedType,
 } from "src/adapter/types/Abi";
 
 /**
@@ -35,9 +35,8 @@ export type ConstructorArgs<TAbi extends Abi> = AbiObjectType<
 >;
 
 /**
- * Get a user-friendly return type for an abi function, which is determined by
- * it's outputs:
- * - __Single output:__ the type of the single output.
+ * Get a return type for an abi function, which is determined by it's outputs:
+ * - __Single output:__ the primitive type of the single output.
  * - __Multiple outputs:__ an object with the output names as keys and the
  *   output types as values.
  * - __No outputs:__ `undefined`.
@@ -45,7 +44,7 @@ export type ConstructorArgs<TAbi extends Abi> = AbiObjectType<
 export type FunctionReturn<
   TAbi extends Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = AbiFriendlyType<TAbi, "function", TFunctionName, "outputs">;
+> = AbiSimplifiedType<TAbi, "function", TFunctionName, "outputs">;
 
 /**
  * Get an object representing decoded function or constructor data from an ABI.
