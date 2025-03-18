@@ -15,12 +15,12 @@ import { MockErc20Example } from "src/artifacts/MockErc20Example";
 import { ZERO_ADDRESS } from "src/constants";
 import { describe, expect, it } from "vitest";
 
-const address = (
-  process.env.VITE_TOKEN_ADDRESS || ZERO_ADDRESS
-).toLowerCase() as AddressType;
-const rpcUrl = process.env.VITE_RPC_URL;
-
 describe("OxAdapter", () => {
+  const address = (
+    process.env.VITE_TOKEN_ADDRESS || ZERO_ADDRESS
+  ).toLowerCase() as AddressType;
+  const rpcUrl = process.env.VITE_RPC_URL;
+
   it("fetches the chain id", async () => {
     const adapter = new OxAdapter({ rpcUrl });
     const chainId = await adapter.getChainId();
