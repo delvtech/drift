@@ -57,6 +57,7 @@ export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
     pollingInterval = OxAdapter.DEFAULT_POLLING_INTERVAL,
   }: OxAdapterOptions = {}) {
     super();
+    console.log("Constructing OxAdapter with rpcUrl:", rpcUrl);
     try {
       const provider = rpcUrl
         ? RpcTransport.fromHttp(rpcUrl)
