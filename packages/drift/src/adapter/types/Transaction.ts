@@ -1,13 +1,4 @@
-import type { Address, Bytes, Hash } from "src/adapter/types/Abi";
-
-// https://github.com/ethereum/execution-apis/blob/e3d2745289bd2bb61dc8593069871be4be441952/src/schemas/transaction.yaml#L329
-export interface TransactionInfo {
-  blockHash?: Hash;
-  blockNumber?: bigint;
-  from?: Address;
-  transactionHash?: Hash;
-  transactionIndex?: bigint;
-}
+import type { Address, Bytes, Hash, HexString } from "src/adapter/types/Abi";
 
 /** Legacy + EIP-1559 compatible transaction */
 // https://github.com/ethereum/execution-apis/blob/e8727564bb74a1ebcd22a933b7b57eb7b71a11c3/src/schemas/transaction.yaml#L78
@@ -21,6 +12,15 @@ interface TransactionBase {
   gasPrice?: bigint;
   chainId?: number;
   to?: Address | null;
+}
+
+// https://github.com/ethereum/execution-apis/blob/e3d2745289bd2bb61dc8593069871be4be441952/src/schemas/transaction.yaml#L329
+export interface TransactionInfo {
+  blockHash?: Hash;
+  blockNumber?: bigint;
+  from?: Address;
+  transactionHash?: Hash;
+  transactionIndex?: bigint;
 }
 
 export interface Transaction extends TransactionBase, TransactionInfo {}
@@ -54,4 +54,57 @@ export interface TransactionReceipt extends Required<TransactionInfo> {
    * to baseFeePerGas + min(maxFeePerGas - baseFeePerGas, maxPriorityFeePerGas).
    */
   effectiveGasPrice: bigint;
+}
+
+/**
+ * Options for constructing a transaction.
+ */
+// https://github.com/ethereum/execution-apis/blob/main/src/schemas/transaction.yaml#L274
+export interface TransactionOptions {
+  type?: string;
+  nonce?: bigint;
+  from?: Address;
+  /**
+   * Gas limit
+   */
+  gas?: bigint;
+  value?: bigint;
+  /**
+   * The gas price willing to be paid by the sender in wei
+   */
+  gasPrice?: bigint;
+  /**
+   * Maximum fee per gas the sender is willing to pay to miners in wei
+   */
+  maxPriorityFeePerGas?: bigint;
+  /**
+   * The maximum total fee per gas the sender is willing to pay (includes the
+   * network / base fee and miner / priority fee) in wei
+   */
+  maxFeePerGas?: bigint;
+  /**
+   * EIP-2930 access list
+   */
+  accessList?: {
+    address: Address;
+    storageKeys: readonly HexString[];
+  }[];
+  /**
+   * Chain ID that this transaction is valid on.
+   */
+  chainId?: bigint;
+}
+
+// https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/schemas/transaction.yaml#L1
+export interface Eip4844Options {
+  /**
+   * The maximum total fee per gas the sender is willing to pay for blob gas in
+   * wei
+   */
+  maxFeePerBlobGas?: bigint;
+  /**
+   * List of versioned blob hashes associated with the transaction's EIP-4844 data blobs.
+   */
+  blobVersionedHashes?: readonly Hash[];
+  blobs?: readonly Bytes[];
 }

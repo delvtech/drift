@@ -1,16 +1,13 @@
 import type { Abi, Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
-  OnMinedParam,
-  ReadAdapter,
-  ReadWriteAdapter,
-} from "src/adapter/types/Adapter";
-import type {
-  ContractGetEventsOptions,
   ContractParams,
-  ContractReadOptions,
-  ContractWriteOptions,
-} from "src/adapter/types/Contract";
+  GetEventsOptions,
+  ReadAdapter,
+  ReadOptions,
+  ReadWriteAdapter,
+  WriteOptions,
+} from "src/adapter/types/Adapter";
 import type { EventLog, EventName } from "src/adapter/types/Event";
 import type {
   DecodedFunctionData,
@@ -18,6 +15,7 @@ import type {
   FunctionName,
   FunctionReturn,
 } from "src/adapter/types/Function";
+import type { TransactionOptions } from "src/adapter/types/Transaction";
 import {
   type Client,
   type ClientOptions,
@@ -145,7 +143,7 @@ export class ReadContract<
    */
   getEvents<TEventName extends EventName<TAbi>>(
     event: TEventName,
-    options?: ContractGetEventsOptions<TAbi, TEventName>,
+    options?: GetEventsOptions<TAbi, TEventName>,
   ): Promise<EventLog<TAbi, TEventName>[]> {
     return this.client.getEvents({
       abi: this.abi,
@@ -301,21 +299,13 @@ export type ContractReadArgs<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 > = Abi extends TAbi
-  ? [
-      functionName: TFunctionName,
-      args?: AnyObject,
-      options?: ContractReadOptions,
-    ]
+  ? [functionName: TFunctionName, args?: AnyObject, options?: ReadOptions]
   : FunctionArgs<TAbi, TFunctionName> extends EmptyObject
-    ? [
-        functionName: TFunctionName,
-        args?: EmptyObject,
-        options?: ContractReadOptions,
-      ]
+    ? [functionName: TFunctionName, args?: EmptyObject, options?: ReadOptions]
     : [
         functionName: TFunctionName,
         args: FunctionArgs<TAbi, TFunctionName>,
-        options?: ContractReadOptions,
+        options?: ReadOptions,
       ];
 
 export type ContractSimulateWriteArgs<
@@ -328,18 +318,18 @@ export type ContractSimulateWriteArgs<
   ? [
       functionName: TFunctionName,
       args?: AnyObject,
-      options?: ContractWriteOptions,
+      options?: TransactionOptions,
     ]
   : FunctionArgs<TAbi, TFunctionName> extends EmptyObject
     ? [
         functionName: TFunctionName,
         args?: EmptyObject,
-        options?: ContractWriteOptions,
+        options?: TransactionOptions,
       ]
     : [
         functionName: TFunctionName,
         args: FunctionArgs<TAbi, TFunctionName>,
-        options?: ContractWriteOptions,
+        options?: TransactionOptions,
       ];
 
 export type ContractWriteArgs<
@@ -349,19 +339,11 @@ export type ContractWriteArgs<
     "nonpayable" | "payable"
   > = FunctionName<TAbi, "nonpayable" | "payable">,
 > = Abi extends TAbi
-  ? [
-      functionName: TFunctionName,
-      args?: AnyObject,
-      options?: ContractWriteOptions & OnMinedParam,
-    ]
+  ? [functionName: TFunctionName, args?: AnyObject, options?: WriteOptions]
   : FunctionArgs<TAbi, TFunctionName> extends EmptyObject
-    ? [
-        functionName: TFunctionName,
-        args?: EmptyObject,
-        options?: ContractWriteOptions & OnMinedParam,
-      ]
+    ? [functionName: TFunctionName, args?: EmptyObject, options?: WriteOptions]
     : [
         functionName: TFunctionName,
         args: FunctionArgs<TAbi, TFunctionName>,
-        options?: ContractWriteOptions & OnMinedParam,
+        options?: WriteOptions,
       ];

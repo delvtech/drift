@@ -18,19 +18,25 @@ export type {
 } from "src/adapter/types/Abi";
 export type {
   Adapter,
+  CallOptions,
   CallParams,
+  ContractParams,
   DecodeFunctionDataParams,
   DecodeFunctionReturnParams,
   EncodeFunctionDataParams,
   EncodeFunctionReturnParams,
   FunctionArgsParam,
+  GetEventsOptions,
   GetEventsParams,
-  OnMinedParam,
+  MinedRangeBlock,
+  RangeBlock,
   ReadAdapter,
+  ReadOptions,
   ReadParams,
   ReadWriteAdapter,
   SimulateWriteParams,
   WriteAdapter,
+  WriteOptions,
   WriteParams,
 } from "src/adapter/types/Adapter";
 export type {
@@ -43,15 +49,6 @@ export type {
   MinedBlockIdentifier,
   MinedBlockProps,
 } from "src/adapter/types/Block";
-export type {
-  ContractCallOptions,
-  ContractGetEventsOptions,
-  ContractParams,
-  ContractReadOptions,
-  ContractWriteOptions,
-  MinedRangeBlock,
-  RangeBlock,
-} from "src/adapter/types/Contract";
 export type {
   EventLog,
   EventArgs,
@@ -73,9 +70,11 @@ export type {
   WaitForTransactionParams,
 } from "src/adapter/types/Network";
 export type {
+  Eip4844Options,
   MinedTransaction,
   Transaction,
   TransactionInfo,
+  TransactionOptions,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
 

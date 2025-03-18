@@ -1,7 +1,6 @@
 import type { OxAdapter } from "src/adapter/OxAdapter";
 import type { Abi } from "src/adapter/types/Abi";
-import type { Adapter } from "src/adapter/types/Adapter";
-import type { ContractParams } from "src/adapter/types/Contract";
+import type { Adapter, ContractParams } from "src/adapter/types/Adapter";
 import {
   type Client,
   type ClientOptions,

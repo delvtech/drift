@@ -10,6 +10,7 @@ import {
 import { AbiEncoder } from "src/adapter/AbiEncoder";
 import type { Abi, HexString } from "src/adapter/types/Abi";
 import type {
+  CallOptions,
   CallParams,
   GetEventsParams,
   ReadParams,
@@ -18,7 +19,6 @@ import type {
   WriteParams,
 } from "src/adapter/types/Adapter";
 import type { BlockIdentifier, BlockTag } from "src/adapter/types/Block";
-import type { ContractCallOptions } from "src/adapter/types/Contract";
 import type { EventArgs, EventName } from "src/adapter/types/Event";
 import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
 import type {
@@ -189,7 +189,7 @@ export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
         {
           to,
           data,
-          ...prepareCallParams(options),
+          ...prepareCallOptions(options),
         },
         prepareBlockParam(block),
       ],
@@ -290,7 +290,7 @@ export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
           {
             to: address,
             data,
-            ...prepareCallParams(options),
+            ...prepareCallOptions(options),
           },
         ],
       })
@@ -337,7 +337,7 @@ export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
             to: address,
             data,
             from: from ?? (await this.getSignerAddress()),
-            ...prepareCallParams(options),
+            ...prepareCallOptions(options),
           },
         ],
       })
@@ -361,7 +361,7 @@ function prepareBlockParam(block?: BlockIdentifier): HexString | BlockTag {
   return block;
 }
 
-function prepareCallParams({
+function prepareCallOptions({
   block, // omitted
   chainId,
   gas,
@@ -372,7 +372,7 @@ function prepareCallParams({
   nonce,
   value,
   ...rest
-}: ContractCallOptions) {
+}: CallOptions) {
   return {
     ...rest,
     chainId:

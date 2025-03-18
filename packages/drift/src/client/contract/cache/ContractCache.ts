@@ -1,10 +1,11 @@
 import type { Abi, Address } from "src/adapter/types/Abi";
-import type { GetEventsParams, ReadParams } from "src/adapter/types/Adapter";
 import type {
-  ContractGetEventsOptions,
   ContractParams,
-  ContractReadOptions,
-} from "src/adapter/types/Contract";
+  GetEventsOptions,
+  GetEventsParams,
+  ReadOptions,
+  ReadParams,
+} from "src/adapter/types/Adapter";
 import type { EventLog, EventName } from "src/adapter/types/Event";
 import type {
   FunctionArgs,
@@ -66,7 +67,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
 
   async eventsKey<TEventName extends EventName<TAbi>>(
     event: TEventName,
-    options?: ContractGetEventsOptions<TAbi, TEventName>,
+    options?: GetEventsOptions<TAbi, TEventName>,
   ): Promise<string> {
     return this.#clientCache.eventsKey({
       abi: this.#abi,
@@ -96,7 +97,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
   partialReadKey<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     fn?: TFunctionName,
     args?: FunctionArgs<TAbi, TFunctionName>,
-    params?: ContractReadOptions,
+    params?: ReadOptions,
   ) {
     return this.#clientCache.partialReadKey({
       abi: this.#abi,
@@ -151,7 +152,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
   >(
     fn?: TFunctionName,
     args?: FunctionArgs<TAbi, TFunctionName>,
-    params?: ContractReadOptions,
+    params?: ReadOptions,
   ) {
     return this.#clientCache.invalidateReadsMatching({
       abi: this.#abi,

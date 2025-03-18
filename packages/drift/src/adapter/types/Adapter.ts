@@ -1,12 +1,6 @@
 import type { Abi, Address, Bytes, Hash } from "src/adapter/types/Abi";
-import type {
-  ContractCallOptions,
-  ContractGetEventsOptions,
-  ContractParams,
-  ContractReadOptions,
-  ContractWriteOptions,
-} from "src/adapter/types/Contract";
-import type { EventLog, EventName } from "src/adapter/types/Event";
+import type { BlockIdentifier, BlockTag } from "src/adapter/types/Block";
+import type { EventFilter, EventLog, EventName } from "src/adapter/types/Event";
 import type {
   DecodedFunctionData,
   FunctionArgs,
@@ -14,7 +8,11 @@ import type {
   FunctionReturn,
 } from "src/adapter/types/Function";
 import type { Network } from "src/adapter/types/Network";
-import type { TransactionReceipt } from "src/adapter/types/Transaction";
+import type {
+  Eip4844Options,
+  TransactionOptions,
+  TransactionReceipt,
+} from "src/adapter/types/Transaction";
 import type { AnyObject, EmptyObject, OneOf } from "src/utils/types";
 
 export interface Adapter extends ReadAdapter, Partial<WriteAdapter> {}
@@ -76,6 +74,124 @@ export interface WriteAdapter {
 
 export interface ReadWriteAdapter extends ReadAdapter, WriteAdapter {}
 
+/**
+ * Params for a contract instance.
+ */
+export interface ContractParams<TAbi extends Abi = Abi> {
+  abi: TAbi;
+  address: Address;
+}
+
+// Events //
+
+/**
+ * A block number or tag used to specify the start or end of a range.
+ */
+export type RangeBlock = BlockTag | bigint;
+
+/**
+ * A block number or tag used to specify the start or end of a mined range.
+ */
+export type MinedRangeBlock = Exclude<RangeBlock, "pending">;
+
+/**
+ * Options for narrowing an event query.
+ */
+export interface GetEventsOptions<
+  TAbi extends Abi = Abi,
+  TEventName extends EventName<TAbi> = EventName<TAbi>,
+> {
+  filter?: EventFilter<TAbi, TEventName>;
+  fromBlock?: RangeBlock;
+  toBlock?: RangeBlock;
+}
+
+/**
+ * Params for getting events.
+ */
+export interface GetEventsParams<
+  TAbi extends Abi = Abi,
+  TEventName extends EventName<TAbi> = EventName<TAbi>,
+> extends ContractParams<TAbi>,
+    GetEventsOptions<TAbi, TEventName> {
+  event: TEventName;
+}
+
+// Read //
+
+/**
+ * The arguments parameter for a function call.
+ */
+export type FunctionArgsParam<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+> = Abi extends TAbi
+  ? {
+      args?: AnyObject;
+    }
+  : EmptyObject extends FunctionArgs<TAbi, TFunctionName>
+    ? {
+        args?: EmptyObject;
+      }
+    : {
+        args: FunctionArgs<TAbi, TFunctionName>;
+      };
+
+/**
+ * Options for reading contract state.
+ */
+// https://github.com/ethereum/execution-apis/blob/main/src/eth/execute.yaml#L1
+export interface ReadOptions<T extends BlockIdentifier = BlockIdentifier> {
+  block?: T;
+}
+
+/**
+ * Params for calling a contract function.
+ */
+export type ReadParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi, "pure" | "view"> = FunctionName<
+    TAbi,
+    "pure" | "view"
+  >,
+> = ContractParams<TAbi> & {
+  fn: TFunctionName;
+} & FunctionArgsParam<TAbi, TFunctionName> &
+  ReadOptions;
+
+// Write //
+
+export interface WriteOptions extends TransactionOptions {
+  onMined?: (receipt: TransactionReceipt | undefined) => void;
+}
+
+export type SimulateWriteParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<
+    TAbi,
+    "nonpayable" | "payable"
+  > = FunctionName<TAbi, "nonpayable" | "payable">,
+> = ContractParams<TAbi> & {
+  fn: TFunctionName;
+} & FunctionArgsParam<TAbi, TFunctionName> &
+  TransactionOptions;
+
+export type WriteParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<
+    TAbi,
+    "nonpayable" | "payable"
+  > = FunctionName<TAbi, "nonpayable" | "payable">,
+> = SimulateWriteParams<TAbi, TFunctionName> & WriteOptions;
+
+// Call //
+
+// https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/eth/execute.yaml#L1
+export interface CallOptions
+  extends ReadOptions,
+    TransactionOptions,
+    Eip4844Options {}
+
 export type CallParams = {
   data?: Bytes;
 } & OneOf<
@@ -92,64 +208,9 @@ export type CallParams = {
       bytecode: Bytes;
     }
 > &
-  ContractCallOptions;
+  CallOptions;
 
-export type FunctionArgsParam<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = Abi extends TAbi
-  ? {
-      args?: AnyObject;
-    }
-  : EmptyObject extends FunctionArgs<TAbi, TFunctionName>
-    ? {
-        args?: EmptyObject;
-      }
-    : {
-        args: FunctionArgs<TAbi, TFunctionName>;
-      };
-
-export type ReadParams<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi, "pure" | "view"> = FunctionName<
-    TAbi,
-    "pure" | "view"
-  >,
-> = ContractParams<TAbi> & {
-  fn: TFunctionName;
-} & FunctionArgsParam<TAbi, TFunctionName> &
-  ContractReadOptions;
-
-export interface GetEventsParams<
-  TAbi extends Abi = Abi,
-  TEventName extends EventName<TAbi> = EventName<TAbi>,
-> extends ContractParams<TAbi>,
-    ContractGetEventsOptions<TAbi, TEventName> {
-  event: TEventName;
-}
-
-export type SimulateWriteParams<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<
-    TAbi,
-    "nonpayable" | "payable"
-  > = FunctionName<TAbi, "nonpayable" | "payable">,
-> = ContractParams<TAbi> & {
-  fn: TFunctionName;
-} & FunctionArgsParam<TAbi, TFunctionName> &
-  ContractWriteOptions;
-
-export interface OnMinedParam {
-  onMined?: (receipt: TransactionReceipt | undefined) => void;
-}
-
-export type WriteParams<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<
-    TAbi,
-    "nonpayable" | "payable"
-  > = FunctionName<TAbi, "nonpayable" | "payable">,
-> = SimulateWriteParams<TAbi, TFunctionName> & OnMinedParam;
+// Utils //
 
 export type EncodeFunctionDataParams<
   TAbi extends Abi = Abi,

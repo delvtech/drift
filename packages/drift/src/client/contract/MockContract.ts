@@ -1,18 +1,17 @@
 import type { MockAdapter } from "src/adapter/MockAdapter";
 import type { Abi } from "src/adapter/types/Abi";
 import type {
+  ContractParams,
+  GetEventsOptions,
+  ReadOptions,
   ReadParams,
   ReadWriteAdapter,
+  WriteOptions,
   WriteParams,
 } from "src/adapter/types/Adapter";
-import type {
-  ContractGetEventsOptions,
-  ContractParams,
-  ContractReadOptions,
-  ContractWriteOptions,
-} from "src/adapter/types/Contract";
 import type { EventName } from "src/adapter/types/Event";
 import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
+import type { TransactionOptions } from "src/adapter/types/Transaction";
 import {
   type MockClient,
   type MockClientOptions,
@@ -67,7 +66,7 @@ export class MockContract<
 
   onGetEvents<TEventName extends EventName<TAbi>>(
     event: TEventName,
-    options?: ContractGetEventsOptions<TAbi, TEventName>,
+    options?: GetEventsOptions<TAbi, TEventName>,
   ) {
     return this.adapter.onGetEvents({
       abi: this.abi,
@@ -80,7 +79,7 @@ export class MockContract<
   onRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     fn: TFunctionName,
     args?: FunctionArgs<TAbi, TFunctionName>,
-    options?: ContractReadOptions,
+    options?: ReadOptions,
   ) {
     return this.adapter.onRead({
       abi: this.abi,
@@ -96,7 +95,7 @@ export class MockContract<
   >(
     fn: TFunctionName,
     args?: FunctionArgs<TAbi, TFunctionName>,
-    options?: ContractWriteOptions,
+    options?: TransactionOptions,
   ) {
     return this.adapter.onSimulateWrite({
       abi: this.abi,
@@ -114,7 +113,7 @@ export class MockContract<
   onWrite<TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">>(
     fn?: TFunctionName,
     args?: FunctionArgs<TAbi, TFunctionName>,
-    options?: ContractWriteOptions,
+    options?: WriteOptions,
   ) {
     return this.adapter.onWrite({
       abi: this.abi,

@@ -1,14 +1,12 @@
 import type { Abi, Bytes } from "src/adapter/types/Abi";
 import type {
   CallParams,
+  ContractParams,
   GetEventsParams,
+  ReadOptions,
   ReadParams,
 } from "src/adapter/types/Adapter";
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
-import type {
-  ContractParams,
-  ContractReadOptions,
-} from "src/adapter/types/Contract";
 import type { EventLog, EventName } from "src/adapter/types/Event";
 import type {
   FunctionArgs,
@@ -290,7 +288,7 @@ interface PartialReadParams<
     "pure" | "view"
   >,
 > extends ContractParams<TAbi>,
-    ContractReadOptions {
+    ReadOptions {
   fn?: TFunctionName;
   args?: FunctionArgs<TAbi, TFunctionName>;
 }
