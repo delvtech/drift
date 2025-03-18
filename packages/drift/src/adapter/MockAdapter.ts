@@ -281,12 +281,12 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
       })(params),
     );
 
-    // TODO: unit test
     if (params.onMined) {
-      writePromise.then((hash) => {
-        this.waitForTransaction({ hash }).then(params.onMined);
-        return hash;
-      });
+      (async () => {
+        const hash = await writePromise;
+        const receipt = await this.waitForTransaction({ hash });
+        params.onMined?.(receipt);
+      })();
     }
 
     return writePromise;
