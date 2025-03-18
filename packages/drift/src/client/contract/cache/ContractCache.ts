@@ -162,4 +162,9 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
       ...params,
     });
   }
+
+  // Clear
+  async clear(): Promise<void> {
+    return this.store.clear();
+  }
 }

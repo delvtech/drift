@@ -270,4 +270,9 @@ export class ClientCache<T extends Store = Store> {
     const matchKey = await this.partialReadKey(params);
     return deleteMatches(this.store, matchKey);
   }
+
+  // Clear
+  async clear(): Promise<void> {
+    return this.store.clear();
+  }
 }
