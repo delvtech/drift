@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.7.1
+
+### Patch Changes
+
+- c2c94c9: Added `clear` method back to `ClientCache` and `ContractCache`.
+
 ## 0.7.0
 
 ### Minor Changes

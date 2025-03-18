@@ -1,5 +1,7 @@
 # @delvtech/drift-viem
 
+## 0.7.1
+
 ## 0.7.0
 
 ### Patch Changes
