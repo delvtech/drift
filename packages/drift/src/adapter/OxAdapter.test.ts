@@ -11,7 +11,7 @@ import type {
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
 import { IERC20 } from "src/artifacts/IERC20";
-import { MockErc20Example } from "src/artifacts/MockErc20Example";
+import { MockERC20 } from "src/artifacts/MockERC20";
 import { ZERO_ADDRESS } from "src/constants";
 import { describe, expect, it } from "vitest";
 
@@ -134,11 +134,11 @@ describe("OxAdapter", () => {
     it("reads from bytecodes", async () => {
       const adapter = new OxAdapter({ rpcUrl });
       const data = adapter.encodeFunctionData({
-        abi: MockErc20Example.abi,
+        abi: MockERC20.abi,
         fn: "name",
       });
       const result = await adapter.call({
-        bytecode: MockErc20Example.bytecode,
+        bytecode: MockERC20.bytecode,
         data,
       });
       expect(result).toEqual(expect.stringMatching(/^0x/));

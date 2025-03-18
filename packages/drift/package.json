@@ -31,17 +31,13 @@
   },
   "typesVersions": {
     "*": {
-      ".": [
-        "./dist/index.d.ts"
-      ],
-      "testing": [
-        "./dist/testing.d.ts"
-      ]
+      ".": ["./dist/index.d.ts"],
+      "testing": ["./dist/testing.d.ts"]
     }
   },
   "scripts": {
-    "build:artifacts": "sh scripts/buildArtifacts.sh",
-    "build:ethereum": "sh scripts/buildEthereum.sh",
+    "generate:artifacts": "sh scripts/generateArtifacts.sh",
+    "generate:ethereum": "sh scripts/generateEthereum.sh",
     "build": "tsup",
     "watch": "tsup --watch",
     "test": "vitest run",
@@ -89,7 +85,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist"
-  ]
+  "files": ["dist"]
 }

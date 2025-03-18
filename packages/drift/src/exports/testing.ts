@@ -24,7 +24,7 @@ export {
 
 // Artifacts
 
-export { MockErc20Example as mockErc20 } from "src/artifacts/MockErc20Example";
+export { MockERC20 as mockErc20 } from "src/artifacts/MockERC20";
 export { IERC20 as erc20 } from "src/artifacts/IERC20";
 
 // Utils

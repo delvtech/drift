@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 /**
  * @title CodeCaller
- * @notice A contract that creates a contract and calls it
+ * @notice A contract that temporarily deploys a contract and calls it.
  */
 contract CodeCaller {
     error BytecodeDeploymentFailed();
