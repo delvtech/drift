@@ -1,7 +1,7 @@
 {
   "name": "@delvtech/drift-ethers-v5",
   "description": "Ethers.js v5 adapter for Drift",
-  "version": "1.0.0",
+  "version": "0.7.0",
   "license": "Apache-2.0",
   "type": "module",
   "main": "dist/index.cjs",
