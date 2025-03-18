@@ -1,5 +1,26 @@
 # @delvtech/drift
 
+## 0.7.0
+
+### Minor Changes
+
+- 8163702: Renamed and restructured types for clarity.
+  - `ContractCallOptions` is now `CallOptions`
+  - `ContractGetEventsOptions` is now `GetEventsOptions`
+  - `ContractReadOptions` is now `ReadOptions`
+  - `ContractWriteOptions` is now `TransactionOptions`
+  - `OnMinedParam` was combined with `TransactionOptions` in new type, `WriteOptions`.
+  - `Eip4844CallOptions` => `Eip4844Options`
+- 10d4d97: Renamed all `*Config` types to `*Options` for clarity and alignment with existing patterns.
+- 2eeb5c3: Renamed `AbiFriendlyType` to `AbiSimplifiedType`, and `arrayToFriendly` to `arrayToSimplified`.
+- bf5463d: Removed `Store` operations on the `ClientCache` and made a couple methods private to simplify the API. Store operations can still be accessed via the `store` property on the cache.
+- bf5463d: Removed cache operation methods from the `Contract` class, e.g., `preloadRead`. The methods have been moved to a new `ContractCache` class which is accessible on the contract via the `cache` property. This streamlines the API and mirrors the design of the underlying `Client` and `ClientCache`.
+
+### Patch Changes
+
+- 0d20425: Fixed formatting for nested `DriftError`s by filtering out repeated lines.
+- bf5463d: Removed unused `ReadClient` and `ReadWriteClient` type aliases.
+
 ## 0.6.0
 
 ### Minor Changes
