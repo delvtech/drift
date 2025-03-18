@@ -1,9 +1,8 @@
 import {
   type Address,
+  type Contract,
   type Drift,
-  type EventLog,
-  type ReadContract,
-  createDrift,
+  type EventLog, createDrift
 } from "@delvtech/drift";
 import { fixed } from "@delvtech/fixed-point-wasm";
 import { ERC4626 } from "src/abis/Erc4626";
@@ -12,7 +11,7 @@ type VaultAbi = typeof ERC4626.abi;
 
 /** A Read-Only Vault client */
 export class ReadVault {
-  contract: ReadContract<VaultAbi>;
+  contract: Contract<VaultAbi>;
   constructor(address: Address, drift: Drift = createDrift()) {
     this.contract = drift.contract({
       abi: ERC4626.abi,

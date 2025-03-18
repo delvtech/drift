@@ -1,8 +1,6 @@
 import type { Store } from "src/store/types";
 import type { AwaitedReturnType, MaybePromise } from "src/utils/types";
 
-// TODO: Ensure the use of `await` here doesn't break batching.
-
 /**
  * Checks the store for the key and returns the value if found, otherwise
  * executes the function and stores the result before returning it.

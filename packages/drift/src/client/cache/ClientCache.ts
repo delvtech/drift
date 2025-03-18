@@ -1,18 +1,12 @@
 import type { Abi, Bytes } from "src/adapter/types/Abi";
 import type {
   CallParams,
-  ContractParams,
   GetEventsParams,
-  ReadOptions,
   ReadParams,
 } from "src/adapter/types/Adapter";
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
 import type { EventLog, EventName } from "src/adapter/types/Event";
-import type {
-  FunctionArgs,
-  FunctionName,
-  FunctionReturn,
-} from "src/adapter/types/Function";
+import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
 import type {
   GetBalanceParams,
   GetTransactionParams,
@@ -232,7 +226,7 @@ export class ClientCache<T extends Store = Store> {
   async partialReadKey<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >({ address, args, block, fn }: PartialReadParams<TAbi, TFunctionName>) {
+  >({ address, args, block, fn }: Partial<ReadParams<TAbi, TFunctionName>>) {
     return this.#createKey("read", {
       address,
       args,
@@ -245,7 +239,7 @@ export class ClientCache<T extends Store = Store> {
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(params: ReadParams<TAbi, TFunctionName>) {
-    return this.partialReadKey(params as PartialReadParams);
+    return this.partialReadKey(params as Partial<ReadParams>);
   }
 
   async preloadRead<
@@ -272,23 +266,8 @@ export class ClientCache<T extends Store = Store> {
   async invalidateReadsMatching<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(params: PartialReadParams<TAbi, TFunctionName>): Promise<void> {
+  >(params: Partial<ReadParams<TAbi, TFunctionName>>): Promise<void> {
     const matchKey = await this.partialReadKey(params);
     return deleteMatches(this.store, matchKey);
   }
-}
-
-// Required due to incompatibility between the conditional `FunctionArgsParam`
-// type and `Partial` type.
-// TODO: Is this still needed?
-interface PartialReadParams<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi, "pure" | "view"> = FunctionName<
-    TAbi,
-    "pure" | "view"
-  >,
-> extends ContractParams<TAbi>,
-    ReadOptions {
-  fn?: TFunctionName;
-  args?: FunctionArgs<TAbi, TFunctionName>;
 }
