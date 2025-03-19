@@ -12,7 +12,7 @@ drift.hooks.on("before:read", async ({ args: [params] }) => {
   console.group("Hook: before:read");
   console.log(`Reading ${params.fn} with:`, params.args);
   const key = await drift.cache.readKey(params);
-  const cachedValue = await drift.cache.get(key);
+  const cachedValue = await drift.cache.store.get(key);
   console.log("Cached value:", cachedValue);
   console.groupEnd();
 });
