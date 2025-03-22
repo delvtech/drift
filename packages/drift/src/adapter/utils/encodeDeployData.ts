@@ -22,7 +22,7 @@ export function encodeDeployData<TAbi extends Abi>({
 }
 
 /**
- * Encodes a contract deploy call into {@linkcode Bytes} and its ABI1.
+ * Encodes a contract deploy call into {@linkcode Bytes} and its ABI.
  */
 export function prepareDeployData<TAbi extends Abi>({
   abi,

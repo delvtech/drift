@@ -21,7 +21,7 @@ export function encodeFunctionData<
 }
 
 /**
- * Encodes a function call into {@linkcode Bytes} and its ABI1.
+ * Encodes a function call into {@linkcode Bytes} and its ABI.
  */
 export function prepareFunctionData<
   TAbi extends Abi,

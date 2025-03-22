@@ -35,7 +35,6 @@ import type {
 import type { TransactionReceipt as TransactionReceiptType } from "src/adapter/types/Transaction";
 import { _decodeFunctionReturn } from "src/adapter/utils/decodeFunctionReturn";
 import { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
-import { prepareDeployData } from "src/adapter/utils/encodeDeployData";
 import { prepareFunctionData } from "src/adapter/utils/encodeFunctionData";
 import { handleError } from "src/adapter/utils/internal/handleError";
 import { prepareParamsArray } from "src/adapter/utils/prepareParamsArray";
@@ -337,7 +336,7 @@ export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
     onMined,
     ...options
   }: WriteParams<TAbi, TFunctionName>) {
-    const { data } = prepareFunctionData({
+    const data = this.encodeFunctionData({
       abi,
       fn,
       args: args as FunctionArgs<TAbi, TFunctionName>,
@@ -372,7 +371,7 @@ export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
     onMined,
     ...options
   }: DeployParams<TAbi>) {
-    const { data } = prepareDeployData({
+    const data = this.encodeDeployData({
       abi,
       bytecode,
       args: args as ConstructorArgs<TAbi>,

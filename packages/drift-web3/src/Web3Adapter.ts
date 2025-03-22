@@ -6,6 +6,7 @@ import {
   type BlockIdentifier,
   type Bytes,
   type CallParams,
+  type DeployParams,
   DriftError,
   type EventLog,
   type EventName,
@@ -131,6 +132,9 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
             receipt
               ? resolve({
                   blockHash: receipt.blockHash as Hash,
+                  contractAddress: receipt.contractAddress as
+                    | Address
+                    | undefined,
                   cumulativeGasUsed: BigInt(receipt.cumulativeGasUsed),
                   gasUsed: BigInt(receipt.gasUsed),
                   blockNumber: receipt.blockNumber ?? undefined,
@@ -305,7 +309,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
       kind: "inputs",
       value: args,
     });
-    const { method } = this._getMethod({ abi, fn, address });
+    const { method } = this.#getMethod({ abi, fn, address });
     from ??= await this.getSignerAddress();
 
     return new Promise<Hash>((resolve, reject) => {
@@ -324,6 +328,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
         req.on("receipt", (receipt) => {
           onMined({
             blockHash: receipt.blockHash as Hash,
+            contractAddress: receipt.contractAddress as Address | undefined,
             cumulativeGasUsed: receipt.cumulativeGasUsed,
             effectiveGasPrice: receipt.effectiveGasPrice ?? 0n,
             blockNumber: receipt.blockNumber,
@@ -340,7 +345,68 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     });
   }
 
-  private _getMethod({
+  async deploy<TAbi extends Abi>({
+    abi,
+    args,
+    bytecode,
+    from,
+    gas,
+    gasPrice,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+    nonce,
+    type,
+    value,
+    onMined,
+  }: DeployParams<TAbi>) {
+    const contract = new this.web3.eth.Contract(abi as readonly AbiFragment[]);
+    const { params } = prepareParamsArray({
+      abi: abi as Abi,
+      type: "constructor",
+      name: undefined,
+      kind: "inputs",
+      value: args,
+    });
+    from ??= await this.getSignerAddress();
+
+    return new Promise<Hash>((resolve, reject) => {
+      const req = contract
+        .deploy({ arguments: params, data: bytecode })
+        .send({
+          from,
+          gas: gas?.toString(),
+          gasPrice: gasPrice?.toString(),
+          maxFeePerGas: maxFeePerGas?.toString(),
+          maxPriorityFeePerGas: maxPriorityFeePerGas?.toString(),
+          nonce: nonce?.toString(),
+          type,
+          value: value?.toString(),
+        })
+        .on("error", reject)
+        .on("transactionHash", (hash) => resolve(hash as Hash));
+
+      if (onMined) {
+        req.on("receipt", (receipt) => {
+          onMined({
+            blockHash: receipt.blockHash as Hash,
+            contractAddress: receipt.contractAddress as Address | undefined,
+            cumulativeGasUsed: BigInt(receipt.cumulativeGasUsed),
+            effectiveGasPrice: BigInt(receipt.effectiveGasPrice ?? 0n),
+            blockNumber: BigInt(receipt.blockNumber),
+            from: receipt.from as Address,
+            logsBloom: receipt.logsBloom as Hash,
+            status: receipt.status ? "success" : "reverted",
+            gasUsed: BigInt(receipt.gasUsed),
+            to: receipt.to as Address,
+            transactionHash: receipt.transactionHash as Hash,
+            transactionIndex: BigInt(receipt.transactionIndex),
+          });
+        });
+      }
+    });
+  }
+
+  #getMethod({
     abi,
     fn,
     address,

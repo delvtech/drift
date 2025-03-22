@@ -169,7 +169,7 @@ export { DriftError, type DriftErrorOptions } from "src/error/DriftError";
 export { type Converted, convertType } from "src/utils/convertType";
 export { stringifyKey } from "src/utils/stringifyKey";
 export { getRandomHex } from "src/utils/testing/getRandomHex";
-export { isHexString } from "src/utils/isHexString";
+export { isHexString, HEX_REGEX } from "src/utils/isHexString";
 export type {
   AnyFunction,
   AnyObject,

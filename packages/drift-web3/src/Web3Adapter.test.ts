@@ -1,13 +1,14 @@
-import type {
-  Address,
-  Block,
-  DecodedFunctionData,
-  EventLog,
-  FunctionArgs,
-  Hash,
-  TransactionReceipt,
+import {
+  type Address,
+  type Block,
+  type DecodedFunctionData,
+  type EventLog,
+  type FunctionArgs,
+  HEX_REGEX,
+  type Hash,
+  type TransactionReceipt,
 } from "@delvtech/drift";
-import { erc20, mockErc20 } from "@delvtech/drift/testing";
+import { erc20, mockErc20, testToken } from "@delvtech/drift/testing";
 import { Web3Adapter } from "src/Web3Adapter";
 import { describe, expect, it } from "vitest";
 import Web3 from "web3";
@@ -70,7 +71,7 @@ describe("Web3Adapter", () => {
       blockNumber: expect.any(BigInt),
       from: expect.any(String),
       hash: expect.any(String),
-      to: expect.any(String),
+      to: expect.toBeOneOf([expect.any(String), undefined]),
       transactionIndex: expect.any(BigInt),
     });
   });
@@ -96,7 +97,7 @@ describe("Web3Adapter", () => {
       gasUsed: expect.any(BigInt),
       logsBloom: expect.any(String),
       status: expect.stringMatching(/^(success|reverted)$/),
-      to: expect.any(String),
+      to: expect.toBeOneOf([expect.any(String), undefined]),
       transactionHash: expect.any(String),
       transactionIndex: expect.any(BigInt),
     } as TransactionReceipt);
@@ -185,6 +186,38 @@ describe("Web3Adapter", () => {
       },
     });
     expect(success).toBeTypeOf("boolean");
+  });
+
+  it("deploys contracts", async () => {
+    const adapter = new Web3Adapter(web3);
+
+    const hash = await adapter.deploy({
+      abi: testToken.abi,
+      bytecode: testToken.bytecode,
+      args: {
+        decimals_: 18,
+        initialSupply: 123n,
+      },
+    });
+    const receipt = await adapter.waitForTransaction({ hash });
+
+    expect(hash).toBeTypeOf("string");
+    expect(receipt).toMatchObject({
+      contractAddress: expect.stringMatching(HEX_REGEX),
+    } satisfies Partial<TransactionReceipt>);
+  });
+
+  it("encodes deploy data", async () => {
+    const adapter = new Web3Adapter(web3);
+    const encoded = adapter.encodeDeployData({
+      abi: testToken.abi,
+      bytecode: testToken.bytecode,
+      args: {
+        decimals_: 18,
+        initialSupply: 123n,
+      },
+    });
+    expect(encoded).toBeTypeOf("string");
   });
 
   it("encodes function data", async () => {
