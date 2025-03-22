@@ -1,9 +1,9 @@
 import {
   type Abi,
-  type FunctionName,
-  type ReadWriteAdapter,
+  type DeployParams,
+  type FunctionName, type ReadWriteAdapter,
   type WriteParams,
-  prepareParamsArray,
+  prepareParamsArray
 } from "@delvtech/drift";
 import {
   ViemReadAdapter,
@@ -78,6 +78,45 @@ export class ViemReadWriteAdapter<
       functionName: params.fn,
       args: prepared.params,
       accessList: params.accessList,
+      account: params.from ?? (await this.getSignerAddress()) ?? null,
+      gas: params.gas,
+      nonce: params.nonce !== undefined ? Number(params.nonce) : undefined,
+      value: params.value,
+      chain: this.walletClient.chain,
+      type: params.type as any,
+      ...gasPriceOptions,
+    });
+
+    if (params.onMined) {
+      this.waitForTransaction({ hash }).then(params.onMined);
+    }
+
+    return hash;
+  }
+
+  async deploy<TAbi extends Abi>(params: DeployParams<TAbi>) {
+    const prepared = prepareParamsArray({
+      abi: params.abi as Abi,
+      type: "constructor",
+      name: undefined,
+      kind: "inputs",
+      value: params.args,
+    });
+
+    const gasPriceOptions =
+      params.gasPrice !== undefined
+        ? {
+            gasPrice: params.gasPrice,
+          }
+        : {
+            maxFeePerGas: params.maxFeePerGas,
+            maxPriorityFeePerGas: params.maxPriorityFeePerGas,
+          };
+
+    const hash = await this.walletClient.deployContract({
+      abi: params.abi as Abi,
+      bytecode: params.bytecode,
+      args: prepared.params,
       account: params.from ?? (await this.getSignerAddress()) ?? null,
       gas: params.gas,
       nonce: params.nonce !== undefined ? Number(params.nonce) : undefined,

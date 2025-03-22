@@ -1,15 +1,16 @@
-import type {
-  Block,
-  DecodedFunctionData,
-  EventLog,
-  FunctionArgs,
-  Transaction,
-  TransactionReceipt,
+import {
+  type Block,
+  type DecodedFunctionData,
+  type EventLog,
+  type FunctionArgs,
+  HEX_REGEX,
+  type Transaction,
+  type TransactionReceipt,
 } from "@delvtech/drift";
-import { mockErc20 } from "@delvtech/drift/testing";
+import { mockErc20, testToken } from "@delvtech/drift/testing";
 import { ViemReadAdapter } from "src/ViemReadAdapter";
 import { http, type Address, createPublicClient, erc20Abi } from "viem";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 const { VITE_RPC_URL = "", VITE_TOKEN_ADDRESS = "0x0" } = process.env;
 const publicClient = createPublicClient({
@@ -63,7 +64,7 @@ describe("ViemReadAdapter", () => {
       blockNumber: expect.any(BigInt),
       from: expect.any(String),
       hash: expect.any(String),
-      to: expect.any(String),
+      to: expect.toBeOneOf([expect.any(String), undefined]),
       transactionIndex: expect.any(BigInt),
     } as Transaction);
   });
@@ -177,6 +178,19 @@ describe("ViemReadAdapter", () => {
     expect(balance).toBeTypeOf("boolean");
   });
 
+  it("encodes deploy data", async () => {
+    const adapter = new ViemReadAdapter({ publicClient });
+    const encoded = adapter.encodeDeployData({
+      abi: testToken.abi,
+      bytecode: testToken.bytecode,
+      args: {
+        decimals_: 18,
+        initialSupply: 123n,
+      },
+    });
+    assert(HEX_REGEX.test(encoded));
+  });
+
   it("encodes function data", async () => {
     const adapter = new ViemReadAdapter({ publicClient });
     const encoded = adapter.encodeFunctionData({
@@ -187,7 +201,7 @@ describe("ViemReadAdapter", () => {
         recipient: address,
       },
     });
-    expect(encoded).toBeTypeOf("string");
+    assert(HEX_REGEX.test(encoded));
   });
 
   it("encodes function return data", async () => {

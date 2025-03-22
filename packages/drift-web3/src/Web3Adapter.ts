@@ -132,14 +132,14 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
             receipt
               ? resolve({
                   blockHash: receipt.blockHash as Hash,
+                  blockNumber: receipt.blockNumber ?? undefined,
                   contractAddress: receipt.contractAddress as
                     | Address
                     | undefined,
                   cumulativeGasUsed: BigInt(receipt.cumulativeGasUsed),
-                  gasUsed: BigInt(receipt.gasUsed),
-                  blockNumber: receipt.blockNumber ?? undefined,
                   effectiveGasPrice: receipt.effectiveGasPrice || 0n,
                   from: receipt.from as Address,
+                  gasUsed: BigInt(receipt.gasUsed),
                   logsBloom: receipt.logsBloom as Hash,
                   status: receipt.status ? "success" : "reverted",
                   to: receipt.to as Address,

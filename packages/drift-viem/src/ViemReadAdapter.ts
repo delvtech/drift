@@ -118,12 +118,15 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
       from: tx.from,
       chainId: tx.chainId,
       hash: tx.hash,
-      to: tx.to,
+      to: tx.to ?? undefined,
       transactionIndex: BigInt(tx.transactionIndex),
     };
   }
 
-  async waitForTransaction({ hash, timeout }: WaitForTransactionParams) {
+  async waitForTransaction({
+    hash,
+    timeout,
+  }: WaitForTransactionParams): Promise<TransactionReceipt> {
     const receipt = await this.publicClient.waitForTransactionReceipt({
       hash,
       timeout,
@@ -131,6 +134,7 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
     return {
       blockHash: receipt.blockHash,
       blockNumber: receipt.blockNumber,
+      contractAddress: receipt.contractAddress ?? undefined,
       cumulativeGasUsed: receipt.cumulativeGasUsed,
       effectiveGasPrice: receipt.effectiveGasPrice,
       from: receipt.from,
@@ -140,7 +144,7 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
       to: receipt.to ?? undefined,
       transactionHash: receipt.transactionHash,
       transactionIndex: BigInt(receipt.transactionIndex),
-    } as TransactionReceipt;
+    };
   }
 
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({

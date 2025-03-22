@@ -10,7 +10,7 @@ import {
 } from "@delvtech/drift";
 import { erc20, mockErc20, testToken } from "@delvtech/drift/testing";
 import { Web3Adapter } from "src/Web3Adapter";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import Web3 from "web3";
 
 const { VITE_RPC_URL = "", VITE_TOKEN_ADDRESS = "0x0" } = process.env;
@@ -217,7 +217,7 @@ describe("Web3Adapter", () => {
         initialSupply: 123n,
       },
     });
-    expect(encoded).toBeTypeOf("string");
+    assert(HEX_REGEX.test(encoded));
   });
 
   it("encodes function data", async () => {
@@ -230,7 +230,7 @@ describe("Web3Adapter", () => {
         to: address,
       },
     });
-    expect(encoded).toBeTypeOf("string");
+    assert(HEX_REGEX.test(encoded));
   });
 
   it("encodes function return data", async () => {
