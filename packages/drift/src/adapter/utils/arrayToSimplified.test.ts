@@ -27,13 +27,13 @@ describe("arrayToSimplified", () => {
       "1": 0n,
     });
 
-    const balanceInput = arrayToSimplified({
+    const balanceOfOutput = arrayToSimplified({
       abi: IERC20.abi,
       name: "balanceOf",
       kind: "outputs",
       values: [123n],
     });
-    expect(balanceInput).toEqual(123n);
+    expect(balanceOfOutput).toEqual(123n);
   });
 });
 

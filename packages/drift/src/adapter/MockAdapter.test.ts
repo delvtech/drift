@@ -1,6 +1,7 @@
 import { MockAdapter } from "src/adapter/MockAdapter";
 import type {
   CallParams,
+  DeployParams,
   GetEventsParams,
   ReadParams,
   WriteParams,
@@ -9,10 +10,10 @@ import type { EventLog } from "src/adapter/types/Event";
 import { createStubBlock } from "src/adapter/utils/testing/createStubBlock";
 import { createStubTransaction } from "src/adapter/utils/testing/createStubTransaction";
 import { createStubTransactionReceipt } from "src/adapter/utils/testing/createStubTransactionReceipt";
-import { IERC20 } from "src/artifacts/IERC20";
+import { TestToken } from "src/artifacts/TestToken";
 import { describe, expect, it, vi } from "vitest";
 
-type Erc20Abi = typeof IERC20.abi;
+type TestTokenAbi = typeof TestToken.abi;
 
 describe("MockAdapter", () => {
   describe("getChainId", () => {
@@ -247,7 +248,7 @@ describe("MockAdapter", () => {
       let error: unknown;
       try {
         await adapter.getEvents({
-          abi: IERC20.abi,
+          abi: TestToken.abi,
           address: "0x",
           event: "Transfer",
         });
@@ -259,17 +260,17 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
-      const params1: GetEventsParams<Erc20Abi, "Transfer"> = {
-        abi: IERC20.abi,
+      const params1: GetEventsParams<TestTokenAbi, "Transfer"> = {
+        abi: TestToken.abi,
         address: "0x1",
         event: "Transfer",
         filter: { from: "0x1" },
       };
-      const params2: GetEventsParams<Erc20Abi, "Transfer"> = {
+      const params2: GetEventsParams<TestTokenAbi, "Transfer"> = {
         ...params1,
         filter: { from: "0x2" },
       };
-      const events1: EventLog<Erc20Abi, "Transfer">[] = [
+      const events1: EventLog<TestTokenAbi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -279,7 +280,7 @@ describe("MockAdapter", () => {
           },
         },
       ];
-      const events2: EventLog<Erc20Abi, "Transfer">[] = [
+      const events2: EventLog<TestTokenAbi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -297,7 +298,7 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
-      const events: EventLog<Erc20Abi, "Transfer">[] = [
+      const events: EventLog<TestTokenAbi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -309,13 +310,13 @@ describe("MockAdapter", () => {
       ];
       adapter
         .onGetEvents({
-          abi: IERC20.abi,
+          abi: TestToken.abi,
           event: "Transfer",
         })
         .resolves(events);
       expect(
         await adapter.getEvents({
-          abi: IERC20.abi,
+          abi: TestToken.abi,
           address: "0x1",
           event: "Transfer",
           filter: { from: "0x1" },
@@ -330,7 +331,7 @@ describe("MockAdapter", () => {
       let error: unknown;
       try {
         await adapter.read({
-          abi: IERC20.abi,
+          abi: TestToken.abi,
           address: "0x",
           fn: "symbol",
         });
@@ -342,13 +343,13 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
-      const params1: ReadParams<Erc20Abi, "allowance"> = {
-        abi: IERC20.abi,
+      const params1: ReadParams<TestTokenAbi, "allowance"> = {
+        abi: TestToken.abi,
         address: "0x1",
         fn: "allowance",
         args: { owner: "0x1", spender: "0x1" },
       };
-      const params2: ReadParams<Erc20Abi, "allowance"> = {
+      const params2: ReadParams<TestTokenAbi, "allowance"> = {
         ...params1,
         args: { owner: "0x2", spender: "0x2" },
       };
@@ -362,16 +363,16 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       adapter
         .onRead({
-          abi: IERC20.abi,
+          abi: TestToken.abi,
           fn: "balanceOf",
         })
         .resolves(123n);
       expect(
         await adapter.read({
-          abi: IERC20.abi,
+          abi: TestToken.abi,
           address: "0x",
           fn: "balanceOf",
-          args: { account: "0x" },
+          args: { owner: "0x" },
         }),
       ).toBe(123n);
     });
@@ -383,7 +384,7 @@ describe("MockAdapter", () => {
       let error: unknown;
       try {
         await adapter.simulateWrite({
-          abi: IERC20.abi,
+          abi: TestToken.abi,
           address: "0x",
           fn: "transfer",
           args: { to: "0x", amount: 123n },
@@ -396,13 +397,13 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const params1: WriteParams<Erc20Abi, "transfer"> = {
-        abi: IERC20.abi,
+      const params1: WriteParams<TestTokenAbi, "transfer"> = {
+        abi: TestToken.abi,
         address: "0x1",
         fn: "transfer",
         args: { to: "0x1", amount: 123n },
       };
-      const params2: WriteParams<Erc20Abi, "transfer"> = {
+      const params2: WriteParams<TestTokenAbi, "transfer"> = {
         ...params1,
         args: { to: "0x2", amount: 123n },
       };
@@ -416,13 +417,13 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       adapter
         .onSimulateWrite({
-          abi: IERC20.abi,
+          abi: TestToken.abi,
           fn: "transfer",
         })
         .resolves(true);
       expect(
         await adapter.simulateWrite({
-          abi: IERC20.abi,
+          abi: TestToken.abi,
           address: "0x1",
           fn: "transfer",
           args: { to: "0x1", amount: 123n },
@@ -437,7 +438,7 @@ describe("MockAdapter", () => {
       let error: unknown;
       try {
         await adapter.write({
-          abi: IERC20.abi,
+          abi: TestToken.abi,
           address: "0x",
           fn: "transfer",
           args: { to: "0x", amount: 123n },
@@ -450,13 +451,13 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
-      const params1: WriteParams<Erc20Abi, "transfer"> = {
-        abi: IERC20.abi,
+      const params1: WriteParams<TestTokenAbi, "transfer"> = {
+        abi: TestToken.abi,
         address: "0x",
         fn: "transfer",
         args: { to: "0x1", amount: 123n },
       };
-      const params2: WriteParams<Erc20Abi, "transfer"> = {
+      const params2: WriteParams<TestTokenAbi, "transfer"> = {
         ...params1,
         args: { to: "0x2", amount: 123n },
       };
@@ -470,13 +471,13 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       adapter
         .onWrite({
-          abi: IERC20.abi,
+          abi: TestToken.abi,
           fn: "transfer",
         })
         .resolves("0x123");
       expect(
         await adapter.write({
-          abi: IERC20.abi,
+          abi: TestToken.abi,
           address: "0x",
           fn: "transfer",
           args: { to: "0x", amount: 123n },
@@ -489,7 +490,7 @@ describe("MockAdapter", () => {
       adapter.onWrite().resolves("0x123");
       expect(
         await adapter.write({
-          abi: IERC20.abi,
+          abi: TestToken.abi,
           address: "0x",
           fn: "transfer",
           args: { to: "0x", amount: 123n },
@@ -506,10 +507,105 @@ describe("MockAdapter", () => {
       adapter.onWaitForTransaction().resolves(receipt);
 
       const hash = await adapter.write({
-        abi: IERC20.abi,
+        abi: TestToken.abi,
         address: "0x",
         fn: "transfer",
         args: { to: "0x", amount: 123n },
+        onMined,
+      });
+      await adapter.waitForTransaction({ hash });
+
+      expect(onMined).toHaveBeenCalledWith(receipt);
+    });
+  });
+
+  describe("deploy", () => {
+    it("Throws an error by default", async () => {
+      const adapter = new MockAdapter();
+      let error: unknown;
+      try {
+        await adapter.deploy({
+          abi: TestToken.abi,
+          bytecode: "0x",
+          args: {
+            decimals_: 18,
+            initialSupply: 0n,
+          },
+        });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
+    });
+
+    it("Can be stubbed with specific args", async () => {
+      const adapter = new MockAdapter();
+      const params1: DeployParams<TestTokenAbi> = {
+        abi: TestToken.abi,
+        bytecode: "0x",
+        args: {
+          decimals_: 18,
+          initialSupply: 0n,
+        },
+      };
+      const params2: DeployParams<TestTokenAbi> = {
+        ...params1,
+        args: {
+          decimals_: 18,
+          initialSupply: 1n,
+        },
+      };
+      adapter.onDeploy(params1).resolves("0x1");
+      adapter.onDeploy(params2).resolves("0x2");
+      expect(await adapter.deploy(params1)).toBe("0x1");
+      expect(await adapter.deploy(params2)).toBe("0x2");
+    });
+
+    it("Can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      adapter.onDeploy({ abi: TestToken.abi }).resolves("0x123");
+      expect(
+        await adapter.deploy({
+          abi: TestToken.abi,
+          bytecode: "0x",
+          args: {
+            decimals_: 18,
+            initialSupply: 0n,
+          },
+        }),
+      ).toBe("0x123");
+    });
+
+    it("Can be called with args after being stubbed with no args", async () => {
+      const adapter = new MockAdapter();
+      adapter.onDeploy().resolves("0x123");
+      expect(
+        await adapter.deploy({
+          abi: TestToken.abi,
+          bytecode: "0x",
+          args: {
+            decimals_: 18,
+            initialSupply: 0n,
+          },
+        }),
+      ).toBe("0x123");
+    });
+
+    it("Calls onMined callbacks with the receipt", async () => {
+      const adapter = new MockAdapter();
+      const receipt = createStubTransactionReceipt();
+      const onMined = vi.fn();
+
+      adapter.onDeploy().resolves("0x123");
+      adapter.onWaitForTransaction().resolves(receipt);
+
+      const hash = await adapter.deploy({
+        abi: TestToken.abi,
+        bytecode: "0x",
+        args: {
+          decimals_: 18,
+          initialSupply: 0n,
+        },
         onMined,
       });
       await adapter.waitForTransaction({ hash });

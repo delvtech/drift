@@ -1,7 +1,7 @@
 import type { AbiStateMutability } from "abitype";
 import type {
   Abi,
-  AbiEntry,
+  AbiEntryName,
   AbiObjectType,
   AbiSimplifiedType,
 } from "src/adapter/types/Abi";
@@ -12,9 +12,7 @@ import type {
 export type FunctionName<
   TAbi extends Abi,
   TStateMutability extends AbiStateMutability = AbiStateMutability,
-> = Abi extends TAbi
-  ? string
-  : AbiEntry<TAbi, "function", string, TStateMutability>["name"];
+> = AbiEntryName<TAbi, "function", TStateMutability>;
 
 /**
  * Get an object type for an abi function's arguments.

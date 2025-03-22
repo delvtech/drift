@@ -64,13 +64,9 @@ export function arrayToObject<
   abi: TAbi;
   name: TName;
   kind: TParameterKind;
-  values?: Abi extends TAbi
-    ? readonly unknown[] // <- fallback for unknown ABI type
-    : Partial<AbiArrayType<TAbi, TItemType, TName, TParameterKind>>;
+  values?: Partial<AbiArrayType<TAbi, TItemType, TName, TParameterKind>>;
 }): AbiObjectType<TAbi, TItemType, TName, TParameterKind> {
-  const item = AbiItem.fromAbi(abi, name as any, {
-    args: values,
-  });
+  const item = AbiItem.fromAbi(abi, name as any, { args: values } as any);
 
   if (!item || !(kind in item)) {
     return {} as AbiObjectType<TAbi, TItemType, TName, TParameterKind>;

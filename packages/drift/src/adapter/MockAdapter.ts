@@ -2,6 +2,7 @@ import { AbiEncoder } from "src/adapter/AbiEncoder";
 import type { Abi, Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   CallParams,
+  DeployParams,
   GetEventsParams,
   ReadParams,
   ReadWriteAdapter,
@@ -304,5 +305,36 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     return this.stubs.get<[], Address>({
       method: "getSignerAddress",
     })();
+  }
+
+  // deploy //
+
+  onDeploy<TAbi extends Abi>(
+    params?: PartialBy<DeployParams<TAbi>, "args" | "bytecode">,
+  ) {
+    return this.stubs.get<[DeployParams<TAbi>], Promise<Hash>>({
+      method: "deploy",
+      key: params ? this.createKey(params) : undefined,
+    });
+  }
+
+  async deploy<TAbi extends Abi>(params: DeployParams<TAbi>) {
+    const deployPromise = Promise.resolve(
+      this.stubs.get<[DeployParams<TAbi>], Promise<Hash>>({
+        method: "deploy",
+        key: this.createKey(params),
+        matchPartial: true,
+      })(params),
+    );
+
+    if (params.onMined) {
+      (async () => {
+        const hash = await deployPromise;
+        const receipt = await this.waitForTransaction({ hash });
+        params.onMined?.(receipt);
+      })();
+    }
+
+    return deployPromise;
   }
 }

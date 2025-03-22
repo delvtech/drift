@@ -1,5 +1,6 @@
 import { OxAdapter } from "src/adapter/OxAdapter";
 import type { Address as AddressType } from "src/adapter/types/Abi";
+import type { ReadParams } from "src/adapter/types/Adapter";
 import type { Block } from "src/adapter/types/Block";
 import type { EventLog } from "src/adapter/types/Event";
 import type {
@@ -10,9 +11,9 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
-import { IERC20 } from "src/artifacts/IERC20";
-import { MockERC20 } from "src/artifacts/MockERC20";
+import { TestToken } from "src/artifacts/TestToken";
 import { ZERO_ADDRESS } from "src/constants";
+import { HEX_REGEX } from "src/utils/isHexString";
 import { describe, expect, it } from "vitest";
 
 describe("OxAdapter", () => {
@@ -81,7 +82,6 @@ describe("OxAdapter", () => {
         blockNumber: expect.any(BigInt),
         from: expect.any(String),
         hash: expect.any(String),
-        to: expect.any(String),
         transactionIndex: expect.any(BigInt),
       } as Transaction),
     );
@@ -121,7 +121,7 @@ describe("OxAdapter", () => {
     it("reads from deployed contracts", async () => {
       const adapter = new OxAdapter({ rpcUrl });
       const data = adapter.encodeFunctionData({
-        abi: IERC20.abi,
+        abi: TestToken.abi,
         fn: "symbol",
       });
       const result = await adapter.call({
@@ -134,11 +134,11 @@ describe("OxAdapter", () => {
     it("reads from bytecodes", async () => {
       const adapter = new OxAdapter({ rpcUrl });
       const data = adapter.encodeFunctionData({
-        abi: MockERC20.abi,
+        abi: TestToken.abi,
         fn: "name",
       });
       const result = await adapter.call({
-        bytecode: MockERC20.bytecode,
+        bytecode: TestToken.bytecode,
         data,
       });
       expect(result).toEqual(expect.stringMatching(/^0x/));
@@ -149,7 +149,7 @@ describe("OxAdapter", () => {
     const adapter = new OxAdapter({ rpcUrl });
     const currentBlock = await adapter.getBlockNumber();
     const events = await adapter.getEvents({
-      abi: IERC20.abi,
+      abi: TestToken.abi,
       address,
       event: "Transfer",
       fromBlock: currentBlock - 100n,
@@ -161,7 +161,7 @@ describe("OxAdapter", () => {
         blockNumber: expect.any(BigInt),
         data: expect.any(String),
         transactionHash: expect.any(String),
-      } as EventLog<typeof IERC20.abi, "Transfer">),
+      } as EventLog<typeof TestToken.abi, "Transfer">),
     );
   });
 
@@ -169,7 +169,7 @@ describe("OxAdapter", () => {
     it("reads from contracts", async () => {
       const adapter = new OxAdapter({ rpcUrl });
       const symbol = await adapter.read({
-        abi: IERC20.abi,
+        abi: TestToken.abi,
         address,
         fn: "symbol",
       });
@@ -179,19 +179,21 @@ describe("OxAdapter", () => {
     it("reads from contracts with args", async () => {
       const adapter = new OxAdapter({ rpcUrl });
       const balance = await adapter.read({
-        abi: IERC20.abi,
+        abi: TestToken.abi,
         address,
         fn: "balanceOf",
-        args: { account: address },
+        args: { owner: address },
       });
       expect(balance).toBeTypeOf("bigint");
     });
+
+    type params = ReadParams<typeof TestToken.abi>;
   });
 
   it("simulates writes to a contracts", async () => {
     const adapter = new OxAdapter({ rpcUrl });
     const balance = await adapter.simulateWrite({
-      abi: IERC20.abi,
+      abi: TestToken.abi,
       address,
       fn: "transfer",
       args: {
@@ -202,10 +204,42 @@ describe("OxAdapter", () => {
     expect(balance).toBeTypeOf("boolean");
   });
 
+  it("deploys contracts", async () => {
+    const adapter = new OxAdapter({ rpcUrl });
+
+    const hash = await adapter.deploy({
+      abi: TestToken.abi,
+      bytecode: TestToken.bytecode,
+      args: {
+        decimals_: 18,
+        initialSupply: 123n,
+      },
+    });
+    const receipt = await adapter.waitForTransaction({ hash });
+
+    expect(hash).toBeTypeOf("string");
+    expect(receipt).toMatchObject({
+      contractAddress: expect.stringMatching(HEX_REGEX),
+    } satisfies Partial<TransactionReceipt>);
+  });
+
+  it("encodes deploy data", async () => {
+    const adapter = new OxAdapter({ rpcUrl });
+    const encoded = adapter.encodeDeployData({
+      abi: TestToken.abi,
+      bytecode: TestToken.bytecode,
+      args: {
+        decimals_: 18,
+        initialSupply: 123n,
+      },
+    });
+    expect(encoded).toBeTypeOf("string");
+  });
+
   it("encodes function data", async () => {
     const adapter = new OxAdapter({ rpcUrl });
     const encoded = adapter.encodeFunctionData({
-      abi: IERC20.abi,
+      abi: TestToken.abi,
       fn: "transfer",
       args: {
         amount: 123n,

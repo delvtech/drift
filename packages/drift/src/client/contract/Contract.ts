@@ -10,6 +10,7 @@ import type {
 } from "src/adapter/types/Adapter";
 import type { EventLog, EventName } from "src/adapter/types/Event";
 import type {
+  ConstructorArgs,
   DecodedFunctionData,
   FunctionArgs,
   FunctionName,
@@ -86,6 +87,19 @@ export class ReadContract<
   }
 
   /**
+   * Encodes a contract deploy call into calldata.
+   */
+  encodeDeployData(
+    ...[bytecode, args]: ContractEncodeDeployDataArgs<TAbi>
+  ): Bytes {
+    return this.client.encodeDeployData({
+      abi: this.abi,
+      bytecode,
+      args: args as ConstructorArgs<TAbi>,
+    });
+  }
+
+  /**
    * Encodes a function call into calldata.
    */
   encodeFunctionData<TFunctionName extends FunctionName<TAbi>>(
@@ -157,14 +171,14 @@ export class ReadContract<
    * Reads a specified function from the contract.
    */
   read<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
-    ...[fn, args, params]: ContractReadArgs<TAbi, TFunctionName>
+    ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
     return this.client.read({
       abi: this.abi,
       address: this.address,
       fn,
       args: args as FunctionArgs<TAbi, TFunctionName>,
-      ...params,
+      ...options,
     });
   }
 
@@ -174,14 +188,14 @@ export class ReadContract<
   simulateWrite<
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
-    ...[fn, args, params]: ContractSimulateWriteArgs<TAbi, TFunctionName>
+    ...[fn, args, options]: ContractSimulateWriteArgs<TAbi, TFunctionName>
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
     return this.client.simulateWrite({
       abi: this.abi,
       address: this.address,
       fn,
       args: args as FunctionArgs<TAbi, TFunctionName>,
-      ...params,
+      ...options,
     });
   }
 }
@@ -197,25 +211,40 @@ export class ReadWriteContract<
   TClient extends Client<TAdapter, TStore> = Client<TAdapter, TStore>,
 > extends ReadContract<TAbi, TAdapter, TStore, TClient> {
   /**
+   * Get the address of the signer for this contract.
+   */
+  getSignerAddress(): Promise<Address> {
+    return this.client.getSignerAddress();
+  }
+
+  /**
    * @returns The transaction hash of the submitted transaction.
    */
   write<TFunctionName extends FunctionName<TAbi, "payable" | "nonpayable">>(
-    ...[fn, args, params]: ContractWriteArgs<TAbi, TFunctionName>
+    ...[fn, args, options]: ContractWriteArgs<TAbi, TFunctionName>
   ): Promise<Hash> {
     return this.client.write({
       abi: this.abi,
       address: this.address,
       fn,
       args: args as FunctionArgs<TAbi, TFunctionName>,
-      ...params,
+      ...options,
     });
   }
 
   /**
-   * Get the address of the signer for this contract.
+   * Deploys a contract using the specified bytecode and constructor arguments.
+   * @returns The transaction hash of the submitted transaction.
    */
-  getSignerAddress(): Promise<Address> {
-    return this.client.getSignerAddress();
+  deploy(
+    ...[bytecode, args, options]: ContractDeployArgs<TAbi>
+  ): Promise<Hash> {
+    return this.client.deploy({
+      abi: this.abi,
+      bytecode,
+      args: args as ConstructorArgs<TAbi>,
+      ...options,
+    });
   }
 }
 
@@ -286,6 +315,15 @@ export function createContract<
   >;
 }
 
+// Parameter types //
+
+export type ContractEncodeDeployDataArgs<TAbi extends Abi = Abi> =
+  Abi extends TAbi
+    ? [bytecode: Bytes, args?: AnyObject]
+    : ConstructorArgs<TAbi> extends EmptyObject
+      ? [bytecode: Bytes, args?: EmptyObject]
+      : [bytecode: Bytes, args: ConstructorArgs<TAbi>];
+
 export type ContractEncodeFunctionDataArgs<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
@@ -347,3 +385,9 @@ export type ContractWriteArgs<
         args: FunctionArgs<TAbi, TFunctionName>,
         options?: WriteOptions,
       ];
+
+export type ContractDeployArgs<TAbi extends Abi = Abi> = Abi extends TAbi
+  ? [bytecode: Bytes, args?: AnyObject, options?: WriteOptions]
+  : ConstructorArgs<TAbi> extends EmptyObject
+    ? [bytecode: Bytes, args?: EmptyObject, options?: WriteOptions]
+    : [bytecode: Bytes, args: ConstructorArgs<TAbi>, options?: WriteOptions];

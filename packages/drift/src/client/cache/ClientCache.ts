@@ -189,7 +189,6 @@ export class ClientCache<T extends Store = Store> {
 
   async invalidateCallsMatching(params: CallParams): Promise<void> {
     const key = await this.callKey(params);
-    console.log("key", key);
     return deleteMatches(this.store, key);
   }
 

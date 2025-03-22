@@ -12,6 +12,7 @@ import type { Abi, HexString } from "src/adapter/types/Abi";
 import type {
   CallOptions,
   CallParams,
+  DeployParams,
   GetEventsParams,
   ReadParams,
   ReadWriteAdapter,
@@ -20,7 +21,11 @@ import type {
 } from "src/adapter/types/Adapter";
 import type { BlockIdentifier, BlockTag } from "src/adapter/types/Block";
 import type { EventArgs, EventName } from "src/adapter/types/Event";
-import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
+import type {
+  ConstructorArgs,
+  FunctionArgs,
+  FunctionName,
+} from "src/adapter/types/Function";
 import type {
   GetBalanceParams,
   GetBlockReturnType,
@@ -30,6 +35,7 @@ import type {
 import type { TransactionReceipt as TransactionReceiptType } from "src/adapter/types/Transaction";
 import { _decodeFunctionReturn } from "src/adapter/utils/decodeFunctionReturn";
 import { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
+import { prepareDeployData } from "src/adapter/utils/encodeDeployData";
 import { prepareFunctionData } from "src/adapter/utils/encodeFunctionData";
 import { handleError } from "src/adapter/utils/internal/handleError";
 import { prepareParamsArray } from "src/adapter/utils/prepareParamsArray";
@@ -138,10 +144,11 @@ export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
       })
       .catch(handleError);
     if (tx) {
-      const parsed = Transaction.fromRpc(tx);
+      const { to, transactionIndex, ...parsed } = Transaction.fromRpc(tx);
       return {
         ...parsed,
-        transactionIndex: BigInt(parsed.transactionIndex),
+        to: to || undefined,
+        transactionIndex: BigInt(transactionIndex),
       };
     }
     return undefined;
@@ -161,10 +168,17 @@ export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
             })
             .then((receipt) => {
               if (receipt) {
-                const parsedReceipt = TransactionReceipt.fromRpc(receipt);
+                const {
+                  to,
+                  transactionIndex,
+                  contractAddress,
+                  ...parsedReceipt
+                } = TransactionReceipt.fromRpc(receipt);
                 resolve({
                   ...parsedReceipt,
-                  transactionIndex: BigInt(parsedReceipt.transactionIndex),
+                  to: to || undefined,
+                  transactionIndex: BigInt(transactionIndex),
+                  contractAddress: contractAddress || undefined,
                 });
               } else {
                 setTimeout(getReceipt, this.pollingInterval);
@@ -335,6 +349,40 @@ export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
         params: [
           {
             to: address,
+            data,
+            from: from ?? (await this.getSignerAddress()),
+            ...prepareCallOptions(options),
+          },
+        ],
+      })
+      .catch(handleError);
+
+    if (onMined) {
+      this.waitForTransaction({ hash }).then(onMined);
+    }
+
+    return hash;
+  }
+
+  async deploy<TAbi extends Abi>({
+    abi,
+    bytecode,
+    args,
+    from,
+    onMined,
+    ...options
+  }: DeployParams<TAbi>) {
+    const { data } = prepareDeployData({
+      abi,
+      bytecode,
+      args: args as ConstructorArgs<TAbi>,
+    });
+
+    const hash = await this.provider
+      .request({
+        method: "eth_sendTransaction",
+        params: [
+          {
             data,
             from: from ?? (await this.getSignerAddress()),
             ...prepareCallOptions(options),

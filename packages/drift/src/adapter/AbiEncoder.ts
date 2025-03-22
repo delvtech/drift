@@ -3,12 +3,14 @@ import type {
   Adapter,
   DecodeFunctionDataParams,
   DecodeFunctionReturnParams,
+  EncodeDeployDataParams,
   EncodeFunctionDataParams,
   EncodeFunctionReturnParams,
 } from "src/adapter/types/Adapter";
 import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
 import { decodeFunctionData } from "src/adapter/utils/decodeFunctionData";
 import { decodeFunctionReturn } from "src/adapter/utils/decodeFunctionReturn";
+import { encodeDeployData } from "src/adapter/utils/encodeDeployData";
 import { encodeFunctionData } from "src/adapter/utils/encodeFunctionData";
 import { encodeFunctionReturn } from "src/adapter/utils/encodeFunctionReturn";
 
@@ -16,7 +18,13 @@ import { encodeFunctionReturn } from "src/adapter/utils/encodeFunctionReturn";
  * Provides a default implementation of the encoding and decoding methods of an
  * {@linkcode Adapter}.
  */
-export abstract class AbiEncoder {
+export abstract class AbiEncoder implements Partial<Adapter> {
+  encodeDeployData<TAbi extends Abi>(
+    params: EncodeDeployDataParams<TAbi>,
+  ): Bytes {
+    return encodeDeployData(params);
+  }
+
   encodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,

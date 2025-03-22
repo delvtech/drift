@@ -11,7 +11,7 @@ interface TransactionBase {
   input: Bytes;
   gasPrice?: bigint;
   chainId?: number;
-  to?: Address | null;
+  to?: Address;
 }
 
 // https://github.com/ethereum/execution-apis/blob/e3d2745289bd2bb61dc8593069871be4be441952/src/schemas/transaction.yaml#L329
@@ -32,10 +32,6 @@ export interface MinedTransaction
 // https://github.com/ethereum/execution-apis/blob/e3d2745289bd2bb61dc8593069871be4be441952/src/schemas/receipt.yaml#L37
 export interface TransactionReceipt extends Required<TransactionInfo> {
   /**
-   * Address of the receiver or `null` in a contract creation transaction.
-   */
-  to: Address | null;
-  /**
    * The sum of gas used by this transaction and all preceding transactions in
    * the same block.
    */
@@ -54,6 +50,15 @@ export interface TransactionReceipt extends Required<TransactionInfo> {
    * to baseFeePerGas + min(maxFeePerGas - baseFeePerGas, maxPriorityFeePerGas).
    */
   effectiveGasPrice: bigint;
+  /**
+   * Address of the receiver or `undefined` in a contract creation transaction.
+   */
+  to?: Address;
+  /**
+   * The contract address created, if the transaction was a contract creation,
+   * otherwise undefined.
+   */
+  contractAddress?: Address;
 }
 
 /**

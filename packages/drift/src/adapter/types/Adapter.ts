@@ -2,6 +2,7 @@ import type { Abi, Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type { BlockIdentifier, BlockTag } from "src/adapter/types/Block";
 import type { EventFilter, EventLog, EventName } from "src/adapter/types/Event";
 import type {
+  ConstructorArgs,
   DecodedFunctionData,
   FunctionArgs,
   FunctionName,
@@ -38,6 +39,10 @@ export interface ReadAdapter extends Network {
     params: SimulateWriteParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>>;
 
+  encodeDeployData<TAbi extends Abi>(
+    params: EncodeDeployDataParams<TAbi>,
+  ): Bytes;
+
   encodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
@@ -70,9 +75,17 @@ export interface WriteAdapter {
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(params: WriteParams<TAbi, TFunctionName>): Promise<Hash>;
+
+  /**
+   * Deploys a contract using the specified bytecode and constructor arguments.
+   * @returns The transaction hash of the submitted transaction.
+   */
+  deploy<TAbi extends Abi>(params: DeployParams<TAbi>): Promise<Hash>;
 }
 
 export interface ReadWriteAdapter extends ReadAdapter, WriteAdapter {}
+
+// Method parameter types //
 
 /**
  * Params for a contract instance.
@@ -82,7 +95,52 @@ export interface ContractParams<TAbi extends Abi = Abi> {
   address: Address;
 }
 
-// Events //
+// Encode/Decode parameters //
+
+export type EncodeDeployDataParams<TAbi extends Abi = Abi> = {
+  abi: TAbi;
+  bytecode: Bytes;
+} & ArgsParam<TAbi, ConstructorArgs<TAbi>>;
+
+export type EncodeFunctionDataParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+> = {
+  abi: TAbi;
+  fn: TFunctionName;
+} & ArgsParam<TAbi, FunctionArgs<TAbi, TFunctionName>>;
+
+export interface EncodeFunctionReturnParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+> {
+  abi: TAbi;
+  fn: TFunctionName;
+  value: FunctionReturn<TAbi, TFunctionName>;
+}
+
+export interface DecodeFunctionDataParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+> {
+  abi: TAbi;
+  data: Bytes;
+  // TODO: This is optional and only used to determine the return type, but is
+  // there another way to get the return type based on the function selector in
+  // the data?
+  fn?: TFunctionName;
+}
+
+export interface DecodeFunctionReturnParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+> {
+  abi: TAbi;
+  data: Bytes;
+  fn: TFunctionName;
+}
+
+// Event parameters //
 
 /**
  * A block number or tag used to specify the start or end of a range.
@@ -117,25 +175,7 @@ export interface GetEventsParams<
   event: TEventName;
 }
 
-// Read //
-
-/**
- * The arguments parameter for a function call.
- */
-export type FunctionArgsParam<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = Abi extends TAbi
-  ? {
-      args?: AnyObject;
-    }
-  : EmptyObject extends FunctionArgs<TAbi, TFunctionName>
-    ? {
-        args?: EmptyObject;
-      }
-    : {
-        args: FunctionArgs<TAbi, TFunctionName>;
-      };
+// Read parameters //
 
 /**
  * Options for reading contract state.
@@ -156,10 +196,10 @@ export type ReadParams<
   >,
 > = ContractParams<TAbi> & {
   fn: TFunctionName;
-} & FunctionArgsParam<TAbi, TFunctionName> &
+} & ArgsParam<TAbi, FunctionArgs<TAbi, TFunctionName>> &
   ReadOptions;
 
-// Write //
+// Write parameters //
 
 export interface WriteOptions extends TransactionOptions {
   onMined?: (receipt: TransactionReceipt | undefined) => void;
@@ -173,8 +213,10 @@ export type SimulateWriteParams<
   > = FunctionName<TAbi, "nonpayable" | "payable">,
 > = ContractParams<TAbi> & {
   fn: TFunctionName;
-} & FunctionArgsParam<TAbi, TFunctionName> &
+} & ArgsParam<TAbi, FunctionArgs<TAbi, TFunctionName>> &
   TransactionOptions;
+
+// Read //
 
 export type WriteParams<
   TAbi extends Abi = Abi,
@@ -184,7 +226,12 @@ export type WriteParams<
   > = FunctionName<TAbi, "nonpayable" | "payable">,
 > = SimulateWriteParams<TAbi, TFunctionName> & WriteOptions;
 
-// Call //
+// Deploy parameters //
+
+export type DeployParams<TAbi extends Abi = Abi> =
+  EncodeDeployDataParams<TAbi> & WriteOptions;
+
+// Call parameters //
 
 // https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/eth/execute.yaml#L1
 export interface CallOptions
@@ -210,42 +257,24 @@ export type CallParams = {
 > &
   CallOptions;
 
-// Utils //
+// Internal //
 
-export type EncodeFunctionDataParams<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = {
-  abi: TAbi;
-  fn: TFunctionName;
-} & FunctionArgsParam<TAbi, TFunctionName>;
-
-export interface EncodeFunctionReturnParams<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> {
-  abi: TAbi;
-  fn: TFunctionName;
-  value: FunctionReturn<TAbi, TFunctionName>;
-}
-
-export interface DecodeFunctionDataParams<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> {
-  abi: TAbi;
-  data: Bytes;
-  // TODO: This is optional and only used to determine the return type, but is
-  // there another way to get the return type based on the function selector in
-  // the data?
-  fn?: TFunctionName;
-}
-
-export interface DecodeFunctionReturnParams<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> {
-  abi: TAbi;
-  data: Bytes;
-  fn: TFunctionName;
-}
+/**
+ * A dynamic arguments parameter that:
+ * - Widens to an optional `AnyObject` if the ABI is not known.
+ * - Is optional if the ABI is not known or if the arguments are empty.
+ * - Is required if the ABI is known and the arguments are not empty.
+ *
+ * @internal
+ */
+type ArgsParam<TAbi extends Abi, Args> = Abi extends TAbi
+  ? {
+      args?: AnyObject;
+    }
+  : EmptyObject extends Args
+    ? {
+        args?: EmptyObject;
+      }
+    : {
+        args: Args;
+      };

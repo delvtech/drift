@@ -56,9 +56,7 @@ export function arrayToSimplified<
   abi: TAbi;
   name: TName;
   kind: TParameterKind;
-  values?: Abi extends TAbi
-    ? readonly unknown[] // <- fallback for unknown ABI type
-    : Partial<AbiArrayType<TAbi, TItemType, TName, TParameterKind>>;
+  values?: Partial<AbiArrayType<TAbi, TItemType, TName, TParameterKind>>;
 }): AbiSimplifiedType<TAbi, TItemType, TName, TParameterKind> {
   const obj = arrayToObject({
     abi,

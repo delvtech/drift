@@ -1,19 +1,19 @@
+import type { Abi } from "src/adapter/types/Abi";
 import type {
   CallParams,
+  DeployParams,
   GetEventsParams,
   ReadParams,
   WriteParams,
 } from "src/adapter/types/Adapter";
 import type { Block } from "src/adapter/types/Block";
 import type { EventLog } from "src/adapter/types/Event";
-import type {
-  Transaction,
-  TransactionReceipt,
-} from "src/adapter/types/Transaction";
 import { createStubBlock } from "src/adapter/utils/testing/createStubBlock";
+import { createStubTransaction } from "src/adapter/utils/testing/createStubTransaction";
+import { createStubTransactionReceipt } from "src/adapter/utils/testing/createStubTransactionReceipt";
 import { IERC20 } from "src/artifacts/IERC20";
 import { createMockClient } from "src/client/MockClient";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 type Erc20Abi = typeof IERC20.abi;
 
@@ -146,19 +146,12 @@ describe("MockClient", () => {
 
     it("Can be stubbed with specific params", async () => {
       const client = createMockClient();
-      const transaction1: Transaction = {
-        input: "0x1",
-        blockNumber: 123n,
-        gas: 123n,
-        gasPrice: 123n,
-        nonce: 123n,
-        type: "0x123",
-        value: 123n,
-      };
-      const transaction2: Transaction = {
-        ...transaction1,
-        input: "0x2",
-      };
+      const transaction1 = createStubTransaction({
+        transactionHash: "0x1",
+      });
+      const transaction2 = createStubTransaction({
+        transactionHash: "0x2",
+      });
       client.onGetTransaction({ hash: "0x1" }).resolves(transaction1);
       client.onGetTransaction({ hash: "0x2" }).resolves(transaction2);
       expect(await client.getTransaction({ hash: "0x1" })).toBe(transaction1);
@@ -167,30 +160,14 @@ describe("MockClient", () => {
 
     it("Can be stubbed with partial params", async () => {
       const client = createMockClient();
-      const transaction: Transaction = {
-        blockNumber: 123n,
-        gas: 123n,
-        gasPrice: 123n,
-        input: "0x",
-        nonce: 123n,
-        type: "0x123",
-        value: 123n,
-      };
+      const transaction = createStubTransaction();
       client.onGetTransaction({}).resolves(transaction);
       expect(await client.getTransaction({ hash: "0x" })).toBe(transaction);
     });
 
     it("Can be called with args after being stubbed with no args", async () => {
       const client = createMockClient();
-      const transaction: Transaction = {
-        blockNumber: 123n,
-        gas: 123n,
-        gasPrice: 123n,
-        input: "0x",
-        nonce: 123n,
-        type: "0x123",
-        value: 123n,
-      };
+      const transaction = createStubTransaction();
       client.onGetTransaction().resolves(transaction);
       expect(await client.getTransaction({ hash: "0x" })).toBe(transaction);
     });
@@ -206,23 +183,12 @@ describe("MockClient", () => {
 
     it("Can be stubbed with specific params", async () => {
       const client = createMockClient();
-      const receipt1: TransactionReceipt = {
+      const receipt1 = createStubTransactionReceipt({
         transactionHash: "0x1",
-        blockNumber: 123n,
-        blockHash: "0x",
-        cumulativeGasUsed: 123n,
-        effectiveGasPrice: 123n,
-        from: "0x",
-        gasUsed: 123n,
-        logsBloom: "0x",
-        status: "success",
-        to: "0x",
-        transactionIndex: 123n,
-      };
-      const receipt2: TransactionReceipt = {
-        ...receipt1,
+      });
+      const receipt2 = createStubTransactionReceipt({
         transactionHash: "0x2",
-      };
+      });
       client.onWaitForTransaction({ hash: "0x1" }).resolves(receipt1);
       client.onWaitForTransaction({ hash: "0x2" }).resolves(receipt2);
       expect(await client.waitForTransaction({ hash: "0x1" })).toBe(receipt1);
@@ -231,19 +197,7 @@ describe("MockClient", () => {
 
     it("Can be stubbed with partial params", async () => {
       const client = createMockClient();
-      const receipt: TransactionReceipt = {
-        blockNumber: 123n,
-        blockHash: "0x",
-        cumulativeGasUsed: 123n,
-        effectiveGasPrice: 123n,
-        from: "0x",
-        gasUsed: 123n,
-        logsBloom: "0x",
-        status: "success",
-        to: "0x",
-        transactionHash: "0x",
-        transactionIndex: 123n,
-      };
+      const receipt = createStubTransactionReceipt();
       client.onWaitForTransaction({ hash: "0x" }).resolves(receipt);
       expect(
         await client.waitForTransaction({ hash: "0x", timeout: 10_000 }),
@@ -252,19 +206,7 @@ describe("MockClient", () => {
 
     it("Can be called with args after being stubbed with no args", async () => {
       const client = createMockClient();
-      const receipt: TransactionReceipt = {
-        blockNumber: 123n,
-        blockHash: "0x",
-        cumulativeGasUsed: 123n,
-        effectiveGasPrice: 123n,
-        from: "0x",
-        gasUsed: 123n,
-        logsBloom: "0x",
-        status: "success",
-        to: "0x",
-        transactionHash: "0x",
-        transactionIndex: 123n,
-      };
+      const receipt = createStubTransactionReceipt();
       client.onWaitForTransaction().resolves(receipt);
       expect(await client.waitForTransaction({ hash: "0x" })).toBe(receipt);
     });
@@ -568,6 +510,120 @@ describe("MockClient", () => {
           args: { to: "0x", amount: 123n },
         }),
       ).toBe("0x123");
+    });
+  });
+
+  describe("deploy", () => {
+    const testAbi = [
+      {
+        type: "constructor",
+        inputs: [
+          { name: "name", type: "string" },
+          { name: "symbol", type: "string" },
+          { name: "decimals", type: "uint8" },
+        ],
+        stateMutability: "nonpayable",
+      },
+    ] as const satisfies Abi;
+    type TestAbi = typeof testAbi;
+
+    it("Throws an error by default", async () => {
+      const client = createMockClient();
+      let error: unknown;
+      try {
+        await client.deploy({
+          abi: testAbi,
+          bytecode: "0x",
+          args: {
+            decimals: 18,
+            name: "Test",
+            symbol: "TST",
+          },
+        });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
+    });
+
+    it("Can be stubbed with specific args", async () => {
+      const client = createMockClient();
+      const params1: DeployParams<TestAbi> = {
+        abi: testAbi,
+        bytecode: "0x",
+        args: {
+          decimals: 18,
+          name: "Test",
+          symbol: "TST",
+        },
+      };
+      const params2: DeployParams<TestAbi> = {
+        ...params1,
+        args: {
+          decimals: 18,
+          name: "Test2",
+          symbol: "TST2",
+        },
+      };
+      client.onDeploy(params1).resolves("0x1");
+      client.onDeploy(params2).resolves("0x2");
+      expect(await client.deploy(params1)).toBe("0x1");
+      expect(await client.deploy(params2)).toBe("0x2");
+    });
+
+    it("Can be stubbed with partial params", async () => {
+      const client = createMockClient();
+      client.onDeploy({ abi: testAbi }).resolves("0x123");
+      expect(
+        await client.deploy({
+          abi: testAbi,
+          bytecode: "0x",
+          args: {
+            decimals: 18,
+            name: "Test",
+            symbol: "TST",
+          },
+        }),
+      ).toBe("0x123");
+    });
+
+    it("Can be called with args after being stubbed with no args", async () => {
+      const client = createMockClient();
+      client.onDeploy().resolves("0x123");
+      expect(
+        await client.deploy({
+          abi: testAbi,
+          bytecode: "0x",
+          args: {
+            decimals: 18,
+            name: "Test",
+            symbol: "TST",
+          },
+        }),
+      ).toBe("0x123");
+    });
+
+    it("Calls onMined callbacks with the receipt", async () => {
+      const client = createMockClient();
+      const receipt = createStubTransactionReceipt();
+      const onMined = vi.fn();
+
+      client.onDeploy().resolves("0x123");
+      client.onWaitForTransaction().resolves(receipt);
+
+      const hash = await client.deploy({
+        abi: testAbi,
+        bytecode: "0x",
+        args: {
+          decimals: 18,
+          name: "Test",
+          symbol: "TST",
+        },
+        onMined,
+      });
+      await client.waitForTransaction({ hash });
+
+      expect(onMined).toHaveBeenCalledWith(receipt);
     });
   });
 

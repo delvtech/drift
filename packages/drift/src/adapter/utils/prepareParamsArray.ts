@@ -1,17 +1,12 @@
-import type {
-  AbiItemType,
-  AbiParameter,
-  AbiParameterKind,
-  AbiStateMutability,
-} from "abitype";
+import type { AbiItemType, AbiParameter, AbiParameterKind } from "abitype";
 import type {
   Abi,
   AbiArrayType,
   AbiEntry,
   AbiEntryName,
+  AbiFilter,
   AbiObjectType,
   AbiSimplifiedType,
-  NamedAbiParameter,
 } from "src/adapter/types/Abi";
 import { handleError } from "src/adapter/utils/internal/handleError";
 import type { AnyObject } from "src/utils/types";
@@ -58,28 +53,21 @@ export function prepareParamsArray<
 }: {
   abi: TAbi;
   type: TItemType;
-  name: TName;
+  name: TName | undefined;
   kind: TParameterKind;
   value: TValue | undefined;
 }): {
-  abiEntry: AbiEntry<
-    TAbi,
-    TItemType,
-    TName,
-    AbiStateMutability,
-    TParameterKind
-  >;
+  abiEntry: AbiEntry<TAbi, TItemType, TName, any, TParameterKind>;
   params: AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
 } {
-  // Type aliases for brevity
-  type TAbiEntry = AbiEntry<TAbi, TItemType, TName, any, TParameterKind>;
-  type TParams = AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
+  type TArray = AbiArrayType<TAbi, TItemType, TName, TParameterKind>;
 
   const matches = abi.filter((item) => {
     if (item.type !== type) return false;
-    if ((item as NamedAbiParameter).name !== name) return false;
+    if ((item as AnyObject).name !== name) return false;
     return kind in item;
-  }) as TAbiEntry[];
+  }) as (AbiEntry<TAbi, TItemType, TName, any, TParameterKind> &
+    AbiFilter<TItemType, TName, any, TParameterKind>)[];
 
   if (!matches.length) {
     handleError(`No matching ABI entry for ${type} ${name} with ${kind}`);
@@ -93,14 +81,14 @@ export function prepareParamsArray<
     if (!params.length) {
       return {
         abiEntry,
-        params: [] as TParams,
+        params: [] as TArray,
       };
     }
 
     if (isUnpacked(value, params)) {
       return {
         abiEntry,
-        params: [value] as TValue[] as TParams,
+        params: [value] as TValue[] as TArray,
       };
     }
 
@@ -108,7 +96,7 @@ export function prepareParamsArray<
       abiEntry,
       params: params.map(
         ({ name }, i) => (value as AnyObject)?.[name || i],
-      ) as TParams,
+      ) as TArray,
     };
   }
 
@@ -122,13 +110,13 @@ export function prepareParamsArray<
   let keyMatchCount = 0;
 
   for (const match of matches) {
-    const params = match[kind];
+    const params = match[kind] as AbiParameter[];
 
     if (!params.length) {
       if (!valuesCount) {
         return {
           abiEntry: match,
-          params: [] as TParams,
+          params: [] as TArray,
         };
       }
       continue;
@@ -137,7 +125,7 @@ export function prepareParamsArray<
     if (isUnpacked(value, params)) {
       return {
         abiEntry: match,
-        params: [value] as TValue[] as TParams,
+        params: [value] as TValue[] as TArray,
       };
     }
 
@@ -160,7 +148,7 @@ export function prepareParamsArray<
 
   return {
     abiEntry,
-    params: paramsArray as TValue[] as TParams,
+    params: paramsArray as TValue[] as TArray,
   };
 }
 

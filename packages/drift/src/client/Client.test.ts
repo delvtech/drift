@@ -126,6 +126,19 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
+    it("Calls encodeDeployData hooks", async () => {
+      const client = createClient({ adapter });
+      const beforeHandler = vi.fn(async ({ resolve }) => resolve());
+      const afterHandler = vi.fn();
+
+      client.hooks.on("before:encodeDeployData", beforeHandler);
+      client.hooks.on("after:encodeDeployData", afterHandler);
+      await client.encodeDeployData({ abi, bytecode: "0x" });
+
+      expect(beforeHandler).toHaveBeenCalledTimes(1);
+      expect(afterHandler).toHaveBeenCalledTimes(1);
+    });
+
     it("Calls encodeFunctionData hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
