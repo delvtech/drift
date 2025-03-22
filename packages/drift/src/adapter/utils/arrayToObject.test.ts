@@ -33,7 +33,7 @@ describe("arrayToObject", () => {
       kind: "inputs",
       values: ["0x123"],
     });
-    expect(balanceInput).toEqual({ account: "0x123" });
+    expect(balanceInput).toEqual({ owner: "0x123" });
   });
 });
 

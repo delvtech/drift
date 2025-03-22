@@ -1,6 +1,5 @@
 import { OxAdapter } from "src/adapter/OxAdapter";
 import type { Address as AddressType } from "src/adapter/types/Abi";
-import type { ReadParams } from "src/adapter/types/Adapter";
 import type { Block } from "src/adapter/types/Block";
 import type { EventLog } from "src/adapter/types/Event";
 import type {
@@ -11,6 +10,7 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
+import { MockERC20 } from "src/artifacts/MockERC20";
 import { TestToken } from "src/artifacts/TestToken";
 import { ZERO_ADDRESS } from "src/constants";
 import { HEX_REGEX } from "src/utils/isHexString";
@@ -134,11 +134,11 @@ describe("OxAdapter", () => {
     it("reads from bytecodes", async () => {
       const adapter = new OxAdapter({ rpcUrl });
       const data = adapter.encodeFunctionData({
-        abi: TestToken.abi,
+        abi: MockERC20.abi,
         fn: "name",
       });
       const result = await adapter.call({
-        bytecode: TestToken.bytecode,
+        bytecode: MockERC20.bytecode,
         data,
       });
       expect(result).toEqual(expect.stringMatching(/^0x/));
@@ -186,8 +186,6 @@ describe("OxAdapter", () => {
       });
       expect(balance).toBeTypeOf("bigint");
     });
-
-    type params = ReadParams<typeof TestToken.abi>;
   });
 
   it("simulates writes to a contracts", async () => {
