@@ -3,7 +3,7 @@ import { testToken } from "@delvtech/drift/testing";
 import { ViemReadWriteAdapter } from "src/ViemReadWriteAdapter";
 import { http, createPublicClient, createWalletClient } from "viem";
 import { mainnet } from "viem/chains";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 const { VITE_RPC_URL = "http://127.0.0.1:8545" } = process.env;
 const publicClient = createPublicClient({
@@ -28,7 +28,7 @@ describe("ViemReadWriteAdapter", () => {
     });
     const receipt = await adapter.waitForTransaction({ hash });
 
-    expect(hash).toBeTypeOf("string");
+    assert(HEX_REGEX.test(hash));
     expect(receipt).toMatchObject({
       contractAddress: expect.stringMatching(HEX_REGEX),
     } satisfies Partial<TransactionReceipt>);

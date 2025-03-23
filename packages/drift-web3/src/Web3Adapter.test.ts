@@ -63,15 +63,15 @@ describe("Web3Adapter", () => {
     expect(tx).toMatchObject({
       gas: expect.any(BigInt),
       gasPrice: expect.any(BigInt),
-      input: expect.any(String),
+      input: expect.stringMatching(HEX_REGEX),
       nonce: expect.any(BigInt),
       type: expect.any(String),
       value: expect.any(BigInt),
-      blockHash: expect.any(String),
+      blockHash: expect.stringMatching(HEX_REGEX),
       blockNumber: expect.any(BigInt),
-      from: expect.any(String),
-      hash: expect.any(String),
-      to: expect.toBeOneOf([expect.any(String), undefined]),
+      from: expect.stringMatching(HEX_REGEX),
+      hash: expect.stringMatching(HEX_REGEX),
+      to: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
       transactionIndex: expect.any(BigInt),
     });
   });
@@ -89,16 +89,16 @@ describe("Web3Adapter", () => {
       hash: block.transactions[0] as Hash,
     });
     expect(tx).toMatchObject({
-      blockHash: expect.any(String),
+      blockHash: expect.stringMatching(HEX_REGEX),
       blockNumber: expect.any(BigInt),
-      from: expect.any(String),
+      from: expect.stringMatching(HEX_REGEX),
       cumulativeGasUsed: expect.any(BigInt),
       effectiveGasPrice: expect.any(BigInt),
       gasUsed: expect.any(BigInt),
-      logsBloom: expect.any(String),
+      logsBloom: expect.stringMatching(HEX_REGEX),
       status: expect.stringMatching(/^(success|reverted)$/),
-      to: expect.toBeOneOf([expect.any(String), undefined]),
-      transactionHash: expect.any(String),
+      to: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
+      transactionHash: expect.stringMatching(HEX_REGEX),
       transactionIndex: expect.any(BigInt),
     } as TransactionReceipt);
   });
@@ -145,8 +145,8 @@ describe("Web3Adapter", () => {
       expect.objectContaining({
         args: expect.any(Object),
         blockNumber: expect.any(BigInt),
-        data: expect.any(String),
-        transactionHash: expect.any(String),
+        data: expect.stringMatching(HEX_REGEX),
+        transactionHash: expect.stringMatching(HEX_REGEX),
       } as EventLog<typeof erc20.abi, "Transfer">),
     );
   });
@@ -201,7 +201,7 @@ describe("Web3Adapter", () => {
     });
     const receipt = await adapter.waitForTransaction({ hash });
 
-    expect(hash).toBeTypeOf("string");
+    assert(HEX_REGEX.test(hash));
     expect(receipt).toMatchObject({
       contractAddress: expect.stringMatching(HEX_REGEX),
     } satisfies Partial<TransactionReceipt>);

@@ -1,16 +1,17 @@
-import type {
-  Address,
-  Block,
-  DecodedFunctionData,
-  EventLog,
-  FunctionArgs,
-  Hash,
-  TransactionReceipt,
+import {
+  type Address,
+  type Block,
+  type DecodedFunctionData,
+  type EventLog,
+  type FunctionArgs,
+  HEX_REGEX,
+  type Hash,
+  type TransactionReceipt,
 } from "@delvtech/drift";
-import { erc20, mockErc20 } from "@delvtech/drift/testing";
+import { erc20, mockErc20, testToken } from "@delvtech/drift/testing";
 import { JsonRpcProvider } from "ethers";
 import { EthersReadAdapter } from "src/EthersReadAdapter";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 const { VITE_RPC_URL = "", VITE_TOKEN_ADDRESS = "0x0" } = process.env;
 const provider = new JsonRpcProvider(VITE_RPC_URL);
@@ -62,15 +63,15 @@ describe("EthersReadAdapter", () => {
     expect(tx).toMatchObject({
       gas: expect.any(BigInt),
       gasPrice: expect.any(BigInt),
-      input: expect.any(String),
+      input: expect.stringMatching(HEX_REGEX),
       nonce: expect.any(BigInt),
       type: expect.any(String),
       value: expect.any(BigInt),
-      blockHash: expect.any(String),
+      blockHash: expect.stringMatching(HEX_REGEX),
       blockNumber: expect.any(BigInt),
-      from: expect.any(String),
-      transactionHash: expect.any(String),
-      to: expect.any(String),
+      from: expect.stringMatching(HEX_REGEX),
+      transactionHash: expect.stringMatching(HEX_REGEX),
+      to: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
       transactionIndex: expect.any(BigInt),
     });
   });
@@ -89,16 +90,16 @@ describe("EthersReadAdapter", () => {
       hash: block!.transactions[0] as Hash,
     });
     expect(tx).toMatchObject({
-      blockHash: expect.any(String),
+      blockHash: expect.stringMatching(HEX_REGEX),
       blockNumber: expect.any(BigInt),
-      from: expect.any(String),
+      from: expect.stringMatching(HEX_REGEX),
       cumulativeGasUsed: expect.any(BigInt),
       effectiveGasPrice: expect.any(BigInt),
       gasUsed: expect.any(BigInt),
-      logsBloom: expect.any(String),
+      logsBloom: expect.stringMatching(HEX_REGEX),
       status: expect.stringMatching(/^(success|reverted)$/),
-      to: expect.any(String),
-      transactionHash: expect.any(String),
+      to: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
+      transactionHash: expect.stringMatching(HEX_REGEX),
       transactionIndex: expect.any(BigInt),
     } as TransactionReceipt);
   });
@@ -145,8 +146,8 @@ describe("EthersReadAdapter", () => {
       expect.objectContaining({
         args: expect.any(Object),
         blockNumber: expect.any(BigInt),
-        data: expect.any(String),
-        transactionHash: expect.any(String),
+        data: expect.stringMatching(HEX_REGEX),
+        transactionHash: expect.stringMatching(HEX_REGEX),
       } as EventLog<typeof erc20.abi, "Transfer">),
     );
   });
@@ -188,6 +189,19 @@ describe("EthersReadAdapter", () => {
     expect(success).toBeTypeOf("boolean");
   });
 
+  it("encodes deploy data", async () => {
+    const adapter = new EthersReadAdapter({ provider });
+    const encoded = adapter.encodeDeployData({
+      abi: testToken.abi,
+      bytecode: testToken.bytecode,
+      args: {
+        decimals_: 18,
+        initialSupply: 123n,
+      },
+    });
+    assert(HEX_REGEX.test(encoded));
+  });
+
   it("encodes function data", async () => {
     const adapter = new EthersReadAdapter({ provider });
     const encoded = adapter.encodeFunctionData({
@@ -198,7 +212,7 @@ describe("EthersReadAdapter", () => {
         to: address,
       },
     });
-    expect(encoded).toBeTypeOf("string");
+    assert(HEX_REGEX.test(encoded));
   });
 
   it("encodes function return data", async () => {

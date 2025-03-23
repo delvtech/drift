@@ -14,7 +14,7 @@ import { MockERC20 } from "src/artifacts/MockERC20";
 import { TestToken } from "src/artifacts/TestToken";
 import { ZERO_ADDRESS } from "src/constants";
 import { HEX_REGEX } from "src/utils/isHexString";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 describe("OxAdapter", () => {
   const address = (
@@ -33,22 +33,22 @@ describe("OxAdapter", () => {
     const block = await adapter.getBlock();
     expect(block).toMatchObject({
       timestamp: expect.any(BigInt),
-      extraData: expect.any(String),
+      extraData: expect.stringMatching(HEX_REGEX),
       gasLimit: expect.any(BigInt),
       gasUsed: expect.any(BigInt),
-      hash: expect.any(String),
-      logsBloom: expect.any(String),
-      miner: expect.any(String),
-      mixHash: expect.any(String),
+      hash: expect.stringMatching(HEX_REGEX),
+      logsBloom: expect.stringMatching(HEX_REGEX),
+      miner: expect.stringMatching(HEX_REGEX),
+      mixHash: expect.stringMatching(HEX_REGEX),
       nonce: expect.any(BigInt),
       number: expect.any(BigInt),
-      parentHash: expect.any(String),
-      receiptsRoot: expect.any(String),
-      sha3Uncles: expect.any(String),
+      parentHash: expect.stringMatching(HEX_REGEX),
+      receiptsRoot: expect.stringMatching(HEX_REGEX),
+      sha3Uncles: expect.stringMatching(HEX_REGEX),
       size: expect.any(BigInt),
-      stateRoot: expect.any(String),
+      stateRoot: expect.stringMatching(HEX_REGEX),
       transactions: expect.any(Array),
-      transactionsRoot: expect.any(String),
+      transactionsRoot: expect.stringMatching(HEX_REGEX),
     } as Block);
   });
 
@@ -74,14 +74,14 @@ describe("OxAdapter", () => {
       expect.objectContaining({
         gas: expect.any(BigInt),
         gasPrice: expect.any(BigInt),
-        input: expect.any(String),
+        input: expect.stringMatching(HEX_REGEX),
         nonce: expect.any(BigInt),
         type: expect.any(String),
         value: expect.any(BigInt),
-        blockHash: expect.any(String),
+        blockHash: expect.stringMatching(HEX_REGEX),
         blockNumber: expect.any(BigInt),
-        from: expect.any(String),
-        hash: expect.any(String),
+        from: expect.stringMatching(HEX_REGEX),
+        hash: expect.stringMatching(HEX_REGEX),
         transactionIndex: expect.any(BigInt),
       } as Transaction),
     );
@@ -102,16 +102,16 @@ describe("OxAdapter", () => {
     });
     expect(tx).toEqual(
       expect.objectContaining({
-        blockHash: expect.any(String),
+        blockHash: expect.stringMatching(HEX_REGEX),
         blockNumber: expect.any(BigInt),
-        from: expect.any(String),
+        from: expect.stringMatching(HEX_REGEX),
         cumulativeGasUsed: expect.any(BigInt),
         effectiveGasPrice: expect.any(BigInt),
         gasUsed: expect.any(BigInt),
-        logsBloom: expect.any(String),
+        logsBloom: expect.stringMatching(HEX_REGEX),
         status: expect.stringMatching(/^(success|reverted)$/),
-        to: expect.any(String),
-        transactionHash: expect.any(String),
+        to: expect.stringMatching(HEX_REGEX),
+        transactionHash: expect.stringMatching(HEX_REGEX),
         transactionIndex: expect.any(BigInt),
       } as TransactionReceipt),
     );
@@ -159,8 +159,8 @@ describe("OxAdapter", () => {
       expect.objectContaining({
         args: expect.any(Object),
         blockNumber: expect.any(BigInt),
-        data: expect.any(String),
-        transactionHash: expect.any(String),
+        data: expect.stringMatching(HEX_REGEX),
+        transactionHash: expect.stringMatching(HEX_REGEX),
       } as EventLog<typeof TestToken.abi, "Transfer">),
     );
   });
@@ -215,7 +215,7 @@ describe("OxAdapter", () => {
     });
     const receipt = await adapter.waitForTransaction({ hash });
 
-    expect(hash).toBeTypeOf("string");
+    assert(HEX_REGEX.test(hash));
     expect(receipt).toMatchObject({
       contractAddress: expect.stringMatching(HEX_REGEX),
     } satisfies Partial<TransactionReceipt>);
@@ -231,7 +231,7 @@ describe("OxAdapter", () => {
         initialSupply: 123n,
       },
     });
-    expect(encoded).toBeTypeOf("string");
+    assert(HEX_REGEX.test(encoded));
   });
 
   it("encodes function data", async () => {
@@ -244,7 +244,7 @@ describe("OxAdapter", () => {
         to: address,
       },
     });
-    expect(encoded).toBeTypeOf("string");
+    assert(HEX_REGEX.test(encoded));
   });
 
   // Ensures edge cases are handled correctly

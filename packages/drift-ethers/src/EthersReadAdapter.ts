@@ -1,5 +1,6 @@
 import {
   type Abi,
+  type AbiArrayType,
   AbiEncoder,
   type Address,
   type BlockIdentifier,
@@ -141,6 +142,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     );
     const receipt: TransactionReceipt | undefined = ethersReceipt
       ? {
+          contractAddress: ethersReceipt.contractAddress as Address | undefined,
           blockHash: ethersReceipt.blockHash as Hash,
           blockNumber: BigInt(ethersReceipt.blockNumber),
           cumulativeGasUsed: ethersReceipt.cumulativeGasUsed,
@@ -149,7 +151,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
           gasUsed: ethersReceipt.gasUsed,
           logsBloom: ethersReceipt.logsBloom as Hash,
           status: ethersReceipt.status ? "success" : "reverted",
-          to: ethersReceipt.to as Address | null,
+          to: (ethersReceipt?.to ?? undefined) as Address | undefined,
           transactionHash: ethersReceipt.hash as Hash,
           transactionIndex: BigInt(ethersReceipt.index),
         }
@@ -230,10 +232,14 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     return events.map((ethersEvent) => {
       const event: EventLog<TAbi, TEventName> = {
         args: arrayToObject({
-          abi: abi as Abi,
+          abi: abi,
           kind: "inputs",
           name: eventName,
-          values: ethersEvent.args,
+          values: ethersEvent.args as unknown[] as AbiArrayType<
+            TAbi,
+            "event",
+            TEventName
+          >,
         }),
         eventName: ethersEvent.eventName as TEventName,
         blockNumber: BigInt(ethersEvent.blockNumber),
