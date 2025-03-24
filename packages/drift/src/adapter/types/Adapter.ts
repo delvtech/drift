@@ -273,7 +273,7 @@ type ArgsParam<TAbi extends Abi, Args> = Abi extends TAbi
     }
   : EmptyObject extends Args
     ? {
-        args?: EmptyObject;
+        args?: Args;
       }
     : {
         args: Args;

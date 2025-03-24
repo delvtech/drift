@@ -1,7 +1,7 @@
 import type { Block } from "src/adapter/types/Block";
 import { getRandomAddress } from "src/utils/testing/getRandomAddress";
 import { getRandomHex } from "src/utils/testing/getRandomHex";
-import type { Eval, Replace, Writeable } from "src/utils/types";
+import type { Eval, Replace, Writable } from "src/utils/types";
 
 /**
  * Creates a stub block for testing.
@@ -9,7 +9,7 @@ import type { Eval, Replace, Writeable } from "src/utils/types";
  */
 export function createStubBlock<
   const T extends Partial<Block> = Partial<Block>,
->(overrides: T = {} as T): Eval<Replace<Block, Writeable<T>>> {
+>(overrides: T = {} as T): Eval<Replace<Block, Writable<T>>> {
   return {
     extraData: "0x",
     gasLimit: 30000000n,

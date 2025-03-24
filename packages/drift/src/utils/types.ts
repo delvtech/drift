@@ -1,7 +1,7 @@
 export type EmptyObject = Record<PropertyKey, never>;
 export type AnyObject = Record<PropertyKey, any>;
 
-export type AnyFunction = (...args: any) => any;
+export type AnyFunction = (...args: any[]) => any;
 
 export type MaybePromise<T> = T | Promise<T>;
 export type MaybeAwaited<T> = T extends Promise<infer U> ? MaybePromise<U> : T;
@@ -51,7 +51,7 @@ export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 /**
  * The opposite of {@linkcode Readonly<T>}. Make all properties in `T` mutable.
  */
-export type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+export type Writable<T> = { -readonly [P in keyof T]: T[P] };
 
 /**
  * Get a superset of `T` that allows for arbitrary properties.
@@ -87,13 +87,13 @@ export type Extended<T extends AnyObject> = T &
  * Get a union of all keys in {@linkcode T} that are required, not `never`, and
  * not assignable to undefined.
  */
-export type RequiredValueKey<T> = {
-  [K in keyof T]-?: [T[K]] extends [never]
+export type RequiredValueKey<T> = keyof {
+  [K in keyof T as [T[K]] extends [never]
     ? never
     : undefined extends T[K]
       ? never
-      : K;
-}[keyof T];
+      : K]: any;
+};
 
 /**
  * Get a union of all keys on `T` that are functions

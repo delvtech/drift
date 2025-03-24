@@ -158,13 +158,15 @@ export type AbiParameters<
   TItemType extends AbiItemType = AbiItemType,
   TName extends AbiEntryName<TAbi, TItemType> = AbiEntryName<TAbi, TItemType>,
   TParameterKind extends AbiParameterKind = AbiParameterKind,
-> = AbiEntry<TAbi, TItemType, TName> extends infer TAbiEntry
-  ? TAbiEntry extends TAbiEntry
-    ? TParameterKind extends keyof TAbiEntry
-      ? TAbiEntry[TParameterKind]
+> = Abi extends TAbi
+  ? readonly AbiParameter[] | []
+  : AbiEntry<TAbi, TItemType, TName> extends infer TAbiEntry
+    ? TAbiEntry extends TAbiEntry
+      ? TParameterKind extends keyof TAbiEntry
+        ? TAbiEntry[TParameterKind]
+        : []
       : []
-    : []
-  : [];
+    : [];
 
 /**
  * Convert an array or tuple of abi parameters to an object type.
@@ -210,9 +212,11 @@ export type AbiArrayType<
   TName,
   TParameterKind
 > extends infer TParameters
-  ? TParameters extends readonly AbiParameter[]
-    ? AbiParametersToPrimitiveTypes<TParameters>
-    : []
+  ? [TParameters] extends [never]
+    ? []
+    : TParameters extends readonly AbiParameter[]
+      ? AbiParametersToPrimitiveTypes<TParameters>
+      : []
   : [];
 
 /**
@@ -263,11 +267,20 @@ export type AbiSimplifiedType<
   TName extends AbiEntryName<TAbi, TItemType> = AbiEntryName<TAbi, TItemType>,
   TParameterKind extends AbiParameterKind = AbiParameterKind,
   TStateMutability extends AbiStateMutability = AbiStateMutability,
-> = Abi extends TAbi
-  ? unknown
-  : AbiEntry<TAbi, TItemType, TName, TStateMutability> extends infer TAbiEntry
-    ? TParameterKind extends keyof TAbiEntry & AbiParameterKind // Check if the ABI entry includes the parameter kind (inputs/outputs)
-      ? TAbiEntry[TParameterKind] extends readonly [AbiParameter] // Check if it's a single parameter
+> = AbiEntry<
+  TAbi,
+  TItemType,
+  TName,
+  TStateMutability,
+  TParameterKind
+> extends infer TAbiEntry extends {
+  [K in TParameterKind]: readonly AbiParameter[];
+}
+  ? [TAbiEntry] extends [never]
+    ? undefined
+    : TAbiEntry[TParameterKind] extends readonly []
+      ? undefined // No parameters
+      : TAbiEntry[TParameterKind] extends readonly [AbiParameter]
         ? AbiParameterToPrimitiveType<
             TAbiEntry[TParameterKind][0],
             TParameterKind
@@ -275,11 +288,10 @@ export type AbiSimplifiedType<
         : TAbiEntry[TParameterKind] extends readonly [
               AbiParameter,
               ...AbiParameter[],
-            ] // Check if it's multiple parameters
+            ]
           ? AbiParametersToObject<TAbiEntry[TParameterKind], TParameterKind> // Multiple parameters type
-          : undefined // Empty parameters
-      : undefined // ABI entry doesn't include the parameter kind (inputs/outputs)
-    : undefined; // ABI entry not found
+          : unknown // Type too wide
+  : undefined;
 
 // Internal //
 

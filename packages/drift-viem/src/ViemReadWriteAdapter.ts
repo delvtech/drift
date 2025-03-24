@@ -1,9 +1,10 @@
 import {
   type Abi,
   type DeployParams,
-  type FunctionName, type ReadWriteAdapter,
+  type FunctionName,
+  type ReadWriteAdapter,
   type WriteParams,
-  prepareParamsArray
+  prepareParamsArray,
 } from "@delvtech/drift";
 import {
   ViemReadAdapter,
