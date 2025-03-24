@@ -53,7 +53,7 @@ export function prepareParamsArray<
 }: {
   abi: TAbi;
   type: TItemType;
-  name: TName | undefined;
+  name: TName;
   kind: TParameterKind;
   value: TValue | undefined;
 }): {

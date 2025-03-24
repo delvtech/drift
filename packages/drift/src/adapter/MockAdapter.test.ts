@@ -258,7 +258,45 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("Can be stubbed with args", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onGetEvents({
+          abi: TestToken.abi,
+          address: "0x1",
+          event: "Transfer",
+          filter: { from: "0x1" },
+        })
+        .resolves([
+          {
+            eventName: "Transfer",
+            args: {
+              from: "0x1",
+              to: "0x1",
+              value: 123n,
+            },
+          },
+        ]);
+      expect(
+        await adapter.getEvents({
+          abi: TestToken.abi,
+          address: "0x1",
+          event: "Transfer",
+          filter: { from: "0x1" },
+        }),
+      ).toMatchObject([
+        {
+          eventName: "Transfer",
+          args: {
+            from: "0x1",
+            to: "0x1",
+            value: 123n,
+          },
+        },
+      ]);
+    });
+
+    it("Can stub different values for different args", async () => {
       const adapter = new MockAdapter();
       const params1: GetEventsParams<TestTokenAbi, "Transfer"> = {
         abi: TestToken.abi,
@@ -341,7 +379,27 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("Can be stubbed with args", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onRead({
+          abi: TestToken.abi,
+          address: "0x1",
+          fn: "balanceOf",
+          args: { owner: "0x1" },
+        })
+        .resolves(123n);
+      expect(
+        await adapter.read({
+          abi: TestToken.abi,
+          address: "0x1",
+          fn: "balanceOf",
+          args: { owner: "0x1" },
+        }),
+      ).toBe(123n);
+    });
+
+    it("Can stub different values for different args", async () => {
       const adapter = new MockAdapter();
       const params1: ReadParams<TestTokenAbi, "allowance"> = {
         abi: TestToken.abi,
@@ -395,7 +453,27 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with args", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onSimulateWrite({
+          abi: TestToken.abi,
+          address: "0x1",
+          fn: "transfer",
+          args: { to: "0x1", amount: 123n },
+        })
+        .resolves(true);
+      expect(
+        await adapter.simulateWrite({
+          abi: TestToken.abi,
+          address: "0x1",
+          fn: "transfer",
+          args: { to: "0x1", amount: 123n },
+        }),
+      ).toBe(true);
+    });
+
+    it("Can stub different values for different args", async () => {
       const adapter = new MockAdapter();
       const params1: WriteParams<TestTokenAbi, "transfer"> = {
         abi: TestToken.abi,
@@ -449,7 +527,27 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific args", async () => {
+    it("Can be stubbed with args", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onWrite({
+          abi: TestToken.abi,
+          address: "0x",
+          fn: "transfer",
+          args: { to: "0x", amount: 123n },
+        })
+        .resolves("0x123");
+      expect(
+        await adapter.write({
+          abi: TestToken.abi,
+          address: "0x",
+          fn: "transfer",
+          args: { to: "0x", amount: 123n },
+        }),
+      ).toBe("0x123");
+    });
+
+    it("Can stub different values for different args", async () => {
       const adapter = new MockAdapter();
       const params1: WriteParams<TestTokenAbi, "transfer"> = {
         abi: TestToken.abi,

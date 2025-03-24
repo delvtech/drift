@@ -84,11 +84,15 @@ export type Extended<T extends AnyObject> = T &
   Record<Exclude<PropertyKey, keyof T>, any>;
 
 /**
- * Get a union of all keys in {@linkcode T} that are required and not assignable
- * to undefined.
+ * Get a union of all keys in {@linkcode T} that are required, not `never`, and
+ * not assignable to undefined.
  */
 export type RequiredValueKey<T> = {
-  [K in keyof T]-?: undefined extends T[K] ? never : K;
+  [K in keyof T]-?: [T[K]] extends [never]
+    ? never
+    : undefined extends T[K]
+      ? never
+      : K;
 }[keyof T];
 
 /**
@@ -179,7 +183,7 @@ export type OneOf<T extends AnyObject> = UnionKey<T> extends infer K extends
  */
 export type ExtractFiltered<T, F = {}> = T extends T // <- Distribute union
   ? RequiredValueKey<F> extends keyof T
-    ? ApplyFilter<T, F> // <- Apply filter to entry
+    ? ApplyFilter<T, F>
     : never // <- Omit if entry is missing a required value
   : never;
 

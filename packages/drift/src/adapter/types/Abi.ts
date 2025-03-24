@@ -96,18 +96,21 @@ export type AbiEntryName<
   TParameterKind extends AbiParameterKind | undefined =
     | AbiParameterKind
     | undefined,
-  // HACK: This specific order of inference is required to maintain the Abi's
-  // types in complex generic contexts, but I don't totally understand why.
-> = (
-  TAbi[number] extends infer TEntry
-    ? ExtractFiltered<
-        TEntry,
-        AbiFilter<TItemType, string, TStateMutability, TParameterKind>
-      >
-    : never
-) extends infer TAbiEntry extends { name: string }
-  ? TAbiEntry["name"]
-  : never;
+> = TItemType extends NamelessAbiItemTypes
+  ? undefined // <- Short-circuit if the item type is nameless
+  : // HACK: This specific order of inference is required to maintain the ABI's
+    // types in complex generic contexts, but needs more thorough testing and
+    // documentation. Edit with caution.
+    (
+        TAbi[number] extends infer TEntry
+          ? ExtractFiltered<
+              TEntry,
+              AbiFilter<TItemType, string, TStateMutability, TParameterKind>
+            >
+          : never
+      ) extends infer TEntry extends { name: string }
+    ? TEntry["name"]
+    : never;
 
 /**
  * Get the ABI entry for a specific type, name, state mutability, and that
@@ -156,10 +159,13 @@ export type AbiParameters<
   TName extends AbiEntryName<TAbi, TItemType> = AbiEntryName<TAbi, TItemType>,
   TParameterKind extends AbiParameterKind = AbiParameterKind,
 > = AbiEntry<TAbi, TItemType, TName> extends infer TAbiEntry
-  ? TParameterKind extends keyof TAbiEntry
-    ? TAbiEntry[TParameterKind]
+  ? TAbiEntry extends TAbiEntry
+    ? TParameterKind extends keyof TAbiEntry
+      ? TAbiEntry[TParameterKind]
+      : []
     : []
   : [];
+
 /**
  * Convert an array or tuple of abi parameters to an object type.
  *
@@ -298,6 +304,14 @@ export type AbiFilter<
     | readonly AbiParameter[]
     | Extract<TParameterKind, undefined>;
 };
+
+/**
+ * Get a union of ABI item types that don't have a name.
+ */
+type NamelessAbiItemTypes = ExtractFiltered<
+  Abi[number],
+  { name: undefined }
+>["type"];
 
 /**
  * Add default names to any ABI parameters that are missing a name. The default
