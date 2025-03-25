@@ -12,6 +12,7 @@
     "@repo/typescript-config": "0.0.0"
   },
   "changesets": [
-    "honest-doors-hear"
+    "honest-doors-hear",
+    "thick-rivers-hang"
   ]
 }

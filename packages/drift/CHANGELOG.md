@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.7.2-next.1
+
+### Patch Changes
+
+- 4e2a1fc: Rename `OxAdapter` to `DefaultAdapter`
+
 ## 0.7.2-next.0
 
 ### Patch Changes
