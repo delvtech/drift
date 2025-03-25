@@ -1,6 +1,8 @@
 import {
   type Abi,
   type Address,
+  type DeployParams,
+  DriftError,
   type FunctionName,
   type Hash,
   type HexString,
@@ -10,7 +12,7 @@ import {
   prepareParamsArray,
 } from "@delvtech/drift";
 import type { ContractTransaction, Signer } from "ethers";
-import { Contract } from "ethers";
+import { Contract, ContractFactory } from "ethers";
 import {
   EthersReadAdapter,
   type EthersReadAdapterParams,
@@ -110,5 +112,58 @@ export class EthersReadWriteAdapter<
     }
 
     return tx.hash as Hash;
+  }
+
+  async deploy<TAbi extends Abi>({
+    abi,
+    args,
+    bytecode,
+    from,
+    onMined,
+    ...options
+  }: DeployParams<TAbi>) {
+    const factory = new ContractFactory(
+      abi as EthersAbi,
+      bytecode,
+      this.signer,
+    );
+    const { params } = prepareParamsArray({
+      abi: abi as Abi,
+      type: "constructor",
+      name: undefined,
+      kind: "inputs",
+      value: args,
+    });
+    const contract = await factory.deploy(...params, {
+      accessList: options.accessList,
+      chainId: options.chainId,
+      // from: from ?? (await this.signer.getAddress()),
+      gasLimit: options.gas,
+      gasPrice: options.gasPrice,
+      maxFeePerGas: options.maxFeePerGas,
+      maxPriorityFeePerGas: options.maxPriorityFeePerGas,
+      nonce: options.nonce ? Number(options.nonce) : undefined,
+      type: options.type ? Number(options.type) : undefined,
+      value: options.value,
+    });
+
+    if (onMined) {
+      (async () => {
+        const deployedContract = await contract.waitForDeployment();
+        const hash = deployedContract.deployTransaction?.hash;
+        if (hash) {
+          const minedTransaction = await this.waitForTransaction({
+            hash: hash as Hash,
+          });
+          onMined(minedTransaction);
+        }
+      })();
+    }
+
+    const hash = contract.deployTransaction?.hash;
+    if (!hash) {
+      throw new DriftError("Failed to get deployment transaction hash");
+    }
+    return hash as Hash;
   }
 }

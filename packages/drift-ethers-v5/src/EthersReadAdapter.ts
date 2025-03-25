@@ -138,6 +138,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     );
     const receipt: TransactionReceipt | undefined = ethersReceipt
       ? {
+          contractAddress: ethersReceipt.contractAddress,
           blockHash: ethersReceipt.blockHash,
           blockNumber: BigInt(ethersReceipt.blockNumber),
           cumulativeGasUsed: ethersReceipt.cumulativeGasUsed.toBigInt(),
@@ -146,7 +147,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
           gasUsed: ethersReceipt.gasUsed.toBigInt(),
           logsBloom: ethersReceipt.logsBloom,
           status: ethersReceipt.status ? "success" : "reverted",
-          to: ethersReceipt.to,
+          to: ethersReceipt.to ?? undefined,
           transactionHash: ethersReceipt.transactionHash,
           transactionIndex: BigInt(ethersReceipt.transactionIndex),
         }
@@ -226,12 +227,12 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     return events.map((ethersEvent) => {
       const event: EventLog<TAbi, TEventName> = {
         args: arrayToObject({
-          abi: abi as Abi,
+          abi: abi,
           kind: "inputs",
           name: eventName,
           values: ethersEvent.args?.map((arg) =>
             arg instanceof BigNumber ? arg.toBigInt() : arg,
-          ),
+          ) as any,
         }),
         eventName: ethersEvent.event as TEventName,
         blockNumber: BigInt(ethersEvent.blockNumber),
