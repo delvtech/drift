@@ -1,0 +1,17 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "example": "0.0.0",
+    "contracts": "0.0.0",
+    "@delvtech/drift": "0.7.1",
+    "@delvtech/drift-ethers": "0.7.1",
+    "@delvtech/drift-ethers-v5": "0.7.1",
+    "@delvtech/drift-viem": "0.7.1",
+    "@delvtech/drift-web3": "0.7.1",
+    "@repo/typescript-config": "0.0.0"
+  },
+  "changesets": [
+    "honest-doors-hear"
+  ]
+}

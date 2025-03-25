@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.7.2-next.0
+
+### Patch Changes
+
+- bb25099: Added `deploy` and `encodeDeployData` methods to `Adapter` types.
+
 ## 0.7.1
 
 ### Patch Changes

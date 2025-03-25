@@ -1,5 +1,13 @@
 # @delvtech/drift-ethers-v5
 
+## 0.7.2-next.0
+
+### Patch Changes
+
+- bb25099: Added `deploy` and `encodeDeployData` methods to `Adapter` types.
+- Updated dependencies [bb25099]
+  - @delvtech/drift@0.7.2-next.0
+
 ## 0.7.1
 
 ## 0.7.0
