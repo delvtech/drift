@@ -1,4 +1,4 @@
-import { OxAdapter, type OxAdapterOptions } from "src/adapter/OxAdapter";
+import { DefaultAdapter, type DefaultAdapterOptions } from "src/adapter/DefaultAdapter";
 import type { Adapter, ReadWriteAdapter } from "src/adapter/types/Adapter";
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
 import { ClientCache } from "src/client/cache/ClientCache";
@@ -63,7 +63,7 @@ export type ClientOptions<
          */
         adapter?: TAdapter;
       }
-    | OxAdapterOptions
+    | DefaultAdapterOptions
   > & {
     // Accept LRU config if LRU can be assigned to T
     store?: LruStore extends TStore ? TStore | LruStoreOptions : TStore;
@@ -73,12 +73,12 @@ export type ClientOptions<
 
 /**
  * Creates a new {@linkcode Client} instance that extends the provided adapter
- * or the default {@linkcode OxAdapter}.
+ * or the default {@linkcode DefaultAdapter}.
  *
  * @param config - The configuration to use for the client.
  */
 export function createClient<
-  TAdapter extends Adapter = OxAdapter,
+  TAdapter extends Adapter = DefaultAdapter,
   TStore extends Store = LruStore,
 >({
   adapter: maybeAdapter,
@@ -89,7 +89,7 @@ export function createClient<
   const interceptor = new MethodInterceptor<TAdapter>();
 
   // Handle adapter options
-  const adapter = (maybeAdapter || new OxAdapter(adapterOptions)) as TAdapter;
+  const adapter = (maybeAdapter || new DefaultAdapter(adapterOptions)) as TAdapter;
 
   // Handle cache options
   const isInstance = storeOrOptions && "clear" in storeOrOptions;

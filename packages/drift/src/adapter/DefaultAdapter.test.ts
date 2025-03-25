@@ -1,4 +1,4 @@
-import { OxAdapter } from "src/adapter/OxAdapter";
+import { DefaultAdapter } from "src/adapter/DefaultAdapter";
 import type { Address as AddressType } from "src/adapter/types/Abi";
 import type { Block } from "src/adapter/types/Block";
 import type { EventLog } from "src/adapter/types/Event";
@@ -16,20 +16,20 @@ import { ZERO_ADDRESS } from "src/constants";
 import { HEX_REGEX } from "src/utils/isHexString";
 import { assert, describe, expect, it } from "vitest";
 
-describe("OxAdapter", () => {
+describe("DefaultAdapter", () => {
   const address = (
     process.env.VITE_TOKEN_ADDRESS || ZERO_ADDRESS
   ).toLowerCase() as AddressType;
   const rpcUrl = process.env.VITE_RPC_URL;
 
   it("fetches the chain id", async () => {
-    const adapter = new OxAdapter({ rpcUrl });
+    const adapter = new DefaultAdapter({ rpcUrl });
     const chainId = await adapter.getChainId();
     expect(chainId).toBeTypeOf("number");
   });
 
   it("fetches the current block", async () => {
-    const adapter = new OxAdapter({ rpcUrl });
+    const adapter = new DefaultAdapter({ rpcUrl });
     const block = await adapter.getBlock();
     expect(block).toMatchObject({
       timestamp: expect.any(BigInt),
@@ -53,13 +53,13 @@ describe("OxAdapter", () => {
   });
 
   it("fetches account balances", async () => {
-    const adapter = new OxAdapter({ rpcUrl });
+    const adapter = new DefaultAdapter({ rpcUrl });
     const balance = await adapter.getBalance({ address });
     expect(balance).toBeTypeOf("bigint");
   });
 
   it("fetches transactions", async () => {
-    const adapter = new OxAdapter({ rpcUrl });
+    const adapter = new DefaultAdapter({ rpcUrl });
     let block: Block | undefined = await adapter.getBlock();
     while (block?.transactions.length === 0) {
       console.log(
@@ -88,7 +88,7 @@ describe("OxAdapter", () => {
   });
 
   it("returns receipts for waited transactions", async () => {
-    const adapter = new OxAdapter({ rpcUrl });
+    const adapter = new DefaultAdapter({ rpcUrl });
     const blockNumber = await adapter.getBlockNumber();
     let block = await adapter.getBlock(blockNumber - 12n * 60n * 24n);
     while (block?.transactions.length === 0) {
@@ -119,7 +119,7 @@ describe("OxAdapter", () => {
 
   describe("call", () => {
     it("reads from deployed contracts", async () => {
-      const adapter = new OxAdapter({ rpcUrl });
+      const adapter = new DefaultAdapter({ rpcUrl });
       const data = adapter.encodeFunctionData({
         abi: TestToken.abi,
         fn: "symbol",
@@ -132,7 +132,7 @@ describe("OxAdapter", () => {
     });
 
     it("reads from bytecodes", async () => {
-      const adapter = new OxAdapter({ rpcUrl });
+      const adapter = new DefaultAdapter({ rpcUrl });
       const data = adapter.encodeFunctionData({
         abi: MockERC20.abi,
         fn: "name",
@@ -146,7 +146,7 @@ describe("OxAdapter", () => {
   });
 
   it("fetches events", async () => {
-    const adapter = new OxAdapter({ rpcUrl });
+    const adapter = new DefaultAdapter({ rpcUrl });
     const currentBlock = await adapter.getBlockNumber();
     const events = await adapter.getEvents({
       abi: TestToken.abi,
@@ -167,7 +167,7 @@ describe("OxAdapter", () => {
 
   describe("read", () => {
     it("reads from contracts", async () => {
-      const adapter = new OxAdapter({ rpcUrl });
+      const adapter = new DefaultAdapter({ rpcUrl });
       const symbol = await adapter.read({
         abi: TestToken.abi,
         address,
@@ -177,7 +177,7 @@ describe("OxAdapter", () => {
     });
 
     it("reads from contracts with args", async () => {
-      const adapter = new OxAdapter({ rpcUrl });
+      const adapter = new DefaultAdapter({ rpcUrl });
       const balance = await adapter.read({
         abi: TestToken.abi,
         address,
@@ -189,7 +189,7 @@ describe("OxAdapter", () => {
   });
 
   it("simulates writes to a contracts", async () => {
-    const adapter = new OxAdapter({ rpcUrl });
+    const adapter = new DefaultAdapter({ rpcUrl });
     const balance = await adapter.simulateWrite({
       abi: TestToken.abi,
       address,
@@ -203,7 +203,7 @@ describe("OxAdapter", () => {
   });
 
   it("deploys contracts", async () => {
-    const adapter = new OxAdapter({ rpcUrl });
+    const adapter = new DefaultAdapter({ rpcUrl });
 
     const hash = await adapter.deploy({
       abi: TestToken.abi,
@@ -222,7 +222,7 @@ describe("OxAdapter", () => {
   });
 
   it("encodes deploy data", async () => {
-    const adapter = new OxAdapter({ rpcUrl });
+    const adapter = new DefaultAdapter({ rpcUrl });
     const encoded = adapter.encodeDeployData({
       abi: TestToken.abi,
       bytecode: TestToken.bytecode,
@@ -235,7 +235,7 @@ describe("OxAdapter", () => {
   });
 
   it("encodes function data", async () => {
-    const adapter = new OxAdapter({ rpcUrl });
+    const adapter = new DefaultAdapter({ rpcUrl });
     const encoded = adapter.encodeFunctionData({
       abi: TestToken.abi,
       fn: "transfer",
@@ -265,7 +265,7 @@ describe("OxAdapter", () => {
   ] as const;
 
   it("encodes function return data", async () => {
-    const adapter = new OxAdapter({ rpcUrl });
+    const adapter = new DefaultAdapter({ rpcUrl });
     const encoded = adapter.encodeFunctionReturn({
       abi: tupleParamsAbi,
       fn: "names",
@@ -280,7 +280,7 @@ describe("OxAdapter", () => {
   });
 
   it("decodes function data", async () => {
-    const adapter = new OxAdapter({ rpcUrl });
+    const adapter = new DefaultAdapter({ rpcUrl });
     const args: FunctionArgs<typeof tupleParamsAbi, "names"> = {
       0: "delv",
       1: "drift",
@@ -301,7 +301,7 @@ describe("OxAdapter", () => {
   });
 
   it("decodes function return data", async () => {
-    const adapter = new OxAdapter({ rpcUrl });
+    const adapter = new DefaultAdapter({ rpcUrl });
     const decoded = adapter.decodeFunctionReturn({
       abi: tupleParamsAbi,
       fn: "names",

@@ -231,21 +231,6 @@ export class ReadWriteContract<
       ...options,
     });
   }
-
-  /**
-   * Deploys a contract using the specified bytecode and constructor arguments.
-   * @returns The transaction hash of the submitted transaction.
-   */
-  deploy(
-    ...[bytecode, args, options]: ContractDeployArgs<TAbi>
-  ): Promise<Hash> {
-    return this.client.deploy({
-      abi: this.abi,
-      bytecode,
-      args: args as ConstructorArgs<TAbi>,
-      ...options,
-    });
-  }
 }
 
 /**

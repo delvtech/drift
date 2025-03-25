@@ -55,7 +55,7 @@ export class ClientCache<T extends Store = Store> {
 
   // Keys //
 
-  async #resolveChainId(): Promise<PropertyKey> {
+  async #resolveNamespace(): Promise<PropertyKey> {
     if (typeof this.namespace === "function") {
       this.namespace = await this.namespace();
     }
@@ -63,7 +63,7 @@ export class ClientCache<T extends Store = Store> {
   }
 
   async #createKey(...parts: NonNullable<unknown>[]): Promise<string> {
-    const namespace = await this.#resolveChainId();
+    const namespace = await this.#resolveNamespace();
     return stringifyKey([namespace, ...parts]);
   }
 

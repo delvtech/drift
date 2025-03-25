@@ -41,7 +41,7 @@ import { prepareParamsArray } from "src/adapter/utils/prepareParamsArray";
 import { DriftError } from "src/error/DriftError";
 import { isHexString } from "src/utils/isHexString";
 
-export interface OxAdapterOptions {
+export interface DefaultAdapterOptions {
   rpcUrl?: string;
   /**
    * Polling frequency in milliseconds
@@ -50,7 +50,7 @@ export interface OxAdapterOptions {
   pollingInterval?: number;
 }
 
-export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
+export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
   provider: Provider.Provider;
   pollingInterval: number;
 
@@ -59,8 +59,8 @@ export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   constructor({
     rpcUrl,
-    pollingInterval = OxAdapter.DEFAULT_POLLING_INTERVAL,
-  }: OxAdapterOptions = {}) {
+    pollingInterval = DefaultAdapter.DEFAULT_POLLING_INTERVAL,
+  }: DefaultAdapterOptions = {}) {
     super();
     try {
       const provider = rpcUrl
@@ -155,7 +155,7 @@ export class OxAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   async waitForTransaction({
     hash,
-    timeout = OxAdapter.DEFAULT_TIMEOUT,
+    timeout = DefaultAdapter.DEFAULT_TIMEOUT,
   }: WaitForTransactionParams) {
     return new Promise<TransactionReceiptType | undefined>(
       (resolve, reject) => {

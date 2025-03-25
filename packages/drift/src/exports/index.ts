@@ -82,9 +82,9 @@ export type {
 export { AbiEncoder } from "src/adapter/AbiEncoder";
 
 export {
-  OxAdapter,
-  type OxAdapterOptions,
-} from "src/adapter/OxAdapter";
+  DefaultAdapter,
+  type DefaultAdapterOptions,
+} from "src/adapter/DefaultAdapter";
 
 export { arrayToSimplified } from "src/adapter/utils/arrayToSimplified";
 export { arrayToObject } from "src/adapter/utils/arrayToObject";
@@ -118,6 +118,11 @@ export {
 } from "src/client/Client";
 
 export {
+  ClientCache,
+  type ClientCacheOptions,
+} from "src/client/cache/ClientCache";
+
+export {
   createDrift,
   type Drift,
   type DriftOptions,
@@ -135,11 +140,6 @@ export {
   type ContractSimulateWriteArgs,
   type ContractWriteArgs,
 } from "src/client/contract/Contract";
-
-export {
-  ClientCache,
-  type ClientCacheOptions,
-} from "src/client/cache/ClientCache";
 
 export {
   ContractCache,

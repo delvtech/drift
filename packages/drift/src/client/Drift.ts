@@ -1,4 +1,4 @@
-import type { OxAdapter } from "src/adapter/OxAdapter";
+import type { DefaultAdapter } from "src/adapter/DefaultAdapter";
 import type { Abi } from "src/adapter/types/Abi";
 import type { Adapter, ContractParams } from "src/adapter/types/Adapter";
 import {
@@ -39,7 +39,7 @@ export type DriftOptions<
 > = ClientOptions<TAdapter, TStore>;
 
 export function createDrift<
-  TAdapter extends Adapter = OxAdapter,
+  TAdapter extends Adapter = DefaultAdapter,
   TStore extends Store = LruStore,
 >(config: DriftOptions<TAdapter, TStore> = {}): Drift<TAdapter, TStore> {
   return createClient(config).extend({

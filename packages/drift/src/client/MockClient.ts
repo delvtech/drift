@@ -1,5 +1,5 @@
+import type { DefaultAdapterOptions } from "src/adapter/DefaultAdapter";
 import { MockAdapter } from "src/adapter/MockAdapter";
-import type { OxAdapterOptions } from "src/adapter/OxAdapter";
 import {
   type Client,
   type ClientOptions,
@@ -16,7 +16,7 @@ export type MockClient<
 export type MockClientOptions<
   TAdapter extends MockAdapter = MockAdapter,
   TStore extends Store = Store,
-> = Partial<Omit<ClientOptions<TAdapter, TStore>, keyof OxAdapterOptions>>;
+> = Partial<Omit<ClientOptions<TAdapter, TStore>, keyof DefaultAdapterOptions>>;
 
 export function createMockClient<
   TAdapter extends MockAdapter = MockAdapter,
