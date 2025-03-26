@@ -54,13 +54,13 @@ export type EventFilter<
 /**
  * A strongly typed event object based on an abi
  */
-export interface EventLog<
+export type EventLog<
   TAbi extends Abi = Abi,
   TEventName extends EventName<TAbi> = EventName<TAbi>,
-> {
+> = {
   eventName: TEventName;
   args: EventArgs<TAbi, TEventName>;
   data?: Bytes;
   blockNumber?: bigint;
   transactionHash?: Hash;
-}
+};

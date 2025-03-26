@@ -2,7 +2,8 @@ import {
   type Address,
   type Contract,
   type Drift,
-  type EventLog, createDrift
+  type EventLog,
+  createDrift,
 } from "@delvtech/drift";
 import { fixed } from "@delvtech/fixed-point-wasm";
 import { ERC4626 } from "src/abis/Erc4626";

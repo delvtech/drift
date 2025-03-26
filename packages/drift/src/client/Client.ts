@@ -1,4 +1,7 @@
-import { DefaultAdapter, type DefaultAdapterOptions } from "src/adapter/DefaultAdapter";
+import {
+  DefaultAdapter,
+  type DefaultAdapterOptions,
+} from "src/adapter/DefaultAdapter";
 import type { Adapter, ReadWriteAdapter } from "src/adapter/types/Adapter";
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
 import { ClientCache } from "src/client/cache/ClientCache";
@@ -22,13 +25,33 @@ export type Client<
   TStore extends Store = Store,
   TExtension extends object = {},
 > = {
+  /**
+   * The {@linkcode Adapter} used by the client for network interactions.
+   */
   adapter: TAdapter;
+
+  /**
+   * A cache for storing responses from the adapter using the provided
+   * {@linkcode Store}.
+   */
   cache: ClientCache<TStore>;
+
+  /**
+   * Hooks for intercepting method calls and responses on the client.
+   */
   hooks: HookRegistry<MethodHooks<TAdapter>> &
     // Intersect with the default adapter to avoid type errors in generic
     // contexts where the keys of the adapter are unknown.
     HookRegistry<MethodHooks<Adapter>>;
+
+  /**
+   * Returns `true` if the client can send transactions.
+   */
   isReadWrite(): this is Client<ReadWriteAdapter>;
+
+  /**
+   * Extends the client with additional properties.
+   */
   extend<T extends object>(
     props: Extended<
       // Using distributive conditional types here ensures that T is inferred as
@@ -41,6 +64,7 @@ export type Client<
       Partial<Client & TExtension> &
       ThisType<Client<TAdapter, TStore, TExtension & T>>,
   ): Client<TAdapter, TStore, Eval<TExtension & T>>;
+
   getBlockOrThrow<T extends BlockIdentifier | undefined>(
     block?: T,
   ): Promise<Block<T>>;
@@ -67,6 +91,10 @@ export type ClientOptions<
   > & {
     // Accept LRU config if LRU can be assigned to T
     store?: LruStore extends TStore ? TStore | LruStoreOptions : TStore;
+
+    /**
+     * The chain ID to use for the client. Fetched from the adapter by default.
+     */
     chainId?: number;
   }
 >;
@@ -89,7 +117,8 @@ export function createClient<
   const interceptor = new MethodInterceptor<TAdapter>();
 
   // Handle adapter options
-  const adapter = (maybeAdapter || new DefaultAdapter(adapterOptions)) as TAdapter;
+  const adapter = (maybeAdapter ||
+    new DefaultAdapter(adapterOptions)) as TAdapter;
 
   // Handle cache options
   const isInstance = storeOrOptions && "clear" in storeOrOptions;

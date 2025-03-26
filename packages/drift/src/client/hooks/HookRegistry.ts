@@ -12,7 +12,7 @@ import type {
  * @template T - The hooks configuration object
  */
 export class HookRegistry<T extends AnyObject = AnyObject> {
-  private _handlers: {
+  #handlers: {
     [K in HookName<T>]?: HookHandler<T, K>[];
   } = {};
 
@@ -25,8 +25,8 @@ export class HookRegistry<T extends AnyObject = AnyObject> {
     hook: THook,
     handler: HookHandler<T, THook>,
   ): void {
-    this._handlers[hook] ||= [];
-    this._handlers[hook].push(handler);
+    this.#handlers[hook] ||= [];
+    this.#handlers[hook].push(handler);
   }
 
   /**
@@ -40,9 +40,9 @@ export class HookRegistry<T extends AnyObject = AnyObject> {
     handler: HookHandler<T, THook>,
   ): boolean {
     let didRemove = false;
-    const handlers = this._handlers[hook];
+    const handlers = this.#handlers[hook];
     if (!handlers) return didRemove;
-    this._handlers[hook] = handlers.filter((existing) => {
+    this.#handlers[hook] = handlers.filter((existing) => {
       if (existing === handler) {
         didRemove = true;
         return false;
@@ -82,7 +82,7 @@ export class HookRegistry<T extends AnyObject = AnyObject> {
     ? MaybePromise<void>
     : void {
     let result: MaybePromise<any> = undefined;
-    const handlers = this._handlers[hook];
+    const handlers = this.#handlers[hook];
     if (!handlers) return result;
     for (const handler of handlers) {
       if (result instanceof Promise) {

@@ -14,7 +14,7 @@ import type {
   TransactionOptions,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
-import type { AnyObject, EmptyObject, OneOf } from "src/utils/types";
+import type { EmptyObject, OneOf } from "src/utils/types";
 
 export interface Adapter extends ReadAdapter, Partial<WriteAdapter> {}
 
@@ -100,7 +100,7 @@ export interface ContractParams<TAbi extends Abi = Abi> {
 export type EncodeDeployDataParams<TAbi extends Abi = Abi> = {
   abi: TAbi;
   bytecode: Bytes;
-} & ArgsParam<TAbi, ConstructorArgs<TAbi>>;
+} & ArgsParam<ConstructorArgs<TAbi>>;
 
 export type EncodeFunctionDataParams<
   TAbi extends Abi = Abi,
@@ -108,7 +108,7 @@ export type EncodeFunctionDataParams<
 > = {
   abi: TAbi;
   fn: TFunctionName;
-} & ArgsParam<TAbi, FunctionArgs<TAbi, TFunctionName>>;
+} & ArgsParam<FunctionArgs<TAbi, TFunctionName>>;
 
 export interface EncodeFunctionReturnParams<
   TAbi extends Abi = Abi,
@@ -181,7 +181,9 @@ export interface GetEventsParams<
  * Options for reading contract state.
  */
 // https://github.com/ethereum/execution-apis/blob/main/src/eth/execute.yaml#L1
-export interface ReadOptions<T extends BlockIdentifier = BlockIdentifier> {
+export interface ReadOptions<
+  T extends BlockIdentifier | undefined = BlockIdentifier,
+> {
   block?: T;
 }
 
@@ -196,7 +198,7 @@ export type ReadParams<
   >,
 > = ContractParams<TAbi> & {
   fn: TFunctionName;
-} & ArgsParam<TAbi, FunctionArgs<TAbi, TFunctionName>> &
+} & ArgsParam<FunctionArgs<TAbi, TFunctionName>> &
   ReadOptions;
 
 // Write parameters //
@@ -213,7 +215,7 @@ export type SimulateWriteParams<
   > = FunctionName<TAbi, "nonpayable" | "payable">,
 > = ContractParams<TAbi> & {
   fn: TFunctionName;
-} & ArgsParam<TAbi, FunctionArgs<TAbi, TFunctionName>> &
+} & ArgsParam<FunctionArgs<TAbi, TFunctionName>> &
   TransactionOptions;
 
 // Read //
@@ -260,21 +262,13 @@ export type CallParams = {
 // Internal //
 
 /**
- * A dynamic arguments parameter that:
- * - Widens to an optional `AnyObject` if the ABI is not known.
- * - Is optional if the ABI is not known or if the arguments are empty.
- * - Is required if the ABI is known and the arguments are not empty.
- *
+ * A dynamic arguments parameter that is optional if the arguments are empty.
  * @internal
  */
-type ArgsParam<TAbi extends Abi, Args> = Abi extends TAbi
+type ArgsParam<Args> = EmptyObject extends Args
   ? {
-      args?: AnyObject;
+      args?: Args;
     }
-  : EmptyObject extends Args
-    ? {
-        args?: Args;
-      }
-    : {
-        args: Args;
-      };
+  : {
+      args: Args;
+    };

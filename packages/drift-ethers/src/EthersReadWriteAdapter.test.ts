@@ -1,7 +1,4 @@
-import {
-  HEX_REGEX,
-  type TransactionReceipt
-} from "@delvtech/drift";
+import { HEX_REGEX, type TransactionReceipt } from "@delvtech/drift";
 import { testToken } from "@delvtech/drift/testing";
 import { JsonRpcProvider } from "ethers";
 import { EthersReadWriteAdapter } from "src/EthersReadWriteAdapter";

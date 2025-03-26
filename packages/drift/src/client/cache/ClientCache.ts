@@ -50,7 +50,7 @@ export class ClientCache<T extends Store = Store> {
     this.store = store;
   }
 
-  // NOTE: These methods are all async to allow for dynamic namespace
+  // NOTE: These methods are all async to accommodate dynamic namespace
   // resolution and external cache implementations.
 
   // Keys //
