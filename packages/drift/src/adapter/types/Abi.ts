@@ -19,8 +19,8 @@ import type {
 
 /**
  * An interface of common types that might be typed differently in different
- * implementations. These types can be overridden via [`declaration
- * merging`](https://www.typescriptlang.org/docs/handbook/declaration-merging.html).
+ * implementations. These types can be overridden via [`module
+ * augmentation`](https://www.typescriptlang.org/docs/handbook/declaration-merging.html#module-augmentation).
  *
  * **Overridable Types**:
  *
@@ -33,7 +33,7 @@ import type {
  * @example
  * ```ts
  * declare module "@delvtech/drift" {
- *   export interface BaseTypes {
+ *   export interface BaseTypeOverrides {
  *     HexString: string;
  *   }
  * }
@@ -42,14 +42,17 @@ import type {
  * `HexString` type by default. Overriding `HexString` will override all three
  * types. Each type can be further customized individually as needed.
  */
-export interface BaseTypes extends _BaseTypes {}
-interface _BaseTypes {
-  Abi: _Abi;
-  HexString: `0x${string}`;
-  Address: this["HexString"];
-  Bytes: this["HexString"];
-  Hash: this["HexString"];
-}
+export interface BaseTypeOverrides {}
+type BaseTypes = Replace<
+  {
+    Abi: _Abi;
+    HexString: `0x${string}`;
+    Address: BaseTypes["HexString"];
+    Bytes: BaseTypes["HexString"];
+    Hash: BaseTypes["HexString"];
+  },
+  BaseTypeOverrides
+>;
 
 export type Abi = BaseTypes["Abi"];
 export type Address = BaseTypes["Address"];

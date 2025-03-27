@@ -10,7 +10,7 @@ export type {
   AbiParameters,
   AbiParametersToObject,
   Address,
-  BaseTypes,
+  BaseTypeOverrides,
   Bytes,
   Hash,
   HexString,
