@@ -23,25 +23,24 @@ export class MethodInterceptor<T extends AnyObject = AnyObject> {
   /**
    * Creates a proxy that automatically intercepts method calls and runs
    * hooks registered with the interceptor.
-   * @param target The object whose methods should be intercepted
+   * @param target - The object whose methods should be intercepted
    * @returns A proxied version of the target object
    */
   createProxy = <U extends T>(target: U): U => {
     return new Proxy(target, {
       get: (target, prop, receiver) => {
         const value: unknown = Reflect.get(target, prop, receiver);
+
         if (prop === "constructor" || typeof value !== "function") {
           return value;
         }
 
-        // Wrap the method
         const wrapped = (...args: unknown[]) =>
           this.#runWithHooks({
             method: prop,
             fn: value.bind(receiver),
             args,
           });
-
         Object.defineProperty(wrapped, "name", {
           get: () => value.name,
         });
@@ -60,18 +59,18 @@ export class MethodInterceptor<T extends AnyObject = AnyObject> {
     fn: AnyFunction;
     args: any[];
   }) {
+    const methodName = String(method);
     let skipped = false;
     let result: any = undefined;
 
-    // Call before hook handlers
-    const beforeHook = this.#hooks.call(`before:${String(method)}`, {
+    const beforeHooksResult = this.#hooks.call(`before:${methodName}`, {
       get args() {
         return args;
       },
-      setArgs(...newArgs: any) {
+      setArgs(...newArgs: unknown[]) {
         args = newArgs;
       },
-      resolve(value: any) {
+      resolve(value: unknown) {
         if (!skipped) {
           skipped = true;
           result = value;
@@ -79,35 +78,34 @@ export class MethodInterceptor<T extends AnyObject = AnyObject> {
       },
     });
 
-    const runAfter = () => {
-      // Call the function if not already resolved by a before hook
+    const wrappedAfterHooks = () => {
       if (!skipped) {
         result = fn(...args);
       }
 
-      // Call after hook handlers
-      const afterHook = this.#hooks.call(`after:${String(method)}`, {
-        args,
+      const afterHooksResult = this.#hooks.call(`after:${methodName}`, {
+        get args() {
+          return args;
+        },
         get result() {
           return result;
         },
-        setResult(newResult: any) {
+        setResult(newResult: unknown) {
           result = newResult;
         },
       });
 
-      // Handle possible promises in the after hook
-      if (afterHook instanceof Promise) {
-        return afterHook.then(() => result) as any;
+      if (afterHooksResult instanceof Promise) {
+        return afterHooksResult.then(() => result) as any;
       }
       return result;
     };
 
     // Handle possible promises in the before hook
-    if (beforeHook instanceof Promise) {
-      return beforeHook.then(runAfter) as any;
+    if (beforeHooksResult instanceof Promise) {
+      return beforeHooksResult.then(wrappedAfterHooks) as any;
     }
-    return runAfter();
+    return wrappedAfterHooks();
   }
 }
 
