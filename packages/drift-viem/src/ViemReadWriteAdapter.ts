@@ -1,8 +1,10 @@
 import {
   type Abi,
   type DeployParams,
+  DriftError,
   type FunctionName,
   type ReadWriteAdapter,
+  type SimulateWriteParams,
   type WriteParams,
   prepareParamsArray,
 } from "@delvtech/drift";
@@ -10,7 +12,7 @@ import {
   ViemReadAdapter,
   type ViemReadAdapterParams,
 } from "src/ViemReadAdapter";
-import type { Address, PublicClient, WalletClient } from "viem";
+import type { PublicClient, WalletClient } from "viem";
 
 export interface ViemReadWriteAdapterParams<
   TPublicClient extends PublicClient = PublicClient,
@@ -38,17 +40,18 @@ export class ViemReadWriteAdapter<
 
   async getSignerAddress() {
     const [address] = await this.walletClient.getAddresses();
-    return address as Address;
+    if (!address) throw new DriftError("No signer address found");
+    return address;
   }
 
   async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>) {
+  >(params: SimulateWriteParams<TAbi, TFunctionName>) {
     return super.simulateWrite({
       ...params,
       from: params.from ?? (await this.getSignerAddress()),
-    } as WriteParams<TAbi, TFunctionName>);
+    });
   }
 
   async write<
@@ -56,7 +59,7 @@ export class ViemReadWriteAdapter<
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(params: WriteParams<TAbi, TFunctionName>) {
     const prepared = prepareParamsArray({
-      abi: params.abi as Abi,
+      abi: params.abi,
       type: "function",
       name: params.fn,
       kind: "inputs",
@@ -97,7 +100,7 @@ export class ViemReadWriteAdapter<
 
   async deploy<TAbi extends Abi>(params: DeployParams<TAbi>) {
     const prepared = prepareParamsArray({
-      abi: params.abi as Abi,
+      abi: params.abi,
       type: "constructor",
       name: undefined,
       kind: "inputs",

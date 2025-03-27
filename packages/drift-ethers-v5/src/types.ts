@@ -6,10 +6,7 @@ export type Provider = providers.Provider;
 export type EthersAbi = Exclude<ContractInterface, Interface>;
 
 declare module "@delvtech/drift" {
-  interface BaseTypes {
-    Address: string;
-    Bytes: string;
-    Hash: string;
+  interface BaseTypeOverrides {
     HexString: string;
   }
 

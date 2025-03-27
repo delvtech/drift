@@ -2,10 +2,11 @@ import {
   type Abi,
   type AbiArrayType,
   AbiEncoder,
-  type Address,
+  type Block,
   type BlockIdentifier,
   type Bytes,
   type CallParams,
+  type EventArgs,
   type EventLog,
   type EventName,
   type FunctionArgs,
@@ -15,13 +16,12 @@ import {
   type GetEventsParams,
   type GetTransactionParams,
   type Hash,
-  type HexString,
   type ReadAdapter,
   type ReadParams,
+  type SimulateWriteParams,
   type Transaction,
   type TransactionReceipt,
   type WaitForTransactionParams,
-  type WriteParams,
   arrayToObject,
   encodeBytecodeCallData,
   prepareParamsArray,
@@ -80,27 +80,29 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
   ) {
     const ethersBlock = await this.provider.getBlock(blockId ?? "latest");
 
-    const block = ethersBlock
-      ? {
-          extraData: ethersBlock.extraData as HexString,
-          gasLimit: ethersBlock.gasLimit,
-          gasUsed: ethersBlock.gasUsed,
-          hash: ethersBlock.hash as Hash | undefined,
-          logsBloom: undefined,
-          miner: ethersBlock.miner as Address,
-          mixHash: undefined,
-          nonce: BigInt(ethersBlock.nonce),
-          number: BigInt(ethersBlock.number),
-          parentHash: ethersBlock.parentHash as Hash,
-          receiptsRoot: (ethersBlock.receiptsRoot as Hash) ?? undefined,
-          sha3Uncles: undefined,
-          size: undefined,
-          stateRoot: ethersBlock.stateRoot as Hash,
-          timestamp: BigInt(ethersBlock.timestamp),
-          transactions: ethersBlock.transactions as Hash[],
-          transactionsRoot: undefined,
-        }
-      : undefined;
+    if (!ethersBlock) {
+      return undefined as GetBlockReturnType<T>;
+    }
+
+    const block: Block<any> = {
+      extraData: ethersBlock.extraData,
+      gasLimit: ethersBlock.gasLimit,
+      gasUsed: ethersBlock.gasUsed,
+      hash: ethersBlock.hash,
+      logsBloom: undefined,
+      miner: ethersBlock.miner,
+      mixHash: undefined,
+      nonce: BigInt(ethersBlock.nonce),
+      number: BigInt(ethersBlock.number),
+      parentHash: ethersBlock.parentHash,
+      receiptsRoot: ethersBlock.receiptsRoot ?? undefined,
+      sha3Uncles: undefined,
+      size: undefined,
+      stateRoot: ethersBlock.stateRoot ?? "0x",
+      timestamp: BigInt(ethersBlock.timestamp),
+      transactions: ethersBlock.transactions.slice(),
+      transactionsRoot: undefined,
+    };
 
     return block as GetBlockReturnType<T>;
   }
@@ -113,19 +115,19 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     const ethersTx = await this.provider.getTransaction(hash);
     const tx: Transaction | undefined = ethersTx
       ? {
-          blockHash: ethersTx.blockHash as Hash | undefined,
+          blockHash: ethersTx.blockHash ?? undefined,
           blockNumber:
             ethersTx.blockNumber === null
               ? undefined
               : BigInt(ethersTx.blockNumber),
           chainId: Number(ethersTx.chainId),
-          from: ethersTx.from as Address,
+          from: ethersTx.from,
           gas: ethersTx.gasLimit,
           gasPrice: ethersTx.gasPrice,
-          transactionHash: ethersTx.hash as Hash,
-          input: ethersTx.data as HexString,
+          transactionHash: ethersTx.hash,
+          input: ethersTx.data,
           nonce: BigInt(ethersTx.nonce),
-          to: (ethersTx.to ?? undefined) as Address | undefined,
+          to: ethersTx.to ?? undefined,
           transactionIndex: BigInt(ethersTx.index),
           type: ethersTx.type.toString(16),
           value: ethersTx.value,
@@ -142,17 +144,17 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     );
     const receipt: TransactionReceipt | undefined = ethersReceipt
       ? {
-          contractAddress: ethersReceipt.contractAddress as Address | undefined,
-          blockHash: ethersReceipt.blockHash as Hash,
+          contractAddress: ethersReceipt.contractAddress ?? undefined,
+          blockHash: ethersReceipt.blockHash,
           blockNumber: BigInt(ethersReceipt.blockNumber),
           cumulativeGasUsed: ethersReceipt.cumulativeGasUsed,
           effectiveGasPrice: ethersReceipt.gasPrice,
-          from: ethersReceipt.from as Address,
+          from: ethersReceipt.from,
           gasUsed: ethersReceipt.gasUsed,
-          logsBloom: ethersReceipt.logsBloom as Hash,
+          logsBloom: ethersReceipt.logsBloom,
           status: ethersReceipt.status ? "success" : "reverted",
-          to: (ethersReceipt?.to ?? undefined) as Address | undefined,
-          transactionHash: ethersReceipt.hash as Hash,
+          to: ethersReceipt?.to ?? undefined,
+          transactionHash: ethersReceipt.hash,
           transactionIndex: BigInt(ethersReceipt.index),
         }
       : undefined;
@@ -198,7 +200,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
       to,
       type: type === undefined ? undefined : Number(type),
       value,
-    }) as Promise<Bytes>;
+    });
   }
 
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
@@ -214,11 +216,11 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     let eventFilter: string | DeferredTopicFilter = eventName;
     if (filter) {
       const { params } = prepareParamsArray({
-        abi: abi as Abi,
+        abi: abi,
         type: "event",
         name: eventName,
         kind: "inputs",
-        value: filter,
+        value: filter as EventArgs<TAbi, TEventName>,
       });
       eventFilter = contract.getEvent(eventName)(...params);
     }
@@ -243,8 +245,8 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
         }),
         eventName: ethersEvent.eventName as TEventName,
         blockNumber: BigInt(ethersEvent.blockNumber),
-        data: ethersEvent.data as HexString,
-        transactionHash: ethersEvent.transactionHash as Hash,
+        data: ethersEvent.data,
+        transactionHash: ethersEvent.transactionHash,
       };
       return event;
     });
@@ -277,7 +279,13 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
   async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >({ abi, address, fn, args, ...params }: WriteParams<TAbi, TFunctionName>) {
+  >({
+    abi,
+    address,
+    fn,
+    args,
+    ...params
+  }: SimulateWriteParams<TAbi, TFunctionName>) {
     const callData = this.encodeFunctionData({
       abi,
       fn,
@@ -332,5 +340,11 @@ declare module "@delvtech/drift" {
      * @see [Ethers.js - TransactionResponse - gasPrice](https://docs.ethers.org/v6/api/providers/#TransactionResponse-gasPrice)
      */
     effectiveGasPrice: bigint;
+  }
+}
+
+declare module "@delvtech/drift" {
+  interface BaseTypeOverrides {
+    HexString: string;
   }
 }

@@ -1,12 +1,10 @@
 import {
   type Abi,
-  type Address,
   type DeployParams,
   DriftError,
   type FunctionName,
-  type Hash,
-  type HexString,
   type ReadWriteAdapter,
+  type SimulateWriteParams,
   type TransactionReceipt,
   type WriteParams,
   prepareParamsArray,
@@ -44,17 +42,17 @@ export class EthersReadWriteAdapter<
   }
 
   getSignerAddress() {
-    return this.signer.getAddress() as Promise<HexString>;
+    return this.signer.getAddress();
   }
 
   async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>) {
+  >(params: SimulateWriteParams<TAbi, TFunctionName>) {
     return super.simulateWrite({
       ...params,
       from: params.from ?? (await this.signer.getAddress()),
-    } as WriteParams<TAbi, TFunctionName>);
+    });
   }
 
   async write<
@@ -72,7 +70,7 @@ export class EthersReadWriteAdapter<
     const contract = new Contract(address, abi as EthersAbi, this.signer);
 
     const { params } = prepareParamsArray({
-      abi: abi as Abi,
+      abi,
       type: "function",
       name: fn,
       kind: "inputs",
@@ -95,23 +93,23 @@ export class EthersReadWriteAdapter<
     if (onMined) {
       tx.wait().then((ethersReceipt) => {
         const receipt: TransactionReceipt = {
-          blockHash: ethersReceipt.blockHash as Hash,
+          blockHash: ethersReceipt.blockHash,
           blockNumber: BigInt(ethersReceipt.blockNumber),
           cumulativeGasUsed: ethersReceipt.cumulativeGasUsed.toBigInt(),
           gasUsed: ethersReceipt.gasUsed.toBigInt(),
           effectiveGasPrice: ethersReceipt.effectiveGasPrice.toBigInt(),
-          from: ethersReceipt.from as Address,
-          logsBloom: ethersReceipt.logsBloom as HexString,
+          from: ethersReceipt.from,
+          logsBloom: ethersReceipt.logsBloom,
           status: ethersReceipt.status ? "success" : "reverted",
-          to: ethersReceipt.to as Address,
-          transactionHash: ethersReceipt.transactionHash as Hash,
+          to: ethersReceipt.to,
+          transactionHash: ethersReceipt.transactionHash,
           transactionIndex: BigInt(ethersReceipt.transactionIndex),
         };
         onMined(receipt);
       });
     }
 
-    return tx.hash as Hash;
+    return tx.hash;
   }
 
   async deploy<TAbi extends Abi>({
@@ -128,7 +126,7 @@ export class EthersReadWriteAdapter<
       this.signer,
     );
     const { params } = prepareParamsArray({
-      abi: abi as Abi,
+      abi,
       type: "constructor",
       name: undefined,
       kind: "inputs",
@@ -152,9 +150,7 @@ export class EthersReadWriteAdapter<
         const deployedContract = await contract.waitForDeployment();
         const hash = deployedContract.deployTransaction?.hash;
         if (hash) {
-          const minedTransaction = await this.waitForTransaction({
-            hash: hash as Hash,
-          });
+          const minedTransaction = await this.waitForTransaction({ hash });
           onMined(minedTransaction);
         }
       })();
@@ -164,6 +160,6 @@ export class EthersReadWriteAdapter<
     if (!hash) {
       throw new DriftError("Failed to get deployment transaction hash");
     }
-    return hash as Hash;
+    return hash;
   }
 }

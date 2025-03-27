@@ -1,10 +1,10 @@
 import {
   type Abi,
   AbiEncoder,
-  type AbiObjectType,
+  type Block,
   type BlockIdentifier,
-  type Bytes,
   type CallParams,
+  type EventArgs,
   type EventName,
   type FunctionArgs,
   type FunctionName,
@@ -61,7 +61,7 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
   async getBlock<T extends BlockIdentifier | undefined = undefined>(
     blockId?: T,
   ) {
-    const block = await this.publicClient.getBlock(
+    const viemBlock = await this.publicClient.getBlock(
       isHex(blockId)
         ? {
             blockHash: blockId,
@@ -75,25 +75,27 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
             },
     );
 
-    return {
-      extraData: block.extraData,
-      gasLimit: block.gasLimit,
-      gasUsed: block.gasUsed,
-      hash: block.hash ?? undefined,
-      logsBloom: block.logsBloom ?? undefined,
-      miner: block.miner,
-      mixHash: block.mixHash,
-      nonce: block.nonce === null ? undefined : BigInt(block.nonce),
-      number: block.number ?? undefined,
-      parentHash: block.parentHash,
-      receiptsRoot: block.receiptsRoot,
-      sha3Uncles: block.sha3Uncles,
-      size: block.size,
-      stateRoot: block.stateRoot,
-      timestamp: block.timestamp,
-      transactions: block.transactions,
-      transactionsRoot: block.transactionsRoot,
-    } as GetBlockReturnType<T>;
+    const block: Block<any> = {
+      extraData: viemBlock.extraData,
+      gasLimit: viemBlock.gasLimit,
+      gasUsed: viemBlock.gasUsed,
+      hash: viemBlock.hash ?? undefined,
+      logsBloom: viemBlock.logsBloom ?? undefined,
+      miner: viemBlock.miner,
+      mixHash: viemBlock.mixHash,
+      nonce: viemBlock.nonce === null ? undefined : BigInt(viemBlock.nonce),
+      number: viemBlock.number ?? undefined,
+      parentHash: viemBlock.parentHash,
+      receiptsRoot: viemBlock.receiptsRoot,
+      sha3Uncles: viemBlock.sha3Uncles,
+      size: viemBlock.size,
+      stateRoot: viemBlock.stateRoot,
+      timestamp: viemBlock.timestamp,
+      transactions: viemBlock.transactions,
+      transactionsRoot: viemBlock.transactionsRoot,
+    };
+
+    return block as GetBlockReturnType<T>;
   }
 
   getBalance({ address, block }: GetBalanceParams) {
@@ -108,7 +110,7 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
     const tx = await this.publicClient.getTransaction({ hash });
     return {
       gas: tx.gas,
-      gasPrice: tx.gasPrice as bigint,
+      gasPrice: tx.gasPrice ?? 0n,
       input: tx.input,
       nonce: BigInt(tx.nonce),
       type: rpcTransactionType[tx.type],
@@ -117,7 +119,7 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
       blockNumber: tx.blockNumber ?? undefined,
       from: tx.from,
       chainId: tx.chainId,
-      hash: tx.hash,
+      transactionHash: tx.hash,
       to: tx.to ?? undefined,
       transactionIndex: BigInt(tx.transactionIndex),
     };
@@ -174,7 +176,7 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
                 topics,
               }).args
             : args
-        ) as AbiObjectType<TAbi, "event", typeof event, "inputs">;
+        ) as EventArgs<TAbi, TEventName>;
 
         return {
           args: objectArgs,
@@ -190,13 +192,13 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
   async call({ block, bytecode, from, nonce, ...rest }: CallParams) {
     const { data } = await this.publicClient.call({
       blockNumber: typeof block === "bigint" ? block : undefined,
-      blockTag: typeof block === "string" ? block : (undefined as any),
+      blockTag: typeof block === "string" ? block : undefined,
       code: bytecode,
       account: from,
       nonce: typeof nonce === "bigint" ? Number(nonce) : nonce,
       ...rest,
     } as CallParameters);
-    return data as Bytes;
+    return data || "0x";
   }
 
   async read<

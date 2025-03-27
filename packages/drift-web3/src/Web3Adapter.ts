@@ -4,11 +4,10 @@ import {
   type Address,
   type AnyObject,
   type BlockIdentifier,
-  type Bytes,
   type CallParams,
   type DeployParams,
   DriftError,
-  type EventLog,
+  type EventArgs,
   type EventName,
   type FunctionArgs,
   type FunctionName,
@@ -19,6 +18,7 @@ import {
   type Hash,
   type ReadParams,
   type ReadWriteAdapter,
+  type SimulateWriteParams,
   type Transaction,
   type TransactionReceipt,
   type WaitForTransactionParams,
@@ -61,25 +61,10 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
 
     const block = web3Block
       ? {
-          extraData: web3Block.extraData,
-          gasLimit: web3Block.gasLimit,
-          gasUsed: web3Block.gasUsed,
-          hash: web3Block.hash as Hash | undefined,
-          logsBloom: web3Block.logsBloom as Hash | undefined,
-          miner: web3Block.miner as Address,
-          mixHash: web3Block.mixHash as Hash,
-          nonce: web3Block.nonce,
-          number: web3Block.number,
-          parentHash: web3Block.parentHash as Hash,
-          receiptsRoot: web3Block.receiptsRoot as Hash,
-          sha3Uncles: web3Block.sha3Uncles as Hash,
-          size: web3Block.size,
-          stateRoot: web3Block.stateRoot as Hash,
-          timestamp: web3Block.timestamp,
+          ...web3Block,
           transactions: web3Block.transactions.map((tx) =>
             typeof tx === "string" ? tx : tx.hash,
-          ) as Hash[],
-          transactionsRoot: web3Block.transactionsRoot as Hash,
+          ),
         }
       : undefined;
 
@@ -94,19 +79,19 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     const tx = await this.web3.eth.getTransaction(hash);
     return tx
       ? ({
-          blockHash: tx.blockHash as Hash | undefined,
+          blockHash: tx.blockHash,
           blockNumber:
             typeof tx.blockNumber !== "undefined"
               ? BigInt(tx.blockNumber)
               : undefined,
           chainId: Number(tx.chainId),
-          from: tx.from as Address,
+          from: tx.from,
           gas: BigInt(tx.gas),
           gasPrice: BigInt(tx.gasPrice),
-          hash: tx.hash as Hash,
+          transactionHash: tx.hash,
           input: tx.input,
           nonce: BigInt(tx.nonce),
-          to: tx.to ?? (undefined as Address | undefined),
+          to: tx.to ?? undefined,
           transactionIndex:
             typeof tx.transactionIndex !== "undefined"
               ? BigInt(tx.transactionIndex)
@@ -114,9 +99,10 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
           type:
             typeof tx.type === "string"
               ? tx.type
-              : (tx.type as unknown as bigint).toString(16),
+              : // The types lie, it will sometimes be a bigint
+                (tx.type as unknown as bigint).toString(16),
           value: BigInt(tx.value),
-        } as Transaction)
+        } satisfies Transaction)
       : undefined;
   }
 
@@ -131,20 +117,9 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
           .then((receipt) =>
             receipt
               ? resolve({
-                  blockHash: receipt.blockHash as Hash,
-                  blockNumber: receipt.blockNumber ?? undefined,
-                  contractAddress: receipt.contractAddress as
-                    | Address
-                    | undefined,
-                  cumulativeGasUsed: BigInt(receipt.cumulativeGasUsed),
+                  ...receipt,
                   effectiveGasPrice: receipt.effectiveGasPrice || 0n,
-                  from: receipt.from as Address,
-                  gasUsed: BigInt(receipt.gasUsed),
-                  logsBloom: receipt.logsBloom as Hash,
                   status: receipt.status ? "success" : "reverted",
-                  to: receipt.to as Address,
-                  transactionHash: receipt.transactionHash as Hash,
-                  transactionIndex: receipt.transactionIndex,
                 })
               : setTimeout(
                   getReceipt,
@@ -194,7 +169,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
         value,
       },
       block,
-    ) as Promise<Bytes>;
+    );
   }
 
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
@@ -226,12 +201,12 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
       }
 
       return {
-        args: event.returnValues,
+        args: event.returnValues as EventArgs<TAbi, TEventName>,
         blockNumber: event.blockNumber ? BigInt(event.blockNumber) : undefined,
         data: event.data,
         eventName,
         transactionHash: event.transactionHash,
-      } as EventLog<TAbi, TEventName>;
+      };
     });
   }
 
@@ -262,7 +237,13 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >({ abi, address, fn, args, ...params }: WriteParams<TAbi, TFunctionName>) {
+  >({
+    abi,
+    address,
+    fn,
+    args,
+    ...params
+  }: SimulateWriteParams<TAbi, TFunctionName>) {
     const callData = this.encodeFunctionData({
       abi,
       fn,
@@ -273,6 +254,8 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     const returnData = await this.call({
       to: address,
       data: callData,
+      from:
+        params.from ?? (await this.getSignerAddress().catch(() => undefined)),
       ...params,
     });
 
@@ -286,7 +269,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   async getSignerAddress() {
     const [address] = await this.web3.eth.getAccounts();
     if (!address) throw new DriftError("No signer address found");
-    return address as Address;
+    return address;
   }
 
   async write<
@@ -303,7 +286,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     ...rest
   }: WriteParams<TAbi, TFunctionName>) {
     const { params } = prepareParamsArray({
-      abi: abi as Abi,
+      abi,
       type: "function",
       name: fn,
       kind: "inputs",
@@ -322,23 +305,14 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
           from,
         })
         .on("error", reject)
-        .on("transactionHash", (hash) => resolve(hash as Hash));
+        .on("transactionHash", (hash) => resolve(hash));
 
       if (onMined) {
         req.on("receipt", (receipt) => {
           onMined({
-            blockHash: receipt.blockHash as Hash,
-            contractAddress: receipt.contractAddress as Address | undefined,
-            cumulativeGasUsed: receipt.cumulativeGasUsed,
+            ...receipt,
             effectiveGasPrice: receipt.effectiveGasPrice ?? 0n,
-            blockNumber: receipt.blockNumber,
-            from: receipt.from as Address,
-            logsBloom: receipt.logsBloom as Hash,
             status: receipt.status ? "success" : "reverted",
-            gasUsed: receipt.gasUsed,
-            to: receipt.to as Address,
-            transactionHash: receipt.transactionHash as Hash,
-            transactionIndex: receipt.transactionIndex,
           });
         });
       }
@@ -361,7 +335,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   }: DeployParams<TAbi>) {
     const contract = new this.web3.eth.Contract(abi as readonly AbiFragment[]);
     const { params } = prepareParamsArray({
-      abi: abi as Abi,
+      abi,
       type: "constructor",
       name: undefined,
       kind: "inputs",
@@ -383,22 +357,26 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
           value: value?.toString(),
         })
         .on("error", reject)
-        .on("transactionHash", (hash) => resolve(hash as Hash));
+        .on("transactionHash", (hash) =>
+          resolve(normalizePossibleUint8Array(hash)),
+        );
 
       if (onMined) {
         req.on("receipt", (receipt) => {
           onMined({
-            blockHash: receipt.blockHash as Hash,
-            contractAddress: receipt.contractAddress as Address | undefined,
+            blockHash: normalizePossibleUint8Array(receipt.blockHash),
+            contractAddress: receipt.contractAddress,
             cumulativeGasUsed: BigInt(receipt.cumulativeGasUsed),
             effectiveGasPrice: BigInt(receipt.effectiveGasPrice ?? 0n),
             blockNumber: BigInt(receipt.blockNumber),
-            from: receipt.from as Address,
-            logsBloom: receipt.logsBloom as Hash,
+            from: receipt.from,
+            logsBloom: normalizePossibleUint8Array(receipt.logsBloom),
             status: receipt.status ? "success" : "reverted",
             gasUsed: BigInt(receipt.gasUsed),
-            to: receipt.to as Address,
-            transactionHash: receipt.transactionHash as Hash,
+            to: receipt.to,
+            transactionHash: normalizePossibleUint8Array(
+              receipt.transactionHash,
+            ),
             transactionIndex: BigInt(receipt.transactionIndex),
           });
         });
@@ -431,7 +409,17 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   }
 }
 
+function normalizePossibleUint8Array(value: string | Uint8Array) {
+  return typeof value === "string"
+    ? value
+    : `0x${Buffer.from(value).toString("hex")}`;
+}
+
 declare module "@delvtech/drift" {
+  interface BaseTypeOverrides {
+    HexString: string;
+  }
+
   interface ContractCallOptions {
     /**
      * Unavailable in web3.js.

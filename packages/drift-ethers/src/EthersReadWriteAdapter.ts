@@ -3,9 +3,8 @@ import {
   type DeployParams,
   DriftError,
   type FunctionName,
-  type Hash,
-  type HexString,
   type ReadWriteAdapter,
+  type SimulateWriteParams,
   type WriteParams,
   prepareParamsArray,
 } from "@delvtech/drift";
@@ -43,17 +42,17 @@ export class EthersReadWriteAdapter<
   }
 
   getSignerAddress() {
-    return this.signer.getAddress() as Promise<HexString>;
+    return this.signer.getAddress();
   }
 
   async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>) {
+  >(params: SimulateWriteParams<TAbi, TFunctionName>) {
     return super.simulateWrite({
       ...params,
       from: params.from ?? (await this.signer.getAddress()),
-    } as WriteParams<TAbi, TFunctionName>);
+    });
   }
 
   async write<
@@ -71,7 +70,7 @@ export class EthersReadWriteAdapter<
     const contract = new Contract(address, abi as InterfaceAbi, this.signer);
 
     const { params } = prepareParamsArray({
-      abi: abi as Abi,
+      abi,
       type: "function",
       name: fn,
       kind: "inputs",
@@ -115,7 +114,7 @@ export class EthersReadWriteAdapter<
       this.signer,
     );
     const { params } = prepareParamsArray({
-      abi: abi as Abi,
+      abi,
       type: "constructor",
       name: undefined,
       kind: "inputs",
@@ -140,9 +139,7 @@ export class EthersReadWriteAdapter<
         const transaction = deployedContract.deploymentTransaction();
         const hash = transaction?.hash;
         if (hash) {
-          const minedTransaction = await this.waitForTransaction({
-            hash: hash as Hash,
-          });
+          const minedTransaction = await this.waitForTransaction({ hash });
           onMined(minedTransaction);
         }
       })();
@@ -152,6 +149,6 @@ export class EthersReadWriteAdapter<
     if (!hash) {
       throw new DriftError("Failed to get deployment transaction hash");
     }
-    return hash as Hash;
+    return hash;
   }
 }

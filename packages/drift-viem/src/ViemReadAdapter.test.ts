@@ -32,7 +32,7 @@ describe("ViemReadAdapter", () => {
     expect(block).toMatchObject({
       number: expect.any(BigInt),
       timestamp: expect.any(BigInt),
-    } as Partial<Block>);
+    } satisfies Partial<Block>);
   });
 
   it("fetches account balances", async () => {
@@ -54,6 +54,7 @@ describe("ViemReadAdapter", () => {
       hash: block.transactions[0]!,
     });
     expect(tx).toMatchObject({
+      chainId: expect.toBeOneOf([expect.any(Number), undefined]),
       gas: expect.any(BigInt),
       gasPrice: expect.any(BigInt),
       input: expect.stringMatching(HEX_REGEX),
@@ -63,10 +64,10 @@ describe("ViemReadAdapter", () => {
       blockHash: expect.stringMatching(HEX_REGEX),
       blockNumber: expect.any(BigInt),
       from: expect.stringMatching(HEX_REGEX),
-      hash: expect.stringMatching(HEX_REGEX),
+      transactionHash: expect.stringMatching(HEX_REGEX),
       to: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
       transactionIndex: expect.any(BigInt),
-    } as Transaction);
+    } satisfies Transaction);
   });
 
   it("returns receipts for waited transactions", async () => {
@@ -82,6 +83,11 @@ describe("ViemReadAdapter", () => {
       hash: block.transactions[0]!,
     });
     expect(tx).toMatchObject({
+      contractAddress: expect.toBeOneOf([
+        expect.stringMatching(HEX_REGEX),
+        undefined,
+      ]),
+      to: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
       blockHash: expect.stringMatching(HEX_REGEX),
       blockNumber: expect.any(BigInt),
       from: expect.stringMatching(HEX_REGEX),
@@ -92,7 +98,7 @@ describe("ViemReadAdapter", () => {
       status: expect.stringMatching(/^(success|reverted)$/),
       transactionHash: expect.stringMatching(HEX_REGEX),
       transactionIndex: expect.any(BigInt),
-    } as TransactionReceipt);
+    } satisfies TransactionReceipt);
   });
 
   describe("call", () => {
@@ -134,11 +140,12 @@ describe("ViemReadAdapter", () => {
     });
     expect(events).toBeInstanceOf(Array);
     expect(events[0]).toMatchObject({
+      eventName: "Transfer",
       args: expect.any(Object),
       blockNumber: expect.any(BigInt),
       data: expect.stringMatching(HEX_REGEX),
       transactionHash: expect.stringMatching(HEX_REGEX),
-    } as EventLog<typeof erc20Abi, "Transfer">);
+    } satisfies EventLog<typeof erc20Abi, "Transfer">);
   });
 
   describe("read", () => {
@@ -234,7 +241,7 @@ describe("ViemReadAdapter", () => {
     expect(decoded).toEqual({
       args,
       functionName: "transfer",
-    } as DecodedFunctionData<typeof erc20Abi, "transfer">);
+    } satisfies DecodedFunctionData<typeof erc20Abi, "transfer">);
   });
 
   it("decodes function return data", async () => {

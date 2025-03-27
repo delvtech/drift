@@ -39,7 +39,7 @@ describe("EthersReadAdapter", () => {
     expect(block).toMatchObject({
       number: expect.any(BigInt),
       timestamp: expect.any(BigInt),
-    } as Partial<Block>);
+    } satisfies Partial<Block>);
   });
 
   it("fetches account balances", async () => {
@@ -62,7 +62,7 @@ describe("EthersReadAdapter", () => {
       hash: block!.transactions[0] as Hash,
     });
     expect(tx).toMatchObject({
-      chainId: expect.any(Number),
+      chainId: expect.toBeOneOf([expect.any(Number), undefined]),
       gas: expect.any(BigInt),
       gasPrice: expect.any(BigInt),
       input: expect.stringMatching(HEX_REGEX),
@@ -74,7 +74,8 @@ describe("EthersReadAdapter", () => {
       transactionHash: expect.stringMatching(HEX_REGEX),
       to: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
       transactionIndex: undefined,
-    } as Transaction);
+      type: expect.any(String),
+    } satisfies Transaction);
   });
 
   it("returns receipts for waited transactions", async () => {
@@ -93,16 +94,20 @@ describe("EthersReadAdapter", () => {
     expect(tx).toMatchObject({
       blockHash: expect.stringMatching(HEX_REGEX),
       blockNumber: expect.any(BigInt),
-      from: expect.stringMatching(HEX_REGEX),
+      contractAddress: expect.toBeOneOf([
+        expect.stringMatching(HEX_REGEX),
+        undefined,
+      ]),
       cumulativeGasUsed: expect.any(BigInt),
       effectiveGasPrice: expect.any(BigInt),
+      from: expect.stringMatching(HEX_REGEX),
       gasUsed: expect.any(BigInt),
       logsBloom: expect.stringMatching(HEX_REGEX),
       status: expect.stringMatching(/^(success|reverted)$/),
       to: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
       transactionHash: expect.stringMatching(HEX_REGEX),
       transactionIndex: expect.any(BigInt),
-    } as TransactionReceipt);
+    } satisfies TransactionReceipt);
   });
 
   describe("call", () => {
@@ -145,11 +150,12 @@ describe("EthersReadAdapter", () => {
     expect(events).toBeInstanceOf(Array);
     expect(events[0]).toEqual(
       expect.objectContaining({
+        eventName: "Transfer",
         args: expect.any(Object),
         blockNumber: expect.any(BigInt),
         data: expect.stringMatching(HEX_REGEX),
         transactionHash: expect.stringMatching(HEX_REGEX),
-      } as EventLog<typeof erc20.abi, "Transfer">),
+      } satisfies EventLog<typeof erc20.abi, "Transfer">),
     );
   });
 
@@ -246,7 +252,7 @@ describe("EthersReadAdapter", () => {
     expect(decoded).toMatchObject({
       args,
       functionName: "transfer",
-    } as DecodedFunctionData<typeof erc20.abi, "transfer">);
+    } satisfies DecodedFunctionData<typeof erc20.abi, "transfer">);
   });
 
   it("decodes function return data", async () => {

@@ -3,8 +3,8 @@ import {
   AbiEncoder,
   type Block,
   type BlockIdentifier,
-  type Bytes,
   type CallParams,
+  type EventArgs,
   type EventLog,
   type EventName,
   type FunctionArgs,
@@ -15,10 +15,10 @@ import {
   type GetTransactionParams,
   type ReadAdapter,
   type ReadParams,
+  type SimulateWriteParams,
   type Transaction,
   type TransactionReceipt,
   type WaitForTransactionParams,
-  type WriteParams,
   arrayToObject,
   encodeBytecodeCallData,
   prepareParamsArray,
@@ -75,27 +75,29 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
   ) {
     const ethersBlock = await this.provider.getBlock(blockParam(blockId));
 
-    const block = ethersBlock
-      ? ({
-          extraData: ethersBlock.extraData,
-          gasLimit: ethersBlock.gasLimit.toBigInt(),
-          gasUsed: ethersBlock.gasUsed.toBigInt(),
-          hash: ethersBlock.hash,
-          logsBloom: undefined,
-          miner: ethersBlock.miner,
-          mixHash: undefined,
-          nonce: BigInt(ethersBlock.nonce),
-          number: BigInt(ethersBlock.number),
-          parentHash: ethersBlock.parentHash,
-          receiptsRoot: undefined,
-          sha3Uncles: undefined,
-          size: undefined,
-          stateRoot: undefined,
-          timestamp: BigInt(ethersBlock.timestamp),
-          transactions: ethersBlock.transactions,
-          transactionsRoot: undefined,
-        } as Block<T>)
-      : undefined;
+    if (!ethersBlock) {
+      return undefined as GetBlockReturnType<T>;
+    }
+
+    const block: Block<any> = {
+      extraData: ethersBlock.extraData,
+      gasLimit: ethersBlock.gasLimit.toBigInt(),
+      gasUsed: ethersBlock.gasUsed.toBigInt(),
+      hash: ethersBlock.hash,
+      logsBloom: undefined,
+      miner: ethersBlock.miner,
+      mixHash: undefined,
+      nonce: BigInt(ethersBlock.nonce),
+      number: BigInt(ethersBlock.number),
+      parentHash: ethersBlock.parentHash,
+      receiptsRoot: undefined,
+      sha3Uncles: undefined,
+      size: undefined,
+      stateRoot: undefined,
+      timestamp: BigInt(ethersBlock.timestamp),
+      transactions: ethersBlock.transactions,
+      transactionsRoot: undefined,
+    };
 
     return block as GetBlockReturnType<T>;
   }
@@ -193,7 +195,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
         value,
       },
       block === undefined ? undefined : blockParam(block),
-    ) as Promise<Bytes>;
+    );
   }
 
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
@@ -209,11 +211,11 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     let eventFilter: string | EventFilter = eventName;
     if (filter) {
       const { params } = prepareParamsArray({
-        abi: abi as Abi,
+        abi: abi,
         type: "event",
         name: eventName,
         kind: "inputs",
-        value: filter,
+        value: filter as EventArgs<TAbi, TEventName>,
       });
       eventFilter = contract.filters[eventName]!(...params);
     }
@@ -270,7 +272,13 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
   async simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >({ abi, address, fn, args, ...params }: WriteParams<TAbi, TFunctionName>) {
+  >({
+    abi,
+    address,
+    fn,
+    args,
+    ...params
+  }: SimulateWriteParams<TAbi, TFunctionName>) {
     const callData = this.encodeFunctionData({
       abi,
       fn,
