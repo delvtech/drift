@@ -105,7 +105,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
       fn,
       args,
       ...params,
-    });
+    } as ReadParams);
   }
 
   readKey<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
@@ -151,7 +151,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(
     fn?: TFunctionName,
-    args?: FunctionArgs<TAbi, TFunctionName>,
+    args?: Partial<FunctionArgs<TAbi, TFunctionName>>,
     params?: ReadOptions,
   ) {
     return this.#clientCache.invalidateReadsMatching({
@@ -160,7 +160,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
       fn,
       args,
       ...params,
-    });
+    } as ReadParams);
   }
 
   // Clear

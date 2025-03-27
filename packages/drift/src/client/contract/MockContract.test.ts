@@ -126,6 +126,14 @@ describe("MockContract", () => {
 
     it("Can be stubbed with partial args", async () => {
       const contract = new MockContract({ abi });
+      contract.onRead("allowance", { owner: "0x" }).resolves(123n);
+      expect(
+        await contract.read("allowance", { owner: "0x", spender: "0x" }),
+      ).toBe(123n);
+    });
+
+    it("Can be stubbed with partial params", async () => {
+      const contract = new MockContract({ abi });
       contract.onRead("balanceOf").resolves(123n);
       expect(await contract.read("balanceOf", { account: "0x" })).toBe(123n);
     });
@@ -172,6 +180,14 @@ describe("MockContract", () => {
     });
 
     it("Can be stubbed with partial args", async () => {
+      const contract = new MockContract({ abi });
+      contract.onSimulateWrite("transfer", { to: "0x1" }).resolves(true);
+      expect(
+        await contract.simulateWrite("transfer", { to: "0x1", amount: 123n }),
+      ).toBe(true);
+    });
+
+    it("Can be stubbed with partial params", async () => {
       const contract = new MockContract({ abi });
       contract.onSimulateWrite("transfer").resolves(true);
       expect(
@@ -239,6 +255,14 @@ describe("MockContract", () => {
     });
 
     it("Can be stubbed with partial args", async () => {
+      const contract = new MockContract({ abi });
+      contract.onWrite("transfer", { to: "0x" }).resolves("0x123");
+      expect(await contract.write("transfer", { to: "0x", amount: 123n })).toBe(
+        "0x123",
+      );
+    });
+
+    it("Can be stubbed with partial params", async () => {
       const contract = new MockContract({ abi });
       contract.onWrite("transfer").resolves("0x123");
       expect(await contract.write("transfer", { to: "0x", amount: 123n })).toBe(

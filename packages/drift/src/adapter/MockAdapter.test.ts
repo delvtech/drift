@@ -434,6 +434,25 @@ describe("MockAdapter", () => {
         }),
       ).toBe(123n);
     });
+
+    it("Can be stubbed with partial args", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onRead({
+          abi: TestToken.abi,
+          fn: "allowance",
+          args: { owner: "0x" },
+        })
+        .resolves(123n);
+      expect(
+        await adapter.read({
+          abi: TestToken.abi,
+          address: "0x",
+          fn: "allowance",
+          args: { owner: "0x", spender: "0x" },
+        }),
+      ).toBe(123n);
+    });
   });
 
   describe("simulateWrite", () => {
@@ -508,6 +527,25 @@ describe("MockAdapter", () => {
         }),
       ).toBe(true);
     });
+
+    it("Can be stubbed with partial args", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onSimulateWrite({
+          abi: TestToken.abi,
+          fn: "transfer",
+          args: { to: "0x1" },
+        })
+        .resolves(true);
+      expect(
+        await adapter.simulateWrite({
+          abi: TestToken.abi,
+          address: "0x1",
+          fn: "transfer",
+          args: { to: "0x1", amount: 123n },
+        }),
+      ).toBe(true);
+    });
   });
 
   describe("write", () => {
@@ -571,6 +609,25 @@ describe("MockAdapter", () => {
         .onWrite({
           abi: TestToken.abi,
           fn: "transfer",
+        })
+        .resolves("0x123");
+      expect(
+        await adapter.write({
+          abi: TestToken.abi,
+          address: "0x",
+          fn: "transfer",
+          args: { to: "0x", amount: 123n },
+        }),
+      ).toBe("0x123");
+    });
+
+    it("Can be stubbed with partial args", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onWrite({
+          abi: TestToken.abi,
+          fn: "transfer",
+          args: { to: "0x" },
         })
         .resolves("0x123");
       expect(
@@ -662,6 +719,23 @@ describe("MockAdapter", () => {
     it("Can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       adapter.onDeploy({ abi: TestToken.abi }).resolves("0x123");
+      expect(
+        await adapter.deploy({
+          abi: TestToken.abi,
+          bytecode: "0x",
+          args: {
+            decimals_: 18,
+            initialSupply: 0n,
+          },
+        }),
+      ).toBe("0x123");
+    });
+
+    it("Can be stubbed with partial args", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onDeploy({ abi: TestToken.abi, args: { decimals_: 18 } })
+        .resolves("0x123");
       expect(
         await adapter.deploy({
           abi: TestToken.abi,

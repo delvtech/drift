@@ -6,7 +6,11 @@ import type {
 } from "src/adapter/types/Adapter";
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
 import type { EventLog, EventName } from "src/adapter/types/Event";
-import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
+import type {
+  FunctionArgs,
+  FunctionName,
+  FunctionReturn,
+} from "src/adapter/types/Function";
 import type {
   GetBalanceParams,
   GetTransactionParams,
@@ -20,7 +24,7 @@ import { LruStore } from "src/store/LruStore";
 import type { Store } from "src/store/types";
 import { deleteMatches } from "src/store/utils/deleteMatches";
 import { stringifyKey } from "src/utils/stringifyKey";
-import type { MaybePromise } from "src/utils/types";
+import type { MaybePromise, Replace } from "src/utils/types";
 
 export type ClientCacheOptions<T extends Store = Store> = {
   /**
@@ -139,7 +143,7 @@ export class ClientCache<T extends Store = Store> {
 
   // Call //
 
-  async callKey({
+  async partialCallKey({
     to,
     data,
     value,
@@ -151,7 +155,7 @@ export class ClientCache<T extends Store = Store> {
     blobs,
     bytecode,
     nonce,
-  }: CallParams): Promise<string> {
+  }: Partial<CallParams>): Promise<string> {
     return this.#createKey("call", {
       to,
       data,
@@ -165,6 +169,10 @@ export class ClientCache<T extends Store = Store> {
       bytecode,
       nonce,
     });
+  }
+
+  async callKey(params: CallParams): Promise<string> {
+    return this.partialCallKey(params);
   }
 
   async preloadCall({
@@ -187,8 +195,8 @@ export class ClientCache<T extends Store = Store> {
     return this.store.delete(key);
   }
 
-  async invalidateCallsMatching(params: CallParams): Promise<void> {
-    const key = await this.callKey(params);
+  async invalidateCallsMatching(params: Partial<CallParams>): Promise<void> {
+    const key = await this.partialCallKey(params);
     return deleteMatches(this.store, key);
   }
 
@@ -225,7 +233,15 @@ export class ClientCache<T extends Store = Store> {
   async partialReadKey<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >({ address, args, block, fn }: Partial<ReadParams<TAbi, TFunctionName>>) {
+  >({
+    address,
+    args,
+    block,
+    fn,
+  }: Replace<
+    Partial<ReadParams<TAbi, TFunctionName>>,
+    { args?: Partial<FunctionArgs<TAbi, TFunctionName>> }
+  >) {
     return this.#createKey("read", {
       address,
       args,
@@ -238,7 +254,7 @@ export class ClientCache<T extends Store = Store> {
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(params: ReadParams<TAbi, TFunctionName>) {
-    return this.partialReadKey(params as Partial<ReadParams>);
+    return this.partialReadKey(params);
   }
 
   async preloadRead<
@@ -265,7 +281,12 @@ export class ClientCache<T extends Store = Store> {
   async invalidateReadsMatching<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(params: Partial<ReadParams<TAbi, TFunctionName>>): Promise<void> {
+  >(
+    params: Replace<
+      Partial<ReadParams<TAbi, TFunctionName>>,
+      { args?: Partial<FunctionArgs<TAbi, TFunctionName>> }
+    >,
+  ): Promise<void> {
     const matchKey = await this.partialReadKey(params);
     return deleteMatches(this.store, matchKey);
   }

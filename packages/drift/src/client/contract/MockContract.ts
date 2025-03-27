@@ -20,7 +20,7 @@ import {
 import { ReadWriteContract } from "src/client/contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
 import type { Store } from "src/store/types";
-import type { Eval, FunctionKey, OneOf, PartialBy } from "src/utils/types";
+import type { Eval, FunctionKey, OneOf } from "src/utils/types";
 
 export type MockContractOptions<
   TAbi extends Abi = Abi,
@@ -78,7 +78,7 @@ export class MockContract<
 
   onRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     fn: TFunctionName,
-    args?: FunctionArgs<TAbi, TFunctionName>,
+    args?: Partial<FunctionArgs<TAbi, TFunctionName>>,
     options?: ReadOptions,
   ) {
     return this.adapter.onRead({
@@ -87,14 +87,14 @@ export class MockContract<
       fn,
       args,
       ...options,
-    } as PartialBy<ReadParams<TAbi, TFunctionName>, "args" | "address">);
+    } as Partial<ReadParams<TAbi, TFunctionName>>);
   }
 
   onSimulateWrite<
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
     fn: TFunctionName,
-    args?: FunctionArgs<TAbi, TFunctionName>,
+    args?: Partial<FunctionArgs<TAbi, TFunctionName>>,
     options?: TransactionOptions,
   ) {
     return this.adapter.onSimulateWrite({
@@ -103,7 +103,7 @@ export class MockContract<
       fn,
       args,
       ...options,
-    } as PartialBy<WriteParams<TAbi, TFunctionName>, "args" | "address">);
+    } as Partial<WriteParams<TAbi, TFunctionName>>);
   }
 
   onGetSignerAddress() {
@@ -112,7 +112,7 @@ export class MockContract<
 
   onWrite<TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">>(
     fn?: TFunctionName,
-    args?: FunctionArgs<TAbi, TFunctionName>,
+    args?: Partial<FunctionArgs<TAbi, TFunctionName>>,
     options?: WriteOptions,
   ) {
     return this.adapter.onWrite({
@@ -121,7 +121,7 @@ export class MockContract<
       fn,
       args,
       ...options,
-    } as PartialBy<WriteParams<TAbi, TFunctionName>, "args" | "address">);
+    } as Partial<WriteParams<TAbi, TFunctionName>>);
   }
 }
 

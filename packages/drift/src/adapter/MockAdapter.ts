@@ -11,7 +11,12 @@ import type {
 } from "src/adapter/types/Adapter";
 import type { BlockIdentifier } from "src/adapter/types/Block";
 import type { EventLog, EventName } from "src/adapter/types/Event";
-import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
+import type {
+  ConstructorArgs,
+  FunctionArgs,
+  FunctionName,
+  FunctionReturn,
+} from "src/adapter/types/Function";
 import type {
   GetBalanceParams,
   GetBlockReturnType,
@@ -24,7 +29,12 @@ import type {
 } from "src/adapter/types/Transaction";
 import { stringifyKey } from "src/utils/stringifyKey";
 import { StubStore } from "src/utils/testing/StubStore";
-import type { AnyObject, FunctionKey, PartialBy } from "src/utils/types";
+import type {
+  AnyObject,
+  FunctionKey,
+  PartialBy,
+  Replace,
+} from "src/utils/types";
 
 export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   stubs = new StubStore<ReadWriteAdapter>();
@@ -200,7 +210,12 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   onRead<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(params: PartialBy<ReadParams<TAbi, TFunctionName>, "args" | "address">) {
+  >(
+    params: Replace<
+      Partial<ReadParams<TAbi, TFunctionName>>,
+      { args?: Partial<FunctionArgs<TAbi, TFunctionName>> }
+    >,
+  ) {
     return this.stubs.get<
       [ReadParams<TAbi, TFunctionName>],
       Promise<FunctionReturn<TAbi, TFunctionName>>
@@ -230,9 +245,9 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
-    params: PartialBy<
-      SimulateWriteParams<TAbi, TFunctionName>,
-      "args" | "address"
+    params: Replace<
+      Partial<SimulateWriteParams<TAbi, TFunctionName>>,
+      { args?: Partial<FunctionArgs<TAbi, TFunctionName>> }
     >,
   ) {
     return this.stubs.get<
@@ -263,7 +278,12 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   onWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params?: PartialBy<WriteParams<TAbi, TFunctionName>, "args" | "address">) {
+  >(
+    params?: Replace<
+      Partial<WriteParams<TAbi, TFunctionName>>,
+      { args?: Partial<FunctionArgs<TAbi, TFunctionName>> }
+    >,
+  ) {
     return this.stubs.get<[WriteParams<TAbi, TFunctionName>], Promise<Hash>>({
       method: "write",
       key: params ? this.createKey(params) : undefined,
@@ -310,7 +330,10 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   // deploy //
 
   onDeploy<TAbi extends Abi>(
-    params?: PartialBy<DeployParams<TAbi>, "args" | "bytecode">,
+    params?: Replace<
+      Partial<DeployParams<TAbi>>,
+      { args?: Partial<ConstructorArgs<TAbi>> }
+    >,
   ) {
     return this.stubs.get<[DeployParams<TAbi>], Promise<Hash>>({
       method: "deploy",
