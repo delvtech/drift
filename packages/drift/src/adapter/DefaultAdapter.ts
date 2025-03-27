@@ -99,7 +99,6 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
   }
 
   getBlock<T extends BlockIdentifier | undefined = undefined>(blockId?: T) {
-    const isBlockHash = isHexString(blockId);
     return this.provider
       .request(
         isHexString(blockId)
