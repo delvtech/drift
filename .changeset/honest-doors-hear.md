@@ -6,4 +6,4 @@
 "@delvtech/drift-web3": patch
 ---
 
-Added `deploy` and `encodeDeployData` methods to `Adapter` types.
+Added `deploy` and `encodeDeployData` methods to `Adapter` and clients.

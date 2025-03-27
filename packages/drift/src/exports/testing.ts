@@ -9,9 +9,9 @@ export { createStubTransactionReceipt } from "src/adapter/utils/testing/createSt
 // Client
 
 export {
+  createMockClient,
   type MockClient,
   type MockClientOptions,
-  createMockClient,
 } from "src/client/MockClient";
 
 export { type MockDrift, createMockDrift } from "src/client/MockDrift";

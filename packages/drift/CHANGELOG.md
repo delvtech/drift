@@ -4,13 +4,13 @@
 
 ### Patch Changes
 
-- 4e2a1fc: Rename `OxAdapter` to `DefaultAdapter`
+- 4e2a1fc: Renamed `OxAdapter` to `DefaultAdapter`
 
 ## 0.7.2-next.0
 
 ### Patch Changes
 
-- bb25099: Added `deploy` and `encodeDeployData` methods to `Adapter` types.
+- bb25099: Added `deploy` and `encodeDeployData` methods to `Adapter` and clients.
 
 ## 0.7.1
 

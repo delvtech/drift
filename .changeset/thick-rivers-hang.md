@@ -2,4 +2,4 @@
 "@delvtech/drift": patch
 ---
 
-Rename `OxAdapter` to `DefaultAdapter`
+Renamed `OxAdapter` to `DefaultAdapter`

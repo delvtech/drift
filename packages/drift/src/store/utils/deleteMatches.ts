@@ -19,6 +19,7 @@ export async function deleteMatches(
   for await (const [key] of store.entries()) {
     if (key === matchKey) {
       operations.push(store.delete(key));
+      continue;
     }
     const parsedKey = JSON.parse(key);
     if (isMatch(parsedKey, parsedMatchKey)) {
