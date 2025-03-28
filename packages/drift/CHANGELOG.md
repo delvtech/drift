@@ -1,5 +1,26 @@
 # @delvtech/drift
 
+## 0.8.0-next.2
+
+### Minor Changes
+
+- bd20749: Renamed the `BaseTypes` export to `BaseTypeOverrides` to be consistent with the precedent set by `BlockOverrides`.
+
+### Patch Changes
+
+- 4050ec9: Improved type inference for contracts created via `Drift.contract(...)`. A contract created in contexts where `Drift.isReadWrite()` returns `true` will now be properly inferred as a `ReadWriteContract`.
+- eb818b8: Refactored param types to make more fields optional:
+  - All params for `invalidateCallsMatching` are now optional.
+  - All args in the `args` param of the following methods are now optional:
+    - `invalidateReadsMatching`
+    - `onRead`
+    - `onSimulateWrite`
+    - `onRead`
+    - `onSimulateWrite`
+    - `onWrite`
+    - `onDeploy`
+- 7427bb6: Added an `epochBlock` option to contract clients to limit how far back function calls and event queries can go. More details in the doc comment.
+
 ## 0.7.2-next.1
 
 ### Patch Changes
