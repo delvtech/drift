@@ -47,7 +47,7 @@ export type Client<
   /**
    * Returns `true` if the client can send transactions.
    */
-  isReadWrite(): this is Client<ReadWriteAdapter>;
+  isReadWrite(): this is Client<ReadWriteAdapter, TStore, TExtension>;
 
   /**
    * Extends the client with additional properties.

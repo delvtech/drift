@@ -45,6 +45,59 @@ export type Contract<
   ? ReadWriteContract<TAbi, TAdapter, TStore, TClient>
   : ReadContract<TAbi, TAdapter, TStore, TClient>;
 
+export type ContractBaseOptions<TAbi extends Abi = Abi> = Eval<
+  ContractParams<TAbi> & {
+    /**
+     * The earliest block number to use for function calls and event queries.
+     * If defined, the {@linkcode ReadOptions.block block} option of the
+     * {@linkcode Contract.read read} method will be overridden when set to
+     * `"earliest"` or a lower block number; and the
+     * {@linkcode GetEventsOptions.fromBlock fromBlock} option of the
+     * {@linkcode Contract.getEvents getEvents} method will be overridden when
+     * `undefined`, `"earliest"`, or a lower block number.
+     *
+     * @example
+     * ```ts
+     * const contract = createContract({
+     *   abi,
+     *   address,
+     *   client,
+     *   epochBlock: 22147561n,
+     * });
+     *
+     * const totalSupply = await contract.read("totalSupply", [], {
+     *   block: 100n, // <- overridden with `this.epochBlock`
+     * });
+     *
+     * const approvals = await contract.getEvents("Approval"); // <- `fromBlock` set to `this.epochBlock`
+     *
+     * const transfers = await contract.getEvents("Transfer", {
+     *   fromBlock: "earliest", // <- overridden with `this.epochBlock`
+     * });
+     * ```
+     */
+    epochBlock?: bigint;
+  }
+>;
+
+/**
+ * Configuration options for creating a {@linkcode Contract}.
+ */
+export type ContractOptions<
+  TAbi extends Abi = Abi,
+  TAdapter extends Adapter = Adapter,
+  TStore extends Store = Store,
+  TClient extends Client<TAdapter, TStore> = Client<TAdapter, TStore>,
+> = Eval<
+  ContractBaseOptions<TAbi> &
+    OneOf<
+      | {
+          client?: TClient;
+        }
+      | ClientOptions<TAdapter, TStore>
+    >
+>;
+
 /**
  * A read-only {@linkcode Contract} instance for fetching data from a smart
  * contract through a drift {@linkcode Client}.
@@ -59,10 +112,12 @@ export class ReadContract<
   address: Address;
   client: TClient;
   cache: ContractCache<TAbi, TStore>;
+  epochBlock?: bigint;
 
   constructor({
     abi,
     address,
+    epochBlock,
     client,
     ...clientOptions
   }: ContractOptions<TAbi, TAdapter, TStore, TClient>) {
@@ -74,6 +129,7 @@ export class ReadContract<
       address,
       clientCache: this.client.cache,
     });
+    this.epochBlock = epochBlock;
   }
 
   isReadWrite(): this is Contract<TAbi, ReadWriteAdapter> {
@@ -157,12 +213,21 @@ export class ReadContract<
    */
   getEvents<TEventName extends EventName<TAbi>>(
     event: TEventName,
-    options?: GetEventsOptions<TAbi, TEventName>,
+    { fromBlock, ...options }: GetEventsOptions<TAbi, TEventName> = {},
   ): Promise<EventLog<TAbi, TEventName>[]> {
+    if (
+      this.epochBlock &&
+      (!fromBlock ||
+        fromBlock === "earliest" ||
+        (typeof fromBlock === "bigint" && fromBlock < this.epochBlock))
+    ) {
+      fromBlock = this.epochBlock;
+    }
     return this.client.getEvents({
       abi: this.abi,
       address: this.address,
       event,
+      fromBlock,
       ...options,
     });
   }
@@ -173,12 +238,21 @@ export class ReadContract<
   read<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
+    let { block, ...restOptions } = options || {};
+    if (
+      this.epochBlock &&
+      (block === "earliest" ||
+        (typeof block === "bigint" && block < this.epochBlock))
+    ) {
+      block = this.epochBlock;
+    }
     return this.client.read({
       abi: this.abi,
       address: this.address,
       fn,
       args: args as FunctionArgs<TAbi, TFunctionName>,
-      ...options,
+      block,
+      ...restOptions,
     });
   }
 
@@ -234,32 +308,6 @@ export class ReadWriteContract<
 }
 
 /**
- * Options for configuring the {@linkcode Client} of a {@linkcode Contract}.
- */
-export type ContractClientOptions<
-  TAdapter extends Adapter = Adapter,
-  TStore extends Store = Store,
-  TClient extends Client<TAdapter, TStore> = Client<TAdapter, TStore>,
-> = OneOf<
-  | {
-      client?: TClient;
-    }
-  | ClientOptions<TAdapter, TStore>
->;
-
-/**
- * Configuration options for creating a {@linkcode Contract}.
- */
-export type ContractOptions<
-  TAbi extends Abi = Abi,
-  TAdapter extends Adapter = Adapter,
-  TStore extends Store = Store,
-  TClient extends Client<TAdapter, TStore> = Client<TAdapter, TStore>,
-> = Eval<
-  ContractParams<TAbi> & ContractClientOptions<TAdapter, TStore, TClient>
->;
-
-/**
  * Creates a new {@linkcode Contract} instance for interacting with a smart
  * contract through a drift {@linkcode Client}.
  *
@@ -274,6 +322,7 @@ export function createContract<
 >({
   abi,
   address,
+  epochBlock,
   client: maybeClient,
   ...clientOptions
 }: ContractOptions<TAbi, TAdapter, TStore, TClient>): Contract<
@@ -288,11 +337,12 @@ export function createContract<
     return new ReadWriteContract({
       abi,
       address,
-      client: client as Client<ReadWriteAdapter, TStore>,
+      client,
+      epochBlock,
     }) as Contract<TAbi, TAdapter, TStore, TClient>;
   }
 
-  return new ReadContract({ abi, address, client }) as Contract<
+  return new ReadContract({ abi, address, client, epochBlock }) as Contract<
     TAbi,
     TAdapter,
     TStore,
@@ -305,31 +355,33 @@ export function createContract<
 export type ContractEncodeDeployDataArgs<TAbi extends Abi = Abi> =
   Abi extends TAbi
     ? [bytecode: Bytes, args?: AnyObject]
-    : ConstructorArgs<TAbi> extends EmptyObject
-      ? [bytecode: Bytes, args?: EmptyObject]
-      : [bytecode: Bytes, args: ConstructorArgs<TAbi>];
+    : ConstructorArgs<TAbi> extends infer TArgs
+      ? EmptyObject extends TArgs
+        ? [bytecode: Bytes, args?: TArgs]
+        : [bytecode: Bytes, args: TArgs]
+      : never;
 
 export type ContractEncodeFunctionDataArgs<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 > = Abi extends TAbi
   ? [functionName: TFunctionName, args?: AnyObject]
-  : FunctionArgs<TAbi, TFunctionName> extends EmptyObject
-    ? [functionName: TFunctionName, args?: EmptyObject]
-    : [functionName: TFunctionName, args: FunctionArgs<TAbi, TFunctionName>];
+  : FunctionArgs<TAbi, TFunctionName> extends infer TArgs
+    ? EmptyObject extends TArgs
+      ? [functionName: TFunctionName, args?: TArgs]
+      : [functionName: TFunctionName, args: TArgs]
+    : never;
 
 export type ContractReadArgs<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 > = Abi extends TAbi
   ? [functionName: TFunctionName, args?: AnyObject, options?: ReadOptions]
-  : FunctionArgs<TAbi, TFunctionName> extends EmptyObject
-    ? [functionName: TFunctionName, args?: EmptyObject, options?: ReadOptions]
-    : [
-        functionName: TFunctionName,
-        args: FunctionArgs<TAbi, TFunctionName>,
-        options?: ReadOptions,
-      ];
+  : FunctionArgs<TAbi, TFunctionName> extends infer TArgs
+    ? EmptyObject extends TArgs
+      ? [functionName: TFunctionName, args?: TArgs, options?: ReadOptions]
+      : [functionName: TFunctionName, args: TArgs, options?: ReadOptions]
+    : never;
 
 export type ContractSimulateWriteArgs<
   TAbi extends Abi = Abi,
@@ -343,17 +395,15 @@ export type ContractSimulateWriteArgs<
       args?: AnyObject,
       options?: TransactionOptions,
     ]
-  : FunctionArgs<TAbi, TFunctionName> extends EmptyObject
-    ? [
-        functionName: TFunctionName,
-        args?: EmptyObject,
-        options?: TransactionOptions,
-      ]
-    : [
-        functionName: TFunctionName,
-        args: FunctionArgs<TAbi, TFunctionName>,
-        options?: TransactionOptions,
-      ];
+  : FunctionArgs<TAbi, TFunctionName> extends infer TArgs
+    ? EmptyObject extends TArgs
+      ? [
+          functionName: TFunctionName,
+          args?: TArgs,
+          options?: TransactionOptions,
+        ]
+      : [functionName: TFunctionName, args: TArgs, options?: TransactionOptions]
+    : never;
 
 export type ContractWriteArgs<
   TAbi extends Abi = Abi,
@@ -363,16 +413,8 @@ export type ContractWriteArgs<
   > = FunctionName<TAbi, "nonpayable" | "payable">,
 > = Abi extends TAbi
   ? [functionName: TFunctionName, args?: AnyObject, options?: WriteOptions]
-  : FunctionArgs<TAbi, TFunctionName> extends EmptyObject
-    ? [functionName: TFunctionName, args?: EmptyObject, options?: WriteOptions]
-    : [
-        functionName: TFunctionName,
-        args: FunctionArgs<TAbi, TFunctionName>,
-        options?: WriteOptions,
-      ];
-
-export type ContractDeployArgs<TAbi extends Abi = Abi> = Abi extends TAbi
-  ? [bytecode: Bytes, args?: AnyObject, options?: WriteOptions]
-  : ConstructorArgs<TAbi> extends EmptyObject
-    ? [bytecode: Bytes, args?: EmptyObject, options?: WriteOptions]
-    : [bytecode: Bytes, args: ConstructorArgs<TAbi>, options?: WriteOptions];
+  : FunctionArgs<TAbi, TFunctionName> extends infer TArgs
+    ? EmptyObject extends TArgs
+      ? [functionName: TFunctionName, args?: TArgs, options?: WriteOptions]
+      : [functionName: TFunctionName, args: TArgs, options?: WriteOptions]
+    : never;

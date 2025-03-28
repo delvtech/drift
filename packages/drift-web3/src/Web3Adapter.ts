@@ -118,6 +118,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
             receipt
               ? resolve({
                   ...receipt,
+                  to: receipt.to ?? undefined,
                   effectiveGasPrice: receipt.effectiveGasPrice || 0n,
                   status: receipt.status ? "success" : "reverted",
                 })

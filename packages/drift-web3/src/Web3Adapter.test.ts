@@ -6,6 +6,7 @@ import {
   type FunctionArgs,
   HEX_REGEX,
   type Hash,
+  type Transaction,
   type TransactionReceipt,
 } from "@delvtech/drift";
 import { erc20, mockErc20, testToken } from "@delvtech/drift/testing";
@@ -61,6 +62,7 @@ describe("Web3Adapter", () => {
       hash: block.transactions[0] as Hash,
     });
     expect(tx).toMatchObject({
+      chainId: expect.any(Number),
       gas: expect.any(BigInt),
       gasPrice: expect.any(BigInt),
       input: expect.stringMatching(HEX_REGEX),
@@ -70,10 +72,10 @@ describe("Web3Adapter", () => {
       blockHash: expect.stringMatching(HEX_REGEX),
       blockNumber: expect.any(BigInt),
       from: expect.stringMatching(HEX_REGEX),
-      hash: expect.stringMatching(HEX_REGEX),
+      transactionHash: expect.stringMatching(HEX_REGEX),
       to: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
       transactionIndex: expect.any(BigInt),
-    });
+    } satisfies Transaction);
   });
 
   it("returns receipts for waited transactions", async () => {
@@ -100,7 +102,11 @@ describe("Web3Adapter", () => {
       to: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
       transactionHash: expect.stringMatching(HEX_REGEX),
       transactionIndex: expect.any(BigInt),
-    } as TransactionReceipt);
+      contractAddress: expect.toBeOneOf([
+        expect.stringMatching(HEX_REGEX),
+        undefined,
+      ]),
+    } satisfies TransactionReceipt);
   });
 
   describe("call", () => {
@@ -181,7 +187,7 @@ describe("Web3Adapter", () => {
       address,
       fn: "transfer",
       args: {
-        amount: 1n,
+        amount: 0n,
         to: address,
       },
     });

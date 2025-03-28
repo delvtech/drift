@@ -60,7 +60,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
     return this.#clientCache.store;
   }
 
-  // NOTE: These methods are all async to allow for dynamic namespace
+  // NOTE: These methods are all async to accommodate dynamic namespace
   // resolution and external cache implementations.
 
   // Events //

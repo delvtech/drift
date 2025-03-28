@@ -1,7 +1,6 @@
 import type { MockAdapter } from "src/adapter/MockAdapter";
 import type { Abi } from "src/adapter/types/Abi";
 import type {
-  ContractParams,
   GetEventsOptions,
   ReadOptions,
   ReadParams,
@@ -17,7 +16,10 @@ import {
   type MockClientOptions,
   createMockClient,
 } from "src/client/MockClient";
-import { ReadWriteContract } from "src/client/contract/Contract";
+import {
+  type ContractBaseOptions,
+  ReadWriteContract,
+} from "src/client/contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
 import type { Store } from "src/store/types";
 import type { Eval, FunctionKey, OneOf } from "src/utils/types";
@@ -28,7 +30,7 @@ export type MockContractOptions<
   TStore extends Store = Store,
   TClient extends MockClient<TAdapter, TStore> = MockClient<TAdapter, TStore>,
 > = Eval<
-  Partial<ContractParams<TAbi>> &
+  Partial<ContractBaseOptions<TAbi>> &
     MockContractClientOptions<TAdapter, TStore, TClient>
 >;
 
@@ -47,11 +49,13 @@ export class MockContract<
     abi = [] as unknown as TAbi,
     address = ZERO_ADDRESS,
     client,
+    epochBlock,
     ...clientOptions
   }: MockContractOptions<TAbi, TAdapter, TStore, TClient> = {}) {
     super({
       abi,
       address,
+      epochBlock,
       client: (client ?? createMockClient(clientOptions)) as TClient,
     });
   }

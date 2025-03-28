@@ -102,14 +102,24 @@ export class StubStore<T> {
     if (matchPartial) {
       // Try to compare the keys to find a partial match
       const parsedKey = JSON.parse(key);
+      const matches: {
+        key: string;
+        stub: SinonStub;
+      }[] = [];
+
       for (const [storedKey, storedStub] of methodStore.keyedStubs) {
         const parsedStoredKey = JSON.parse(storedKey);
+
         if (isMatch(parsedKey, parsedStoredKey)) {
-          return storedStub as any;
+          matches.push({
+            key: storedKey,
+            stub: storedStub,
+          });
         }
       }
 
-      return methodStore.defaultStub as any;
+      matches.sort((a, b) => b.key.length - a.key.length);
+      return (matches[0]?.stub || methodStore.defaultStub) as any;
     }
 
     let newStub = sinonStub().callsFake((...args) => {
@@ -176,4 +186,16 @@ export class NotImplementedError extends DriftError {
       },
     );
   }
+}
+
+function deepKeyCount(obj: any): number {
+  let count = 0;
+  for (const value of Object.values(obj)) {
+    if (value && typeof value === "object") {
+      count += deepKeyCount(value);
+    } else {
+      count++;
+    }
+  }
+  return count;
 }

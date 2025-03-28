@@ -1,11 +1,11 @@
 import type { MockAdapter } from "src/adapter/MockAdapter";
 import type { Abi } from "src/adapter/types/Abi";
-import type { ContractParams } from "src/adapter/types/Adapter";
 import type { Client } from "src/client/Client";
 import {
   type MockClientOptions,
   createMockClient,
 } from "src/client/MockClient";
+import type { ContractBaseOptions } from "src/client/contract/Contract";
 import { MockContract } from "src/client/contract/MockContract";
 import type { LruStore } from "src/store/LruStore";
 import type { Store } from "src/store/types";
@@ -17,15 +17,9 @@ export type MockDrift<
   TAdapter,
   TStore,
   {
-    contract<TAbi extends Abi>({
-      abi,
-      address,
-    }: ContractParams<TAbi>): MockContract<
-      TAbi,
-      TAdapter,
-      TStore,
-      MockDrift<TAdapter, TStore>
-    >;
+    contract<TAbi extends Abi>(
+      options: ContractBaseOptions<TAbi>,
+    ): MockContract<TAbi, TAdapter, TStore, MockDrift<TAdapter, TStore>>;
   }
 >;
 
@@ -36,10 +30,9 @@ export function createMockDrift<
   config: MockClientOptions<TAdapter, TStore> = {},
 ): MockDrift<TAdapter, TStore> {
   return createMockClient(config).extend({
-    contract({ abi, address }) {
+    contract(options) {
       return new MockContract({
-        abi,
-        address,
+        ...options,
         client: this,
       });
     },

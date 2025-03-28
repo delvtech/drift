@@ -1,13 +1,17 @@
 import type { DefaultAdapter } from "src/adapter/DefaultAdapter";
 import type { Abi } from "src/adapter/types/Abi";
-import type { Adapter, ContractParams } from "src/adapter/types/Adapter";
+import type { Adapter } from "src/adapter/types/Adapter";
 import {
   type Client,
   type ClientOptions,
   createClient,
 } from "src/client/Client";
 import type { ClientCache } from "src/client/cache/ClientCache";
-import { type Contract, createContract } from "src/client/contract/Contract";
+import {
+  type Contract,
+  type ContractBaseOptions,
+  createContract,
+} from "src/client/contract/Contract";
 import type { HookRegistry } from "src/client/hooks/HookRegistry";
 import type { LruStore } from "src/store/LruStore";
 import type { Store } from "src/store/types";
@@ -29,7 +33,7 @@ export type Drift<
   {
     contract<TAbi extends Abi, TThis extends Drift<TAdapter, TStore>>(
       this: TThis,
-      params: ContractParams<TAbi>,
+      options: ContractBaseOptions<TAbi>,
     ): Contract<
       TAbi,
       TThis["adapter"],
@@ -49,10 +53,9 @@ export function createDrift<
   TStore extends Store = LruStore,
 >(config: DriftOptions<TAdapter, TStore> = {}): Drift<TAdapter, TStore> {
   return createClient(config).extend({
-    contract({ abi, address }) {
+    contract(options) {
       return createContract({
-        abi,
-        address,
+        ...options,
         client: this,
       });
     },
