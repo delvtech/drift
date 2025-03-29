@@ -15,12 +15,12 @@ export interface GetStubParams<T, TArgs extends any[], TReturnType> {
    *
    * @example
    * ```ts
-   * const aliceBalanceStub = mock.stubs.get<[NetworkGetBalanceParams], Promise<bigint>>({
+   * const aliceBalanceStub = mock.stubs.get<[GetBalanceParams], Promise<bigint>>({
    *   method: "getBalance",
    *   key: { address: "alice" },
    * });
    *
-   * const bobBalanceStub = mock.stubs.get<[NetworkGetBalanceParams], Promise<bigint>>({
+   * const bobBalanceStub = mock.stubs.get<[GetBalanceParams], Promise<bigint>>({
    *   method: "getBalance",
    *   key: { address: "bob" },
    * });
@@ -29,14 +29,25 @@ export interface GetStubParams<T, TArgs extends any[], TReturnType> {
   key?: string;
 
   /**
-   * Whether to allow partial matching of the key. If `true`, the first stub
-   * with a key that is a partial match of the given key will be returned. This
-   * has no effect if `key` is not provided.
+   * Whether to allow partial matching of the key. If `true`, the stub with the
+   * closest matching key will be returned. This has no effect if `key` is not
+   * provided.
    */
   matchPartial?: boolean;
 
   /**
-   * A function to create the stub if it doesn't exist.
+   * A function to create the stub if it doesn't exist. A new stub which throws
+   * a {@linkcode NotImplementedError} by default will be passed to this
+   * function. The function should return the actual stub to be used.
+   *
+   * @example
+   * ```ts
+   * const aliceBalanceStub = mock.stubs.get<[GetBalanceParams], Promise<bigint>>({
+   *   method: "getBalance",
+   *   key: { address: "alice" },
+   *   create: (stub) => stub.resolves(100n),
+   * });
+   * ```
    */
   create?: (stub: SinonStub<TArgs, TReturnType>) => SinonStub;
 }
@@ -45,7 +56,7 @@ export interface GetStubParams<T, TArgs extends any[], TReturnType> {
  * A store for stubs that can be used to mock methods on an object, `T`.
  */
 export class StubStore<T> {
-  protected methodStores = new Map<
+  #methodStores = new Map<
     FunctionKey<T>,
     {
       defaultStub: SinonStub;
@@ -55,8 +66,8 @@ export class StubStore<T> {
 
   reset(method?: FunctionKey<T>) {
     return method
-      ? this.methodStores.delete(method)
-      : this.methodStores.clear();
+      ? this.#methodStores.delete(method)
+      : this.#methodStores.clear();
   }
 
   /**
@@ -68,26 +79,29 @@ export class StubStore<T> {
     matchPartial,
     create,
   }: GetStubParams<T, TArgs, TReturnType>): SinonStub<TArgs, TReturnType> {
-    let methodStore = this.methodStores.get(method);
+    const methodName = String(method);
+    let methodStore = this.#methodStores.get(method);
 
     // Create a new method store if one doesn't exist
     if (!methodStore) {
       methodStore = {
-        defaultStub: sinonStub().callsFake((...args) => {
-          throw new NotImplementedError({
-            method: String(method),
-            args,
-          });
-        }),
+        defaultStub: createDefaultStub(methodName),
         keyedStubs: new Map(),
       };
-      this.methodStores.set(method, methodStore);
+      this.#methodStores.set(method, methodStore);
 
-      // Apply the create function to the new default stub and return early if
-      // no key is provided or if partial matching is enabled.
-      if (create && (!key || matchPartial)) {
-        methodStore.defaultStub = create(methodStore.defaultStub as any);
-        return methodStore.defaultStub as any;
+      // Call the create function and return early if no key is provided or if
+      // partial matching is enabled.
+      if (create) {
+        if (!key) {
+          methodStore.defaultStub = create(methodStore.defaultStub as any);
+          return methodStore.defaultStub as any;
+        }
+        if (matchPartial) {
+          const newStub = create(createDefaultStub(methodName) as any);
+          methodStore.keyedStubs.set(key, newStub);
+          return newStub as any;
+        }
       }
     }
 
@@ -142,7 +156,7 @@ export class StubStore<T> {
    * Find out if a method has been stubbed.
    */
   has(method: FunctionKey<T>) {
-    return this.methodStores.has(method);
+    return this.#methodStores.has(method);
   }
 }
 
@@ -152,8 +166,24 @@ export class NotImplementedError extends DriftError {
     key,
     args,
   }: { method: string; key?: string; args?: any[] }) {
-    super(
-      `Missing stub${key ? ` with key '${key}'` : ""} for '${method}' method.
+    super(createMissingStubMessage({ method, key, args }), {
+      name: "NotImplementedError",
+    });
+  }
+}
+
+// Internal //
+
+function createMissingStubMessage({
+  method,
+  key,
+  args,
+}: {
+  method: string;
+  key?: string;
+  args?: any[];
+}) {
+  return `Missing stub${key ? ` with key '${key}'` : ""} for '${method}' method.
 
   The value must be stubbed first: 'mock.on${method.replace(/^./, (c) => c.toUpperCase())}(...args).resolves(value)'
   ${
@@ -180,22 +210,14 @@ export class NotImplementedError extends DriftError {
   ]
 `
       : ""
-  }`,
-      {
-        name: "NotImplementedError",
-      },
-    );
-  }
+  }`;
 }
 
-function deepKeyCount(obj: any): number {
-  let count = 0;
-  for (const value of Object.values(obj)) {
-    if (value && typeof value === "object") {
-      count += deepKeyCount(value);
-    } else {
-      count++;
-    }
-  }
-  return count;
+function createDefaultStub(method: string) {
+  return sinonStub().callsFake((...args) => {
+    throw new NotImplementedError({
+      method,
+      args,
+    });
+  });
 }

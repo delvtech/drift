@@ -180,7 +180,7 @@ export type AbiParameters<
  *   { name: "spender", type: "address" },
  *   { name: "value", type: "uint256" }
  * ]>;
- * // -> { spender: string, value: bigint }
+ * // -> { spender: `0x${string}`, value: bigint }
  * ```
  */
 export type AbiParametersToObject<
@@ -198,7 +198,7 @@ export type AbiParametersToObject<
  * @example
  * ```ts
  * type ApproveInput = AbiArrayType<Erc20Abi, "function", "approve", "inputs">;
- * // -> [string, bigint]
+ * // -> [`0x${string}`, bigint]
  *
  * type BalanceOutput = AbiArrayType<Erc20Abi, "function", "balanceOf", "outputs">;
  * // -> [bigint]
@@ -228,7 +228,7 @@ export type AbiArrayType<
  * @example
  * ```ts
  * type ApproveArgs = AbiObjectType<Erc20Abi, "function", "approve", "inputs">;
- * // -> { spender: string, value: bigint }
+ * // -> { spender: `0x${string}`, value: bigint }
  *
  * type Balance = AbiObjectType<Erc20Abi, "function", "balanceOf", "outputs">;
  * // -> { balance: bigint }
@@ -255,7 +255,7 @@ export type AbiObjectType<
  * @example
  * ```ts
  * type ApproveArgs = AbiSimplifiedType<Erc20Abi, "function", "approve", "inputs">;
- * // -> { spender: `${string}`, value: bigint }
+ * // -> { spender: `0x${string}`, value: bigint }
  *
  * type Balance = AbiSimplifiedType<Erc20Abi, "function", "balanceOf", "outputs">;
  * // -> bigint
@@ -355,7 +355,7 @@ type WithDefaultNames<TParameters extends readonly AbiParameter[]> = {
  * @example
  * ```ts
  * type Parameters = NamedParametersToObject<[{ name: "spender", type: "address" }, { name: "", type: "uint256" }]>;
- * // -> { spender: `${string}`, "1": bigint }
+ * // -> { spender: `0x${string}`, "1": bigint }
  * ```
  */
 type NamedParametersToObject<

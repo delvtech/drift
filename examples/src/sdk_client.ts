@@ -8,24 +8,30 @@ import {
 import { fixed } from "@delvtech/fixed-point-wasm";
 import { ERC4626 } from "src/abis/Erc4626";
 
-type VaultAbi = typeof ERC4626.abi;
+type Erc4626Abi = typeof ERC4626.abi;
 
-/** A Read-Only Vault client */
+/**
+ * An bare-bones Read-Only Vault client.
+ */
 export class ReadVault {
-  contract: Contract<VaultAbi>;
+  contract: Contract<Erc4626Abi>;
+
   constructor(address: Address, drift: Drift = createDrift()) {
     this.contract = drift.contract({
       abi: ERC4626.abi,
       address,
     });
   }
+
   getBalance(account: Address): Promise<bigint> {
     return this.contract.read("balanceOf", { account });
   }
+
   getDecimals(): Promise<number> {
     return this.contract.read("decimals");
   }
-  getDeposits(account?: Address): Promise<EventLog<VaultAbi, "Deposit">[]> {
+
+  getDeposits(account?: Address): Promise<EventLog<Erc4626Abi, "Deposit">[]> {
     return this.contract.getEvents("Deposit", {
       filter: {
         sender: account,
@@ -34,10 +40,9 @@ export class ReadVault {
   }
 }
 
-const yearnVaultAddress = "0x4cE9c93513DfF543Bc392870d57dF8C04e89Ba0a";
-
 const vault = new ReadVault(
-  yearnVaultAddress,
+  // mainnet yearn vault
+  "0x4cE9c93513DfF543Bc392870d57dF8C04e89Ba0a",
   createDrift({
     rpcUrl: process.env.RPC_URL,
   }),

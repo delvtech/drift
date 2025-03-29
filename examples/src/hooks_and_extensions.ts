@@ -7,18 +7,19 @@ const drift = createDrift({
   rpcUrl: process.env.RPC_URL,
 });
 
-// Log all read operations along with their cached values
+// A simple hook to log all read operations along with their cached values.
 drift.hooks.on("before:read", async ({ args: [params] }) => {
+  const cachedValue = await drift.cache.getRead(params);
   console.group("Hook: before:read");
-  console.log(`Reading ${params.fn} with:`, params.args);
-  const key = await drift.cache.readKey(params);
-  const cachedValue = await drift.cache.store.get(key);
-  console.log("Cached value:", cachedValue);
+  console.table({
+    ...params,
+    cachedValue,
+  });
   console.groupEnd();
 });
 
-// Create a contract instance and extend it with a custom method which makes
-// multiple read calls to fetch and format the balance of an account.
+// An example of an extended contract client with a custom method which combines
+// multiple read calls to return a formatted balance.
 const contract = drift
   .contract({
     abi: erc20.abi,
@@ -26,17 +27,17 @@ const contract = drift
   })
   .extend({
     async getFormattedBalance(account: Address) {
-      console.group("getFormattedBalance");
-      const balance = await this.read("balanceOf", { account });
-      const decimals = await this.read("decimals");
-      console.groupEnd();
+      const [balance, decimals] = await Promise.all([
+        this.read("balanceOf", { account }),
+        this.read("decimals"),
+      ]);
       return fixed(balance, decimals).format();
     },
   });
 
 console.table({
+  contractAddress: contract.address,
   name: await contract.read("name"),
-  address: contract.address,
   balance: await contract.read("balanceOf", { account: contract.address }),
-  formatted: await contract.getFormattedBalance(contract.address),
+  formatted: await contract.getFormattedBalance(contract.address), // <- "balanceOf" will be read from cache
 });

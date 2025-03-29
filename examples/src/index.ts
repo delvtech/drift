@@ -16,17 +16,18 @@ const tokenName = await drift.read({
   fn: "name",
 });
 
-// Create a contract instance
+// Create a contract client
 const token = drift.contract({
   abi: erc20.abi,
   address: tokenAddress,
 });
 
+// Call contract functions
 const balance = await token.read("balanceOf", {
   account: token.address,
 });
 
-// Extend the contract instance with custom methods
+// Extend clients with custom methods
 const extendedToken = token.extend({
   async getFormattedBalance(account: Address) {
     const balance = await this.read("balanceOf", { account });
@@ -35,6 +36,7 @@ const extendedToken = token.extend({
   },
 });
 
+// Call the extended method
 const formattedBalance = await extendedToken.getFormattedBalance(token.address);
 
 console.table({

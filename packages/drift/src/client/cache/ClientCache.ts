@@ -57,20 +57,6 @@ export class ClientCache<T extends Store = Store> {
   // NOTE: These methods are all async to accommodate dynamic namespace
   // resolution and external cache implementations.
 
-  // Keys //
-
-  async #resolveNamespace(): Promise<PropertyKey> {
-    if (typeof this.namespace === "function") {
-      this.namespace = await this.namespace();
-    }
-    return this.namespace;
-  }
-
-  async #createKey(...parts: NonNullable<unknown>[]): Promise<string> {
-    const namespace = await this.#resolveNamespace();
-    return stringifyKey([namespace, ...parts]);
-  }
-
   // Block //
 
   /**
@@ -448,5 +434,19 @@ export class ClientCache<T extends Store = Store> {
    */
   async clear(): Promise<void> {
     return this.store.clear();
+  }
+
+  // Internal //
+
+  async #resolveNamespace(): Promise<PropertyKey> {
+    if (typeof this.namespace === "function") {
+      this.namespace = await this.namespace();
+    }
+    return this.namespace;
+  }
+
+  async #createKey(...parts: NonNullable<unknown>[]): Promise<string> {
+    const namespace = await this.#resolveNamespace();
+    return stringifyKey([namespace, ...parts]);
   }
 }
