@@ -65,10 +65,13 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
 
   // Events //
 
+  /**
+   * Get the key used to store event logs from {@linkcode Contract.getEvents}.
+   */
   async eventsKey<TEventName extends EventName<TAbi>>(
     event: TEventName,
     options?: GetEventsOptions<TAbi, TEventName>,
-  ): Promise<string> {
+  ) {
     return this.#clientCache.eventsKey({
       abi: this.#abi,
       address: this.#address,
@@ -77,6 +80,9 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
     });
   }
 
+  /**
+   * Add event logs to the cache for {@linkcode Contract.getEvents}.
+   */
   async preloadEvents<TEventName extends EventName<TAbi>>(
     params: Omit<
       GetEventsParams<TAbi, TEventName>,
@@ -84,7 +90,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
     > & {
       value: readonly EventLog<TAbi, TEventName>[];
     },
-  ): Promise<void> {
+  ) {
     return this.#clientCache.preloadEvents({
       abi: this.#abi,
       address: this.#address,
@@ -92,34 +98,58 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
     });
   }
 
+  /**
+   * Get cached event logs from {@linkcode Contract.getEvents}.
+   */
+  async getEvents<TEventName extends EventName<TAbi>>(
+    event: TEventName,
+    options?: GetEventsOptions<TAbi, TEventName>,
+  ) {
+    return this.#clientCache.getEvents({
+      abi: this.#abi,
+      address: this.#address,
+      event,
+      ...options,
+    });
+  }
+
   // Read //
 
+  /**
+   * Get a partial key used to store a {@linkcode Contract.read read} return.
+   */
   partialReadKey<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     fn?: TFunctionName,
     args?: FunctionArgs<TAbi, TFunctionName>,
-    params?: ReadOptions,
+    options?: ReadOptions,
   ) {
     return this.#clientCache.partialReadKey({
       abi: this.#abi,
       address: this.#address,
       fn,
       args,
-      ...params,
+      ...options,
     } as ReadParams);
   }
 
+  /**
+   * Get the key used to store a {@linkcode Contract.read read} return.
+   */
   readKey<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
-    ...[fn, args, params]: ContractReadArgs<TAbi, TFunctionName>
+    ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ) {
     return this.#clientCache.readKey({
       abi: this.#abi,
       address: this.#address,
       fn,
       args: args as FunctionArgs<TAbi, TFunctionName>,
-      ...params,
+      ...options,
     });
   }
 
+  /**
+   * Add a {@linkcode Contract.read read} return to the cache.
+   */
   preloadRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     params: Omit<
       ReadParams<TAbi, TFunctionName>,
@@ -135,35 +165,59 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
     });
   }
 
+  /**
+   * Get a cached {@linkcode Contract.read read} return.
+   */
+  async getRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
+    ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
+  ) {
+    return this.#clientCache.getRead({
+      abi: this.#abi,
+      address: this.#address,
+      fn,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
+      ...options,
+    });
+  }
+
+  /**
+   * Delete a {@linkcode Contract.read read} return from the cache.
+   */
   invalidateRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
-    ...[fn, args, params]: ContractReadArgs<TAbi, TFunctionName>
+    ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ) {
     return this.#clientCache.invalidateRead({
       abi: this.#abi,
       address: this.#address,
       fn,
       args: args as FunctionArgs<TAbi, TFunctionName>,
-      ...params,
+      ...options,
     });
   }
 
+  /**
+   * Delete all {@linkcode Contract.read} returns from the cache that match
+   * partial params.
+   */
   invalidateReadsMatching<
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(
     fn?: TFunctionName,
     args?: Partial<FunctionArgs<TAbi, TFunctionName>>,
-    params?: ReadOptions,
+    options?: ReadOptions,
   ) {
     return this.#clientCache.invalidateReadsMatching({
       abi: this.#abi,
       address: this.#address,
       fn,
       args,
-      ...params,
+      ...options,
     } as ReadParams);
   }
 
-  // Clear
+  /**
+   * Clear the entire cache.
+   */
   async clear(): Promise<void> {
     return this.store.clear();
   }

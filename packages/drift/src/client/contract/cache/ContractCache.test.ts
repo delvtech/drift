@@ -13,7 +13,7 @@ type Erc20Abi = typeof IERC20.abi;
 
 describe("ContractCache", () => {
   describe("events", () => {
-    it("Namespaces event keys", async () => {
+    it("Namespaces keys", async () => {
       const store = new LruStore();
       const cache1 = new ContractCache({
         abi,
@@ -36,7 +36,7 @@ describe("ContractCache", () => {
       expect(JSON.stringify(key2)).toContain("ns2");
     });
 
-    it("Preloads events", async () => {
+    it("Preloads values", async () => {
       const cache = new ContractCache({ abi, address, namespace: "test" });
       const events: EventLog<Erc20Abi, "Approval">[] = [
         {
@@ -61,15 +61,14 @@ describe("ContractCache", () => {
         event: "Approval",
         value: events,
       });
-      const key = await cache.eventsKey("Approval");
-      const value = await cache.store.get(key);
+      const value = await cache.getEvents("Approval");
 
       expect(value).toStrictEqual(events);
     });
   });
 
   describe("Reads", () => {
-    it("Namespaces read keys", async () => {
+    it("Namespaces keys", async () => {
       const store = new LruStore();
       const cache1 = new ContractCache({
         abi,
@@ -96,7 +95,7 @@ describe("ContractCache", () => {
       expect(JSON.stringify(key2)).toContain("ns2");
     });
 
-    it("Preloads reads", async () => {
+    it("Preloads values", async () => {
       const cache = new ContractCache({ abi, address, namespace: "test" });
       const readArgs: ContractReadArgs<Erc20Abi, "allowance"> = [
         "allowance",
@@ -108,13 +107,12 @@ describe("ContractCache", () => {
         args: readArgs[1],
         value: 123n,
       });
-      const key = await cache.readKey(...readArgs);
-      const value = await cache.store.get(key);
+      const value = await cache.getRead(...readArgs);
 
       expect(value).toStrictEqual(123n);
     });
 
-    it("Invalidates reads", async () => {
+    it("Invalidates values", async () => {
       const cache = new ContractCache({ abi, address, namespace: "test" });
       const readArgs: ContractReadArgs<Erc20Abi, "allowance"> = [
         "allowance",
@@ -126,18 +124,17 @@ describe("ContractCache", () => {
         args: readArgs[1],
         value: 123n,
       });
-      const key = await cache.readKey(...readArgs);
-      let value = await cache.store.get(key);
+      let value = await cache.getRead(...readArgs);
 
       expect(value).toBe(123n);
 
       await cache.invalidateRead(...readArgs);
-      value = await cache.store.get(key);
+      value = await cache.getRead(...readArgs);
 
       expect(value).toBeUndefined();
     });
 
-    it("Invalidates reads matching partial params", async () => {
+    it("Invalidates values matching partial params", async () => {
       const cache = new ContractCache({ abi, address, namespace: "test" });
       const readArgs1: ContractReadArgs<Erc20Abi, "allowance"> = [
         "allowance",
@@ -159,18 +156,16 @@ describe("ContractCache", () => {
         value: 456n,
       });
 
-      const key1 = await cache.readKey(...readArgs1);
-      const key2 = await cache.readKey(...readArgs2);
-      let value1 = await cache.store.get(key1);
-      let value2 = await cache.store.get(key2);
+      let value1 = await cache.getRead(...readArgs1);
+      let value2 = await cache.getRead(...readArgs2);
 
       expect(value1).toBe(123n);
       expect(value2).toBe(456n);
 
       await cache.invalidateReadsMatching(readArgs1[0]);
 
-      value1 = await cache.store.get(key1);
-      value2 = await cache.store.get(key2);
+      value1 = await cache.getRead(...readArgs1);
+      value2 = await cache.getRead(...readArgs2);
       expect(value1).toBeUndefined();
       expect(value2).toBeUndefined();
     });

@@ -73,10 +73,16 @@ export class ClientCache<T extends Store = Store> {
 
   // Block //
 
+  /**
+   * Get the key used to store a block.
+   */
   async blockKey(block?: BlockIdentifier): Promise<string> {
     return this.#createKey("block", { block });
   }
 
+  /**
+   * Add a block to the cache.
+   */
   async preloadBlock<T extends BlockIdentifier>({
     value,
     block,
@@ -88,12 +94,36 @@ export class ClientCache<T extends Store = Store> {
     return this.store.set(key, value);
   }
 
+  /**
+   * Get a cached block.
+   */
+  async getBlock<T extends BlockIdentifier>(
+    block?: T,
+  ): Promise<Block<T> | undefined> {
+    const key = await this.blockKey(block);
+    return this.store.get(key);
+  }
+
+  /**
+   * Delete a block from the cache.
+   */
+  async invalidateBlock<T extends BlockIdentifier>(block?: T): Promise<void> {
+    const key = await this.blockKey(block);
+    return this.store.delete(key);
+  }
+
   // Balance //
 
+  /**
+   * Get the key used to store an account's balance.
+   */
   async balanceKey({ address, block }: GetBalanceParams): Promise<string> {
     return this.#createKey("balance", { address, block });
   }
 
+  /**
+   * Add an account's balance to the cache.
+   */
   async preloadBalance({
     value,
     ...params
@@ -104,6 +134,17 @@ export class ClientCache<T extends Store = Store> {
     return this.store.set(key, value);
   }
 
+  /**
+   * Get the cached balance for an account.
+   */
+  async getBalance(params: GetBalanceParams): Promise<bigint | undefined> {
+    const key = await this.balanceKey(params);
+    return this.store.get(key);
+  }
+
+  /**
+   * Delete an account's balance from the cache.
+   */
   async invalidateBalance(params: GetBalanceParams): Promise<void> {
     const key = await this.balanceKey(params);
     return this.store.delete(key);
@@ -111,10 +152,16 @@ export class ClientCache<T extends Store = Store> {
 
   // Transaction //
 
+  /**
+   * Get the key used to store a transaction.
+   */
   async transactionKey({ hash }: GetTransactionParams): Promise<string> {
     return this.#createKey("transaction", { hash });
   }
 
+  /**
+   * Add a transaction to the cache.
+   */
   async preloadTransaction({
     value,
     ...params
@@ -125,12 +172,36 @@ export class ClientCache<T extends Store = Store> {
     return this.store.set(key, value);
   }
 
+  /**
+   * Get a cached transaction.
+   */
+  async getTransaction(
+    params: GetTransactionParams,
+  ): Promise<Transaction | undefined> {
+    const key = await this.transactionKey(params);
+    return this.store.get(key);
+  }
+
+  /**
+   * Delete a transaction from the cache.
+   */
+  async invalidateTransaction(params: GetTransactionParams): Promise<void> {
+    const key = await this.transactionKey(params);
+    return this.store.delete(key);
+  }
+
   // Transaction Receipt //
 
+  /**
+   * Get the key used to store a transaction receipt.
+   */
   async transactionReceiptKey({ hash }: GetTransactionParams): Promise<string> {
     return this.#createKey("transactionReceipt", { hash });
   }
 
+  /**
+   * Add a transaction receipt to the cache.
+   */
   async preloadTransactionReceipt({
     value,
     ...params
@@ -141,8 +212,21 @@ export class ClientCache<T extends Store = Store> {
     return this.store.set(key, value);
   }
 
+  /**
+   * Get a cached transaction receipt.
+   */
+  async getTransactionReceipt(
+    params: GetTransactionParams,
+  ): Promise<Transaction | undefined> {
+    const key = await this.transactionReceiptKey(params);
+    return this.store.get(key);
+  }
+
   // Call //
 
+  /**
+   * Get a partial key used to store a call return.
+   */
   async partialCallKey({
     to,
     data,
@@ -155,7 +239,7 @@ export class ClientCache<T extends Store = Store> {
     blobs,
     bytecode,
     nonce,
-  }: Partial<CallParams>): Promise<string> {
+  }: Partial<CallParams> = {}): Promise<string> {
     return this.#createKey("call", {
       to,
       data,
@@ -171,10 +255,16 @@ export class ClientCache<T extends Store = Store> {
     });
   }
 
+  /**
+   * Get the key used to store a {@linkcode Client.call} return.
+   */
   async callKey(params: CallParams): Promise<string> {
     return this.partialCallKey(params);
   }
 
+  /**
+   * Add a {@linkcode Client.call} return to the cache.
+   */
   async preloadCall({
     preloadValue,
     ...params
@@ -190,18 +280,36 @@ export class ClientCache<T extends Store = Store> {
     return this.store.set(key, preloadValue);
   }
 
+  /**
+   * Get a cached {@linkcode Client.call} return.
+   */
+  async getCall(params: CallParams): Promise<Bytes | undefined> {
+    const key = await this.callKey(params);
+    return this.store.get(key);
+  }
+
+  /**
+   * Delete a {@linkcode Client.call} return from the cache.
+   */
   async invalidateCall(params: CallParams): Promise<void> {
     const key = await this.callKey(params);
     return this.store.delete(key);
   }
 
-  async invalidateCallsMatching(params: Partial<CallParams>): Promise<void> {
+  /**
+   * Delete all {@linkcode Client.call} returns from the cache that match
+   * partial params.
+   */
+  async invalidateCallsMatching(params?: Partial<CallParams>): Promise<void> {
     const key = await this.partialCallKey(params);
     return deleteMatches(this.store, key);
   }
 
   // Events //
 
+  /**
+   * Get the key used to store event logs from {@linkcode Client.getEvents}.
+   */
   async eventsKey<TAbi extends Abi, TEventName extends EventName<TAbi>>({
     address,
     event,
@@ -218,6 +326,9 @@ export class ClientCache<T extends Store = Store> {
     });
   }
 
+  /**
+   * Add event logs to the cache for {@linkcode Client.getEvents}.
+   */
   async preloadEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
     value,
     ...params
@@ -228,20 +339,35 @@ export class ClientCache<T extends Store = Store> {
     return this.store.set(key, value);
   }
 
+  /**
+   * Get cached event logs from {@linkcode Client.getEvents}.
+   */
+  async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
+    params: GetEventsParams<TAbi, TEventName>,
+  ): Promise<EventLog<TAbi, TEventName>[] | undefined> {
+    const key = await this.eventsKey(params);
+    return this.store.get(key);
+  }
+
   // Read //
 
+  /**
+   * Get a partial key used to store a {@linkcode Client.read} return.
+   */
   async partialReadKey<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >({
-    address,
-    args,
-    block,
-    fn,
-  }: Replace<
-    Partial<ReadParams<TAbi, TFunctionName>>,
-    { args?: Partial<FunctionArgs<TAbi, TFunctionName>> }
-  >) {
+  >(
+    {
+      address,
+      args,
+      block,
+      fn,
+    }: Replace<
+      Partial<ReadParams<TAbi, TFunctionName>>,
+      { args?: Partial<FunctionArgs<TAbi, TFunctionName>> }
+    > = {} as any,
+  ) {
     return this.#createKey("read", {
       address,
       args,
@@ -250,6 +376,9 @@ export class ClientCache<T extends Store = Store> {
     });
   }
 
+  /**
+   * Get the key used to store a {@linkcode Client.read} return.
+   */
   async readKey<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
@@ -257,6 +386,9 @@ export class ClientCache<T extends Store = Store> {
     return this.partialReadKey(params);
   }
 
+  /**
+   * Add a {@linkcode Client.read} return to the cache.
+   */
   async preloadRead<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
@@ -270,6 +402,22 @@ export class ClientCache<T extends Store = Store> {
     return this.store.set(key, value);
   }
 
+  /**
+   * Get a cached {@linkcode Client.read} return.
+   */
+  async getRead<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
+  >(
+    params: ReadParams<TAbi, TFunctionName>,
+  ): Promise<FunctionReturn<TAbi, TFunctionName> | undefined> {
+    const key = await this.readKey(params);
+    return this.store.get(key);
+  }
+
+  /**
+   * Delete a {@linkcode Client.read} return from the cache.
+   */
   async invalidateRead<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
@@ -278,11 +426,15 @@ export class ClientCache<T extends Store = Store> {
     return this.store.delete(key);
   }
 
+  /**
+   * Delete all {@linkcode Client.read} returns from the cache that match
+   * partial params.
+   */
   async invalidateReadsMatching<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(
-    params: Replace<
+    params?: Replace<
       Partial<ReadParams<TAbi, TFunctionName>>,
       { args?: Partial<FunctionArgs<TAbi, TFunctionName>> }
     >,
@@ -291,7 +443,9 @@ export class ClientCache<T extends Store = Store> {
     return deleteMatches(this.store, matchKey);
   }
 
-  // Clear
+  /**
+   * Clear the entire cache.
+   */
   async clear(): Promise<void> {
     return this.store.clear();
   }
