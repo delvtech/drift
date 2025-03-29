@@ -42,7 +42,7 @@ export type Client<
   hooks: HookRegistry<MethodHooks<TAdapter & TExtension>> &
     // Intersect with the default adapter to avoid type errors in generic
     // contexts where the keys of the adapter are unknown.
-    HookRegistry<MethodHooks<Adapter>>;
+    HookRegistry<MethodHooks<Adapter & TExtension>>;
 
   /**
    * Returns `true` if the client can send transactions.
