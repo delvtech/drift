@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.8.0-next.5
+
+### Patch Changes
+
+- 2a131a1: Patched extension hook inference in generic contexts.
+
 ## 0.8.0-next.4
 
 ### Patch Changes
