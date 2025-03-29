@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.8.0-next.4
+
+### Patch Changes
+
+- 6e816ad: Added `Client` extension methods to inferred hook names. This means autocompletion for `Client.hooks` will be available for methods added via `extend(...)`, including the `contract(...)` method added by the main `Drift` client.
+
 ## 0.8.0-next.3
 
 ### Patch Changes
