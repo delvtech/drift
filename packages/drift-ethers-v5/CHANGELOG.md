@@ -1,5 +1,7 @@
 # @delvtech/drift-ethers-v5
 
+## 0.8.0-next.3
+
 ## 0.8.0-next.2
 
 ### Patch Changes
