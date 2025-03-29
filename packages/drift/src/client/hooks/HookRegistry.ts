@@ -78,9 +78,7 @@ export class HookRegistry<T extends AnyObject = AnyObject> {
   call<THook extends HookName<T>>(
     hook: THook,
     ...args: Parameters<HookHandler<T, THook>>
-  ): Promise<any> extends ReturnType<HookHandler<T, THook>>
-    ? MaybePromise<void>
-    : void {
+  ): MaybePromise<void> {
     let result: MaybePromise<any> = undefined;
     const handlers = this.#handlers[hook];
     if (!handlers) return result;

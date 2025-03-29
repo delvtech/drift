@@ -37,8 +37,8 @@ export type Drift<
     ): Contract<
       TAbi,
       TThis["adapter"],
-      TStore,
-      Drift<TThis["adapter"], TStore>
+      TThis["cache"]["store"],
+      Drift<TThis["adapter"], TThis["cache"]["store"]>
     >;
   }
 >;
