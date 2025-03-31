@@ -155,7 +155,6 @@ export {
 export type {
   HookHandler,
   HookName,
-  HookPayload,
   HookRegistry,
 } from "src/client/hooks/HookRegistry";
 

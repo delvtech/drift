@@ -1,5 +1,7 @@
 # @delvtech/drift-web3
 
+## 0.8.0-next.6
+
 ## 0.8.0-next.5
 
 ## 0.8.0-next.4

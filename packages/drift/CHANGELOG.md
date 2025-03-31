@@ -1,5 +1,15 @@
 # @delvtech/drift
 
+## 0.8.0-next.6
+
+### Minor Changes
+
+- 90b67fd: Removed the `find` method from the `Store` interface.
+
+### Patch Changes
+
+- 90b67fd: Reverted type inference improvement in 4050ec9 for `Drift.contract` which makes `MockDrift` unassignable to `Drift`.
+
 ## 0.8.0-next.5
 
 ### Patch Changes
