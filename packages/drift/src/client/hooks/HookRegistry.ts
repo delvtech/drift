@@ -1,15 +1,11 @@
-import type {
-  AnyFunction,
-  AnyObject,
-  FunctionKey,
-  MaybePromise,
-} from "src/utils/types";
+import type { AnyObject, FunctionKey, MaybePromise } from "src/utils/types";
 
 /**
  * A registry for managing and executing hook handlers.
  * Handlers are executed sequentially in registration order.
  *
- * @template T - The hooks configuration object
+ * @typeParam T - The hook mapping object containing hook names and their
+ * corresponding handler functions.
  */
 export class HookRegistry<T extends AnyObject = AnyObject> {
   #handlers: {
@@ -62,7 +58,7 @@ export class HookRegistry<T extends AnyObject = AnyObject> {
     hook: THook,
     handler: HookHandler<T, THook>,
   ): void {
-    const wrapped = (...args: any[]) => {
+    const wrapped = (...args: Parameters<typeof handler>) => {
       this.off(hook, wrapped);
       handler(...args);
     };
@@ -94,39 +90,19 @@ export class HookRegistry<T extends AnyObject = AnyObject> {
 }
 
 /**
- * Represents a possible hook name given a hooks configuration object.
- * @group Hooks
+ * Get a union of all hook names from the hook mapping object `T`.
  */
-export type HookName<THooks extends AnyObject = AnyObject> =
-  | FunctionKey<THooks>
-  | (string & {});
+export type HookName<T extends AnyObject = AnyObject> = T extends T
+  ? FunctionKey<T>
+  : never;
 
 /**
  * A handler function for a specific hook.
  * @template THook - The name of the hook being handled
- * @template T - The hooks configuration object containing the hook
- * @group Hooks
+ * @template T - The hook mapping object containing hook names and their
+ * corresponding handler functions.
  */
 export type HookHandler<
   T extends AnyObject = AnyObject,
   THook extends HookName<T> = HookName<T>,
-> = AnyObject extends T
-  ? (...args: any[]) => MaybePromise<void>
-  : T[THook] extends AnyFunction
-    ? T[THook]
-    : (...args: any[]) => MaybePromise<void>;
-
-/**
- * The payload object passed to a hook handler.
- *
- * By convention, the payload will be the first argument of the hook, but this
- * may not always be the case for custom hooks at runtime
- *
- * @template THook - The name of the hook being handled
- * @template T - The hooks configuration object containing the hook
- * @group Hooks
- */
-export type HookPayload<
-  T extends AnyObject = AnyObject,
-  THook extends HookName<T> = HookName<T>,
-> = Parameters<HookHandler<T, THook>>[0];
+> = (payload: Parameters<T[THook]>[0]) => MaybePromise<void>;

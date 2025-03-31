@@ -34,7 +34,13 @@ export type ClientCacheOptions<T extends Store = Store> = {
   namespace: PropertyKey | (() => MaybePromise<PropertyKey>);
 
   /**
-   * The underlying cache implementation. Defaults to an in-memory LRU cache.
+   * The underlying cache implementation.
+   *
+   * @default
+   * // in-memory Least Recently Used (LRU) cache
+   * new LruStore()
+   *
+   * @see {@linkcode LruStore}
    */
   store?: T;
 };
@@ -48,7 +54,7 @@ export class ClientCache<T extends Store = Store> {
 
   constructor({
     namespace,
-    store = new LruStore() as Store as T,
+    store = new LruStore() as unknown as T,
   }: ClientCacheOptions<T>) {
     this.namespace = namespace;
     this.store = store;
@@ -287,8 +293,10 @@ export class ClientCache<T extends Store = Store> {
    * partial params.
    */
   async invalidateCallsMatching(params?: Partial<CallParams>): Promise<void> {
-    const key = await this.partialCallKey(params);
-    return deleteMatches(this.store, key);
+    return deleteMatches({
+      store: this.store,
+      matchKey: this.partialCallKey(params),
+    });
   }
 
   // Events //
@@ -425,8 +433,10 @@ export class ClientCache<T extends Store = Store> {
       { args?: Partial<FunctionArgs<TAbi, TFunctionName>> }
     >,
   ): Promise<void> {
-    const matchKey = await this.partialReadKey(params);
-    return deleteMatches(this.store, matchKey);
+    return deleteMatches({
+      store: this.store,
+      matchKey: this.partialReadKey(params),
+    });
   }
 
   /**

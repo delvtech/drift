@@ -24,13 +24,7 @@ import {
 } from "src/client/Client";
 import { ContractCache } from "src/client/contract/cache/ContractCache";
 import type { Store } from "src/store/types";
-import type {
-  AnyObject,
-  EmptyObject,
-  Eval,
-  Extended,
-  OneOf,
-} from "src/utils/types";
+import type { EmptyObject, Eval, Extended, OneOf } from "src/utils/types";
 
 /**
  * An interface for interacting with a smart contract through a drift
@@ -353,35 +347,31 @@ export function createContract<
 // Parameter types //
 
 export type ContractEncodeDeployDataArgs<TAbi extends Abi = Abi> =
-  Abi extends TAbi
-    ? [bytecode: Bytes, args?: AnyObject]
-    : ConstructorArgs<TAbi> extends infer TArgs
-      ? EmptyObject extends TArgs
-        ? [bytecode: Bytes, args?: TArgs]
-        : [bytecode: Bytes, args: TArgs]
-      : never;
+  EmptyObject extends ConstructorArgs<TAbi>
+    ? [bytecode: Bytes, args?: ConstructorArgs<TAbi>]
+    : [bytecode: Bytes, args: ConstructorArgs<TAbi>];
 
 export type ContractEncodeFunctionDataArgs<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = Abi extends TAbi
-  ? [functionName: TFunctionName, args?: AnyObject]
-  : FunctionArgs<TAbi, TFunctionName> extends infer TArgs
-    ? EmptyObject extends TArgs
-      ? [functionName: TFunctionName, args?: TArgs]
-      : [functionName: TFunctionName, args: TArgs]
-    : never;
+> = EmptyObject extends FunctionArgs<TAbi, TFunctionName>
+  ? [functionName: TFunctionName, args?: FunctionArgs<TAbi, TFunctionName>]
+  : [functionName: TFunctionName, args: FunctionArgs<TAbi, TFunctionName>];
 
 export type ContractReadArgs<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = Abi extends TAbi
-  ? [functionName: TFunctionName, args?: AnyObject, options?: ReadOptions]
-  : FunctionArgs<TAbi, TFunctionName> extends infer TArgs
-    ? EmptyObject extends TArgs
-      ? [functionName: TFunctionName, args?: TArgs, options?: ReadOptions]
-      : [functionName: TFunctionName, args: TArgs, options?: ReadOptions]
-    : never;
+> = EmptyObject extends FunctionArgs<TAbi, TFunctionName>
+  ? [
+      functionName: TFunctionName,
+      args?: FunctionArgs<TAbi, TFunctionName>,
+      options?: ReadOptions,
+    ]
+  : [
+      functionName: TFunctionName,
+      args: FunctionArgs<TAbi, TFunctionName>,
+      options?: ReadOptions,
+    ];
 
 export type ContractSimulateWriteArgs<
   TAbi extends Abi = Abi,
@@ -389,21 +379,17 @@ export type ContractSimulateWriteArgs<
     TAbi,
     "nonpayable" | "payable"
   > = FunctionName<TAbi, "nonpayable" | "payable">,
-> = Abi extends TAbi
+> = EmptyObject extends FunctionArgs<TAbi, TFunctionName>
   ? [
       functionName: TFunctionName,
-      args?: AnyObject,
+      args?: FunctionArgs<TAbi, TFunctionName>,
       options?: TransactionOptions,
     ]
-  : FunctionArgs<TAbi, TFunctionName> extends infer TArgs
-    ? EmptyObject extends TArgs
-      ? [
-          functionName: TFunctionName,
-          args?: TArgs,
-          options?: TransactionOptions,
-        ]
-      : [functionName: TFunctionName, args: TArgs, options?: TransactionOptions]
-    : never;
+  : [
+      functionName: TFunctionName,
+      args: FunctionArgs<TAbi, TFunctionName>,
+      options?: TransactionOptions,
+    ];
 
 export type ContractWriteArgs<
   TAbi extends Abi = Abi,
@@ -411,10 +397,14 @@ export type ContractWriteArgs<
     TAbi,
     "nonpayable" | "payable"
   > = FunctionName<TAbi, "nonpayable" | "payable">,
-> = Abi extends TAbi
-  ? [functionName: TFunctionName, args?: AnyObject, options?: WriteOptions]
-  : FunctionArgs<TAbi, TFunctionName> extends infer TArgs
-    ? EmptyObject extends TArgs
-      ? [functionName: TFunctionName, args?: TArgs, options?: WriteOptions]
-      : [functionName: TFunctionName, args: TArgs, options?: WriteOptions]
-    : never;
+> = EmptyObject extends FunctionArgs<TAbi, TFunctionName>
+  ? [
+      functionName: TFunctionName,
+      args?: FunctionArgs<TAbi, TFunctionName>,
+      options?: WriteOptions,
+    ]
+  : [
+      functionName: TFunctionName,
+      args: FunctionArgs<TAbi, TFunctionName>,
+      options?: WriteOptions,
+    ];

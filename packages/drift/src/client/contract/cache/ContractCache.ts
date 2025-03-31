@@ -168,7 +168,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
   /**
    * Get a cached {@linkcode Contract.read read} return.
    */
-  async getRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
+  getRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ) {
     return this.#clientCache.getRead({
@@ -218,7 +218,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
   /**
    * Clear the entire cache.
    */
-  async clear(): Promise<void> {
-    return this.store.clear();
+  clear() {
+    return this.#clientCache.clear();
   }
 }

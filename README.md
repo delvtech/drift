@@ -54,11 +54,10 @@ Building on Ethereum often means dealing with:
     - [Write Operations](#write-operations)
     - [Contract Instances](#contract-instances)
 - [Example: Building Vault Clients](#example-building-vault-clients)
-  - [1. Define core vault clients](#1-define-core-vault-clients)
+  - [1. Define vault clients](#1-define-vault-clients)
   - [2. Use the clients in your application](#2-use-the-clients-in-your-application)
     - [Benefits of This Architecture](#benefits-of-this-architecture)
-  - [3. Extend core clients for library-specific clients](#3-extend-core-clients-for-library-specific-clients)
-  - [4. Test Your Clients with Drift's Built-in Mocks](#4-test-your-clients-with-drifts-built-in-mocks)
+  - [3. Test Your Clients with Drift's Built-in Mocks](#3-test-your-clients-with-drifts-built-in-mocks)
     - [Example: Testing Client Methods with Multiple RPC Calls](#example-testing-client-methods-with-multiple-rpc-calls)
     - [Benefits](#benefits)
 - [Simplifying React Hook Management](#simplifying-react-hook-management)
@@ -68,9 +67,12 @@ Building on Ethereum often means dealing with:
 - [Caching in Action](#caching-in-action)
   - [Cache Invalidation](#cache-invalidation)
   - [Preloading Cache Data](#preloading-cache-data)
-- [Advanced Usage](#advanced-usage)
-  - [Custom Store Implementation](#custom-store-implementation)
-  - [Extending Drift for Your Needs](#extending-drift-for-your-needs)
+  - [Direct Access to Cached Data](#direct-access-to-cached-data)
+- [Extending Drift for Your Needs](#extending-drift-for-your-needs)
+  - [Extension Points](#extension-points)
+    - [Adapters](#adapters)
+    - [Stores](#stores)
+  - [Hooks](#hooks)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -153,7 +155,7 @@ const balance = await drift.read({
 
 #### Write Operations
 
-If Drift was initialized with a wallet client, you can perform write operations:
+If Drift was initialized with a signer, you can perform write operations:
 
 ```typescript
 const txHash = await drift.write({
@@ -212,7 +214,7 @@ const txHash = await vault.write(
 Let's build a simple library agnostic SDK with `ReadVault` and `ReadWriteVault`
 clients using Drift.
 
-### 1. Define core vault clients
+### 1. Define vault clients
 
 In your core SDK package, define the `ReadVault` and `ReadWriteVault` clients
 using Drift's `ReadContract` and `ReadWriteContract` abstractions.
@@ -239,7 +241,7 @@ export class ReadVault {
   
   constructor(address: Address, drift: Drift = createDrift()) {
     this.contract = drift.contract({
-      abi: ERC4626.abi,
+      abi: erc4626Abi,
       address,
     });
   }
@@ -330,63 +332,8 @@ const deposits = await readVault.getDeposits("0xUserAddress");
   adapter packages.
 - **Simplicity:** Your application code stays clean and focused on business
   logic rather than on optimizing network calls or managing cache keys.
-- **Flexibility:** Your core logic remains untouched when switching web3
-  libraries.
 
-### 3. Extend core clients for library-specific clients
-
-To provide library specific client packages, e.g., `sdk-viem`, extend the core
-clients and overwrite their constructors to accept `viem` clients.
-
-```typescript
-// sdk-viem/src/VaultClient.ts
-import {
-  ReadVault as CoreReadVault,
-  ReadWriteVault as CoreReadWriteVault,
-} from "sdk-core";
-import { createDrift } from "@delvtech/drift";
-import { viemAdapter } from "@delvtech/drift-viem";
-import { PublicClient, WalletClient } from "viem";
-
-export class ReadVault extends CoreReadVault {
-  constructor(address: string, publicClient: PublicClient) {
-    const drift = createDrift({
-      adapter: viemAdapter({ publicClient }),
-    });
-    super(address, drift);
-  }
-}
-
-export class ReadWriteVault extends CoreReadWriteVault {
-  constructor(
-    address: string,
-    publicClient: PublicClient,
-    walletClient: WalletClient,
-  ) {
-    const drift = createDrift({
-      adapter: viemAdapter({ publicClient, walletClient }),
-    });
-    super(address, drift);
-  }
-}
-```
-
-Then, in your app:
-
-```typescript
-import { ReadVault } from "sdk-viem";
-import { createPublicClient, http } from "viem";
-
-const publicClient = createPublicClient({
-  transport: http(),
-  // ...other options
-});
-
-// Instantiate the ReadVault client with viem directly
-const readVault = new ReadVault("0xYourVaultAddress", publicClient);
-```
-
-### 4. Test Your Clients with Drift's Built-in Mocks
+### 3. Test Your Clients with Drift's Built-in Mocks
 
 Testing smart contract interactions can be complex and time-consuming. Drift
 simplifies this process by providing built-in mocks that allow you to stub
@@ -394,7 +341,7 @@ responses and focus on testing your application logic.
 
 > [!IMPORTANT]
 >
-> Drift's testing mocks have a peer dependency on `sinon`. Make sure to install
+> Drift's testing mocks have a peer dependency on [Sinon.JS](https://sinonjs.org). Make sure to install
 > it before using the mocks.
 >
 > ```sh
@@ -403,8 +350,8 @@ responses and focus on testing your application logic.
 
 #### Example: Testing Client Methods with Multiple RPC Calls
 
-Suppose you have a method `getAccountValue` in your `ReadVault` client that
-get's the total asset value for an account by fetching their vault balance and
+Suppose you have a method, `getAccountValue`, in your `ReadVault` client that
+gets the total asset value for an account by fetching their vault balance and
 converting it to assets. Under the hood, this method makes multiple RPC
 requests.
 
@@ -508,6 +455,8 @@ const balance2 = await contract.read("balanceOf", { account });
 
 ### Cache Invalidation
 
+Delete cached data to ensure it's re-fetched using `invalidate*` methods.
+
 ```typescript
 // Invalidate the cache for a specific read
 contract.cache.invalidateRead("balanceOf", { account });
@@ -521,7 +470,7 @@ contract.cache.clear();
 
 ### Preloading Cache Data
 
-Data such as immutables from token lists can be preloaded into the cache to
+Add static data such as immutables from token lists using `preload*` methods to
 avoid network requests without changing how the data is accessed.
 
 ```ts
@@ -542,40 +491,83 @@ contract.cache.preloadEvents({
 });
 ```
 
-The `preload*` and `invalidate*` methods are available on both the `Drift.cache`
-and `Contract.cache` instances. The signatures for both match the respective
-methods on the instance; The `Contract.cache.preloadRead`  signature is the same
-as `Contract.read` and `Drift.cache.preloadRead` is the same as `Drift.read`.
+### Direct Access to Cached Data
+
+Drift clients will automatically check the cache before fetching new data, but
+direct access to the cached data is available via `get*` methods.
+
+```typescript
+// Get a cached read return
+const cachedBalance = await contract.cache.getRead("balanceOf", { account });
+
+// Get a cached transaction receipt
+const cachedReceipt = await drift.cache.getTransactionReceipt({ hash })
+```
+
+The `invalidate*`, `preload*`, and `get*` methods are available on both the
+`Drift.cache` and `Contract.cache` instances.
 
 > [!IMPORTANT]
 >
-> Preloading data affects all clients that share the same cache. Since Drift
-> passes its own cache to the contracts it creates via `Drift.contract()` by
-> default, they'll already be preloaded with the `Drift` instance's cache and
-> any data preloaded with the contract will also be preloaded for the `Drift`
-> instance.
+> Manipulating cache data affects all clients that share the same cache. Since
+> Drift passes its own cache to the contracts it creates via `Drift.contract()`,
+> they'll already be preloaded with the `Drift` instance's cache and any cache
+> operations performed on the contract cache will also affect the `Drift` cache.
 
-## Advanced Usage
+## Extending Drift for Your Needs
 
-### Custom Store Implementation
+Drift is designed to be extensible. You can build additional abstractions or
+utilities on top of it to suit your project's requirements.
 
-If you have specific caching needs, you can provide your own store
-implementation which can be either synchronous or asynchronous.
+### Extension Points
+
+#### Adapters
+
+Extend support to new web3 libraries or custom providers by implementing the
+[`Adapter`](./packages/drift/src/adapter/types/Adapter.ts#L19) interface. See
+the [`DefaultAdapter`](./packages/drift/src/adapter/DefaultAdapter.ts#L53) for
+an example.
+
+#### Stores
+
+Implement a custom [`Store`](./packages/drift/src/store/types.ts#L7) to manage
+caching in a way that suits your application. The default store is an in-memory
+LRU cache, but you can create a custom store that uses TTL, localStorage,
+IndexedDB,
+[QueryCache](https://tanstack.com/query/latest/docs/reference/QueryCache), or
+any other storage mechanism, sync or async.
 
 ```typescript
 import { createDrift } from "@delvtech/drift";
-import { LRUCache } from "lru-cache";
 
-const customStore = new LRUCache({ max: 500 });
+const customStore = new Map<string, unknown>();
 const drift = createDrift({
   store: customStore,
 });
 ```
 
-### Extending Drift for Your Needs
+### Hooks
 
-Drift is designed to be extensible. You can build additional abstractions or
-utilities on top of it to suit your project's requirements.
+Add custom logic by intercepting and modifying client methods with `hooks`. Each
+method has a `before:<method>` and `after:<method>` hook that allows you to
+inspect and modify the arguments and results.
+
+```typescript
+// Simulate writes before sending the transaction
+drift.hooks.on("before:write", async ({ args: [params] }) => {
+  await drift.simulateWrite(params);
+});
+
+drift.hooks.on("before:getEvents", async ({ args: [params], resolve }) => {
+  const cachedValue = await drift.cache.getRead(params);
+  resolve(readMiddleware({ drift, params, cachedValue }));
+});
+
+
+drift.hooks.on("after:read", ({ args: [params], result, setResult }) => {
+  setResult(transformResultMiddleware({ drift, params, result }));
+});
+```
 
 ## Contributing
 

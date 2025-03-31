@@ -11,7 +11,7 @@ describe("HookRegistry", () => {
 
     hooks.on("clear", handler);
     hooks.on("clear", handler2);
-    await hooks.call("clear");
+    await hooks.call("clear", undefined);
 
     expect(handler).toHaveBeenCalledTimes(1);
     expect(handler2).toHaveBeenCalledTimes(1);
@@ -32,7 +32,7 @@ describe("HookRegistry", () => {
     hooks.on("clear", handler);
     hooks.on("clear", handler2);
 
-    await hooks.call("clear");
+    await hooks.call("clear", undefined);
     expect(order).toEqual([1, 2]);
   });
 
@@ -41,10 +41,10 @@ describe("HookRegistry", () => {
     const handler = vi.fn();
 
     hooks.on("clear", handler);
-    await hooks.call("clear");
+    await hooks.call("clear", undefined);
 
     hooks.off("clear", handler);
-    await hooks.call("clear");
+    await hooks.call("clear", undefined);
 
     expect(handler).toHaveBeenCalledTimes(1);
   });
@@ -56,8 +56,8 @@ describe("HookRegistry", () => {
 
     hooks.on("clear", handler);
     hooks.once("clear", onceHandler);
-    await hooks.call("clear");
-    await hooks.call("clear");
+    await hooks.call("clear", undefined);
+    await hooks.call("clear", undefined);
 
     expect(handler).toHaveBeenCalledTimes(2);
     expect(onceHandler).toHaveBeenCalledTimes(1);

@@ -3,16 +3,24 @@ import type { Store } from "src/store/types";
 import type { MaybePromise } from "src/utils/types";
 
 /**
- * Deletes all entries in the store that match the `matchKey`.
+ * Deletes all entries in the store whose keys match the provided key.
  *
- * @param store - The store to delete entries from.
- * @param matchKey - The key to match against. This can be a partial object to
- * delete entries based on a subset of properties.
+ * **Important**: This assumes that the keys in the store are JSON strings.
  */
-export async function deleteMatches(
-  store: Store,
-  matchKey: string,
-): Promise<void> {
+export async function deleteMatches({
+  store,
+  matchKey,
+}: {
+  /**
+   * The store to delete entries from.
+   */
+  store: Store;
+  /**
+   * The key to match against.
+   */
+  matchKey: MaybePromise<string>;
+}): Promise<void> {
+  matchKey = await matchKey;
   const parsedMatchKey = JSON.parse(matchKey);
   const operations: MaybePromise<void>[] = [];
 

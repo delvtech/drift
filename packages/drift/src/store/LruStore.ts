@@ -6,10 +6,10 @@ export type LruStoreOptions<
 > = LRUCache.Options<string, V, unknown>;
 
 /**
- * An LRU (Least Recently Used) implementation of {@linkcode Store}.
+ * Least Recently Used (LRU) implementation of the {@linkcode Store} interface.
  *
- * @param options - The options to pass to the underlying [LRU
- * cache](https://www.npmjs.com/package/lru-cache). Default: `{ max: 500 }`.
+ * @param options - The options to pass to the underlying {@linkcode LRUCache}.
+ * Default: `{ max: 500 }`.
  *
  * @see [NPM - lru-cache](https://www.npmjs.com/package/lru-cache).
  */

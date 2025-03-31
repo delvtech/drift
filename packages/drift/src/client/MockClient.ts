@@ -1,11 +1,6 @@
-import type { DefaultAdapterOptions } from "src/adapter/DefaultAdapter";
 import { MockAdapter } from "src/adapter/MockAdapter";
-import {
-  type Client,
-  type ClientOptions,
-  createClient,
-} from "src/client/Client";
-import type { LruStore } from "src/store/LruStore";
+import { type Client, createClient } from "src/client/Client";
+import type { LruStore, LruStoreOptions } from "src/store/LruStore";
 import type { Store } from "src/store/types";
 
 export type MockClient<
@@ -16,7 +11,11 @@ export type MockClient<
 export type MockClientOptions<
   TAdapter extends MockAdapter = MockAdapter,
   TStore extends Store = Store,
-> = Partial<Omit<ClientOptions<TAdapter, TStore>, keyof DefaultAdapterOptions>>;
+> = {
+  adapter?: TAdapter;
+  store?: LruStore extends TStore ? TStore | LruStoreOptions : TStore;
+  chainId?: number;
+};
 
 export function createMockClient<
   TAdapter extends MockAdapter = MockAdapter,

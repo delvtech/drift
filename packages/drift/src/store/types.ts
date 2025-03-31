@@ -1,22 +1,14 @@
 import type { MaybePromise } from "src/utils/types";
 
 /**
- * An interface for storing and retrieving values in a cache. The methods may be
- * synchronous or asynchronous.
+ * A minimal interface for storing and retrieving values in a cache. The methods
+ * may be synchronous or asynchronous.
  */
 export interface Store {
   /**
    * Returns an iterable of key-value pairs for every entry in the store.
    */
   entries: () => Iterable<[string, any]> | AsyncIterable<[string, any]>;
-
-  /**
-   * Returns the the first value from the store that the specified predicate
-   * matches, or undefined if no match is found.
-   *
-   * @param predicate - A function to test each key-value pair in the store.
-   */
-  find: (predicate: (value: any, key: string) => boolean) => MaybePromise<any>;
 
   /**
    * Returns a boolean indicating whether an entry exists for the specified key.

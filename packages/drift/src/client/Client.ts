@@ -39,10 +39,7 @@ export type Client<
   /**
    * Hooks for intercepting method calls and responses on the client.
    */
-  hooks: HookRegistry<MethodHooks<TAdapter & TExtension>> &
-    // Intersect with the default adapter to avoid type errors in generic
-    // contexts where the keys of the adapter are unknown.
-    HookRegistry<MethodHooks<Adapter & TExtension>>;
+  hooks: HookRegistry<MethodHooks<(TAdapter | Adapter) & TExtension>>;
 
   /**
    * Returns `true` if the client can send transactions.
