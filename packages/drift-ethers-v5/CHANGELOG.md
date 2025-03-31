@@ -1,5 +1,7 @@
 # @delvtech/drift-ethers-v5
 
+## 0.8.0-next.7
+
 ## 0.8.0-next.6
 
 ## 0.8.0-next.5

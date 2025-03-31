@@ -1,7 +1,7 @@
 {
   "name": "@delvtech/drift-web3",
   "description": "Web3.js adapter for Drift",
-  "version": "0.8.0-next.6",
+  "version": "0.8.0-next.7",
   "license": "Apache-2.0",
   "type": "module",
   "main": "dist/index.cjs",
@@ -32,7 +32,7 @@
     "web3": "^4.16.0"
   },
   "devDependencies": {
-    "@delvtech/drift": "^0.8.0-next.6",
+    "@delvtech/drift": "^0.8.0-next.7",
     "@repo/typescript-config": "*",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.3.6",

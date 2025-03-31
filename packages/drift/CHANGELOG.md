@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.8.0-next.7
+
+### Patch Changes
+
+- 30612d1: Re-added type inference improvement from 4050ec9 for `Drift.contract` and patched `MockDrift` to be assignable to `Drift`.
+
 ## 0.8.0-next.6
 
 ### Minor Changes
