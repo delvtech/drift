@@ -17,6 +17,10 @@ export type MockDrift<
   TAdapter,
   TStore,
   {
+    contract<TAbi extends Abi, TThis extends MockDrift<TAdapter, TStore>>(
+      this: TThis,
+      options: ContractBaseOptions<TAbi>,
+    ): MockContract<TAbi, TThis["adapter"], TThis["cache"]["store"], TThis>;
     contract<TAbi extends Abi>(
       options: ContractBaseOptions<TAbi>,
     ): MockContract<TAbi, TAdapter, TStore, MockDrift<TAdapter, TStore>>;
@@ -30,7 +34,9 @@ export function createMockDrift<
   config: MockClientOptions<TAdapter, TStore> = {},
 ): MockDrift<TAdapter, TStore> {
   return createMockClient(config).extend({
-    contract(options) {
+    contract(
+      options: ContractBaseOptions,
+    ): MockContract<Abi, TAdapter, TStore, MockDrift<TAdapter, TStore>> {
       return new MockContract({
         ...options,
         client: this,

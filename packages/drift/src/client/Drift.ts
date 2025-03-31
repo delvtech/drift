@@ -31,9 +31,10 @@ export type Drift<
   TAdapter,
   TStore,
   {
-    contract<TAbi extends Abi>(
+    contract<TAbi extends Abi, TThis extends Drift<TAdapter, TStore>>(
+      this: TThis,
       options: ContractBaseOptions<TAbi>,
-    ): Contract<TAbi, TAdapter, TStore, Drift<TAdapter, TStore>>;
+    ): Contract<TAbi, TThis["adapter"], TThis["cache"]["store"], TThis>;
   }
 >;
 
