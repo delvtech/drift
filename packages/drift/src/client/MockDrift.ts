@@ -31,9 +31,9 @@ export function createMockDrift<
   TAdapter extends MockAdapter = MockAdapter,
   TStore extends Store = LruStore,
 >(
-  config: MockClientOptions<TAdapter, TStore> = {},
+  options: MockClientOptions<TAdapter, TStore> = {},
 ): MockDrift<TAdapter, TStore> {
-  return createMockClient(config).extend({
+  return createMockClient(options).extend({
     contract(
       options: ContractBaseOptions,
     ): MockContract<Abi, TAdapter, TStore, MockDrift<TAdapter, TStore>> {

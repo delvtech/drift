@@ -105,12 +105,13 @@ export type ClientOptions<
 export function createClient<
   TAdapter extends Adapter = DefaultAdapter,
   TStore extends Store = LruStore,
->({
-  adapter: maybeAdapter,
-  store: storeOrOptions,
-  chainId,
-  ...adapterOptions
-}: ClientOptions<TAdapter, TStore> = {}): Client<TAdapter, TStore> {
+>(options: ClientOptions<TAdapter, TStore> = {}): Client<TAdapter, TStore> {
+  let {
+    adapter: maybeAdapter,
+    store: storeOrOptions,
+    chainId,
+    ...adapterOptions
+  } = options;
   const interceptor = new MethodInterceptor<TAdapter>();
 
   // Handle adapter options

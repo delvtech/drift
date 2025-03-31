@@ -20,17 +20,20 @@ export type MockClientOptions<
 export function createMockClient<
   TAdapter extends MockAdapter = MockAdapter,
   TStore extends Store = LruStore,
->({
-  adapter = new MockAdapter() as TAdapter,
-  chainId,
-  ...config
-}: MockClientOptions<TAdapter, TStore> = {}): MockClient<TAdapter, TStore> {
+>(
+  options: MockClientOptions<TAdapter, TStore> = {},
+): MockClient<TAdapter, TStore> {
+  const {
+    adapter = new MockAdapter() as TAdapter,
+    chainId,
+    ...restOptions
+  } = options;
   if (!adapter.stubs.has("getChainId")) {
     adapter.onGetChainId().resolves(chainId ?? 0);
   }
   return createClient({
     adapter,
     chainId,
-    ...config,
+    ...restOptions,
   });
 }

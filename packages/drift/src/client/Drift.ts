@@ -46,8 +46,8 @@ export type DriftOptions<
 export function createDrift<
   TAdapter extends Adapter = DefaultAdapter,
   TStore extends Store = LruStore,
->(config: DriftOptions<TAdapter, TStore> = {}): Drift<TAdapter, TStore> {
-  return createClient(config).extend({
+>(options: DriftOptions<TAdapter, TStore> = {}): Drift<TAdapter, TStore> {
+  return createClient(options).extend({
     contract(options) {
       return createContract({
         ...options,

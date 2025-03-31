@@ -317,7 +317,7 @@ export function createContract<
   abi,
   address,
   epochBlock,
-  client: maybeClient,
+  client,
   ...clientOptions
 }: ContractOptions<TAbi, TAdapter, TStore, TClient>): Contract<
   TAbi,
@@ -325,7 +325,7 @@ export function createContract<
   TClient["cache"]["store"],
   TClient
 > {
-  const client = (maybeClient || createClient(clientOptions)) as TClient;
+  client = (client || createClient(clientOptions)) as TClient;
 
   if (client.isReadWrite()) {
     return new ReadWriteContract({

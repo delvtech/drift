@@ -48,8 +48,8 @@ export class MockContract<
   constructor({
     abi = [] as unknown as TAbi,
     address = ZERO_ADDRESS,
-    client,
     epochBlock,
+    client,
     ...clientOptions
   }: MockContractOptions<TAbi, TAdapter, TStore, TClient> = {}) {
     super({
