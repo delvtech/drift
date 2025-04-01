@@ -61,7 +61,17 @@ export class ClientCache<T extends Store = Store> {
   }
 
   // NOTE: These methods are all async to accommodate dynamic namespace
-  // resolution and external cache implementations.
+  // resolution and async store implementations.
+
+  /**
+   * Clear the entire cache.
+   *
+   * **Warning**: This operation is not namespaced and will delete everything in
+   * the store. This is a full reset.
+   */
+  async clear(): Promise<void> {
+    return this.store.clear();
+  }
 
   // Block //
 
@@ -97,20 +107,36 @@ export class ClientCache<T extends Store = Store> {
   }
 
   /**
-   * Delete a block from the cache.
+   * Delete a block in the cache to ensure {@linkcode Client.getBlock}
+   * re-fetches it when requested.
    */
   async invalidateBlock<T extends BlockIdentifier>(block?: T): Promise<void> {
     const key = await this.blockKey(block);
     return this.store.delete(key);
   }
 
+  /**
+   * Delete all blocks in the cache to ensure {@linkcode Client.getBlock}
+   * re-fetches them when requested.
+   */
+  async clearBlocks(): Promise<void> {
+    return deleteMatches({
+      store: this.store,
+      matchKey: this.blockKey(),
+    });
+  }
+
   // Balance //
+
+  #partialBalanceKey({ address, block }: Partial<GetBalanceParams> = {}) {
+    return this.#createKey("balance", { address, block });
+  }
 
   /**
    * Get the key used to store an account's balance.
    */
-  async balanceKey({ address, block }: GetBalanceParams): Promise<string> {
-    return this.#createKey("balance", { address, block });
+  async balanceKey(params: GetBalanceParams): Promise<string> {
+    return this.#partialBalanceKey(params);
   }
 
   /**
@@ -135,20 +161,36 @@ export class ClientCache<T extends Store = Store> {
   }
 
   /**
-   * Delete an account's balance from the cache.
+   * Delete an account's balance in the cache to ensure
+   * {@linkcode Client.getBalance} re-fetches it when called.
    */
   async invalidateBalance(params: GetBalanceParams): Promise<void> {
     const key = await this.balanceKey(params);
     return this.store.delete(key);
   }
 
+  /**
+   * Delete all account balances in the cache to ensure
+   * {@linkcode Client.getBalance} re-fetches them when called.
+   */
+  async clearBalances(): Promise<void> {
+    return deleteMatches({
+      store: this.store,
+      matchKey: this.#partialBalanceKey(),
+    });
+  }
+
   // Transaction //
 
+  #partialTransactionKey({ hash }: Partial<GetTransactionParams> = {}) {
+    return this.#createKey("transaction", { hash });
+  }
+
   /**
-   * Get the key used to store a transaction.
+   * Get the key used to store a transaction,
    */
   async transactionKey({ hash }: GetTransactionParams): Promise<string> {
-    return this.#createKey("transaction", { hash });
+    return this.#partialTransactionKey({ hash });
   }
 
   /**
@@ -175,11 +217,23 @@ export class ClientCache<T extends Store = Store> {
   }
 
   /**
-   * Delete a transaction from the cache.
+   * Delete a transaction in the cache to ensure
+   * {@linkcode Client.getTransaction} re-fetches it when called.
    */
   async invalidateTransaction(params: GetTransactionParams): Promise<void> {
     const key = await this.transactionKey(params);
     return this.store.delete(key);
+  }
+
+  /**
+   * Delete all transactions in the cache to ensure
+   * {@linkcode Client.getTransaction} re-fetches them when called.
+   */
+  async clearTransactions(): Promise<void> {
+    return deleteMatches({
+      store: this.store,
+      matchKey: this.#partialTransactionKey(),
+    });
   }
 
   // Transaction Receipt //
@@ -216,10 +270,7 @@ export class ClientCache<T extends Store = Store> {
 
   // Call //
 
-  /**
-   * Get a partial key used to store a call return.
-   */
-  async partialCallKey({
+  #partialCallKey({
     to,
     data,
     value,
@@ -231,7 +282,7 @@ export class ClientCache<T extends Store = Store> {
     blobs,
     bytecode,
     nonce,
-  }: Partial<CallParams> = {}): Promise<string> {
+  }: Partial<CallParams> = {}) {
     return this.#createKey("call", {
       to,
       data,
@@ -248,23 +299,26 @@ export class ClientCache<T extends Store = Store> {
   }
 
   /**
-   * Get the key used to store a {@linkcode Client.call} return.
+   * Get the key used to store a call result.
    */
   async callKey(params: CallParams): Promise<string> {
-    return this.partialCallKey(params);
+    return this.#partialCallKey(params);
   }
 
   /**
-   * Add a {@linkcode Client.call} return to the cache.
+   * Add a call result to the cache.
    */
   async preloadCall({
     preloadValue,
     ...params
   }: {
+    /**
+     * The return value to preload.
+     */
     preloadValue: Bytes;
     /**
-     * **IMPORTANT**: This is the `value` from the {@linkcode CallParams}, not
-     * the value to preload. Use `preloadValue` instead.
+     * **IMPORTANT**: This is the {@linkcode CallParams.value}, not the return
+     * value to preload. Use {@linkcode preloadValue} instead.
      */
     value?: CallParams["value"];
   } & CallParams): Promise<void> {
@@ -273,7 +327,7 @@ export class ClientCache<T extends Store = Store> {
   }
 
   /**
-   * Get a cached {@linkcode Client.call} return.
+   * Get a cached call result.
    */
   async getCall(params: CallParams): Promise<Bytes | undefined> {
     const key = await this.callKey(params);
@@ -281,7 +335,8 @@ export class ClientCache<T extends Store = Store> {
   }
 
   /**
-   * Delete a {@linkcode Client.call} return from the cache.
+   * Delete a call result in the cache to ensure {@linkcode Client.call}
+   * re-sends the request when called.
    */
   async invalidateCall(params: CallParams): Promise<void> {
     const key = await this.callKey(params);
@@ -289,20 +344,28 @@ export class ClientCache<T extends Store = Store> {
   }
 
   /**
-   * Delete all {@linkcode Client.call} returns from the cache that match
-   * partial params.
+   * Delete all call results in the cache that match partial params to ensure
+   * {@linkcode Client.call} re-sends matching requests when called.
    */
   async invalidateCallsMatching(params?: Partial<CallParams>): Promise<void> {
     return deleteMatches({
       store: this.store,
-      matchKey: this.partialCallKey(params),
+      matchKey: this.#partialCallKey(params),
     });
+  }
+
+  /**
+   * Delete all call results in the cache to ensure {@linkcode Client.call}
+   * re-sends all requests when called.
+   */
+  async clearCalls(): Promise<void> {
+    return this.invalidateCallsMatching();
   }
 
   // Events //
 
   /**
-   * Get the key used to store event logs from {@linkcode Client.getEvents}.
+   * Get the key used to store an event query.
    */
   async eventsKey<TAbi extends Abi, TEventName extends EventName<TAbi>>({
     address,
@@ -321,7 +384,7 @@ export class ClientCache<T extends Store = Store> {
   }
 
   /**
-   * Add event logs to the cache for {@linkcode Client.getEvents}.
+   * Add an event query to the cache.
    */
   async preloadEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
     value,
@@ -334,7 +397,7 @@ export class ClientCache<T extends Store = Store> {
   }
 
   /**
-   * Get cached event logs from {@linkcode Client.getEvents}.
+   * Get a cached event query.
    */
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
     params: GetEventsParams<TAbi, TEventName>,
@@ -345,10 +408,7 @@ export class ClientCache<T extends Store = Store> {
 
   // Read //
 
-  /**
-   * Get a partial key used to store a {@linkcode Client.read} return.
-   */
-  async partialReadKey<
+  #partialReadKey<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(
@@ -371,17 +431,17 @@ export class ClientCache<T extends Store = Store> {
   }
 
   /**
-   * Get the key used to store a {@linkcode Client.read} return.
+   * Get the key used to store a read result.
    */
   async readKey<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(params: ReadParams<TAbi, TFunctionName>) {
-    return this.partialReadKey(params);
+  >(params: ReadParams<TAbi, TFunctionName>): Promise<string> {
+    return this.#partialReadKey(params);
   }
 
   /**
-   * Add a {@linkcode Client.read} return to the cache.
+   * Add a read result to the cache.
    */
   async preloadRead<
     TAbi extends Abi,
@@ -397,7 +457,7 @@ export class ClientCache<T extends Store = Store> {
   }
 
   /**
-   * Get a cached {@linkcode Client.read} return.
+   * Get a cached read result.
    */
   async getRead<
     TAbi extends Abi,
@@ -410,7 +470,8 @@ export class ClientCache<T extends Store = Store> {
   }
 
   /**
-   * Delete a {@linkcode Client.read} return from the cache.
+   * Delete a read result in the cache to ensure {@linkcode Client.read}
+   * re-fetches it when called.
    */
   async invalidateRead<
     TAbi extends Abi,
@@ -421,8 +482,8 @@ export class ClientCache<T extends Store = Store> {
   }
 
   /**
-   * Delete all {@linkcode Client.read} returns from the cache that match
-   * partial params.
+   * Delete all read results in the cache that match partial params to ensure
+   * {@linkcode Client.read} re-fetches matching reads when called.
    */
   async invalidateReadsMatching<
     TAbi extends Abi,
@@ -435,15 +496,16 @@ export class ClientCache<T extends Store = Store> {
   ): Promise<void> {
     return deleteMatches({
       store: this.store,
-      matchKey: this.partialReadKey(params),
+      matchKey: this.#partialReadKey(params),
     });
   }
 
   /**
-   * Clear the entire cache.
+   * Delete all read results in the cache to ensure {@linkcode Client.read}
+   * re-fetches them when called.
    */
-  async clear(): Promise<void> {
-    return this.store.clear();
+  async clearReads(): Promise<void> {
+    return this.invalidateReadsMatching();
   }
 
   // Internal //

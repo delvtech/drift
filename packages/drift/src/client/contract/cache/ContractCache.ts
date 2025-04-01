@@ -60,15 +60,22 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
     return this.#clientCache.store;
   }
 
-  // NOTE: These methods are all async to accommodate dynamic namespace
-  // resolution and external cache implementations.
+  /**
+   * Clear the entire cache.
+   *
+   * **Warning**: This operation is not scoped to the contract and will delete
+   * everything in the store. This is a full reset.
+   */
+  clear() {
+    return this.#clientCache.clear();
+  }
 
   // Events //
 
   /**
-   * Get the key used to store event logs from {@linkcode Contract.getEvents}.
+   * Get the key used to store an event query.
    */
-  async eventsKey<TEventName extends EventName<TAbi>>(
+  eventsKey<TEventName extends EventName<TAbi>>(
     event: TEventName,
     options?: GetEventsOptions<TAbi, TEventName>,
   ) {
@@ -81,9 +88,9 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
   }
 
   /**
-   * Add event logs to the cache for {@linkcode Contract.getEvents}.
+   * Add an event query to the cache.
    */
-  async preloadEvents<TEventName extends EventName<TAbi>>(
+  preloadEvents<TEventName extends EventName<TAbi>>(
     params: Omit<
       GetEventsParams<TAbi, TEventName>,
       keyof ContractParams<TAbi>
@@ -99,9 +106,9 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
   }
 
   /**
-   * Get cached event logs from {@linkcode Contract.getEvents}.
+   * Get a cached event query.
    */
-  async getEvents<TEventName extends EventName<TAbi>>(
+  getEvents<TEventName extends EventName<TAbi>>(
     event: TEventName,
     options?: GetEventsOptions<TAbi, TEventName>,
   ) {
@@ -116,24 +123,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
   // Read //
 
   /**
-   * Get a partial key used to store a {@linkcode Contract.read read} return.
-   */
-  partialReadKey<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
-    fn?: TFunctionName,
-    args?: FunctionArgs<TAbi, TFunctionName>,
-    options?: ReadOptions,
-  ) {
-    return this.#clientCache.partialReadKey({
-      abi: this.#abi,
-      address: this.#address,
-      fn,
-      args,
-      ...options,
-    } as ReadParams);
-  }
-
-  /**
-   * Get the key used to store a {@linkcode Contract.read read} return.
+   * Get the key used to store a read result.
    */
   readKey<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
@@ -148,7 +138,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
   }
 
   /**
-   * Add a {@linkcode Contract.read read} return to the cache.
+   * Add a read result to the cache.
    */
   preloadRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     params: Omit<
@@ -166,7 +156,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
   }
 
   /**
-   * Get a cached {@linkcode Contract.read read} return.
+   * Get a cached read result.
    */
   getRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
@@ -181,7 +171,8 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
   }
 
   /**
-   * Delete a {@linkcode Contract.read read} return from the cache.
+   * Delete a read result in the cache to ensure {@linkcode Contract.read}
+   * re-fetches it when called.
    */
   invalidateRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
@@ -196,8 +187,9 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
   }
 
   /**
-   * Delete all {@linkcode Contract.read} returns from the cache that match
-   * partial params.
+   * Delete all read results in the cache for this contract that match partial
+   * params to ensure {@linkcode Client.read} re-fetches matching reads when
+   * called.
    */
   invalidateReadsMatching<
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
@@ -216,9 +208,14 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
   }
 
   /**
-   * Clear the entire cache.
+   * Delete all read results in the cache for this contract to ensure
+   * {@linkcode Contract.read} re-fetches them when called.
    */
-  clear() {
-    return this.#clientCache.clear();
+  async clearReads(): Promise<void> {
+    // TODO: Cleanup type cast
+    return this.#clientCache.invalidateReadsMatching({
+      abi: this.#abi as Abi,
+      address: this.#address,
+    });
   }
 }
