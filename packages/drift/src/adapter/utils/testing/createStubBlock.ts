@@ -1,6 +1,6 @@
 import type { Block } from "src/adapter/types/Block";
-import { getRandomAddress } from "src/utils/testing/getRandomAddress";
-import { getRandomHex } from "src/utils/testing/getRandomHex";
+import { randomAddress } from "src/utils/testing/randomAddress";
+import { randomHex } from "src/utils/testing/randomHex";
 import type { Eval, Replace, Writable } from "src/utils/types";
 
 /**
@@ -14,20 +14,20 @@ export function createStubBlock<
     extraData: "0x",
     gasLimit: 30000000n,
     gasUsed: 108_000_000n,
-    hash: getRandomHex(),
+    hash: randomHex(),
     logsBloom: "0x0",
-    miner: getRandomAddress(),
-    mixHash: getRandomHex(),
+    miner: randomAddress(),
+    mixHash: randomHex(),
     nonce: 1n,
     number: 1n,
-    parentHash: getRandomHex(),
-    receiptsRoot: getRandomHex(),
-    sha3Uncles: getRandomHex(),
+    parentHash: randomHex(),
+    receiptsRoot: randomHex(),
+    sha3Uncles: randomHex(),
     size: 100_000n,
-    stateRoot: getRandomHex(),
+    stateRoot: randomHex(),
     timestamp: BigInt(Date.now()) / 1000n,
     transactions: [],
-    transactionsRoot: getRandomHex(),
+    transactionsRoot: randomHex(),
     ...overrides,
   };
 }

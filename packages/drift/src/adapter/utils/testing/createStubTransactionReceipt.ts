@@ -1,6 +1,6 @@
 import type { TransactionReceipt } from "src/adapter/types/Transaction";
-import { getRandomAddress } from "src/utils/testing/getRandomAddress";
-import { getRandomHex } from "src/utils/testing/getRandomHex";
+import { randomAddress } from "src/utils/testing/randomAddress";
+import { randomHex } from "src/utils/testing/randomHex";
 
 /**
  * Creates a stub transaction receipt for testing.
@@ -10,16 +10,17 @@ export function createStubTransactionReceipt(
   overrides: Partial<TransactionReceipt> = {},
 ): TransactionReceipt {
   return {
-    blockHash: getRandomHex(),
+    blockHash: randomHex(),
     blockNumber: 1n,
+    contractAddress: randomAddress(),
     cumulativeGasUsed: 0n,
     effectiveGasPrice: 0n,
-    from: getRandomHex(),
+    from: randomHex(),
     gasUsed: 0n,
-    logsBloom: getRandomHex(),
+    logsBloom: randomHex(),
     status: "success",
-    to: getRandomAddress(),
-    transactionHash: getRandomHex(),
+    to: randomAddress(),
+    transactionHash: randomHex(),
     transactionIndex: 0n,
     ...overrides,
   };

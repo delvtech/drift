@@ -32,6 +32,6 @@ export { TestToken as testToken } from "src/artifacts/TestToken";
 
 export { NotImplementedError } from "src/utils/testing/StubStore";
 export { ALICE, BOB, NANCY } from "src/utils/testing/accounts";
-export { getRandomAddress } from "src/utils/testing/getRandomAddress";
-export { getRandomHex } from "src/utils/testing/getRandomHex";
-export { getRandomInt } from "src/utils/testing/getRandomInt";
+export { randomAddress } from "src/utils/testing/randomAddress";
+export { randomHex } from "src/utils/testing/randomHex";
+export { randomInt } from "src/utils/testing/randomInt";

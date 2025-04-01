@@ -1,15 +1,16 @@
-import { getRandomHex } from "src/utils/testing/getRandomHex";
+import { HEX_REGEX } from "src/utils/isHexString";
+import { randomHex } from "src/utils/testing/randomHex";
 import { describe, expect, it } from "vitest";
 
-describe("getRandomHex", () => {
+describe("randomHex", () => {
   it(
     "creates valid hex strings",
     {
       repeats: 20,
     },
     () => {
-      const hex = getRandomHex();
-      expect(hex).toMatch(/^0x[0-9a-f]+$/);
+      const hex = randomHex();
+      expect(hex).toMatch(HEX_REGEX);
     },
   );
 
@@ -20,9 +21,9 @@ describe("getRandomHex", () => {
     },
     () => {
       const bytes = Math.floor(Math.random() * 127) + 1;
-      const hex = getRandomHex(bytes);
+      const hex = randomHex(bytes);
       expect(hex.length).toBe(bytes * 2 + 2);
-      expect(hex).toMatch(/^0x[0-9a-f]+$/);
+      expect(hex).toMatch(HEX_REGEX);
     },
   );
 
@@ -34,10 +35,10 @@ describe("getRandomHex", () => {
     },
     () => {
       const bytes = Math.floor(Math.random() * 108) + 20;
-      const hex = getRandomHex(bytes, prefix);
+      const hex = randomHex(bytes, prefix);
       expect(hex.length).toBe(bytes * 2 + 2);
       const generatedChars = hex.slice(2 + prefix.length);
-      expect(generatedChars).toMatch(/^[0-9a-f]+$/);
+      expect(generatedChars).toMatch(/^[0-9a-fA-F]+$/);
     },
   );
 });

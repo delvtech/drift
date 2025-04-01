@@ -7,11 +7,11 @@ import type { HexString } from "src/adapter/types/Abi";
  *
  * @example
  * ```ts
- * const data = getRandomHex(32, "d00d");
+ * const data = randomHex(32, "d00d");
  * // -> "0xd00dffe96681c09cc931e1d059a7eddf729ef9e58eebc412bd6f167cb7ecfe88"
  * ```
  */
-export function getRandomHex(bytes = 32, prefix = ""): HexString {
+export function randomHex(bytes = 32, prefix = ""): HexString {
   const array = new Uint8Array(bytes);
   crypto.getRandomValues(array);
   const hex = Array.from(array, (b) => b.toString(16).padStart(2, "0")).join(
