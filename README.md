@@ -372,7 +372,7 @@ test("getUserAssetValue should return the total asset value for a user", async (
     address: "0xVaultAddress",
   });
 
-  // Stub the vault's return values
+  // Stub the vault's return values using `on*` methods
   mockContract.onRead("balanceOf", { account: "0xUserAddress" }).resolves(
     BigInt(100e18), // User has 100 vault shares
   );
@@ -455,7 +455,8 @@ const balance2 = await contract.read("balanceOf", { account });
 
 ### Cache Invalidation
 
-Delete cached data to ensure it's re-fetched using `invalidate*` methods.
+Delete cached data to ensure it's re-fetched using `invalidate*` and `clear*`
+methods.
 
 ```typescript
 // Invalidate the cache for a specific read
@@ -507,8 +508,8 @@ const cachedBalance = await contract.cache.getRead("balanceOf", { account });
 const cachedReceipt = await drift.cache.getTransactionReceipt({ hash })
 ```
 
-The `invalidate*`, `preload*`, and `get*` methods are available on both the
-`Drift.cache` and `Contract.cache` instances.
+The `invalidate*`, `clear*`, `preload*`, and `get*` methods are available on
+both the `Drift.cache` and `Contract.cache` instances.
 
 > [!IMPORTANT]
 >
