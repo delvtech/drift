@@ -524,48 +524,68 @@ utilities on top of it to suit your project's requirements.
 #### Adapters
 
 Extend support to new web3 libraries or custom providers by implementing the
-[`Adapter`](./packages/drift/src/adapter/types/Adapter.ts#L19) interface. See
-the [`DefaultAdapter`](./packages/drift/src/adapter/DefaultAdapter.ts#L53) for
-an example.
+[`Adapter`][Adapter] interface. Drift [`Clients`][Client], including
+[`Drift`][Drift], extend the prototype of the `Adapter` they're provided,
+inheriting all of it's properties and methods, extending some, and adding some
+of their own. See the [`DefaultAdapter`][DefaultAdapter] for an example
+implementation.
+
+```typescript
+import { DefaultAdapter, createDrift } from "@delvtech/drift";
+
+class CustomAdapter extends DefaultAdapter {
+  override async getChainId(): Promise<number> {
+    // Custom implementation...
+  }
+}
+
+const drift = await createDrift({
+  adapter: new CustomAdapter({
+    rpcUrl: process.env.RPC_URL,
+  }),
+});
+```
 
 #### Stores
 
-Implement a custom [`Store`](./packages/drift/src/store/types.ts#L7) to manage
+Implement a custom [`Store`][Store] to manage
 caching in a way that suits your application. The default store is an in-memory
 LRU cache, but you can create a custom store that uses TTL, localStorage,
 IndexedDB,
-[QueryCache](https://tanstack.com/query/latest/docs/reference/QueryCache), or
+[QueryClient](https://tanstack.com/query/latest/docs/reference/QueryClient), or
 any other storage mechanism, sync or async.
 
 ```typescript
 import { createDrift } from "@delvtech/drift";
 
-const customStore = new Map<string, unknown>();
 const drift = createDrift({
-  store: customStore,
+  store: new Map<string, unknown>(),
 });
 ```
 
 ### Hooks
 
 Add custom logic by intercepting and modifying client methods with `hooks`. Each
-method has a `before:<method>` and `after:<method>` hook that allows you to
-inspect and modify the arguments and results.
+client method (including custom adapter methods) has type-safe `before:<method>`
+and `after:<method>` hooks that can be used to inspect and modify the arguments
+or results.
 
 ```typescript
-// Simulate writes before sending the transaction
+// Simulate writes before sending transactions
 drift.hooks.on("before:write", async ({ args: [params] }) => {
   await drift.simulateWrite(params);
 });
 
-drift.hooks.on("before:getEvents", async ({ args: [params], resolve }) => {
+// Run middleware on reads
+drift.hooks.on("before:read", async ({ args: [params], resolve }) => {
   const cachedValue = await drift.cache.getRead(params);
   resolve(readMiddleware({ drift, params, cachedValue }));
 });
 
-
-drift.hooks.on("after:read", ({ args: [params], result, setResult }) => {
-  setResult(transformResultMiddleware({ drift, params, result }));
+// Run middleware to transform the result of calls
+drift.hooks.on("after:call", ({ args: [params], result, setResult }) => {
+  const transformedResult = callResultMiddleware({ drift, params, result });
+  setResult(transformedResult);
 });
 ```
 
@@ -577,3 +597,9 @@ Guide](./.github/CONTRIBUTING.md) to get started.
 ## License
 
 Drift is open-source software licensed under the [Apache 2.0](./LICENSE).
+
+[Adapter]: ./packages/drift/src/adapter/types/Adapter.ts#L19
+[DefaultAdapter]: ./packages/drift/src/adapter/DefaultAdapter.ts#L53
+[Store]: ./packages/drift/src/store/types.ts#L7
+[Client]: ./packages/drift/src/client/Client.ts#L24
+[Drift]: ./packages/drift/src/client/Drift.ts#L27
