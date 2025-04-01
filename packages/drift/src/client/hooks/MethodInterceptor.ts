@@ -23,8 +23,8 @@ export class MethodInterceptor<T extends AnyObject = AnyObject> {
   /**
    * Creates a proxy that automatically intercepts method calls and runs
    * hooks registered with the interceptor.
-   * @param target - The object whose methods should be intercepted
-   * @returns A proxied version of the target object
+   * @param target - The object whose methods should be intercepted.
+   * @returns A proxied version of the target object.
    */
   createProxy = <U extends T>(target: U): U => {
     return new Proxy(target, {
@@ -137,20 +137,32 @@ export type MethodHooks<
 > = U extends U
   ? {
       [K in FunctionKey<U> as `before:${K & string}`]: (payload: {
-        /** The arguments passed to the method */
+        /**
+         * The arguments passed to the method.
+         **/
         readonly args: Parameters<T[K]>;
-        /** Override the arguments and continue */
+        /**
+         * Override the arguments and continue.
+         **/
         setArgs(...args: Parameters<T[K]>): void;
-        /** Set the result and return early */
+        /**
+         * Set the result and return early.
+         **/
         resolve(value: Awaited<ReturnType<T[K]>>): void;
       }) => ReturnType<T[K]> extends Promise<any> ? MaybePromise<void> : void;
     } & {
       [K in FunctionKey<U> as `after:${K & string}`]: (payload: {
-        /** The arguments that were passed to the method */
+        /**
+         * The arguments that were passed to the method.
+         **/
         readonly args: Parameters<T[K]>;
-        /** The result returned by the method */
+        /**
+         * The result returned by the method.
+         **/
         readonly result: MaybeAwaited<ReturnType<T[K]>>;
-        /** Override the result and continue */
+        /**
+         * Override the result and continue.
+         **/
         setResult(value: MaybeAwaited<ReturnType<T[K]>>): void;
       }) => ReturnType<T[K]> extends Promise<any> ? MaybePromise<void> : void;
     }

@@ -8,6 +8,7 @@ import { createStubBlock } from "src/adapter/utils/testing/createStubBlock";
 import { createStubTransaction } from "src/adapter/utils/testing/createStubTransaction";
 import { createStubTransactionReceipt } from "src/adapter/utils/testing/createStubTransactionReceipt";
 import { IERC20 } from "src/artifacts/IERC20";
+import { TestToken } from "src/artifacts/TestToken";
 import { ClientCache } from "src/client/cache/ClientCache";
 import { ZERO_ADDRESS } from "src/constants";
 import { LruStore } from "src/store/LruStore";
@@ -49,6 +50,54 @@ describe("ClientCache", () => {
       value = await cache.getBalance({ address: ALICE });
       expect(value).toBeUndefined();
     });
+
+    describe("clearBalances", () => {
+      it("Clears all values", async () => {
+        const cache = new ClientCache({ namespace: "test" });
+
+        await cache.preloadBalance({ address: ALICE, value: 123n });
+        await cache.preloadBalance({ address: BOB, value: 456n });
+        await cache.preloadBalance({ address: NANCY, value: 789n });
+
+        let values = await Promise.all([
+          cache.getBalance({ address: ALICE }),
+          cache.getBalance({ address: BOB }),
+          cache.getBalance({ address: NANCY }),
+        ]);
+        expect(values).toStrictEqual([123n, 456n, 789n]);
+
+        await cache.clearBalances();
+
+        values = await Promise.all([
+          cache.getBalance({ address: ALICE }),
+          cache.getBalance({ address: BOB }),
+          cache.getBalance({ address: NANCY }),
+        ]);
+        expect(values).toStrictEqual([undefined, undefined, undefined]);
+      });
+
+      it("Doesn't clear unrelated values", async () => {
+        const cache = new ClientCache({ namespace: "test" });
+        const block = createStubBlock({ number: 123n });
+
+        await cache.preloadBalance({ address: ALICE, value: 123n });
+        await cache.preloadBlock({ block: 123n, value: block });
+
+        let values = await Promise.all([
+          cache.getBalance({ address: ALICE }),
+          cache.getBlock(123n),
+        ]);
+        expect(values).toStrictEqual([123n, block]);
+
+        await cache.clearBalances();
+
+        values = await Promise.all([
+          cache.getBalance({ address: ALICE }),
+          cache.getBlock(123n),
+        ]);
+        expect(values).toStrictEqual([undefined, block]);
+      });
+    });
   });
 
   describe("blocks", () => {
@@ -85,6 +134,57 @@ describe("ClientCache", () => {
       value = await cache.getBlock(123n);
       expect(value).toBeUndefined();
     });
+
+    describe("clearBlocks", () => {
+      it("Clears all values", async () => {
+        const cache = new ClientCache({ namespace: "test" });
+        const block1 = createStubBlock({ number: 1n });
+        const block2 = createStubBlock({ number: 2n });
+        const block3 = createStubBlock({ number: 3n });
+
+        await cache.preloadBlock({ block: 1n, value: block1 });
+        await cache.preloadBlock({ block: 2n, value: block2 });
+        await cache.preloadBlock({ block: 3n, value: block3 });
+
+        let values = await Promise.all([
+          cache.getBlock(1n),
+          cache.getBlock(2n),
+          cache.getBlock(3n),
+        ]);
+        expect(values).toStrictEqual([block1, block2, block3]);
+
+        await cache.clearBlocks();
+
+        values = await Promise.all([
+          cache.getBlock(1n),
+          cache.getBlock(2n),
+          cache.getBlock(3n),
+        ]);
+        expect(values).toStrictEqual([undefined, undefined, undefined]);
+      });
+
+      it("Doesn't clear unrelated values", async () => {
+        const cache = new ClientCache({ namespace: "test" });
+        const block = createStubBlock({ number: 0n });
+
+        await cache.preloadBlock({ block: 0n, value: block });
+        await cache.preloadBalance({ address: ALICE, value: 123n });
+
+        let values = await Promise.all([
+          cache.getBlock(0n),
+          cache.getBalance({ address: ALICE }),
+        ]);
+        expect(values).toStrictEqual([block, 123n]);
+
+        await cache.clearBlocks();
+
+        values = await Promise.all([
+          cache.getBlock(0n),
+          cache.getBalance({ address: ALICE }),
+        ]);
+        expect(values).toStrictEqual([undefined, 123n]);
+      });
+    });
   });
 
   describe("transactions", () => {
@@ -120,6 +220,57 @@ describe("ClientCache", () => {
       await cache.invalidateTransaction({ hash: "0x123" });
       value = await cache.getTransaction({ hash: "0x123" });
       expect(value).toBeUndefined();
+    });
+
+    describe("clearTransactions", () => {
+      it("Clears all values", async () => {
+        const cache = new ClientCache({ namespace: "test" });
+        const tx1 = createStubTransaction({ transactionHash: "0x1" });
+        const tx2 = createStubTransaction({ transactionHash: "0x2" });
+        const tx3 = createStubTransaction({ transactionHash: "0x3" });
+
+        await cache.preloadTransaction({ hash: "0x1", value: tx1 });
+        await cache.preloadTransaction({ hash: "0x2", value: tx2 });
+        await cache.preloadTransaction({ hash: "0x3", value: tx3 });
+
+        let values = await Promise.all([
+          cache.getTransaction({ hash: "0x1" }),
+          cache.getTransaction({ hash: "0x2" }),
+          cache.getTransaction({ hash: "0x3" }),
+        ]);
+        expect(values).toStrictEqual([tx1, tx2, tx3]);
+
+        await cache.clearTransactions();
+
+        values = await Promise.all([
+          cache.getTransaction({ hash: "0x1" }),
+          cache.getTransaction({ hash: "0x2" }),
+          cache.getTransaction({ hash: "0x3" }),
+        ]);
+        expect(values).toStrictEqual([undefined, undefined, undefined]);
+      });
+
+      it("Doesn't clear unrelated values", async () => {
+        const cache = new ClientCache({ namespace: "test" });
+        const tx = createStubTransaction({ transactionHash: "0x1" });
+
+        await cache.preloadTransaction({ hash: "0x1", value: tx });
+        await cache.preloadBalance({ address: ALICE, value: 123n });
+
+        let values = await Promise.all([
+          cache.getTransaction({ hash: "0x1" }),
+          cache.getBalance({ address: ALICE }),
+        ]);
+        expect(values).toStrictEqual([tx, 123n]);
+
+        await cache.clearTransactions();
+
+        values = await Promise.all([
+          cache.getTransaction({ hash: "0x1" }),
+          cache.getBalance({ address: ALICE }),
+        ]);
+        expect(values).toStrictEqual([undefined, 123n]);
+      });
     });
   });
 
@@ -220,6 +371,53 @@ describe("ClientCache", () => {
       value2 = await cache.getCall(params2);
       expect(value1).toBeUndefined();
       expect(value2).toBeUndefined();
+    });
+
+    describe("clearCalls", () => {
+      it("Clears all values", async () => {
+        const cache = new ClientCache({ namespace: "test" });
+
+        await cache.preloadCall({ to: "0x", data: "0x1", preloadValue: "0x1" });
+        await cache.preloadCall({ to: "0x", data: "0x2", preloadValue: "0x2" });
+        await cache.preloadCall({ to: "0x", data: "0x3", preloadValue: "0x3" });
+
+        let values = await Promise.all([
+          cache.getCall({ to: "0x", data: "0x1" }),
+          cache.getCall({ to: "0x", data: "0x2" }),
+          cache.getCall({ to: "0x", data: "0x3" }),
+        ]);
+        expect(values).toStrictEqual(["0x1", "0x2", "0x3"]);
+
+        await cache.clearCalls();
+
+        values = await Promise.all([
+          cache.getCall({ to: "0x", data: "0x1" }),
+          cache.getCall({ to: "0x", data: "0x2" }),
+          cache.getCall({ to: "0x", data: "0x3" }),
+        ]);
+        expect(values).toStrictEqual([undefined, undefined, undefined]);
+      });
+
+      it("Doesn't clear unrelated values", async () => {
+        const cache = new ClientCache({ namespace: "test" });
+
+        await cache.preloadCall({ to: "0x", data: "0x1", preloadValue: "0x1" });
+        await cache.preloadBalance({ address: ALICE, value: 123n });
+
+        let values = await Promise.all([
+          cache.getCall({ to: "0x", data: "0x1" }),
+          cache.getBalance({ address: ALICE }),
+        ]);
+        expect(values).toStrictEqual(["0x1", 123n]);
+
+        await cache.clearCalls();
+
+        values = await Promise.all([
+          cache.getCall({ to: "0x", data: "0x1" }),
+          cache.getBalance({ address: ALICE }),
+        ]);
+        expect(values).toStrictEqual([undefined, 123n]);
+      });
     });
   });
 
@@ -382,6 +580,75 @@ describe("ClientCache", () => {
       value2 = await cache.getRead(params2);
       expect(value1).toBeUndefined();
       expect(value2).toBeUndefined();
+    });
+
+    describe("clearReads", () => {
+      it("Clears all values", async () => {
+        const cache = new ClientCache({ namespace: "test" });
+        const abi = TestToken.abi;
+
+        await cache.preloadRead({
+          abi,
+          address: "0x1",
+          fn: "symbol",
+          value: "ONE",
+        });
+        await cache.preloadRead({
+          abi,
+          address: "0x2",
+          fn: "symbol",
+          value: "TWO",
+        });
+        await cache.preloadRead({
+          abi,
+          address: "0x3",
+          fn: "symbol",
+          value: "THREE",
+        });
+
+        let values = await Promise.all([
+          cache.getRead({ abi, address: "0x1", fn: "symbol" }),
+          cache.getRead({ abi, address: "0x2", fn: "symbol" }),
+          cache.getRead({ abi, address: "0x3", fn: "symbol" }),
+        ]);
+        expect(values).toStrictEqual(["ONE", "TWO", "THREE"]);
+
+        await cache.clearReads();
+
+        values = await Promise.all([
+          cache.getRead({ abi, address: "0x1", fn: "symbol" }),
+          cache.getRead({ abi, address: "0x2", fn: "symbol" }),
+          cache.getRead({ abi, address: "0x3", fn: "symbol" }),
+        ]);
+        expect(values).toStrictEqual([undefined, undefined, undefined]);
+      });
+
+      it("Doesn't clear unrelated values", async () => {
+        const cache = new ClientCache({ namespace: "test" });
+        const abi = TestToken.abi;
+
+        await cache.preloadRead({
+          abi,
+          address: "0x",
+          fn: "symbol",
+          value: "TEST",
+        });
+        await cache.preloadBalance({ address: ALICE, value: 123n });
+
+        let values = await Promise.all([
+          cache.getRead({ abi, address: "0x", fn: "symbol" }),
+          cache.getBalance({ address: ALICE }),
+        ]);
+        expect(values).toStrictEqual(["TEST", 123n]);
+
+        await cache.clearReads();
+
+        values = await Promise.all([
+          cache.getRead({ abi, address: "0x", fn: "symbol" }),
+          cache.getBalance({ address: ALICE }),
+        ]);
+        expect(values).toStrictEqual([undefined, 123n]);
+      });
     });
   });
 });

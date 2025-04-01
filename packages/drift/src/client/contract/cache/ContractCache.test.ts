@@ -169,5 +169,52 @@ describe("ContractCache", () => {
       expect(value1).toBeUndefined();
       expect(value2).toBeUndefined();
     });
+
+    describe("clearReads", () => {
+      it("Clears all values", async () => {
+        const cache = new ContractCache({ abi, address, namespace: "test" });
+
+        await cache.preloadRead({ fn: "symbol", value: "IBN" });
+        await cache.preloadRead({ fn: "name", value: "BATTUTA" });
+        await cache.preloadRead({ fn: "decimals", value: 24 });
+
+        let values = await Promise.all([
+          cache.getRead("symbol"),
+          cache.getRead("name"),
+          cache.getRead("decimals"),
+        ]);
+        expect(values).toStrictEqual(["IBN", "BATTUTA", 24]);
+
+        await cache.clearReads();
+
+        values = await Promise.all([
+          cache.getRead("symbol"),
+          cache.getRead("name"),
+          cache.getRead("decimals"),
+        ]);
+        expect(values).toStrictEqual([undefined, undefined, undefined]);
+      });
+
+      it("Doesn't clear unrelated values", async () => {
+        const cache = new ContractCache({ abi, address, namespace: "test" });
+
+        await cache.preloadRead({ fn: "symbol", value: "TEST" });
+        await cache.preloadEvents({ event: "Approval", value: [] });
+
+        let values = await Promise.all([
+          cache.getRead("symbol"),
+          cache.getEvents("Approval"),
+        ]);
+        expect(values).toStrictEqual(["TEST", []]);
+
+        await cache.clearReads();
+
+        values = await Promise.all([
+          cache.getRead("symbol"),
+          cache.getEvents("Approval"),
+        ]);
+        expect(values).toStrictEqual([undefined, []]);
+      });
+    });
   });
 });
