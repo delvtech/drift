@@ -465,7 +465,7 @@ contract.cache.invalidateRead("balanceOf", { account });
 contract.cache.invalidateReadsMatching("balanceOf");
 
 // Invalidate all reads associated with the contract
-contract.cache.invalidateReads();
+contract.cache.clearReads();
 
 // Let it all go...
 contract.cache.clear();
