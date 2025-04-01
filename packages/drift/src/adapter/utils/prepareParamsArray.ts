@@ -105,12 +105,12 @@ export function prepareParamsArray<
   // given values and the best match is returned.
   const valuesCount =
     value && typeof value === "object" ? Object.keys(value).length : 0;
-  let abiEntry = matches[0]!;
-  let paramsArray: any[] = [];
-  let keyMatchCount = 0;
+  let bestMatch = matches[0]!;
+  let bestMatchParamsArray: any[] = [];
+  let bestKeyMatchCount = 0;
 
   for (const match of matches) {
-    const params = match[kind] as AbiParameter[];
+    const params = match[kind];
 
     if (!params.length) {
       if (!valuesCount) {
@@ -130,25 +130,25 @@ export function prepareParamsArray<
     }
 
     const args: AnyObject = value || {};
-    const potentialParamsArray: any[] = [];
-    let potentialKeyMatchCount = 0;
+    const candidateParamsArray: any[] = [];
+    let candidateKeyMatchCount = 0;
 
-    for (const [i, input] of params.entries()) {
-      const key = input.name || i;
-      if (key in args) potentialKeyMatchCount++;
-      potentialParamsArray.push(args[key]);
+    for (const [i, { name }] of params.entries()) {
+      const key = name || i;
+      candidateParamsArray.push(args[key]);
+      if (key in args) candidateKeyMatchCount++;
     }
 
-    if (potentialKeyMatchCount > keyMatchCount) {
-      abiEntry = match;
-      keyMatchCount = potentialKeyMatchCount;
-      paramsArray = potentialParamsArray;
+    if (candidateKeyMatchCount > bestKeyMatchCount) {
+      bestMatch = match;
+      bestMatchParamsArray = candidateParamsArray;
+      bestKeyMatchCount = candidateKeyMatchCount;
     }
   }
 
   return {
-    abiEntry,
-    params: paramsArray as TValue[] as TArray,
+    abiEntry: bestMatch,
+    params: bestMatchParamsArray as TValue[] as TArray,
   };
 }
 
@@ -174,8 +174,6 @@ function isUnpacked(value: unknown, params: readonly AbiParameter[]) {
   // the array has to be checked to determine if it's wrapped in an extra array
   // which is interpreted the same as `{ 0: value }`
   let innerValue = value;
-  for (const _ of arrayBrackets.match(/\[\d*]/g)!) {
-    innerValue = value?.[0];
-  }
+  for (const _ of arrayBrackets.match(/\[\d*]/g)!) innerValue = value?.[0];
   return !Array.isArray(innerValue);
 }

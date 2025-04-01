@@ -186,8 +186,8 @@ const txHash = await drift.write({
 
 ```typescript
 const txHash = await drift.deploy({
-  bytecode: ERC20.bytecode,
   abi: ERC20.abi,
+  bytecode: ERC20.bytecode,
   args: {
     decimals_: 18,
     initialSupply: 100_000_000n * 10n ** 18n, // 100M
@@ -198,11 +198,12 @@ const txHash = await drift.deploy({
 const receipt = await drift.waitForTransaction({ hash: txHash });
 
 if (receipt?.status === "success" && receipt?.contractAddress) {
-  const deployedToken = drift.contract({
+  const totalSupply = await drift.read({
     abi: ERC20.abi,
     address: receipt.contractAddress,
+    fn: "totalSupply",
   });
-  const totalSupply = await deployedToken.read("totalSupply"); // 100000000000000000000000000n
+  // => 100000000000000000000000000n
 }
 ```
 

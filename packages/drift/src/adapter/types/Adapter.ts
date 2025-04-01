@@ -203,10 +203,6 @@ export type ReadParams<
 
 // Write parameters //
 
-export interface WriteOptions extends TransactionOptions {
-  onMined?: (receipt: TransactionReceipt | undefined) => void;
-}
-
 export type SimulateWriteParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<
@@ -218,7 +214,9 @@ export type SimulateWriteParams<
 } & ArgsParam<FunctionArgs<TAbi, TFunctionName>> &
   TransactionOptions;
 
-// Read //
+export interface WriteOptions extends TransactionOptions {
+  onMined?: (receipt: TransactionReceipt | undefined) => void;
+}
 
 export type WriteParams<
   TAbi extends Abi = Abi,
