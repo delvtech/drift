@@ -52,6 +52,7 @@ Building on Ethereum often means dealing with:
   - [2. Interact with your Contracts](#2-interact-with-your-contracts)
     - [Read Operations with Caching](#read-operations-with-caching)
     - [Write Operations](#write-operations)
+    - [Deployments](#deployments)
     - [Contract Instances](#contract-instances)
 - [Example: Building Vault Clients](#example-building-vault-clients)
   - [1. Define vault clients](#1-define-vault-clients)
@@ -179,6 +180,30 @@ const txHash = await drift.write({
     });
   },
 });
+```
+
+#### Deployments
+
+```typescript
+const txHash = await drift.deploy({
+  bytecode: ERC20.bytecode,
+  abi: ERC20.abi,
+  args: {
+    decimals_: 18,
+    initialSupply: 100_000_000n * 10n ** 18n, // 100M
+  },
+});
+
+// Wait for the receipt to get the contract address
+const receipt = await drift.waitForTransaction({ hash: txHash });
+
+if (receipt?.status === "success" && receipt?.contractAddress) {
+  const deployedToken = drift.contract({
+    abi: ERC20.abi,
+    address: receipt.contractAddress,
+  });
+  const totalSupply = await deployedToken.read("totalSupply"); // 100000000000000000000000000n
+}
 ```
 
 #### Contract Instances
