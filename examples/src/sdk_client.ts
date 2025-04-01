@@ -11,7 +11,7 @@ import { ERC4626 } from "src/abis/Erc4626";
 type Erc4626Abi = typeof ERC4626.abi;
 
 /**
- * An bare-bones Read-Only Vault client.
+ * A bare-bones Read-Only Vault client.
  */
 export class ReadVault {
   contract: Contract<Erc4626Abi>;
