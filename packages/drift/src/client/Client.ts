@@ -4,6 +4,7 @@ import {
 } from "src/adapter/DefaultAdapter";
 import type { Adapter, ReadWriteAdapter } from "src/adapter/types/Adapter";
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
+import type { GetBlockReturnType } from "src/adapter/types/Network";
 import { ClientCache } from "src/client/cache/ClientCache";
 import { BlockNotFoundError } from "src/client/errors";
 import type { HookRegistry } from "src/client/hooks/HookRegistry";
@@ -37,8 +38,11 @@ export type Client<
   cache: ClientCache<TStore>;
 
   /**
-   * Hooks for intercepting method calls and responses on the client.
+   * Hooks for intercepting and modifying method calls or responses on the
+   * client.
    */
+  // TAdapter is unioned with Adapter to ensure autocomplete works in generic
+  // contexts where TAdapter isn't resolved to a specific type.
   hooks: HookRegistry<MethodHooks<(TAdapter | Adapter) & TExtension>>;
 
   /**
@@ -62,11 +66,33 @@ export type Client<
       ThisType<Client<TAdapter, TStore, TExtension & T>>,
   ): Client<TAdapter, TStore, Eval<TExtension & T>>;
 
-  getBlockOrThrow<T extends BlockIdentifier | undefined>(
+  getBlock<
+    T extends BlockIdentifier | undefined = undefined,
+    TOptions extends GetBlockOptions = {},
+  >(
     block?: T,
-  ): Promise<Block<T>>;
+    options?: Eval<GetBlockOptions & TOptions>,
+  ): Promise<ClientGetBlockReturnType<T, TOptions>>;
 } & TAdapter &
   TExtension;
+
+export interface GetBlockOptions {
+  /**
+   * Whether to throw a {@linkcode BlockNotFoundError} if the block isn't found.
+   * Setting this to true will remove `undefined` from the return type.
+   * @default false
+   */
+  throws?: boolean;
+}
+
+/**
+ * The awaited return type of a {@linkcode Client.getBlock} call considering the
+ * provided {@linkcode BlockIdentifier} and {@linkcode GetBlockOptions}.
+ */
+export type ClientGetBlockReturnType<
+  T extends BlockIdentifier | undefined = undefined,
+  TOptions extends GetBlockOptions = {},
+> = TOptions extends { throws: true } ? Block<T> : GetBlockReturnType<T>;
 
 /**
  * Configuration options for creating a {@linkcode Client}.
@@ -149,22 +175,16 @@ export function createClient<
       return chainId;
     },
 
-    getBlock(params) {
-      return getOrSet({
+    async getBlock(blockId?: BlockIdentifier, options?: GetBlockOptions) {
+      const block = await getOrSet({
         store: this.cache.store,
-        key: this.cache.blockKey(params),
-        fn: () => this.adapter.getBlock(params),
+        key: this.cache.blockKey(blockId),
+        fn: () => this.adapter.getBlock(blockId),
       });
-    },
-
-    async getBlockOrThrow<T extends BlockIdentifier | undefined>(
-      blockId?: T,
-    ): Promise<Block<T>> {
-      const block = await this.getBlock(blockId);
-      if (!block) {
+      if (!block && options?.throws) {
         throw new BlockNotFoundError(blockId);
       }
-      return block as Block<T>;
+      return block;
     },
 
     getBalance(params) {

@@ -58,6 +58,10 @@ export interface GetTransactionParams {
   hash: Hash;
 }
 
+/**
+ * The awaited return type of a {@linkcode Network.getBlock} call considering
+ * the provided {@linkcode BlockIdentifier}.
+ */
 export type GetBlockReturnType<
   T extends BlockIdentifier | undefined = undefined,
 > = T extends BlockTag | undefined ? Block<T> : Block<T> | undefined;

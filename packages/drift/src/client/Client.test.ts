@@ -19,16 +19,6 @@ describe("Client", () => {
     expect(client).toBeInstanceOf(MockAdapter);
   });
 
-  describe("getBlockOrThrow", () => {
-    it("Throws if no block is found", async () => {
-      const client = createClient({ adapter });
-      client.onGetBlock().resolves(undefined);
-      await expect(client.getBlockOrThrow()).rejects.toThrow(
-        BlockNotFoundError,
-      );
-    });
-  });
-
   describe("getEvents", () => {
     it("Uses the same default params as `ClientCache`", async () => {
       const client = createClient({ adapter });
@@ -44,6 +34,16 @@ describe("Client", () => {
       });
       const result = await client.getEvents(params);
       expect(result).toBe(events);
+    });
+  });
+
+  describe("getBlock", () => {
+    it("Throws if no block is found and `throws` is true", async () => {
+      const client = createClient({ adapter });
+      client.onGetBlock().resolves(undefined);
+      await expect(client.getBlock("latest", { throws: true })).rejects.toThrow(
+        BlockNotFoundError,
+      );
     });
   });
 
