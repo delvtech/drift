@@ -1,5 +1,14 @@
 # @delvtech/drift
 
+## 0.8.0-next.9
+
+### Minor Changes
+
+- e5257ca: Added missing fields to the return type of `createStub*` utils and renamed `getRandom*` utils to `random*`.
+  - `getRandomAddress` is now `randomAddress`
+  - `getRandomHex` is now `randomHex`
+  - `getRandomInt` is now `randomInt`
+
 ## 0.8.0-next.8
 
 ### Minor Changes
