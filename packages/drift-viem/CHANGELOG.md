@@ -1,5 +1,7 @@
 # @delvtech/drift-viem
 
+## 0.8.0-next.8
+
 ## 0.8.0-next.7
 
 ## 0.8.0-next.6
