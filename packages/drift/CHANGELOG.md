@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.8.3
+
+### Patch Changes
+
+- 15c81a8: Patched `hooks` type in generic contexts.
+
 ## 0.8.2
 
 ### Patch Changes
