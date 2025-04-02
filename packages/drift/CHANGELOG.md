@@ -19,7 +19,6 @@
 ### Patch Changes
 
 - 4050ec9: Improved type inference for contracts created via `Drift.contract(...)`. A contract created in contexts where `Drift.isReadWrite()` returns `true` will now be properly inferred as a `ReadWriteContract`.
-- 8c08620: Reverted type inference improvement in 4050ec9 for `Drift.contract` which makes `MockDrift` unassignable to `Drift`.
 - 2a131a1: Patched extension hook inference in generic contexts.
 - bb25099: Added `deploy` and `encodeDeployData` methods to `Adapter` and clients.
 - 1a03e83: Added first-class getter methods to `ClientCache` and `ContractCache` which return values from the `store` using their corresponding `*Key` methods. For example: `contract.cache.getRead('name')` gets the value associated with `contract.cache.readKey('name')` from `contract.cache.store`.
@@ -42,7 +41,6 @@
     - `clearReads()`
   - On the `ContractCache` (i.e. `contract.cache`):
     - `clearReads()`
-- 30612d1: Re-added type inference improvement from 4050ec9 for `Drift.contract` and patched `MockDrift` to be assignable to `Drift`.
 - 6e816ad: Added `Client` extension methods to inferred hook names. This means autocompletion for `Client.hooks` will be available for methods added via `extend(...)`, including the `contract(...)` method added by the main `Drift` client.
 - 4e2a1fc: Renamed `OxAdapter` to `DefaultAdapter`
 
