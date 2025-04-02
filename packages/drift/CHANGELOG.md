@@ -1,5 +1,12 @@
 # @delvtech/drift
 
+## 0.8.1
+
+### Patch Changes
+
+- e981e26: Added `sendRawTransaction` method.
+- 21c5a59: Patch `Contract.extend` type.
+
 ## 0.8.0
 
 ### Minor Changes
