@@ -1,5 +1,11 @@
 # @delvtech/drift-ethers
 
+## 0.8.0
+
+### Patch Changes
+
+- bb25099: Added `deploy` and `encodeDeployData` methods to `Adapter` and clients.
+
 ## 0.8.0-next.9
 
 ## 0.8.0-next.8

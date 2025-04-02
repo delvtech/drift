@@ -1,5 +1,49 @@
 # @delvtech/drift
 
+## 0.8.0
+
+### Minor Changes
+
+- 94b9230: Added missing fields to the return type of `createStub*` utils and renamed `getRandom*` utils to `random*`.
+  - `getRandomAddress` is now `randomAddress`
+  - `getRandomHex` is now `randomHex`
+  - `getRandomInt` is now `randomInt`
+- 8c08620: Removed the `find` method from the `Store` interface.
+- 1752a54: Removed the `getBlockOrThrow` method and added an optional `GetBlockOptions` argument to `getBlock` which accepts a `throws` option. If `throws` is `true`, a `BlockNotFoundError` error will be thrown if the block isn't found and `undefined` will be remove from the return type.
+  ```ts
+  const maybeBlock = await drift.getBlock(123n); // => Block<123n> | undefined
+  const block = await drift.getBlock(123n, { throws: true }); // => Block<123n>
+  ```
+- bd20749: Renamed the `BaseTypes` export to `BaseTypeOverrides` to be consistent with the precedent set by `BlockOverrides`.
+
+### Patch Changes
+
+- 4050ec9: Improved type inference for contracts created via `Drift.contract(...)`. A contract created in contexts where `Drift.isReadWrite()` returns `true` will now be properly inferred as a `ReadWriteContract`.
+- 2a131a1: Patched extension hook inference in generic contexts.
+- bb25099: Added `deploy` and `encodeDeployData` methods to `Adapter` and clients.
+- 1a03e83: Added first-class getter methods to `ClientCache` and `ContractCache` which return values from the `store` using their corresponding `*Key` methods. For example: `contract.cache.getRead('name')` gets the value associated with `contract.cache.readKey('name')` from `contract.cache.store`.
+- eb818b8: Refactored param types to make more fields optional:
+  - All params for `invalidateCallsMatching` are now optional.
+  - All args in the `args` param of the following methods are now optional:
+    - `invalidateReadsMatching`
+    - `onRead`
+    - `onSimulateWrite`
+    - `onRead`
+    - `onSimulateWrite`
+    - `onWrite`
+    - `onDeploy`
+- 7427bb6: Added an `epochBlock` option to contract clients to limit how far back function calls and event queries can go. More details in the doc comment.
+- 22a3fb9: Cleaned up cache APIs and added more methods:
+  - On the `ClientCache` (i.e. `drift.cache`):
+    - `clearBlocks()`
+    - `clearBalances()`
+    - `clearTransactions()`
+    - `clearReads()`
+  - On the `ContractCache` (i.e. `contract.cache`):
+    - `clearReads()`
+- 6e816ad: Added `Client` extension methods to inferred hook names. This means autocompletion for `Client.hooks` will be available for methods added via `extend(...)`, including the `contract(...)` method added by the main `Drift` client.
+- 4e2a1fc: Renamed `OxAdapter` to `DefaultAdapter`
+
 ## 0.8.0-next.9
 
 ### Minor Changes
