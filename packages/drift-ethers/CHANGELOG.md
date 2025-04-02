@@ -1,5 +1,11 @@
 # @delvtech/drift-ethers
 
+## 0.8.2
+
+### Patch Changes
+
+- 253c0d5: Added `sendTransaction` method.
+
 ## 0.8.1
 
 ### Patch Changes
