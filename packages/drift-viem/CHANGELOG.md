@@ -1,5 +1,11 @@
 # @delvtech/drift-viem
 
+## 0.8.4
+
+### Patch Changes
+
+- cc7cf63: Fixed `sendTransaction` which was missing the `data` param.
+
 ## 0.8.3
 
 ## 0.8.2

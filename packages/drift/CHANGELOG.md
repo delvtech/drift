@@ -1,5 +1,11 @@
 # @delvtech/drift
 
+## 0.8.4
+
+### Patch Changes
+
+- cc7cf63: Disabled name minification in build to improve logging and debugging.
+
 ## 0.8.3
 
 ### Patch Changes
