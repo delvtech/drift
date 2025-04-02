@@ -1,5 +1,9 @@
 # Drift
 
+[![NPM Version](https://img.shields.io/npm/v/%40delvtech%2Fdrift?color=cb3837)](https://npmjs.com/package/@delvtech/drift)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-23454d)](./LICENSE)
+[![DELV Terms of Service](https://img.shields.io/badge/DELV-Terms%20of%20Service-316f5b)](https://delv-public.s3.us-east-2.amazonaws.com/delv-terms-of-service.pdf)
+
 **Effortless Ethereum Development Across Web3 Libraries**
 
 Write cached Ethereum smart contract interactions once with Drift and run them
