@@ -41,9 +41,10 @@ export type Client<
    * Hooks for intercepting and modifying method calls or responses on the
    * client.
    */
-  // TAdapter is unioned with Adapter to ensure autocomplete works in generic
-  // contexts where TAdapter isn't resolved to a specific type.
-  hooks: HookRegistry<MethodHooks<(TAdapter | Adapter) & TExtension>>;
+  hooks: HookRegistry<MethodHooks<TAdapter & TExtension>> &
+    // Intersect with default Adapter hooks to ensure autocomplete works in
+    // generic contexts where TAdapter isn't resolved to a specific type.
+    HookRegistry<MethodHooks<Adapter>>;
 
   /**
    * Returns `true` if the client can send transactions.
