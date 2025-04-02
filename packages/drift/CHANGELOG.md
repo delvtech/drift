@@ -5,7 +5,7 @@
 ### Patch Changes
 
 - e981e26: Added `sendRawTransaction` method.
-- 21c5a59: Patch `Contract.extend` type.
+- 21c5a59: Patched `Contract.extend` type.
 
 ## 0.8.0
 
