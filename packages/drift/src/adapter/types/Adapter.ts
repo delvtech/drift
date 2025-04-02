@@ -19,7 +19,55 @@ import type { EmptyObject, OneOf } from "src/utils/types";
 export interface Adapter extends ReadAdapter, Partial<WriteAdapter> {}
 
 export interface ReadAdapter extends Network {
+  /**
+   * Executes a new message call immediately without creating a transaction on
+   * the block chain.
+   * @returns The return value of the executed function.
+   *
+   * @example
+   * ```ts
+   * const data = await drift.call({
+   *   to: tokenAddress,
+   *   data: drift.encodeFunctionData({
+   *     abi: erc20.abi,
+   *     fn: "transfer",
+   *     args: { to, amount },
+   *   }),
+   * });
+   *
+   * if (data) {
+   *   const decoded = drift.decodeFunctionReturn({
+   *     abi: erc20.abi,
+   *     fn: "transfer",
+   *     data,
+   *   });
+   * }
+   * ```
+   *
+   * Calls can also be made using a bytecode instead of an address, sometimes
+   * referred to as a "deployless" call. The contract is temporarily created
+   * using the bytecode and the function is called on it.
+   *
+   * ```ts
+   * const data = await drift.call({
+   *   bytecode: MockErc20Example.bytecode,
+   *   data: drift.encodeFunctionData({
+   *     abi: MockErc20Example.abi,
+   *     fn: "name",
+   *   }),
+   * });
+   * ```
+   */
   call(params: CallParams): Promise<Bytes>;
+
+  /**
+   * Submits a raw signed transaction. For
+   * [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844) transactions, the raw
+   * form must be the network form. This means it includes the blobs, KZG
+   * commitments, and KZG proofs.
+   * @returns The transaction hash of the submitted transaction.
+   */
+  sendRawTransaction(transaction: Bytes): Promise<Hash>;
 
   getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
     params: GetEventsParams<TAbi, TEventName>,
@@ -244,7 +292,7 @@ export type CallParams = {
 } & OneOf<
   | {
       /**
-       * A contract address to call.
+       * The address to call.
        */
       to: Address;
     }

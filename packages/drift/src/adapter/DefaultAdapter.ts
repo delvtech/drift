@@ -8,7 +8,7 @@ import {
   TransactionReceipt,
 } from "ox";
 import { AbiEncoder } from "src/adapter/AbiEncoder";
-import type { Abi, HexString } from "src/adapter/types/Abi";
+import type { Abi, Bytes, HexString } from "src/adapter/types/Abi";
 import type {
   CallOptions,
   CallParams,
@@ -205,6 +205,13 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
         },
         prepareBlockParam(block),
       ],
+    });
+  }
+
+  sendRawTransaction(transaction: Bytes) {
+    return this.provider.request({
+      method: "eth_sendRawTransaction",
+      params: [transaction],
     });
   }
 

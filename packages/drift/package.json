@@ -31,12 +31,8 @@
   },
   "typesVersions": {
     "*": {
-      ".": [
-        "./dist/index.d.ts"
-      ],
-      "testing": [
-        "./dist/testing.d.ts"
-      ]
+      ".": ["./dist/index.d.ts"],
+      "testing": ["./dist/testing.d.ts"]
     }
   },
   "scripts": {
@@ -89,7 +85,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist"
-  ]
+  "files": ["dist"]
 }

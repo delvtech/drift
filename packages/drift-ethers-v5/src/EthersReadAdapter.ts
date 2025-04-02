@@ -3,6 +3,7 @@ import {
   AbiEncoder,
   type Block,
   type BlockIdentifier,
+  type Bytes,
   type CallParams,
   type EventArgs,
   type EventLog,
@@ -196,6 +197,11 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
       },
       block === undefined ? undefined : blockParam(block),
     );
+  }
+
+  async sendRawTransaction(transaction: Bytes) {
+    const tx = await this.provider.sendTransaction(transaction);
+    return tx.hash;
   }
 
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({

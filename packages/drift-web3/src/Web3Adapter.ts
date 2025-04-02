@@ -4,6 +4,7 @@ import {
   type Address,
   type AnyObject,
   type BlockIdentifier,
+  type Bytes,
   type CallParams,
   type DeployParams,
   DriftError,
@@ -171,6 +172,11 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
       },
       block,
     );
+  }
+
+  async sendRawTransaction(transaction: Bytes) {
+    const tx = await this.web3.eth.sendSignedTransaction(transaction);
+    return normalizePossibleByteArray(tx.transactionHash);
   }
 
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
@@ -359,23 +365,23 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
         })
         .on("error", reject)
         .on("transactionHash", (hash) =>
-          resolve(normalizePossibleUint8Array(hash)),
+          resolve(normalizePossibleByteArray(hash)),
         );
 
       if (onMined) {
         req.on("receipt", (receipt) => {
           onMined({
-            blockHash: normalizePossibleUint8Array(receipt.blockHash),
+            blockHash: normalizePossibleByteArray(receipt.blockHash),
             contractAddress: receipt.contractAddress,
             cumulativeGasUsed: BigInt(receipt.cumulativeGasUsed),
             effectiveGasPrice: BigInt(receipt.effectiveGasPrice ?? 0n),
             blockNumber: BigInt(receipt.blockNumber),
             from: receipt.from,
-            logsBloom: normalizePossibleUint8Array(receipt.logsBloom),
+            logsBloom: normalizePossibleByteArray(receipt.logsBloom),
             status: receipt.status ? "success" : "reverted",
             gasUsed: BigInt(receipt.gasUsed),
             to: receipt.to,
-            transactionHash: normalizePossibleUint8Array(
+            transactionHash: normalizePossibleByteArray(
               receipt.transactionHash,
             ),
             transactionIndex: BigInt(receipt.transactionIndex),
@@ -410,7 +416,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   }
 }
 
-function normalizePossibleUint8Array(value: string | Uint8Array) {
+function normalizePossibleByteArray(value: string | Uint8Array) {
   return typeof value === "string"
     ? value
     : `0x${Buffer.from(value).toString("hex")}`;

@@ -178,6 +178,25 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     })(params);
   }
 
+  // sendRawTransaction //
+
+  onSendRawTransaction(transaction?: Bytes) {
+    return this.stubs.get<[Bytes], Promise<Hash>>({
+      method: "sendRawTransaction",
+      key:
+        transaction === undefined ? undefined : this.createKey({ transaction }),
+    });
+  }
+
+  async sendRawTransaction(transaction: Bytes) {
+    return this.stubs.get<[Bytes], Promise<Hash>>({
+      method: "sendRawTransaction",
+      key:
+        transaction === undefined ? undefined : this.createKey({ transaction }),
+      matchPartial: true,
+    })(transaction);
+  }
+
   // getEvents //
 
   onGetEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(

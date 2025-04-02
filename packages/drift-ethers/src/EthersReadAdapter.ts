@@ -203,6 +203,11 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     });
   }
 
+  async sendRawTransaction(transaction: Bytes) {
+    const tx = await this.provider.broadcastTransaction(transaction);
+    return tx.hash;
+  }
+
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
     abi,
     address,

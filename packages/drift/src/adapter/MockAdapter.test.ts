@@ -242,6 +242,33 @@ describe("MockAdapter", () => {
     });
   });
 
+  describe("sendRawTransaction", () => {
+    it("Rejects with an error by default", async () => {
+      const adapter = new MockAdapter();
+      let error: unknown;
+      try {
+        await adapter.sendRawTransaction("0x01");
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
+    });
+
+    it("Can be stubbed with specific params", async () => {
+      const adapter = new MockAdapter();
+      adapter.onSendRawTransaction("0x1").resolves("0xa");
+      adapter.onSendRawTransaction("0x2").resolves("0xb");
+      expect(await adapter.sendRawTransaction("0x1")).toBe("0xa");
+      expect(await adapter.sendRawTransaction("0x2")).toBe("0xb");
+    });
+
+    it("Can be called with args after being stubbed with no args", async () => {
+      const adapter = new MockAdapter();
+      adapter.onSendRawTransaction().resolves("0xa");
+      expect(await adapter.sendRawTransaction("0x1")).toBe("0xa");
+    });
+  });
+
   describe("getEvents", () => {
     it("Rejects with an error by default", async () => {
       const adapter = new MockAdapter();

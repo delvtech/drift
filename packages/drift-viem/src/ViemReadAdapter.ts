@@ -3,6 +3,7 @@ import {
   AbiEncoder,
   type Block,
   type BlockIdentifier,
+  type Bytes,
   type CallParams,
   type EventArgs,
   type EventName,
@@ -199,6 +200,10 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
       ...rest,
     } as CallParameters);
     return data || "0x";
+  }
+
+  sendRawTransaction(serializedTransaction: Bytes) {
+    return this.publicClient.sendRawTransaction({ serializedTransaction });
   }
 
   async read<
