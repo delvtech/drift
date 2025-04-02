@@ -131,7 +131,7 @@ export class ReadContract<
   }
 
   extend<T extends Partial<Extended<this>>>(
-    props: T & ThisType<T & this>,
+    props: T & Partial<this> & ThisType<T & this>,
   ): T & this {
     return Object.assign(this, props);
   }
