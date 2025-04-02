@@ -21,7 +21,7 @@ import type {
 } from "src/adapter/types/Transaction";
 import type { Client } from "src/client/Client";
 import { LruStore } from "src/store/LruStore";
-import type { Store } from "src/store/types";
+import type { Store } from "src/store/Store";
 import { deleteMatches } from "src/store/utils/deleteMatches";
 import { stringifyKey } from "src/utils/stringifyKey";
 import type { MaybePromise, Replace } from "src/utils/types";

@@ -1,5 +1,5 @@
 import { HookRegistry } from "src/client/hooks/HookRegistry";
-import type { Store } from "src/store/types";
+import type { Store } from "src/store/Store";
 import { describe, expect, it, vi } from "vitest";
 
 describe("HookRegistry", () => {

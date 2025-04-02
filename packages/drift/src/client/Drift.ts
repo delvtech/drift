@@ -14,7 +14,7 @@ import {
 } from "src/client/contract/Contract";
 import type { HookRegistry } from "src/client/hooks/HookRegistry";
 import type { LruStore } from "src/store/LruStore";
-import type { Store } from "src/store/types";
+import type { Store } from "src/store/Store";
 
 /**
  * A client for interacting with an Ethereum network through an

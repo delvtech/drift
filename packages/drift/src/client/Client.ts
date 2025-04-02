@@ -13,7 +13,7 @@ import {
   MethodInterceptor,
 } from "src/client/hooks/MethodInterceptor";
 import { LruStore, type LruStoreOptions } from "src/store/LruStore";
-import type { Store } from "src/store/types";
+import type { Store } from "src/store/Store";
 import { getOrSet } from "src/store/utils/getOrSet";
 import type { Eval, Extended, OneOf } from "src/utils/types";
 

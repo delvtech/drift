@@ -136,34 +136,46 @@ export type MethodHooks<
   U extends T = T,
 > = U extends U
   ? {
-      [K in FunctionKey<U> as `before:${K & string}`]: (payload: {
-        /**
-         * The arguments passed to the method.
-         **/
-        readonly args: Parameters<T[K]>;
-        /**
-         * Override the arguments and continue.
-         **/
-        setArgs(...args: Parameters<T[K]>): void;
-        /**
-         * Set the result and return early.
-         **/
-        resolve(value: Awaited<ReturnType<T[K]>>): void;
-      }) => ReturnType<T[K]> extends Promise<any> ? MaybePromise<void> : void;
+      [K in FunctionKey<U> as `before:${K & string}`]: BeforeMethodHook<T[K]>;
     } & {
-      [K in FunctionKey<U> as `after:${K & string}`]: (payload: {
-        /**
-         * The arguments that were passed to the method.
-         **/
-        readonly args: Parameters<T[K]>;
-        /**
-         * The result returned by the method.
-         **/
-        readonly result: MaybeAwaited<ReturnType<T[K]>>;
-        /**
-         * Override the result and continue.
-         **/
-        setResult(value: MaybeAwaited<ReturnType<T[K]>>): void;
-      }) => ReturnType<T[K]> extends Promise<any> ? MaybePromise<void> : void;
+      [K in FunctionKey<U> as `after:${K & string}`]: AfterMethodHook<T[K]>;
     }
   : never;
+
+/**
+ * A hook that's called before a method is executed to inspect and modify its
+ * arguments and/or skip its execution.
+ */
+export type BeforeMethodHook<T extends AnyFunction = AnyFunction> = (payload: {
+  /**
+   * The arguments passed to the method.
+   **/
+  readonly args: Parameters<T>;
+  /**
+   * Override the arguments and continue.
+   **/
+  setArgs(...args: Parameters<T>): void;
+  /**
+   * Set the return value and continue without calling the method.
+   **/
+  resolve(value: Awaited<ReturnType<T>>): void;
+}) => ReturnType<T> extends Promise<any> ? MaybePromise<void> : void;
+
+/**
+ * A hook that's called after a method is executed to inspect and modify its
+ * result.
+ */
+export type AfterMethodHook<T extends AnyFunction = AnyFunction> = (payload: {
+  /**
+   * The arguments that were passed to the method.
+   **/
+  readonly args: Parameters<T>;
+  /**
+   * The result returned by the method.
+   **/
+  readonly result: MaybeAwaited<ReturnType<T>>;
+  /**
+   * Override the result and continue.
+   **/
+  setResult(value: MaybeAwaited<ReturnType<T>>): void;
+}) => ReturnType<T> extends Promise<any> ? MaybePromise<void> : void;

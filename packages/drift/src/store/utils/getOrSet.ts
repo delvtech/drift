@@ -1,4 +1,4 @@
-import type { Store } from "src/store/types";
+import type { Store } from "src/store/Store";
 import type { AwaitedReturnType, MaybePromise } from "src/utils/types";
 
 /**

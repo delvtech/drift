@@ -1,5 +1,5 @@
 import isMatch from "lodash.ismatch";
-import type { Store } from "src/store/types";
+import type { Store } from "src/store/Store";
 import type { MaybePromise } from "src/utils/types";
 
 /**

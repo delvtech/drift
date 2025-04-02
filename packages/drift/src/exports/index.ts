@@ -105,7 +105,7 @@ export {
   LruStore,
   type LruStoreOptions,
 } from "src/store/LruStore";
-export type { Store } from "src/store/types";
+export type { Store } from "src/store/Store";
 
 export { getOrSet } from "src/store/utils/getOrSet";
 export { deleteMatches } from "src/store/utils/deleteMatches";

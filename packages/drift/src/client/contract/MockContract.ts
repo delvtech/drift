@@ -21,7 +21,7 @@ import {
   ReadWriteContract,
 } from "src/client/contract/Contract";
 import { ZERO_ADDRESS } from "src/constants";
-import type { Store } from "src/store/types";
+import type { Store } from "src/store/Store";
 import type { Eval, FunctionKey, OneOf } from "src/utils/types";
 
 export type MockContractOptions<

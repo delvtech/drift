@@ -141,7 +141,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     );
     const receipt: TransactionReceipt | undefined = ethersReceipt
       ? {
-          contractAddress: ethersReceipt.contractAddress,
+          contractAddress: ethersReceipt.contractAddress ?? undefined,
           blockHash: ethersReceipt.blockHash,
           blockNumber: BigInt(ethersReceipt.blockNumber),
           cumulativeGasUsed: ethersReceipt.cumulativeGasUsed.toBigInt(),

@@ -1,5 +1,5 @@
 import { LRUCache } from "lru-cache";
-import type { Store } from "src/store/types";
+import type { Store } from "src/store/Store";
 
 export type LruStoreOptions<
   V extends NonNullable<unknown> = NonNullable<unknown>,

@@ -20,7 +20,7 @@ describe("Client", () => {
   });
 
   describe("getEvents", () => {
-    it("Uses the same default params as `ClientCache`", async () => {
+    it("Uses the same default options as `ClientCache`", async () => {
       const client = createClient({ adapter });
       const params: GetEventsParams = {
         abi,

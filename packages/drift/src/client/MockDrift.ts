@@ -8,7 +8,7 @@ import {
 import type { ContractBaseOptions } from "src/client/contract/Contract";
 import { MockContract } from "src/client/contract/MockContract";
 import type { LruStore } from "src/store/LruStore";
-import type { Store } from "src/store/types";
+import type { Store } from "src/store/Store";
 
 export type MockDrift<
   TAdapter extends MockAdapter = MockAdapter,

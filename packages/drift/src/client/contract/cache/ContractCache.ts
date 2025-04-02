@@ -17,7 +17,7 @@ import {
   type ClientCacheOptions,
 } from "src/client/cache/ClientCache";
 import type { Contract, ContractReadArgs } from "src/client/contract/Contract";
-import type { Store } from "src/store/types";
+import type { Store } from "src/store/Store";
 import type { Eval, OneOf } from "src/utils/types";
 
 export type ContractCacheOptions<

@@ -23,7 +23,7 @@ import {
   createClient,
 } from "src/client/Client";
 import { ContractCache } from "src/client/contract/cache/ContractCache";
-import type { Store } from "src/store/types";
+import type { Store } from "src/store/Store";
 import type { EmptyObject, Eval, Extended, OneOf } from "src/utils/types";
 
 /**

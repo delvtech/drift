@@ -1,7 +1,7 @@
 import { MockAdapter } from "src/adapter/MockAdapter";
 import { type Client, createClient } from "src/client/Client";
 import type { LruStore, LruStoreOptions } from "src/store/LruStore";
-import type { Store } from "src/store/types";
+import type { Store } from "src/store/Store";
 
 export type MockClient<
   TAdapter extends MockAdapter = MockAdapter,
