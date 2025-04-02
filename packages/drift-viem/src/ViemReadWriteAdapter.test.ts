@@ -1,7 +1,12 @@
 import { HEX_REGEX } from "@delvtech/drift";
 import { testToken } from "@delvtech/drift/testing";
 import { ViemReadWriteAdapter } from "src/ViemReadWriteAdapter";
-import { http, createPublicClient, createWalletClient } from "viem";
+import {
+  http,
+  createPublicClient,
+  createWalletClient,
+  getContract,
+} from "viem";
 import { mainnet } from "viem/chains";
 import { describe, expect, it } from "vitest";
 
@@ -43,5 +48,14 @@ describe("ViemReadWriteAdapter", () => {
 
     expect(hash).toMatch(HEX_REGEX);
     expect(receipt.contractAddress).toMatch(HEX_REGEX);
+
+    const token = getContract({
+      abi: testToken.abi,
+      address: receipt.contractAddress!,
+      client: publicClient,
+    });
+    const supply = await token.read.totalSupply();
+
+    expect(supply).toEqual(123n);
   });
 });

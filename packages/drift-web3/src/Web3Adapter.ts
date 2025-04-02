@@ -406,10 +406,10 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
       const req = this.web3.eth
         .sendTransaction({
           ...rest,
-          accessList: accessList as AccessList,
-          to: address,
           data: method(...params).encodeABI(),
+          to: address,
           from,
+          accessList: accessList as AccessList,
         })
         .on("error", reject)
         .on("transactionHash", (hash) => resolve(hash));

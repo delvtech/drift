@@ -57,12 +57,19 @@ export class ViemReadWriteAdapter<
           };
 
     const hash = await this.walletClient.sendTransaction({
+      data: params.data,
+      to: params.to,
       account: params.from ?? (await this.getSignerAddress()) ?? null,
       gas: params.gas,
       nonce: params.nonce !== undefined ? Number(params.nonce) : undefined,
       value: params.value,
       chain: this.walletClient.chain,
       type: params.type as any,
+      accessList: params.accessList,
+      // TODO:
+      // blobs: params.blobs,
+      // blobVersionedHashes: params.blobVersionedHashes,
+      // maxFeePerBlobGas: params.maxFeePerBlobGas,
       ...gasPriceOptions,
     });
 
