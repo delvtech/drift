@@ -1,5 +1,11 @@
 # @delvtech/drift-ethers
 
+## 0.8.1
+
+### Patch Changes
+
+- e981e26: Added `sendRawTransaction` method.
+
 ## 0.8.0
 
 ### Patch Changes
