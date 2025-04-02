@@ -119,16 +119,21 @@ export interface ReadAdapter extends Network {
 export interface WriteAdapter {
   getSignerAddress(): Promise<Address>;
 
-  write<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>): Promise<Hash>;
+  /**
+   * Signs and submits a transaction.
+   */
+  sendTransaction(params: SendTransactionParams): Promise<Hash>;
 
   /**
    * Deploys a contract using the specified bytecode and constructor arguments.
    * @returns The transaction hash of the submitted transaction.
    */
   deploy<TAbi extends Abi>(params: DeployParams<TAbi>): Promise<Hash>;
+
+  write<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(params: WriteParams<TAbi, TFunctionName>): Promise<Hash>;
 }
 
 export interface ReadWriteAdapter extends ReadAdapter, WriteAdapter {}
@@ -143,7 +148,7 @@ export interface ContractParams<TAbi extends Abi = Abi> {
   address: Address;
 }
 
-// Encode/Decode parameters //
+// Encode/Decode //
 
 export type EncodeDeployDataParams<TAbi extends Abi = Abi> = {
   abi: TAbi;
@@ -188,7 +193,7 @@ export interface DecodeFunctionReturnParams<
   fn: TFunctionName;
 }
 
-// Event parameters //
+// Events //
 
 /**
  * A block number or tag used to specify the start or end of a range.
@@ -223,7 +228,7 @@ export interface GetEventsParams<
   event: TEventName;
 }
 
-// Read parameters //
+// Read //
 
 /**
  * Options for reading contract state.
@@ -249,7 +254,7 @@ export type ReadParams<
 } & ArgsParam<FunctionArgs<TAbi, TFunctionName>> &
   ReadOptions;
 
-// Write parameters //
+// Write //
 
 export type SimulateWriteParams<
   TAbi extends Abi = Abi,
@@ -274,12 +279,12 @@ export type WriteParams<
   > = FunctionName<TAbi, "nonpayable" | "payable">,
 > = SimulateWriteParams<TAbi, TFunctionName> & WriteOptions;
 
-// Deploy parameters //
+// Deploy //
 
 export type DeployParams<TAbi extends Abi = Abi> =
   EncodeDeployDataParams<TAbi> & WriteOptions;
 
-// Call parameters //
+// Call //
 
 // https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/eth/execute.yaml#L1
 export interface CallOptions
@@ -304,6 +309,31 @@ export type CallParams = {
     }
 > &
   CallOptions;
+
+// Send transaction //
+
+// https://github.com/ethereum/execution-apis/blob/40088597b8b4f48c45184da002e27ffc3c37641f/src/eth/submit.yaml#L1
+export type SendTransactionParams = {
+  /**
+   * The data to send with the transaction.
+   */
+  data: Bytes;
+} & OneOf<
+  | (Eip4844Options & {
+      /**
+       * The address to send the transaction to.
+       */
+      to: Address;
+    })
+  | {
+      /**
+       * The address to send the transaction to or `undefined` for a contract
+       * creation.
+       */
+      to?: Address;
+    }
+> &
+  WriteOptions;
 
 // Internal //
 

@@ -21,6 +21,23 @@ describe("DefaultAdapter", () => {
     process.env.VITE_TOKEN_ADDRESS || ZERO_ADDRESS
   ).toLowerCase() as AddressType;
   const rpcUrl = process.env.VITE_RPC_URL;
+  const transactionReceiptMatch: TransactionReceipt = {
+    blockHash: expect.stringMatching(HEX_REGEX),
+    blockNumber: expect.any(BigInt),
+    from: expect.stringMatching(HEX_REGEX),
+    cumulativeGasUsed: expect.any(BigInt),
+    effectiveGasPrice: expect.any(BigInt),
+    gasUsed: expect.any(BigInt),
+    logsBloom: expect.stringMatching(HEX_REGEX),
+    status: expect.stringMatching(/^(success|reverted)$/),
+    to: expect.stringMatching(HEX_REGEX),
+    transactionHash: expect.stringMatching(HEX_REGEX),
+    transactionIndex: expect.any(BigInt),
+    contractAddress: expect.toBeOneOf([
+      expect.stringMatching(HEX_REGEX),
+      undefined,
+    ]),
+  };
 
   it("fetches the chain id", async () => {
     const adapter = new DefaultAdapter({ rpcUrl });
@@ -49,7 +66,7 @@ describe("DefaultAdapter", () => {
       stateRoot: expect.stringMatching(HEX_REGEX),
       transactions: expect.any(Array),
       transactionsRoot: expect.stringMatching(HEX_REGEX),
-    } as Block);
+    } satisfies Block);
   });
 
   it("fetches account balances", async () => {
@@ -70,21 +87,21 @@ describe("DefaultAdapter", () => {
     const tx = await adapter.getTransaction({
       hash: block!.transactions[0]!,
     });
-    expect(tx).toEqual(
-      expect.objectContaining({
-        gas: expect.any(BigInt),
-        gasPrice: expect.any(BigInt),
-        input: expect.stringMatching(HEX_REGEX),
-        nonce: expect.any(BigInt),
-        type: expect.any(String),
-        value: expect.any(BigInt),
-        blockHash: expect.stringMatching(HEX_REGEX),
-        blockNumber: expect.any(BigInt),
-        from: expect.stringMatching(HEX_REGEX),
-        hash: expect.stringMatching(HEX_REGEX),
-        transactionIndex: expect.any(BigInt),
-      } as Transaction),
-    );
+    expect(tx).toMatchObject({
+      gas: expect.any(BigInt),
+      gasPrice: expect.any(BigInt),
+      input: expect.stringMatching(HEX_REGEX),
+      nonce: expect.any(BigInt),
+      type: expect.any(String),
+      value: expect.any(BigInt),
+      blockHash: expect.stringMatching(HEX_REGEX),
+      blockNumber: expect.any(BigInt),
+      from: expect.stringMatching(HEX_REGEX),
+      transactionHash: expect.stringMatching(HEX_REGEX),
+      transactionIndex: expect.any(BigInt),
+      chainId: expect.any(Number),
+      to: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
+    } satisfies Transaction);
   });
 
   it("returns receipts for waited transactions", async () => {
@@ -100,21 +117,7 @@ describe("DefaultAdapter", () => {
     const tx = await adapter.waitForTransaction({
       hash: block!.transactions[0]!,
     });
-    expect(tx).toEqual(
-      expect.objectContaining({
-        blockHash: expect.stringMatching(HEX_REGEX),
-        blockNumber: expect.any(BigInt),
-        from: expect.stringMatching(HEX_REGEX),
-        cumulativeGasUsed: expect.any(BigInt),
-        effectiveGasPrice: expect.any(BigInt),
-        gasUsed: expect.any(BigInt),
-        logsBloom: expect.stringMatching(HEX_REGEX),
-        status: expect.stringMatching(/^(success|reverted)$/),
-        to: expect.stringMatching(HEX_REGEX),
-        transactionHash: expect.stringMatching(HEX_REGEX),
-        transactionIndex: expect.any(BigInt),
-      } as TransactionReceipt),
-    );
+    expect(tx).toMatchObject(transactionReceiptMatch);
   });
 
   describe("call", () => {
@@ -155,14 +158,13 @@ describe("DefaultAdapter", () => {
       fromBlock: currentBlock - 100n,
     });
     expect(events).toBeInstanceOf(Array);
-    expect(events[0]).toEqual(
-      expect.objectContaining({
-        args: expect.any(Object),
-        blockNumber: expect.any(BigInt),
-        data: expect.stringMatching(HEX_REGEX),
-        transactionHash: expect.stringMatching(HEX_REGEX),
-      } as EventLog<typeof TestToken.abi, "Transfer">),
-    );
+    expect(events[0]).toMatchObject({
+      args: expect.any(Object),
+      blockNumber: expect.any(BigInt),
+      data: expect.stringMatching(HEX_REGEX),
+      eventName: "Transfer",
+      transactionHash: expect.stringMatching(HEX_REGEX),
+    } satisfies EventLog<typeof TestToken.abi, "Transfer">);
   });
 
   describe("read", () => {
@@ -208,17 +210,28 @@ describe("DefaultAdapter", () => {
     const hash = await adapter.deploy({
       abi: TestToken.abi,
       bytecode: TestToken.bytecode,
-      args: {
-        decimals_: 18,
-        initialSupply: 123n,
-      },
+      args: { decimals_: 18, initialSupply: 123n },
     });
     const receipt = await adapter.waitForTransaction({ hash });
 
-    assert(HEX_REGEX.test(hash));
-    expect(receipt).toMatchObject({
-      contractAddress: expect.stringMatching(HEX_REGEX),
-    } satisfies Partial<TransactionReceipt>);
+    expect(hash).toMatch(HEX_REGEX);
+    expect(receipt?.contractAddress).toMatch(HEX_REGEX);
+  });
+
+  it("sends transactions", async () => {
+    const adapter = new DefaultAdapter({ rpcUrl });
+
+    const hash = await adapter.sendTransaction({
+      data: adapter.encodeDeployData({
+        abi: TestToken.abi,
+        bytecode: TestToken.bytecode,
+        args: { decimals_: 18, initialSupply: 123n },
+      }),
+    });
+    const receipt = await adapter.waitForTransaction({ hash });
+
+    expect(hash).toMatch(HEX_REGEX);
+    expect(receipt?.contractAddress).toMatch(HEX_REGEX);
   });
 
   it("encodes deploy data", async () => {
@@ -226,10 +239,7 @@ describe("DefaultAdapter", () => {
     const encoded = adapter.encodeDeployData({
       abi: TestToken.abi,
       bytecode: TestToken.bytecode,
-      args: {
-        decimals_: 18,
-        initialSupply: 123n,
-      },
+      args: { decimals_: 18, initialSupply: 123n },
     });
     assert(HEX_REGEX.test(encoded));
   });
@@ -239,10 +249,7 @@ describe("DefaultAdapter", () => {
     const encoded = adapter.encodeFunctionData({
       abi: TestToken.abi,
       fn: "transfer",
-      args: {
-        amount: 123n,
-        to: address,
-      },
+      args: { amount: 123n, to: address },
     });
     assert(HEX_REGEX.test(encoded));
   });
@@ -269,10 +276,7 @@ describe("DefaultAdapter", () => {
     const encoded = adapter.encodeFunctionReturn({
       abi: tupleParamsAbi,
       fn: "names",
-      value: {
-        0: "delv",
-        1: "drift",
-      },
+      value: ["delv", "drift"],
     });
     expect(encoded).toEqual(
       "0x00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000464656c760000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000056472696674000000000000000000000000000000000000000000000000000000",
@@ -307,9 +311,6 @@ describe("DefaultAdapter", () => {
       fn: "names",
       data: "0x00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000464656c760000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000056472696674000000000000000000000000000000000000000000000000000000",
     });
-    expect(decoded).toMatchObject({
-      0: "delv",
-      1: "drift",
-    });
+    expect(decoded).toMatchObject({ 0: "delv", 1: "drift" });
   });
 });

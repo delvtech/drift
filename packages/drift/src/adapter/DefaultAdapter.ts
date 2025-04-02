@@ -8,14 +8,14 @@ import {
   TransactionReceipt,
 } from "ox";
 import { AbiEncoder } from "src/adapter/AbiEncoder";
-import type { Abi, Bytes, HexString } from "src/adapter/types/Abi";
+import type { Abi, Bytes, Hash, HexString } from "src/adapter/types/Abi";
 import type {
-  CallOptions,
   CallParams,
   DeployParams,
   GetEventsParams,
   ReadParams,
   ReadWriteAdapter,
+  SendTransactionParams,
   SimulateWriteParams,
   WriteParams,
 } from "src/adapter/types/Adapter";
@@ -32,7 +32,12 @@ import type {
   GetTransactionParams,
   WaitForTransactionParams,
 } from "src/adapter/types/Network";
-import type { TransactionReceipt as TransactionReceiptType } from "src/adapter/types/Transaction";
+import type {
+  Eip4844Options,
+  TransactionOptions,
+  TransactionReceipt as TransactionReceiptType,
+  Transaction as TransactionType,
+} from "src/adapter/types/Transaction";
 import { _decodeFunctionReturn } from "src/adapter/utils/decodeFunctionReturn";
 import { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
 import { prepareFunctionData } from "src/adapter/utils/encodeFunctionData";
@@ -134,7 +139,9 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
       .catch(handleError);
   }
 
-  async getTransaction({ hash }: GetTransactionParams) {
+  async getTransaction({
+    hash,
+  }: GetTransactionParams): Promise<TransactionType | undefined> {
     const tx = await this.provider
       .request({
         method: "eth_getTransactionByHash",
@@ -147,6 +154,7 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
         ...parsed,
         to: to || undefined,
         transactionIndex: BigInt(transactionIndex),
+        transactionHash: parsed.hash,
       };
     }
     return undefined;
@@ -201,7 +209,7 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
         {
           to,
           data,
-          ...prepareCallOptions(options),
+          ...prepareTransactionOptions(options),
         },
         prepareBlockParam(block),
       ],
@@ -309,7 +317,7 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
           {
             to: address,
             data,
-            ...prepareCallOptions(options),
+            ...prepareTransactionOptions(options),
           },
         ],
       })
@@ -330,33 +338,22 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
     return Address.checksum(address);
   }
 
-  async write<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >({
-    abi,
-    fn,
-    args,
-    address,
+  async sendTransaction({
+    data,
+    to,
     from,
     onMined,
     ...options
-  }: WriteParams<TAbi, TFunctionName>) {
-    const data = this.encodeFunctionData({
-      abi,
-      fn,
-      args: args as FunctionArgs<TAbi, TFunctionName>,
-    });
-
+  }: SendTransactionParams): Promise<Hash> {
     const hash = await this.provider
       .request({
         method: "eth_sendTransaction",
         params: [
           {
-            to: address,
             data,
+            to,
             from: from ?? (await this.getSignerAddress()),
-            ...prepareCallOptions(options),
+            ...prepareTransactionOptions(options),
           },
         ],
       })
@@ -390,7 +387,46 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
           {
             data,
             from: from ?? (await this.getSignerAddress()),
-            ...prepareCallOptions(options),
+            ...prepareTransactionOptions(options),
+          },
+        ],
+      })
+      .catch(handleError);
+
+    if (onMined) {
+      this.waitForTransaction({ hash }).then(onMined);
+    }
+
+    return hash;
+  }
+
+  async write<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >({
+    abi,
+    fn,
+    args,
+    address,
+    from,
+    onMined,
+    ...options
+  }: WriteParams<TAbi, TFunctionName>) {
+    const data = this.encodeFunctionData({
+      abi,
+      fn,
+      args: args as FunctionArgs<TAbi, TFunctionName>,
+    });
+
+    const hash = await this.provider
+      .request({
+        method: "eth_sendTransaction",
+        params: [
+          {
+            data,
+            to: address,
+            from: from ?? (await this.getSignerAddress()),
+            ...prepareTransactionOptions(options),
           },
         ],
       })
@@ -414,8 +450,7 @@ function prepareBlockParam(block?: BlockIdentifier): HexString | BlockTag {
   return block;
 }
 
-function prepareCallOptions({
-  block, // omitted
+function prepareTransactionOptions({
   chainId,
   gas,
   gasPrice,
@@ -425,7 +460,7 @@ function prepareCallOptions({
   nonce,
   value,
   ...rest
-}: CallOptions) {
+}: TransactionOptions & Eip4844Options) {
   return {
     ...rest,
     chainId:
@@ -457,7 +492,7 @@ function prepareCallOptions({
       value === undefined
         ? undefined
         : (`0x${value.toString(16)}` as HexString),
-  } as const;
+  };
 }
 
 declare global {

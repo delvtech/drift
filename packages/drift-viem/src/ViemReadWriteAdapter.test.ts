@@ -1,9 +1,9 @@
-import { HEX_REGEX, type TransactionReceipt } from "@delvtech/drift";
+import { HEX_REGEX } from "@delvtech/drift";
 import { testToken } from "@delvtech/drift/testing";
 import { ViemReadWriteAdapter } from "src/ViemReadWriteAdapter";
 import { http, createPublicClient, createWalletClient } from "viem";
 import { mainnet } from "viem/chains";
-import { assert, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 const { VITE_RPC_URL = "http://127.0.0.1:8545" } = process.env;
 const publicClient = createPublicClient({
@@ -21,16 +21,27 @@ describe("ViemReadWriteAdapter", () => {
     const hash = await adapter.deploy({
       abi: testToken.abi,
       bytecode: testToken.bytecode,
-      args: {
-        decimals_: 18,
-        initialSupply: 123n,
-      },
+      args: { decimals_: 18, initialSupply: 123n },
     });
     const receipt = await adapter.waitForTransaction({ hash });
 
-    assert(HEX_REGEX.test(hash));
-    expect(receipt).toMatchObject({
-      contractAddress: expect.stringMatching(HEX_REGEX),
-    } satisfies Partial<TransactionReceipt>);
+    expect(hash).toMatch(HEX_REGEX);
+    expect(receipt.contractAddress).toMatch(HEX_REGEX);
+  });
+
+  it("sends transactions", async () => {
+    const adapter = new ViemReadWriteAdapter({ publicClient, walletClient });
+
+    const hash = await adapter.sendTransaction({
+      data: adapter.encodeDeployData({
+        abi: testToken.abi,
+        bytecode: testToken.bytecode,
+        args: { decimals_: 18, initialSupply: 123n },
+      }),
+    });
+    const receipt = await adapter.waitForTransaction({ hash });
+
+    expect(hash).toMatch(HEX_REGEX);
+    expect(receipt.contractAddress).toMatch(HEX_REGEX);
   });
 });

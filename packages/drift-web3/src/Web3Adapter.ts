@@ -19,6 +19,7 @@ import {
   type Hash,
   type ReadParams,
   type ReadWriteAdapter,
+  type SendTransactionParams,
   type SimulateWriteParams,
   type Transaction,
   type TransactionReceipt,
@@ -279,27 +280,14 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     return address;
   }
 
-  async write<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >({
-    abi,
-    accessList,
-    address,
-    args,
-    fn,
+  async sendTransaction({
+    data,
+    to,
     from,
     onMined,
+    accessList,
     ...rest
-  }: WriteParams<TAbi, TFunctionName>) {
-    const { params } = prepareParamsArray({
-      abi,
-      type: "function",
-      name: fn,
-      kind: "inputs",
-      value: args,
-    });
-    const { method } = this.#getMethod({ abi, fn, address });
+  }: SendTransactionParams) {
     from ??= await this.getSignerAddress();
 
     return new Promise<Hash>((resolve, reject) => {
@@ -307,8 +295,8 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
         .sendTransaction({
           ...rest,
           accessList: accessList as AccessList,
-          to: address,
-          data: method(...params).encodeABI(),
+          to,
+          data,
           from,
         })
         .on("error", reject)
@@ -385,6 +373,53 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
               receipt.transactionHash,
             ),
             transactionIndex: BigInt(receipt.transactionIndex),
+          });
+        });
+      }
+    });
+  }
+
+  async write<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >({
+    abi,
+    accessList,
+    address,
+    args,
+    fn,
+    from,
+    onMined,
+    ...rest
+  }: WriteParams<TAbi, TFunctionName>) {
+    const { params } = prepareParamsArray({
+      abi,
+      type: "function",
+      name: fn,
+      kind: "inputs",
+      value: args,
+    });
+    const { method } = this.#getMethod({ abi, fn, address });
+    from ??= await this.getSignerAddress();
+
+    return new Promise<Hash>((resolve, reject) => {
+      const req = this.web3.eth
+        .sendTransaction({
+          ...rest,
+          accessList: accessList as AccessList,
+          to: address,
+          data: method(...params).encodeABI(),
+          from,
+        })
+        .on("error", reject)
+        .on("transactionHash", (hash) => resolve(hash));
+
+      if (onMined) {
+        req.on("receipt", (receipt) => {
+          onMined({
+            ...receipt,
+            effectiveGasPrice: receipt.effectiveGasPrice ?? 0n,
+            status: receipt.status ? "success" : "reverted",
           });
         });
       }

@@ -813,6 +813,61 @@ describe("MockAdapter", () => {
     });
   });
 
+  describe("sendTransaction", () => {
+    it("Throws an error by default", async () => {
+      const adapter = new MockAdapter();
+      let error: unknown;
+      try {
+        await adapter.sendTransaction({ data: "0x" });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(Error);
+    });
+
+    it("Can be stubbed with specific args", async () => {
+      const adapter = new MockAdapter();
+      adapter.onSendTransaction({ data: "0x1" }).resolves("0xa");
+      adapter.onSendTransaction({ data: "0x2" }).resolves("0xb");
+      expect(await adapter.sendTransaction({ data: "0x1" })).toBe("0xa");
+      expect(await adapter.sendTransaction({ data: "0x2" })).toBe("0xb");
+    });
+
+    it("Can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      adapter.onSendTransaction({}).resolves("0x123");
+      expect(await adapter.sendTransaction({ data: "0x" })).toBe("0x123");
+    });
+
+    it("Can be called with args after being stubbed with no args", async () => {
+      const adapter = new MockAdapter();
+      adapter.onSendTransaction().resolves("0x123");
+      expect(await adapter.sendTransaction({ data: "0x" })).toBe("0x123");
+    });
+
+    it("Calls onMined callbacks with the receipt", async () => {
+      const adapter = new MockAdapter();
+      const receipt = createStubTransactionReceipt();
+      const onMined = vi.fn();
+
+      adapter.onDeploy().resolves("0x123");
+      adapter.onWaitForTransaction().resolves(receipt);
+
+      const hash = await adapter.deploy({
+        abi: TestToken.abi,
+        bytecode: "0x",
+        args: {
+          decimals_: 18,
+          initialSupply: 0n,
+        },
+        onMined,
+      });
+      await adapter.waitForTransaction({ hash });
+
+      expect(onMined).toHaveBeenCalledWith(receipt);
+    });
+  });
+
   describe("getSignerAddress", () => {
     it("Throws an error by default", async () => {
       const adapter = new MockAdapter();

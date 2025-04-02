@@ -6,6 +6,7 @@ import type {
   GetEventsParams,
   ReadParams,
   ReadWriteAdapter,
+  SendTransactionParams,
   SimulateWriteParams,
   WriteParams,
 } from "src/adapter/types/Adapter";
@@ -29,12 +30,7 @@ import type {
 } from "src/adapter/types/Transaction";
 import { stringifyKey } from "src/utils/stringifyKey";
 import { StubStore } from "src/utils/testing/StubStore";
-import type {
-  AnyObject,
-  FunctionKey,
-  PartialBy,
-  Replace,
-} from "src/utils/types";
+import type { AnyObject, FunctionKey, Replace } from "src/utils/types";
 
 export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   stubs = new StubStore<ReadWriteAdapter>();
@@ -163,10 +159,10 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   // call //
 
-  onCall(params: Partial<CallParams>) {
+  onCall(params?: Partial<CallParams>) {
     return this.stubs.get<[CallParams], Promise<Bytes>>({
       method: "call",
-      key: this.createKey(params),
+      key: params ? this.createKey(params) : undefined,
     });
   }
 
@@ -200,14 +196,14 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   // getEvents //
 
   onGetEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
-    params: PartialBy<GetEventsParams<TAbi, TEventName>, "address">,
+    params?: Partial<GetEventsParams<TAbi, TEventName>>,
   ) {
     return this.stubs.get<
       [GetEventsParams<TAbi, TEventName>],
       Promise<EventLog<TAbi, TEventName>[]>
     >({
       method: "getEvents",
-      key: this.createKey(params),
+      key: params ? this.createKey(params) : undefined,
     });
   }
 
@@ -230,7 +226,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
   >(
-    params: Replace<
+    params?: Replace<
       Partial<ReadParams<TAbi, TFunctionName>>,
       { args?: Partial<FunctionArgs<TAbi, TFunctionName>> }
     >,
@@ -240,7 +236,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
       Promise<FunctionReturn<TAbi, TFunctionName>>
     >({
       method: "read",
-      key: this.createKey(params),
+      key: params ? this.createKey(params) : undefined,
     });
   }
 
@@ -264,7 +260,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(
-    params: Replace<
+    params?: Replace<
       Partial<SimulateWriteParams<TAbi, TFunctionName>>,
       { args?: Partial<FunctionArgs<TAbi, TFunctionName>> }
     >,
@@ -274,7 +270,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
       Promise<FunctionReturn<TAbi, TFunctionName>>
     >({
       method: "simulateWrite",
-      key: this.createKey(params),
+      key: params ? this.createKey(params) : undefined,
     });
   }
 
@@ -313,23 +309,20 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(params: WriteParams<TAbi, TFunctionName>) {
-    const writePromise = Promise.resolve(
-      this.stubs.get<[WriteParams<TAbi, TFunctionName>], Promise<Hash>>({
-        method: "write",
-        key: this.createKey(params),
-        matchPartial: true,
-      })(params),
-    );
+    const hash = await this.stubs.get<
+      [WriteParams<TAbi, TFunctionName>],
+      Promise<Hash>
+    >({
+      method: "write",
+      key: this.createKey(params),
+      matchPartial: true,
+    })(params);
 
     if (params.onMined) {
-      (async () => {
-        const hash = await writePromise;
-        const receipt = await this.waitForTransaction({ hash });
-        params.onMined?.(receipt);
-      })();
+      this.waitForTransaction({ hash }).then(params.onMined);
     }
 
-    return writePromise;
+    return hash;
   }
 
   // getSignerAddress //
@@ -361,7 +354,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   }
 
   async deploy<TAbi extends Abi>(params: DeployParams<TAbi>) {
-    const deployPromise = Promise.resolve(
+    const hash = await Promise.resolve(
       this.stubs.get<[DeployParams<TAbi>], Promise<Hash>>({
         method: "deploy",
         key: this.createKey(params),
@@ -370,13 +363,32 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     );
 
     if (params.onMined) {
-      (async () => {
-        const hash = await deployPromise;
-        const receipt = await this.waitForTransaction({ hash });
-        params.onMined?.(receipt);
-      })();
+      this.waitForTransaction({ hash }).then(params.onMined);
     }
 
-    return deployPromise;
+    return hash;
+  }
+
+  // sendTransaction //
+
+  onSendTransaction(params?: Partial<SendTransactionParams>) {
+    return this.stubs.get<[SendTransactionParams], Promise<Hash>>({
+      method: "sendTransaction",
+      key: params ? this.createKey(params) : undefined,
+    });
+  }
+
+  async sendTransaction(params: SendTransactionParams) {
+    const hash = await this.stubs.get<[SendTransactionParams], Promise<Hash>>({
+      method: "sendTransaction",
+      key: this.createKey(params),
+      matchPartial: true,
+    })(params);
+
+    if (params.onMined) {
+      this.waitForTransaction({ hash }).then(params.onMined);
+    }
+
+    return hash;
   }
 }

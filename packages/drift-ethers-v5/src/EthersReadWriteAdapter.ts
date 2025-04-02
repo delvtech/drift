@@ -4,6 +4,7 @@ import {
   DriftError,
   type FunctionName,
   type ReadWriteAdapter,
+  type SendTransactionParams,
   type SimulateWriteParams,
   type TransactionReceipt,
   type WriteParams,
@@ -11,6 +12,7 @@ import {
 } from "@delvtech/drift";
 import type { ContractTransaction, Signer } from "ethers";
 import { Contract, ContractFactory } from "ethers";
+import type { AccessList } from "ethers/lib/utils";
 import {
   EthersReadAdapter,
   type EthersReadAdapterParams,
@@ -55,37 +57,28 @@ export class EthersReadWriteAdapter<
     });
   }
 
-  async write<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >({
-    abi,
-    address,
-    args,
-    fn,
+  async sendTransaction({
+    data,
+    to,
     from,
     onMined,
     ...options
-  }: WriteParams<TAbi, TFunctionName>) {
-    const contract = new Contract(address, abi as EthersAbi, this.signer);
-
-    const { params } = prepareParamsArray({
-      abi,
-      type: "function",
-      name: fn,
-      kind: "inputs",
-      value: args,
-    });
-
-    const tx: ContractTransaction = await contract[fn](...params, {
-      accessList: options.accessList,
-      chainId: options.chainId,
+  }: SendTransactionParams) {
+    const tx = await this.signer.sendTransaction({
+      data,
+      to,
+      accessList: options.accessList as AccessList,
+      chainId:
+        typeof options.chainId === "bigint"
+          ? Number(options.chainId)
+          : options.chainId,
       from: from ?? (await this.signer.getAddress()),
       gasLimit: options.gas,
       gasPrice: options.gasPrice,
       maxFeePerGas: options.maxFeePerGas,
       maxPriorityFeePerGas: options.maxPriorityFeePerGas,
-      nonce: options.nonce ? Number(options.nonce) : undefined,
+      nonce:
+        typeof options.nonce === "bigint" ? Number(options.nonce) : undefined,
       type: options.type ? Number(options.type) : undefined,
       value: options.value,
     });
@@ -161,5 +154,62 @@ export class EthersReadWriteAdapter<
       throw new DriftError("Failed to get deployment transaction hash");
     }
     return hash;
+  }
+
+  async write<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >({
+    abi,
+    address,
+    args,
+    fn,
+    from,
+    onMined,
+    ...options
+  }: WriteParams<TAbi, TFunctionName>) {
+    const contract = new Contract(address, abi as EthersAbi, this.signer);
+
+    const { params } = prepareParamsArray({
+      abi,
+      type: "function",
+      name: fn,
+      kind: "inputs",
+      value: args,
+    });
+
+    const tx: ContractTransaction = await contract[fn](...params, {
+      accessList: options.accessList,
+      chainId: options.chainId,
+      from: from ?? (await this.signer.getAddress()),
+      gasLimit: options.gas,
+      gasPrice: options.gasPrice,
+      maxFeePerGas: options.maxFeePerGas,
+      maxPriorityFeePerGas: options.maxPriorityFeePerGas,
+      nonce: options.nonce ? Number(options.nonce) : undefined,
+      type: options.type ? Number(options.type) : undefined,
+      value: options.value,
+    });
+
+    if (onMined) {
+      tx.wait().then((ethersReceipt) => {
+        const receipt: TransactionReceipt = {
+          blockHash: ethersReceipt.blockHash,
+          blockNumber: BigInt(ethersReceipt.blockNumber),
+          cumulativeGasUsed: ethersReceipt.cumulativeGasUsed.toBigInt(),
+          gasUsed: ethersReceipt.gasUsed.toBigInt(),
+          effectiveGasPrice: ethersReceipt.effectiveGasPrice.toBigInt(),
+          from: ethersReceipt.from,
+          logsBloom: ethersReceipt.logsBloom,
+          status: ethersReceipt.status ? "success" : "reverted",
+          to: ethersReceipt.to,
+          transactionHash: ethersReceipt.transactionHash,
+          transactionIndex: BigInt(ethersReceipt.transactionIndex),
+        };
+        onMined(receipt);
+      });
+    }
+
+    return tx.hash;
   }
 }

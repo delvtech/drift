@@ -4,10 +4,12 @@ import {
   DriftError,
   type FunctionName,
   type ReadWriteAdapter,
+  type SendTransactionParams,
   type SimulateWriteParams,
   type WriteParams,
   prepareParamsArray,
 } from "@delvtech/drift";
+import type { AccessList } from "ethers";
 import type { Provider, Signer } from "ethers";
 import { ContractFactory } from "ethers";
 import { Contract } from "ethers";
@@ -55,33 +57,23 @@ export class EthersReadWriteAdapter<
     });
   }
 
-  async write<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >({
-    abi,
-    address,
-    args,
-    fn,
+  async sendTransaction({
+    data,
+    to,
     from,
     onMined,
     ...options
-  }: WriteParams<TAbi, TFunctionName>) {
-    const contract = new Contract(address, abi as InterfaceAbi, this.signer);
-
-    const { params } = prepareParamsArray({
-      abi,
-      type: "function",
-      name: fn,
-      kind: "inputs",
-      value: args,
-    });
-
-    const writePromise = contract.getFunction(fn)(...params, {
-      accessList: options.accessList,
+  }: SendTransactionParams) {
+    const { hash } = await this.signer.sendTransaction({
+      data,
+      to,
+      accessList: options.accessList as AccessList,
       chainId: options.chainId,
       from: from ?? (await this.signer.getAddress()),
       gasLimit: options.gas,
+      blobs: options.blobs as string[],
+      blobVersionedHashes: options.blobVersionedHashes as string[],
+      maxFeePerBlobGas: options.maxFeePerBlobGas,
       gasPrice: options.gasPrice,
       maxFeePerGas: options.maxFeePerGas,
       maxPriorityFeePerGas: options.maxPriorityFeePerGas,
@@ -90,14 +82,9 @@ export class EthersReadWriteAdapter<
       value: options.value,
     });
 
-    if (onMined) {
-      writePromise.then((hash) => {
-        this.waitForTransaction({ hash }).then(onMined);
-        return hash;
-      });
-    }
+    if (onMined) this.waitForTransaction({ hash }).then(onMined);
 
-    return writePromise;
+    return hash;
   }
 
   async deploy<TAbi extends Abi>({
@@ -149,6 +136,46 @@ export class EthersReadWriteAdapter<
     if (!hash) {
       throw new DriftError("Failed to get deployment transaction hash");
     }
+    return hash;
+  }
+
+  async write<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >({
+    abi,
+    address,
+    args,
+    fn,
+    from,
+    onMined,
+    ...options
+  }: WriteParams<TAbi, TFunctionName>) {
+    const contract = new Contract(address, abi as InterfaceAbi, this.signer);
+
+    const { params } = prepareParamsArray({
+      abi,
+      type: "function",
+      name: fn,
+      kind: "inputs",
+      value: args,
+    });
+
+    const { hash } = await contract.getFunction(fn)(...params, {
+      accessList: options.accessList,
+      chainId: options.chainId,
+      from: from ?? (await this.signer.getAddress()),
+      gasLimit: options.gas,
+      gasPrice: options.gasPrice,
+      maxFeePerGas: options.maxFeePerGas,
+      maxPriorityFeePerGas: options.maxPriorityFeePerGas,
+      nonce: options.nonce ? Number(options.nonce) : undefined,
+      type: options.type ? Number(options.type) : undefined,
+      value: options.value,
+    });
+
+    if (onMined) this.waitForTransaction({ hash }).then(onMined);
+
     return hash;
   }
 }
