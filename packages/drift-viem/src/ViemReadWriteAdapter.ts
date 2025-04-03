@@ -7,7 +7,7 @@ import {
   type SendTransactionParams,
   type SimulateWriteParams,
   type WriteParams,
-  prepareParamsArray,
+  prepareParams,
 } from "@delvtech/drift";
 import {
   ViemReadAdapter,
@@ -81,7 +81,7 @@ export class ViemReadWriteAdapter<
   }
 
   async deploy<TAbi extends Abi>(params: DeployParams<TAbi>) {
-    const prepared = prepareParamsArray({
+    const prepared = prepareParams({
       abi: params.abi,
       type: "constructor",
       name: undefined,
@@ -133,7 +133,7 @@ export class ViemReadWriteAdapter<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(params: WriteParams<TAbi, TFunctionName>) {
-    const prepared = prepareParamsArray({
+    const prepared = prepareParams({
       abi: params.abi,
       type: "function",
       name: params.fn,

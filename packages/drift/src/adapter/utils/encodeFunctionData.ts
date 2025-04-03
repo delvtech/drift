@@ -3,7 +3,7 @@ import type { Abi, Bytes } from "src/adapter/types/Abi";
 import type { EncodeFunctionDataParams } from "src/adapter/types/Adapter";
 import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
 import { handleError } from "src/adapter/utils/internal/handleError";
-import { prepareParamsArray } from "src/adapter/utils/prepareParamsArray";
+import { prepareParams } from "src/adapter/utils/prepareParams";
 
 /**
  * Encodes a function call into {@linkcode Bytes}.
@@ -32,7 +32,7 @@ export function prepareFunctionData<
   fn,
 }: { abi: TAbi; fn: TFunctionName; args: FunctionArgs<TAbi, TFunctionName> }) {
   try {
-    const { abiEntry, params } = prepareParamsArray({
+    const { abiEntry, params } = prepareParams({
       abi,
       type: "function",
       name: fn,

@@ -1,9 +1,9 @@
-import { prepareParamsArray } from "src/adapter/utils/prepareParamsArray";
+import { prepareParams } from "src/adapter/utils/prepareParams";
 import { IERC20 } from "src/artifacts/IERC20";
 import { expect, test } from "vitest";
 
-test("prepareParamsArray", () => {
-  const fromEmptyObject = prepareParamsArray({
+test("prepareParams", () => {
+  const fromEmptyObject = prepareParams({
     abi: IERC20.abi,
     type: "function",
     name: "symbol",
@@ -12,7 +12,7 @@ test("prepareParamsArray", () => {
   });
   expect(fromEmptyObject.params).toEqual([]);
 
-  const fromUndefined = prepareParamsArray({
+  const fromUndefined = prepareParams({
     abi: IERC20.abi,
     type: "function",
     name: "symbol",
@@ -21,7 +21,7 @@ test("prepareParamsArray", () => {
   });
   expect(fromUndefined.params).toEqual([]);
 
-  const fromUnpackedValue = prepareParamsArray({
+  const fromUnpackedValue = prepareParams({
     abi: IERC20.abi,
     type: "function",
     name: "symbol",
@@ -30,7 +30,7 @@ test("prepareParamsArray", () => {
   });
   expect(fromUnpackedValue.params).toEqual(["ETH"]);
 
-  const fromObject = prepareParamsArray({
+  const fromObject = prepareParams({
     abi: IERC20.abi,
     type: "function",
     name: "symbol",
@@ -39,7 +39,7 @@ test("prepareParamsArray", () => {
   });
   expect(fromObject.params).toEqual(["ETH"]);
 
-  const fromArray = prepareParamsArray({
+  const fromArray = prepareParams({
     abi: IERC20.abi,
     type: "function",
     name: "symbol",
@@ -48,7 +48,7 @@ test("prepareParamsArray", () => {
   });
   expect(fromArray.params).toEqual(["ETH"]);
 
-  const fromObjectWithNamedKeys = prepareParamsArray({
+  const fromObjectWithNamedKeys = prepareParams({
     abi: IERC20.abi,
     type: "function",
     name: "transfer",
@@ -72,7 +72,7 @@ test("prepareParamsArray", () => {
       type: "function",
     },
   ] as const;
-  const fromObjectWithNumberKeys = prepareParamsArray({
+  const fromObjectWithNumberKeys = prepareParams({
     abi: votesAbi,
     type: "function",
     name: "votes",

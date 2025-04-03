@@ -22,7 +22,7 @@ import {
   type WaitForTransactionParams,
   arrayToObject,
   encodeBytecodeCallData,
-  prepareParamsArray,
+  prepareParams,
 } from "@delvtech/drift";
 import {
   BigNumber,
@@ -216,7 +216,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
 
     let eventFilter: string | EventFilter = eventName;
     if (filter) {
-      const { params } = prepareParamsArray({
+      const { params } = prepareParams({
         abi: abi,
         type: "event",
         name: eventName,

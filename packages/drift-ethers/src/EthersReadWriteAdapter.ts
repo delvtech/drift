@@ -7,7 +7,7 @@ import {
   type SendTransactionParams,
   type SimulateWriteParams,
   type WriteParams,
-  prepareParamsArray,
+  prepareParams,
 } from "@delvtech/drift";
 import type { AccessList } from "ethers";
 import type { Provider, Signer } from "ethers";
@@ -100,7 +100,7 @@ export class EthersReadWriteAdapter<
       bytecode,
       this.signer,
     );
-    const { params } = prepareParamsArray({
+    const { params } = prepareParams({
       abi,
       type: "constructor",
       name: undefined,
@@ -153,7 +153,7 @@ export class EthersReadWriteAdapter<
   }: WriteParams<TAbi, TFunctionName>) {
     const contract = new Contract(address, abi as InterfaceAbi, this.signer);
 
-    const { params } = prepareParamsArray({
+    const { params } = prepareParams({
       abi,
       type: "function",
       name: fn,

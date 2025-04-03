@@ -26,7 +26,7 @@ import {
   type WaitForTransactionParams,
   type WriteParams,
   encodeBytecodeCallData,
-  prepareParamsArray,
+  prepareParams,
 } from "@delvtech/drift";
 import { type AbiFragment, type AccessList, default as Web3 } from "web3";
 
@@ -329,7 +329,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     onMined,
   }: DeployParams<TAbi>) {
     const contract = new this.web3.eth.Contract(abi as readonly AbiFragment[]);
-    const { params } = prepareParamsArray({
+    const { params } = prepareParams({
       abi,
       type: "constructor",
       name: undefined,
@@ -392,7 +392,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     onMined,
     ...rest
   }: WriteParams<TAbi, TFunctionName>) {
-    const { params } = prepareParamsArray({
+    const { params } = prepareParams({
       abi,
       type: "function",
       name: fn,

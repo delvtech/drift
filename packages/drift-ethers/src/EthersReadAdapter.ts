@@ -24,7 +24,7 @@ import {
   type WaitForTransactionParams,
   arrayToObject,
   encodeBytecodeCallData,
-  prepareParamsArray,
+  prepareParams,
 } from "@delvtech/drift";
 import type { AccessList } from "ethers";
 import {
@@ -220,7 +220,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
 
     let eventFilter: string | DeferredTopicFilter = eventName;
     if (filter) {
-      const { params } = prepareParamsArray({
+      const { params } = prepareParams({
         abi: abi,
         type: "event",
         name: eventName,

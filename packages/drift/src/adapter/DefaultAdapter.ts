@@ -42,7 +42,7 @@ import { _decodeFunctionReturn } from "src/adapter/utils/decodeFunctionReturn";
 import { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
 import { prepareFunctionData } from "src/adapter/utils/encodeFunctionData";
 import { handleError } from "src/adapter/utils/internal/handleError";
-import { prepareParamsArray } from "src/adapter/utils/prepareParamsArray";
+import { prepareParams } from "src/adapter/utils/prepareParams";
 import { DriftError } from "src/error/DriftError";
 import { isHexString } from "src/utils/isHexString";
 
@@ -231,7 +231,7 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
     fromBlock,
     toBlock,
   }: GetEventsParams<TAbi, TEventName>) {
-    const { abiEntry } = prepareParamsArray({
+    const { abiEntry } = prepareParams({
       abi,
       type: "event",
       name: event,

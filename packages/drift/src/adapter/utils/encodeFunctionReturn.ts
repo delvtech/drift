@@ -3,14 +3,14 @@ import type { Abi, Bytes } from "src/adapter/types/Abi";
 import type { EncodeFunctionReturnParams } from "src/adapter/types/Adapter";
 import type { FunctionName } from "src/adapter/types/Function";
 import { handleError } from "src/adapter/utils/internal/handleError";
-import { prepareParamsArray } from "src/adapter/utils/prepareParamsArray";
+import { prepareParams } from "src/adapter/utils/prepareParams";
 
 export function encodeFunctionReturn<
   TAbi extends Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 >({ abi, fn, value }: EncodeFunctionReturnParams<TAbi, TFunctionName>): Bytes {
   try {
-    const { abiEntry, params } = prepareParamsArray({
+    const { abiEntry, params } = prepareParams({
       abi,
       type: "function",
       name: fn,

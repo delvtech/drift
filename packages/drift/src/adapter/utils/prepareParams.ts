@@ -17,25 +17,32 @@ import type { AnyObject } from "src/utils/types";
  *
  * @example
  * ```ts
- * const outputArray = prepareParamsArray({
- *   abi: erc20.abi,
- *   type: "function",
- *   name: "balanceOf",
- *   kind: "outputs",
- *   value: 123n,
- * }); // -> [123n]
- *
- *
- * const outputArrayFromObject = prepareParamsArray({
+ * const approveCall = prepareParams({
  *   abi: erc20.abi,
  *   type: "function",
  *   name: "approve",
  *   kind: "inputs",
  *   value: { amount: 123n, spender: "0x..." },
- * }); // -> ["0x...", 123n]
+ * });
+ * // -> {
+ * //   abiEntry: { type: "function", name: "approve", ... },
+ * //   params: ["0x...", 123n],
+ * // }
+ *
+ * const balanceOfReturn = prepareParams({
+ *   abi: erc20.abi,
+ *   type: "function",
+ *   name: "balanceOf",
+ *   kind: "outputs",
+ *   value: 123n,
+ * });
+ * // -> {
+ * //   abiEntry: { type: "function", name: "balanceOf", ... },
+ * //   params: [123n],
+ * // }
  * ```
  */
-export function prepareParamsArray<
+export function prepareParams<
   TAbi extends Abi,
   TItemType extends AbiItemType,
   TName extends AbiEntryName<TAbi, TItemType>,

@@ -3,7 +3,7 @@ import type { Abi, Bytes } from "src/adapter/types/Abi";
 import type { EncodeDeployDataParams } from "src/adapter/types/Adapter";
 import type { ConstructorArgs } from "src/adapter/types/Function";
 import { handleError } from "src/adapter/utils/internal/handleError";
-import { prepareParamsArray } from "src/adapter/utils/prepareParamsArray";
+import { prepareParams } from "src/adapter/utils/prepareParams";
 
 /**
  * Encodes a contract deploy call into {@linkcode Bytes}.
@@ -30,7 +30,7 @@ export function prepareDeployData<TAbi extends Abi>({
   bytecode,
 }: { abi: TAbi; args: ConstructorArgs<TAbi>; bytecode: Bytes }) {
   try {
-    const { abiEntry, params } = prepareParamsArray({
+    const { abiEntry, params } = prepareParams({
       abi,
       type: "constructor",
       name: undefined,

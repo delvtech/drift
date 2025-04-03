@@ -89,7 +89,7 @@ export {
 
 export { arrayToSimplified } from "src/adapter/utils/arrayToSimplified";
 export { arrayToObject } from "src/adapter/utils/arrayToObject";
-export { prepareParamsArray } from "src/adapter/utils/prepareParamsArray";
+export { prepareParams } from "src/adapter/utils/prepareParams";
 export { decodeFunctionData } from "src/adapter/utils/decodeFunctionData";
 export { decodeFunctionReturn } from "src/adapter/utils/decodeFunctionReturn";
 export {
