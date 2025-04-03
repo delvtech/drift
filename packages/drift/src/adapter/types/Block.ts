@@ -66,6 +66,7 @@ export interface MinedBlockProps<
  * Augmentable overrides for the {@linkcode Block} type. Adapter libs can merge
  * into this interface to customize block properties.
  */
+// @ts-expect-error - Unused type param added for use in augmentations.
 export interface BlockOverrides<T extends BlockIdentifier | undefined> {}
 
 /**

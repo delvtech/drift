@@ -1,3 +1,35 @@
 {
-  "extends": "@repo/typescript-config/base.json"
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": ["./*.ts", "src"],
+  "compilerOptions": {
+    // Environment
+    "target": "esnext",
+    "lib": ["esnext"],
+    "module": "esnext",
+    "moduleDetection": "force",
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    // "allowImportingTsExtensions": true,
+    "allowSyntheticDefaultImports": true,
+    // "allowJs": true,
+    // "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "src/*": ["src/*"]
+    },
+
+    // Type Checking
+    "skipLibCheck": true,
+    // "checkJs": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": false,
+
+    // Output
+    "noEmit": true
+  }
 }

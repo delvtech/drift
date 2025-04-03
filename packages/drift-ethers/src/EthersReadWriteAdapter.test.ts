@@ -4,8 +4,7 @@ import { JsonRpcProvider } from "ethers";
 import { EthersReadWriteAdapter } from "src/EthersReadWriteAdapter";
 import { assert, describe, expect, it } from "vitest";
 
-const { VITE_RPC_URL = "http://127.0.0.1:8545", VITE_TOKEN_ADDRESS = "0x0" } =
-  process.env;
+const { VITE_RPC_URL = "http://127.0.0.1:8545" } = process.env;
 const provider = new JsonRpcProvider(VITE_RPC_URL);
 const signer = await provider.getSigner();
 

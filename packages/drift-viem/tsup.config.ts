@@ -9,4 +9,5 @@ export default defineConfig({
   minify: true,
   shims: true,
   cjsInterop: true,
+  keepNames: true,
 });

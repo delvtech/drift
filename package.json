@@ -21,7 +21,6 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.1",
     "@changesets/cli": "^2.27.1",
-    "@repo/typescript-config": "*",
     "turbo": "^2.3.4"
   },
   "engines": {

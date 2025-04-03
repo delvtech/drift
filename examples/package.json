@@ -14,7 +14,6 @@
     "@delvtech/fixed-point-wasm": "^0.0.8"
   },
   "devDependencies": {
-    "@repo/typescript-config": "*",
     "dotenv": "^16.4.5",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"

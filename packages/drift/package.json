@@ -31,12 +31,8 @@
   },
   "typesVersions": {
     "*": {
-      ".": [
-        "./dist/index.d.ts"
-      ],
-      "testing": [
-        "./dist/testing.d.ts"
-      ]
+      ".": ["./dist/index.d.ts"],
+      "testing": ["./dist/testing.d.ts"]
     }
   },
   "scripts": {
@@ -66,7 +62,6 @@
   },
   "devDependencies": {
     "@open-rpc/typings": "^1.12.4",
-    "@repo/typescript-config": "*",
     "@types/lodash.ismatch": "^4.4.9",
     "@types/sinon": "^17.0.3",
     "@vitest/coverage-v8": "3.0.4",
@@ -89,7 +84,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist"
-  ]
+  "files": ["dist"]
 }

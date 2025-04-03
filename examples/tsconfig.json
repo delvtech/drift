@@ -1,15 +1,28 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "@repo/typescript-config/base.json",
   "include": ["./*.ts", "src"],
-  "exclude": ["node_modules"],
   "compilerOptions": {
-    "rootDir": ".",
+    // Environment
+    "target": "esnext",
+    "lib": ["esnext"],
+    "module": "esnext",
+    "moduleDetection": "force",
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
     "baseUrl": ".",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
     "paths": {
       "src/*": ["src/*"]
-    }
+    },
+
+    // Type Checking
+    "skipLibCheck": true,
+    "strict": true,
+
+    // Output
+    "noEmit": true
   }
 }

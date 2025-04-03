@@ -33,7 +33,6 @@
   },
   "devDependencies": {
     "@delvtech/drift": "^0.8.4",
-    "@repo/typescript-config": "*",
     "ethers": "^5.7.2",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.3.6",
@@ -51,7 +50,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist"
-  ]
+  "files": ["dist"]
 }

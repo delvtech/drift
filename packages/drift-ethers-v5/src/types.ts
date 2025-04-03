@@ -1,4 +1,3 @@
-import type { BlockIdentifier } from "@delvtech/drift";
 import type { ContractInterface, providers } from "ethers/lib/ethers";
 import type { Interface } from "ethers/lib/utils";
 

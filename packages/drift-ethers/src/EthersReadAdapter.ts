@@ -54,8 +54,10 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
   provider: TProvider;
 
   constructor({
-    provider = "window" in globalThis && "ethereum" in window
-      ? (new BrowserProvider(window.ethereum) as Provider as TProvider)
+    provider = "ethereum" in globalThis
+      ? (new BrowserProvider(
+          (globalThis as any).ethereum,
+        ) as Provider as TProvider)
       : (getDefaultProvider() as Provider as TProvider),
   }: EthersReadAdapterParams<TProvider> = {}) {
     super();
