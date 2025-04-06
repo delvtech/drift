@@ -19,11 +19,7 @@ export type MinedBlockIdentifier = Exclude<BlockIdentifier, "pending">;
  */
 export type BlockStatus<
   T extends BlockIdentifier | undefined = BlockIdentifier,
-> = T extends "pending"
-  ? "pending"
-  : "pending" extends T
-    ? "mined" | "pending"
-    : "mined";
+> = T extends "pending" ? "pending" : "mined";
 
 // https://github.com/ethereum/execution-apis/blob/3ae3d29fc9900e5c48924c238dff7643fdc3680e/src/schemas/block.yaml#L1
 
@@ -63,10 +59,10 @@ export interface MinedBlockProps<
 }
 
 /**
- * Augmentable overrides for the {@linkcode Block} type. Adapter libs can merge
- * into this interface to customize block properties.
+ * Augmentable overrides for the {@linkcode Block} type. Adapter libraries can
+ * merge into this interface to customize block properties.
  */
-// @ts-expect-error - Unused type param added for use in augmentations.
+// @ts-expect-error: Unused type param is a placeholder for adapter libraries.
 export interface BlockOverrides<T extends BlockIdentifier | undefined> {}
 
 /**

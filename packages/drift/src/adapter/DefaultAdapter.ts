@@ -198,24 +198,6 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
     ).catch(handleError);
   }
 
-  call({ to, data, bytecode, block, ...options }: CallParams) {
-    if (bytecode && data) {
-      data = encodeBytecodeCallData(bytecode, data);
-    }
-
-    return this.provider.request({
-      method: "eth_call",
-      params: [
-        {
-          to,
-          data,
-          ...prepareTransactionOptions(options),
-        },
-        prepareBlockParam(block),
-      ],
-    });
-  }
-
   sendRawTransaction(transaction: Bytes) {
     return this.provider.request({
       method: "eth_sendRawTransaction",
@@ -264,29 +246,38 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
     });
   }
 
-  async read<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >({ abi, address, fn, args, block }: ReadParams<TAbi, TFunctionName>) {
-    const { data, abiFn } = prepareFunctionData({
-      abi,
-      fn,
-      args: args as FunctionArgs<TAbi, TFunctionName>,
-    });
+  call({ to, data, bytecode, block, ...options }: CallParams) {
+    if (bytecode && data) {
+      data = encodeBytecodeCallData(bytecode, data);
+    }
 
-    const returnData = await this.provider
+    return this.provider
       .request({
         method: "eth_call",
         params: [
           {
-            to: address,
+            to,
             data,
+            ...prepareTransactionOptions(options),
           },
           prepareBlockParam(block),
         ],
       })
       .catch(handleError);
+  }
 
+  async read<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
+  >({
+    abi,
+    address,
+    fn,
+    args = {} as FunctionArgs<TAbi, TFunctionName>,
+    block,
+  }: ReadParams<TAbi, TFunctionName>) {
+    const { data, abiFn } = prepareFunctionData({ abi, fn, args });
+    const returnData = await this.call({ to: address, data, block });
     return _decodeFunctionReturn<TAbi, TFunctionName>({
       abi,
       data: returnData,
@@ -300,29 +291,12 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
   >({
     abi,
     fn,
-    args,
+    args = {} as FunctionArgs<TAbi, TFunctionName>,
     address,
     ...options
   }: SimulateWriteParams<TAbi, TFunctionName>) {
-    const { abiFn, data } = prepareFunctionData({
-      abi,
-      fn,
-      args: args as FunctionArgs<TAbi, TFunctionName>,
-    });
-
-    const result = await this.provider
-      .request({
-        method: "eth_call",
-        params: [
-          {
-            to: address,
-            data,
-            ...prepareTransactionOptions(options),
-          },
-        ],
-      })
-      .catch(handleError);
-
+    const { abiFn, data } = prepareFunctionData({ abi, fn, args });
+    const result = await this.call({ to: address, data, ...options });
     return _decodeFunctionReturn<TAbi, TFunctionName>({
       abi,
       data: result,
@@ -366,38 +340,14 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
     return hash;
   }
 
-  async deploy<TAbi extends Abi>({
+  deploy<TAbi extends Abi>({
     abi,
     bytecode,
-    args,
-    from,
-    onMined,
+    args = {} as ConstructorArgs<TAbi>,
     ...options
   }: DeployParams<TAbi>) {
-    const data = this.encodeDeployData({
-      abi,
-      bytecode,
-      args: args as ConstructorArgs<TAbi>,
-    });
-
-    const hash = await this.provider
-      .request({
-        method: "eth_sendTransaction",
-        params: [
-          {
-            data,
-            from: from ?? (await this.getSignerAddress()),
-            ...prepareTransactionOptions(options),
-          },
-        ],
-      })
-      .catch(handleError);
-
-    if (onMined) {
-      this.waitForTransaction({ hash }).then(onMined);
-    }
-
-    return hash;
+    const data = this.encodeDeployData({ abi, bytecode, args });
+    return this.sendTransaction({ data, ...options });
   }
 
   async write<
@@ -406,37 +356,12 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
   >({
     abi,
     fn,
-    args,
+    args = {} as FunctionArgs<TAbi, TFunctionName>,
     address,
-    from,
-    onMined,
     ...options
   }: WriteParams<TAbi, TFunctionName>) {
-    const data = this.encodeFunctionData({
-      abi,
-      fn,
-      args: args as FunctionArgs<TAbi, TFunctionName>,
-    });
-
-    const hash = await this.provider
-      .request({
-        method: "eth_sendTransaction",
-        params: [
-          {
-            data,
-            to: address,
-            from: from ?? (await this.getSignerAddress()),
-            ...prepareTransactionOptions(options),
-          },
-        ],
-      })
-      .catch(handleError);
-
-    if (onMined) {
-      this.waitForTransaction({ hash }).then(onMined);
-    }
-
-    return hash;
+    const data = this.encodeFunctionData({ abi, fn, args });
+    return this.sendTransaction({ data, to: address, ...options });
   }
 }
 

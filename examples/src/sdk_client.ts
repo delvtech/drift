@@ -23,12 +23,17 @@ export class ReadVault {
     });
   }
 
+  getDecimals(): Promise<number> {
+    return this.contract.read("decimals");
+  }
+
   getBalance(account: Address): Promise<bigint> {
     return this.contract.read("balanceOf", { account });
   }
 
-  getDecimals(): Promise<number> {
-    return this.contract.read("decimals");
+  async getAssetValue(account: Address): Promise<bigint> {
+    const shares = await this.getBalance(account);
+    return this.contract.read("convertToAssets", { shares });
   }
 
   getDeposits(account?: Address): Promise<EventLog<Erc4626Abi, "Deposit">[]> {
@@ -41,8 +46,7 @@ export class ReadVault {
 }
 
 const vault = new ReadVault(
-  // mainnet yearn vault
-  "0x4cE9c93513DfF543Bc392870d57dF8C04e89Ba0a",
+  "0x4cE9c93513DfF543Bc392870d57dF8C04e89Ba0a", // mainnet yearn vault
   createDrift({
     rpcUrl: process.env.RPC_URL,
   }),
@@ -56,7 +60,6 @@ const [decimals, totalAssets, deposits] = await Promise.all([
 
 console.log("totalAssets", fixed(totalAssets, decimals).format());
 console.log("Deposit count:", deposits.length);
-
 console.group("Last 3 deposits (in arbitrary order):");
 await Promise.all(
   deposits.slice(0, 3).map(async ({ args, transactionHash }) => {

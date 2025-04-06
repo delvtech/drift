@@ -7,15 +7,18 @@
   "scripts": {
     "dev": "tsx -r dotenv/config src/index.ts",
     "watch": "tsx -r dotenv/config --watch src/index.ts",
-    "sdk": "tsx -r dotenv/config src/sdk.ts"
+    "sdk": "tsx -r dotenv/config src/sdk.ts",
+    "test": "tsx -r dotenv/config --test --test-reporter=spec src/*.test.*",
+    "test:watch": "tsx -r dotenv/config --test --test-reporter=spec --watch src/*.test.*"
   },
   "dependencies": {
     "@delvtech/drift": "^0.8.4",
     "@delvtech/fixed-point-wasm": "^0.0.8"
   },
   "devDependencies": {
-    "dotenv": "^16.4.5",
-    "tsx": "^4.19.2",
-    "typescript": "^5.6.3"
+    "@types/node": "^22.14.0",
+    "dotenv": "^16.4.7",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
   }
 }

@@ -12,10 +12,10 @@ import type {
  * execution. Uses a Proxy to automatically intercept method calls.
  */
 export class MethodInterceptor<T extends AnyObject = AnyObject> {
-  // Untyped to make private usage easier
+  // Untyped `MethodHooks` to make private usage easier
   #hooks = new HookRegistry<MethodHooks>();
 
-  // Typed getter for public usage
+  // Typed `MethodHooks` getter for public usage
   get hooks() {
     return this.#hooks as HookRegistry<MethodHooks<T>>;
   }
@@ -122,12 +122,12 @@ export class MethodInterceptor<T extends AnyObject = AnyObject> {
  *
  * type DevHooks = MethodHooks<Dev>;
  * // => {
- * //   "before:wakeUp": (payload: {...}) => MaybePromise<void>;
- * //   "before:code": (payload: {...}) => MaybePromise<void>;
- * //   "before:sleep": (payload: {...}) => MaybePromise<void>;
- * //   "after:wakeUp": (payload: {...}) => MaybePromise<void>;
- * //   "after:code": (payload: {...}) => MaybePromise<void>;
- * //   "after:sleep": (payload: {...}) => MaybePromise<void>;
+ * //   "before:wakeUp": (payload: {...}) => void;
+ * //   "before:code": (payload: {...}) => void;
+ * //   "before:sleep": (payload: {...}) => void;
+ * //   "after:wakeUp": (payload: {...}) => void;
+ * //   "after:code": (payload: {...}) => void;
+ * //   "after:sleep": (payload: {...}) => void;
  * // }
  * ```
  */

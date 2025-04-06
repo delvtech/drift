@@ -145,9 +145,11 @@ export type OneOf<T extends AnyObject> = UnionKey<T> extends infer K extends
 
 /**
  * Extracts and transforms members of a union type `T` based on a filter type
- * `F`. It's similar to `Extract<T, U>` but rather than omitting members of `T`
- * that aren't wholly assignable to `U`, (e.g., omitting `{ a: string }` when
- * `U` is `{ a: 'foo' }`), it narrows values of `T` that the filter type `F` is
+ * `F`.
+ *
+ * It's similar to `Extract<T, U>` but rather than omitting members of `T` that
+ * aren't wholly assignable to `U`, (e.g., omitting `{ a: string }` when `U` is
+ * `{ a: 'foo' }`), it narrows values of `T` that the filter type `F` is
  * assignable to (e.g., `{ a: string }` is narrowed to `{ a: 'foo' }`).
  *
  * For each member in `T` (distributing over unions), if it includes all
@@ -190,6 +192,9 @@ export type ExtractFiltered<T, F = {}> = T extends T // <- Distribute union
 /**
  * Transforms a type `T` based on a filter type `F`, returning `never` if the
  * result is not assignable to `T`.
+ *
+ * It's similar to creating the intersection `T & F`, but returns `never` if the
+ * types don't overlap.
  *
  * @typeParam T - The type to be transformed.
  * @typeParam F - The filter type specifying the desired transformations.

@@ -1,9 +1,4 @@
-import type {
-  AnyObject,
-  Eval,
-  FunctionKey,
-  MaybePromise,
-} from "src/utils/types";
+import type { Eval, FunctionKey, MaybePromise } from "src/utils/types";
 
 /**
  * A registry for managing and executing hook handlers. Handlers are executed
@@ -34,7 +29,7 @@ import type {
  * hooks.call("afterConnect", { peerId: "123", status: "success" }); // -> "Connected to peer: 123"
  * ```
  */
-export class HookRegistry<THooks extends AnyObject = AnyObject> {
+export class HookRegistry<THooks extends HookMap = HookMap> {
   #handlers: {
     [K in HookName<THooks>]?: HookHandler<THooks, K>[];
   } = {};
@@ -64,15 +59,15 @@ export class HookRegistry<THooks extends AnyObject = AnyObject> {
   ): boolean {
     let didRemove = false;
     const handlers = this.#handlers[hook];
-    if (!handlers) return didRemove;
-    this.#handlers[hook] = handlers.filter((existing) => {
-      if (existing === handler) {
-        didRemove = true;
-        return false;
-      }
-      return true;
-    });
-
+    if (handlers) {
+      this.#handlers[hook] = handlers.filter((existing) => {
+        if (existing === handler) {
+          didRemove = true;
+          return false;
+        }
+        return true;
+      });
+    }
     return didRemove;
   }
 
@@ -93,8 +88,8 @@ export class HookRegistry<THooks extends AnyObject = AnyObject> {
   }
 
   /**
-   * Call all handlers registered for a hook.
-   * Handlers are called sequentially in registration order.
+   * Call all handlers registered for a hook. Handlers are called sequentially
+   * in registration order.
    * @param hook - The hook to call.
    * @param payload - The payload to pass to each handler.
    */
@@ -104,12 +99,13 @@ export class HookRegistry<THooks extends AnyObject = AnyObject> {
   ): MaybePromise<void> {
     let result: MaybePromise<any> = undefined;
     const handlers = this.#handlers[hook];
-    if (!handlers) return result;
-    for (const handler of handlers) {
-      if (result instanceof Promise) {
-        result = result.then(() => handler(payload));
-      } else {
-        result = handler(payload);
+    if (handlers) {
+      for (const handler of handlers) {
+        if (result instanceof Promise) {
+          result = result.then(() => handler(payload));
+        } else {
+          result = handler(payload);
+        }
       }
     }
     return result;
@@ -117,28 +113,36 @@ export class HookRegistry<THooks extends AnyObject = AnyObject> {
 }
 
 /**
- * Get a union of all hook names from the hook mapping object `T`.
+ * An object mapping hook names to handler function types.
  */
-export type HookName<THooks extends AnyObject = AnyObject> =
-  THooks extends THooks ? FunctionKey<THooks> : never;
+export type HookMap<
+  THookName extends PropertyKey = PropertyKey,
+  THookHandler extends (payload: any) => any = (payload: any) => any,
+> = Record<THookName, THookHandler>;
+
+/**
+ * Get a union of all hook names from a hook map.
+ */
+export type HookName<THooks extends HookMap = HookMap> = THooks extends THooks
+  ? FunctionKey<THooks>
+  : never;
 
 /**
  * The payload passed to handlers of a specific hook.
- * @typeParam THook - The name of the hook being handled
- * @typeParam T - The hook mapping object containing hook names and their
+ * @typeParam THooks - A mapping of hook names to their handler function types.
+ * @typeParam THook - The name of the hook to get the payload for.
  */
 export type HookPayload<
-  THooks extends AnyObject = AnyObject,
+  THooks extends HookMap = HookMap,
   THook extends HookName<THooks> = HookName<THooks>,
 > = Parameters<THooks[THook]>[0];
 
 /**
  * A handler function for a specific hook.
- * @typeParam THook - The name of the hook being handled
- * @typeParam T - The hook mapping object containing hook names and their
- * corresponding handler functions.
+ * @typeParam THooks - A mapping of hook names to their handler function types.
+ * @typeParam THook - The name of the hook being handled.
  */
 export type HookHandler<
-  THooks extends AnyObject = AnyObject,
+  THooks extends HookMap = HookMap,
   THook extends HookName<THooks> = HookName<THooks>,
 > = (payload: Eval<HookPayload<THooks, THook>>) => MaybePromise<void>;

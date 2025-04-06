@@ -28,7 +28,7 @@ export function prepareDeployData<TAbi extends Abi>({
   abi,
   args,
   bytecode,
-}: { abi: TAbi; args: ConstructorArgs<TAbi>; bytecode: Bytes }) {
+}: EncodeDeployDataParams<TAbi>) {
   try {
     const { abiEntry, params } = prepareParams({
       abi,

@@ -153,7 +153,9 @@ const balance = await drift.read({
   address: "0xYourVaultAddress",
   fn: "balanceOf",
   args: {
-    account: "0xUserAddress",
+    // Named type-safe arguments improve readability
+    // and discoverability through IDE autocompletion
+    account: "0xUserAddress", 
   },
 });
 ```
@@ -201,7 +203,7 @@ const txHash = await drift.deploy({
 // Wait for the receipt to get the contract address
 const receipt = await drift.waitForTransaction({ hash: txHash });
 
-if (receipt?.status === "success" && receipt?.contractAddress) {
+if (receipt?.status === "success" && receipt.contractAddress) {
   const totalSupply = await drift.read({
     abi: ERC20.abi,
     address: receipt.contractAddress,
@@ -246,11 +248,11 @@ clients using Drift.
 
 ### 1. Define vault clients
 
-In your core SDK package, define the `ReadVault` and `ReadWriteVault` clients
-using Drift's `ReadContract` and `ReadWriteContract` abstractions.
+Define read and read-write clients that wrap Drift's `ReadContract` and
+`ReadWriteContract` abstractions.
 
 ```typescript
-// sdk-core/src/VaultClient.ts
+// foobar-sdk/src/VaultClient.ts
 import {
   type Address,
   type Drift,
@@ -261,9 +263,9 @@ import {
   type ReadWriteContract,
   createDrift,
 } from "@delvtech/drift";
-import { erc4626Abi } from "./abis/Erc4626";
+import { vaultAbi } from "./abis/vaultAbi";
 
-type VaultAbi = typeof erc4626Abi;
+type VaultAbi = typeof vaultAbi;
 
 /** A Read-Only Vault client */
 export class ReadVault {
@@ -271,7 +273,7 @@ export class ReadVault {
   
   constructor(address: Address, drift: Drift = createDrift()) {
     this.contract = drift.contract({
-      abi: erc4626Abi,
+      abi: vaultAbi,
       address,
     });
   }
@@ -280,8 +282,12 @@ export class ReadVault {
   getBalance(account: Address): Promise<bigint> {
     return this.contract.read("balanceOf", { account });
   }
-  getDecimals(): Promise<number> {
-    return this.contract.read("decimals");
+  convertToAssets(shares: bigint): Promise<bigint> {
+    return this.contract.read("convertToAssets", { shares });
+  }
+  async getAssetValue(account: Address): Promise<bigint> {
+    const shares = await this.getBalance(account);
+    return this.convertToAssets(shares);
   }
 
   // Fetch events with internal caching
@@ -334,7 +340,7 @@ an example using `viem`:
 import { createDrift } from "@delvtech/drift";
 import { viemAdapter } from "@delvtech/drift-viem";
 import { createPublicClient, http } from "viem";
-import { ReadVault } from "sdk-core";
+import { ReadVault } from "@foobar/sdk";
 
 const publicClient = createPublicClient({
   transport: http(),
@@ -351,8 +357,8 @@ const readVault = new ReadVault("0xYourVaultAddress", drift);
 // Fetch user balance
 const userBalance = await readVault.getBalance("0xUserAddress");
 
-// Get deposit history
-const deposits = await readVault.getDeposits("0xUserAddress");
+// Get the asset value of the user; the balance will be fetched from the cache
+const userAssetValue = await readVault.getAssetValue("0xUserAddress");
 ```
 
 #### Benefits of This Architecture
@@ -380,44 +386,45 @@ responses and focus on testing your application logic.
 
 #### Example: Testing Client Methods with Multiple RPC Calls
 
-Suppose you have a method, `getAccountValue`, in your `ReadVault` client that
-gets the total asset value for an account by fetching their vault balance and
-converting it to assets. Under the hood, this method makes multiple RPC
-requests.
+In our `ReadVault` client, the `getAssetValue` method gets the total asset
+value for an account by fetching their vault balance and converting it to
+assets. Under the hood, this method makes multiple RPC requests.
 
 Here's how you can use Drift's mocks to stub contract calls and test your
 method:
 
 ```typescript
-// sdk-core/src/ReadVault.test.ts
-import { createMockDrift } from "@delvtech/drift/testing";
+import assert from "node:assert";
+import test from "node:test";
+import { createMockDrift, randomAddress } from "@delvtech/drift/testing";
 import { vaultAbi } from "./abis/VaultAbi";
 import { ReadVault } from "./VaultClient";
 
-test("getUserAssetValue should return the total asset value for a user", async () => {
+test("getAssetValue returns account balances converted to assets", async () => {
   // Set up mocks
+  const address = randomAddress();
+  const account = randomAddress();
   const mockDrift = createMockDrift();
-  const mockContract = mockDrift.contract({
-    abi: vaultAbi,
-    address: "0xVaultAddress",
-  });
+  const mockContract = mockDrift.contract({ abi: vaultAbi, address });
 
   // Stub the vault's return values using `on*` methods
-  mockContract.onRead("balanceOf", { account: "0xUserAddress" }).resolves(
-    BigInt(100e18), // User has 100 vault shares
+  mockContract.onRead("balanceOf", { account }).resolves(
+    // Return 100 shares for the account
+    BigInt(100e18),
   );
-  mockContract.onRead("convertToAssets", { shares: BigInt(100e18) }).resolves(
-    BigInt(150e18), // 100 vault shares are worth 150 in assets
+  mockContract.onRead("convertToAssets").callsFake(
+    // Simulate the conversion of shares to assets
+    async (params) => (params.args.shares * BigInt(1.5e18)) / BigInt(1e18),
   );
 
-  // Instantiate your client with the mocked Drift instance
-  const readVault = new ReadVault("0xVaultAddress", mockDrift);
+  // Create your client with the mocked Drift instance
+  const readVault = new ReadVault(address, mockDrift);
 
   // Call the method you want to test
-  const accountAssetValue = await readVault.getAccountValue("0xUserAddress");
+  const accountAssetValue = await readVault.getAssetValue(account);
 
   // Assert the expected result
-  expect(accountAssetValue).toEqual(BigInt(150e18));
+  assert.strictEqual(accountAssetValue, BigInt(150e18));
 });
 ```
 
@@ -427,14 +434,15 @@ test("getUserAssetValue should return the total asset value for a user", async (
   network interactions.
 - **Focus on Logic:** Concentrate on testing your application's business logic.
 - **Easy Setup:** Minimal configuration required to get started with testing.
+  You can even start building and testing your clients before the contracts
+  are deployed.
 
 ## Simplifying React Hook Management
 
 ### The Problem Without Drift
 
-In traditional setups, you might rely on data-fetching libraries like React
-Query. However, to prevent redundant network requests, each contract call would
-need:
+In most setups, you might rely on data-fetching libraries like React Query.
+However, to prevent redundant network requests, each contract call would need:
 
 - Its own hook (e.g., `useBalanceOf`, `useTokenSymbol`).
 - Unique query keys for caching.
@@ -446,7 +454,8 @@ result separately.
 
 Drift's internal caching means you don't need to wrap every contract call in a
 separate hook. You can perform multiple contract interactions within a single
-function or hook without worrying about redundant requests.
+function or hook without worrying about redundant requests. Calls with the same
+parameters made in different hooks will share the same cache.
 
 #### Example Using React Query
 
@@ -456,7 +465,7 @@ import { ReadVault } from "sdk-core";
 
 function useVaultData(readVault: ReadVault, userAddress: string) {
   return useQuery(["vaultData", userAddress], async () => {
-    // Perform multiple reads without separate hooks or query keys
+    // Perform multiple reads without separate query keys.
     const [balance, symbol, deposits] = await Promise.all([
       readVault.getBalance(userAddress),
       readVault.contract.read("symbol"),
@@ -478,9 +487,15 @@ don't result in unnecessary network requests, even when composed within the same
 function.
 
 ```typescript
-// Both calls use the cache; only one network request is made
-const balance1 = await contract.read("balanceOf", { account });
-const balance2 = await contract.read("balanceOf", { account });
+// Return values are cached after the first call.
+const balance = await contract.read("balanceOf", { account });
+
+// Subsequent calls with the same parameters will return the cached value.
+const fromCache = await contract.read("balanceOf", { account });
+
+// Different parameters will trigger a network request.
+const atBlock = await contract.read("balanceOf", { account }, { block: 123n });
+const otherBalance = await contract.read("balanceOf", { account: "0xOtherAccount" });
 ```
 
 ### Cache Invalidation
@@ -495,7 +510,7 @@ contract.cache.invalidateRead("balanceOf", { account });
 // Invalidate all reads matching partial arguments
 contract.cache.invalidateReadsMatching("balanceOf");
 
-// Invalidate all reads associated with the contract
+// Clear all reads associated with the contract
 contract.cache.clearReads();
 
 // Let it all go...
@@ -568,7 +583,7 @@ implementation.
 import { DefaultAdapter, createDrift } from "@delvtech/drift";
 
 class CustomAdapter extends DefaultAdapter {
-  override async getChainId(): Promise<number> {
+  override async getChainId() {
     // Custom implementation...
   }
 }
@@ -582,18 +597,23 @@ const drift = await createDrift({
 
 #### Stores
 
-Implement a custom [`Store`][Store] to manage
-caching in a way that suits your application. The default store is an in-memory
-LRU cache, but you can create a custom store that uses TTL, localStorage,
-IndexedDB,
+Implement a custom [`Store`][Store] to manage caching in a way that suits your
+application. The default store is an in-memory LRU cache, but you can create a
+custom store that uses TTL, localStorage, IndexedDB,
 [QueryClient](https://tanstack.com/query/latest/docs/reference/QueryClient), or
 any other storage mechanism, sync or async.
 
 ```typescript
 import { createDrift } from "@delvtech/drift";
 
+class CustomStore extends Map {
+  override set(key: string, value: unknown) {
+    // Custom implementation...
+  }
+}
+
 const drift = createDrift({
-  store: new Map<string, unknown>(),
+  store: new CustomStore(),
 });
 ```
 
@@ -613,7 +633,8 @@ drift.hooks.on("before:write", async ({ args: [params] }) => {
 // Run middleware on reads
 drift.hooks.on("before:read", async ({ args: [params], resolve }) => {
   const cachedValue = await drift.cache.getRead(params);
-  resolve(readMiddleware({ drift, params, cachedValue }));
+  const result = await readMiddleware({ drift, params, cachedValue })
+  resolve(result);
 });
 
 // Run middleware to transform the result of calls

@@ -30,16 +30,14 @@ export function decodeFunctionData<
       as: "Array",
       checksumAddress: true,
     }) as any;
+    const functionName = abiFn.name as TFunctionName;
     const args: FunctionArgs<TAbi, TFunctionName> = arrayToObject({
       abi,
-      name: abiFn.name as TFunctionName,
+      name: functionName,
       kind: "inputs",
       values: arrayArgs,
     });
-    return {
-      functionName: abiFn.name as TFunctionName,
-      args,
-    };
+    return { functionName, args };
   } catch (e) {
     handleError(e);
   }

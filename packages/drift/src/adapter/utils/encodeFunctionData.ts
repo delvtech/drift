@@ -25,12 +25,8 @@ export function encodeFunctionData<
  */
 export function prepareFunctionData<
   TAbi extends Abi,
-  TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
->({
-  abi,
-  args,
-  fn,
-}: { abi: TAbi; fn: TFunctionName; args: FunctionArgs<TAbi, TFunctionName> }) {
+  TFunctionName extends FunctionName<TAbi>,
+>({ abi, args, fn }: EncodeFunctionDataParams<TAbi, TFunctionName>) {
   try {
     const { abiEntry, params } = prepareParams({
       abi,

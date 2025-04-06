@@ -30,8 +30,10 @@ const balance = await token.read("balanceOf", {
 // Extend clients with custom methods
 const extendedToken = token.extend({
   async getFormattedBalance(account: Address) {
-    const balance = await this.read("balanceOf", { account });
-    const decimals = await this.read("decimals");
+    const [balance, decimals] = await Promise.all([
+      this.read("balanceOf", { account }),
+      this.read("decimals"),
+    ]);
     return fixed(balance, decimals).format();
   },
 });
