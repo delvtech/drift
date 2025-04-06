@@ -454,8 +454,8 @@ result separately.
 
 Drift's internal caching means you don't need to wrap every contract call in a
 separate hook. You can perform multiple contract interactions within a single
-function or hook without worrying about redundant requests. Calls with the same
-parameters made in different hooks will share the same cache.
+function or hook without worrying about redundant requests from overlapping
+queries.
 
 #### Example Using React Query
 
