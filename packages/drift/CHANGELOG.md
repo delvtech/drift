@@ -1,5 +1,15 @@
 # @delvtech/drift
 
+## 0.9.0
+
+### Minor Changes
+
+- ce25bb5: Renamed `prepareParamsArray` util to `prepareParams`.
+
+### Patch Changes
+
+- 893ec5e: Added `createStubEvent` and `createStubEvents` testing utils.
+
 ## 0.8.4
 
 ### Patch Changes
