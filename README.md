@@ -89,8 +89,8 @@ Install Drift:
 npm install @delvtech/drift
 ```
 
-**Optional:** To use Drift with a specific web3 library, install the corresponding
-adapter:
+**Optional:** To use Drift with a specific web3 library, install the
+corresponding adapter:
 
 ```sh
 # Install one (optional)
@@ -267,7 +267,7 @@ import { vaultAbi } from "./abis/vaultAbi";
 
 type VaultAbi = typeof vaultAbi;
 
-/** A Read-Only Vault client */
+/** A read-only Vault client */
 export class ReadVault {
   contract: ReadContract<VaultAbi>;
   
@@ -279,19 +279,19 @@ export class ReadVault {
   }
 
   // Make read calls with internal caching
-  getBalance(account: Address): Promise<bigint> {
+  getBalance(account: Address) {
     return this.contract.read("balanceOf", { account });
   }
-  convertToAssets(shares: bigint): Promise<bigint> {
+  convertToAssets(shares: bigint) {
     return this.contract.read("convertToAssets", { shares });
   }
-  async getAssetValue(account: Address): Promise<bigint> {
+  async getAssetValue(account: Address) {
     const shares = await this.getBalance(account);
     return this.convertToAssets(shares);
   }
 
   // Fetch events with internal caching
-  getDeposits(account?: Address): Promise<EventLog<VaultAbi, "Deposit">[]> {
+  getDeposits(account?: Address) {
     return this.contract.getEvents("Deposit", {
       filter: {
         sender: account,
@@ -300,6 +300,7 @@ export class ReadVault {
   }
 }
 
+/** A read-write Vault client that can sign transactions */
 export class ReadWriteVault extends ReadVault {
   declare contract: ReadWriteContract<VaultAbi>;
 
@@ -311,7 +312,7 @@ export class ReadWriteVault extends ReadVault {
   }
 
   // Make a deposit
-  deposit(amount: bigint, account: Address): Promise<Hash> {
+  deposit(amount: bigint, account: Address) {
     return this.contract.write(
       "deposit",
       {
@@ -377,8 +378,9 @@ responses and focus on testing your application logic.
 
 > [!IMPORTANT]
 >
-> Drift's testing mocks have a peer dependency on [Sinon.JS](https://sinonjs.org). Make sure to install
-> it before using the mocks.
+> Drift's testing mocks have a peer dependency on
+> [Sinon.JS](https://sinonjs.org/releases/v17/). Make sure to install it before
+> using the mocks.
 >
 > ```sh
 > npm install --save-dev sinon
@@ -386,9 +388,9 @@ responses and focus on testing your application logic.
 
 #### Example: Testing Client Methods with Multiple RPC Calls
 
-In our `ReadVault` client, the `getAssetValue` method gets the total asset
-value for an account by fetching their vault balance and converting it to
-assets. Under the hood, this method makes multiple RPC requests.
+In our `ReadVault` client, the `getAssetValue` method gets the total asset value
+for an account by fetching their vault balance and converting it to assets.
+Under the hood, this method makes multiple RPC requests.
 
 Here's how you can use Drift's mocks to stub contract calls and test your
 method:
@@ -434,8 +436,8 @@ test("getAssetValue returns account balances converted to assets", async () => {
   network interactions.
 - **Focus on Logic:** Concentrate on testing your application's business logic.
 - **Easy Setup:** Minimal configuration required to get started with testing.
-  You can even start building and testing your clients before the contracts
-  are deployed.
+  You can even start building and testing your clients before the contracts are
+  deployed.
 
 ## Simplifying React Hook Management
 
