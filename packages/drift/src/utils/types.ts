@@ -39,14 +39,15 @@ export type Replace<T, U> = Omit<T, keyof U> & U;
  * Make all properties in `T` whose keys are in the union `K` required and
  * non-nullable. Similar to `Required` but only applies to a subset of keys.
  */
-export type RequiredBy<T, K extends keyof T> = Omit<T, K> &
-  Required<Pick<T, K>>;
+export type RequiredBy<T, K extends keyof T | (string & {})> = Omit<T, K> &
+  Required<Pick<T, K & keyof T>>;
 
 /**
  * Make all properties in `T` whose keys are in the union `K` optional. Similar
  * to `Partial` but only applies to a subset of keys.
  */
-export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type PartialBy<T, K extends keyof T | (string & {})> = Omit<T, K> &
+  Partial<Pick<T, K & keyof T>>;
 
 /**
  * The opposite of {@linkcode Readonly<T>}. Make all properties in `T` mutable.
