@@ -43,6 +43,7 @@ export interface Network {
 
   /**
    * Wait for a transaction to be mined.
+   * @returns The transaction receipt.
    */
   waitForTransaction(
     params: WaitForTransactionParams,

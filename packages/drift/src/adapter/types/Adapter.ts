@@ -16,8 +16,16 @@ import type {
 } from "src/adapter/types/Transaction";
 import type { EmptyObject, OneOf } from "src/utils/types";
 
+/**
+ * An interface for interacting with a blockchain network and its contracts,
+ * required by all Drift client APIs.
+ */
 export interface Adapter extends ReadAdapter, Partial<WriteAdapter> {}
 
+/**
+ * A read-only interface for interacting with a blockchain network and its
+ * contracts, required by all Drift client APIs.
+ */
 export interface ReadAdapter extends Network {
   /**
    * Executes a new message call immediately without creating a transaction on
@@ -69,10 +77,17 @@ export interface ReadAdapter extends Network {
    */
   sendRawTransaction(transaction: Bytes): Promise<Hash>;
 
+  /**
+   * Get a list of logs for a contract event.
+   */
   getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
     params: GetEventsParams<TAbi, TEventName>,
   ): Promise<EventLog<TAbi, TEventName>[]>;
 
+  /**
+   * Calls a `pure` or `view` function on a contract.
+   * @returns The decoded return value of the function.
+   */
   read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
@@ -80,6 +95,10 @@ export interface ReadAdapter extends Network {
     params: ReadParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>>;
 
+  /**
+   * Call a state-mutating function on a contract without sending a transaction.
+   * @returns The decoded return value of the function.
+   */
   simulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
@@ -87,20 +106,32 @@ export interface ReadAdapter extends Network {
     params: SimulateWriteParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>>;
 
+  /**
+   * Encodes the constructor call data for a contract deployment.
+   */
   encodeDeployData<TAbi extends Abi>(
     params: EncodeDeployDataParams<TAbi>,
   ): Bytes;
 
+  /**
+   * Encodes the call data for a function on a contract.
+   */
   encodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
   >(params: EncodeFunctionDataParams<TAbi, TFunctionName>): Bytes;
 
+  /**
+   * Encodes the return value of a function on a contract.
+   */
   encodeFunctionReturn<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
   >(params: EncodeFunctionReturnParams<TAbi, TFunctionName>): Bytes;
 
+  /**
+   * Decodes the call data for a function on a contract.
+   */
   decodeFunctionData<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
@@ -108,6 +139,9 @@ export interface ReadAdapter extends Network {
     params: DecodeFunctionDataParams<TAbi, TFunctionName>,
   ): DecodedFunctionData<TAbi, TFunctionName>;
 
+  /**
+   * Decodes the return value of a function on a contract.
+   */
   decodeFunctionReturn<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi>,
@@ -116,26 +150,44 @@ export interface ReadAdapter extends Network {
   ): FunctionReturn<TAbi, TFunctionName>;
 }
 
+/**
+ * A write-only interface for signing and submitting transactions.
+ */
 export interface WriteAdapter {
+  /**
+   * Get's the address of the account that will be used to sign transactions.
+   * @returns The address of the signer.
+   */
   getSignerAddress(): Promise<Address>;
 
   /**
    * Signs and submits a transaction.
+   * @returns The transaction hash of the submitted transaction.
    */
   sendTransaction(params: SendTransactionParams): Promise<Hash>;
 
   /**
-   * Deploys a contract using the specified bytecode and constructor arguments.
+   * Creates, signs, and submits a contract creation transaction using the
+   * specified bytecode and constructor arguments.
    * @returns The transaction hash of the submitted transaction.
    */
   deploy<TAbi extends Abi>(params: DeployParams<TAbi>): Promise<Hash>;
 
+  /**
+   * Creates, signs, and submits a transaction for a state-mutating contract
+   * function.
+   * @returns The transaction hash of the submitted transaction.
+   */
   write<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(params: WriteParams<TAbi, TFunctionName>): Promise<Hash>;
 }
 
+/**
+ * A read-write interface for interacting with a blockchain network and
+ * its contracts, required by all read-write Drift client APIs.
+ */
 export interface ReadWriteAdapter extends ReadAdapter, WriteAdapter {}
 
 // Method parameter types //
