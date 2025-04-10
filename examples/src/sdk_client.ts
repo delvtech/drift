@@ -2,7 +2,6 @@ import {
   type Address,
   type Contract,
   type Drift,
-  type EventLog,
   createDrift,
 } from "@delvtech/drift";
 import { fixed } from "@delvtech/fixed-point-wasm";
@@ -10,9 +9,7 @@ import { ERC4626 } from "src/abis/Erc4626";
 
 type Erc4626Abi = typeof ERC4626.abi;
 
-/**
- * A bare-bones Read-Only Vault client.
- */
+/** A read-only Vault client */
 export class ReadVault {
   contract: Contract<Erc4626Abi>;
 
@@ -23,20 +20,23 @@ export class ReadVault {
     });
   }
 
-  getDecimals(): Promise<number> {
+  // Make read calls with internal caching
+  getDecimals() {
     return this.contract.read("decimals");
   }
-
-  getBalance(account: Address): Promise<bigint> {
+  getBalance(account: Address) {
     return this.contract.read("balanceOf", { account });
   }
-
-  async getAssetValue(account: Address): Promise<bigint> {
-    const shares = await this.getBalance(account);
+  convertToAssets(shares: bigint) {
     return this.contract.read("convertToAssets", { shares });
   }
+  async getAssetValue(account: Address) {
+    const shares = await this.getBalance(account);
+    return this.convertToAssets(shares);
+  }
 
-  getDeposits(account?: Address): Promise<EventLog<Erc4626Abi, "Deposit">[]> {
+  // Fetch events with internal caching
+  getDeposits(account?: Address) {
     return this.contract.getEvents("Deposit", {
       filter: {
         sender: account,
@@ -70,7 +70,7 @@ await Promise.all(
     });
     if (!transaction) return;
 
-    console.log({
+    console.table({
       assets: fixed(args.assets, decimals).format(),
       shares: fixed(args.shares, decimals).format(),
       sender: args.sender,

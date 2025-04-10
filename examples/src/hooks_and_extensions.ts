@@ -2,20 +2,25 @@ import { type Address, createDrift } from "@delvtech/drift";
 import { erc20 } from "@delvtech/drift/testing";
 import { fixed } from "@delvtech/fixed-point-wasm";
 
-// Create a Drift client
+// Create a Drift client.
 const drift = createDrift({
   rpcUrl: process.env.RPC_URL,
 });
 
-// A simple hook to log all read operations along with their cached values.
+// A simple hook to log cache hits.
 drift.hooks.on("before:read", async ({ args: [params] }) => {
   const cachedValue = await drift.cache.getRead(params);
-  console.group("Hook: before:read");
-  console.table({
-    ...params,
-    cachedValue,
-  });
-  console.groupEnd();
+  if (cachedValue !== undefined) {
+    console.group("✅ Cache hit:");
+    console.table({
+      address: params.address,
+      fn: params.fn,
+      ...params.args,
+      block: params.block,
+      cachedValue,
+    });
+    console.groupEnd();
+  }
 });
 
 // An example of an extended contract client with a custom method which combines

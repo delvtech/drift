@@ -18,7 +18,7 @@ class ReadVault {
       address,
     });
   }
-  async getAssetValue(account: Address): Promise<bigint> {
+  async getAssetValue(account: Address) {
     const shares = await this.contract.read("balanceOf", { account });
     return this.contract.read("convertToAssets", { shares });
   }

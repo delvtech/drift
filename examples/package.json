@@ -1,15 +1,18 @@
 {
-  "name": "example",
+  "name": "examples",
   "version": "0.0.0",
   "main": "index.js",
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "tsx -r dotenv/config src/index.ts",
-    "watch": "tsx -r dotenv/config --watch src/index.ts",
-    "sdk": "tsx -r dotenv/config src/sdk.ts",
-    "test": "tsx -r dotenv/config --test --test-reporter=spec src/*.test.*",
-    "test:watch": "tsx -r dotenv/config --test --test-reporter=spec --watch src/*.test.*"
+    "execute": "tsx --env-file-if-exists=.env",
+    "dev": "yarn execute src/index.ts",
+    "watch": "yarn execute --watch src/index.ts",
+    "bytecode_call": "yarn execute src/bytecode_call.ts",
+    "hooks_and_extensions": "yarn execute src/hooks_and_extensions.ts",
+    "test": "yarn execute --test",
+    "test:watch": "yarn test --watch",
+    "sdk_client": "yarn execute src/sdk_client.ts"
   },
   "dependencies": {
     "@delvtech/drift": "^0.8.4",
@@ -17,7 +20,6 @@
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
-    "dotenv": "^16.4.7",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3"
   }
