@@ -3,6 +3,10 @@
 export { MockAdapter } from "src/adapter/MockAdapter";
 
 export { createStubBlock } from "src/adapter/utils/testing/createStubBlock";
+export {
+  createStubEvent,
+  createStubEvents,
+} from "src/adapter/utils/testing/createStubEvent";
 export { createStubTransaction } from "src/adapter/utils/testing/createStubTransaction";
 export { createStubTransactionReceipt } from "src/adapter/utils/testing/createStubTransactionReceipt";
 
