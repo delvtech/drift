@@ -17,26 +17,19 @@ type CreateStubEventParams<
 >;
 
 /**
- * Creates a stub event for testing.
+ * Creates a stub event log for testing.
  */
 export function createStubEvent<
   TAbi extends Abi,
   TEventName extends EventName<TAbi>,
->({
-  abi,
-  eventName,
-  args,
-  blockNumber,
-  ...overrides
-}: CreateStubEventParams<TAbi, TEventName>): EventLog<TAbi, TEventName> {
+>(params: CreateStubEventParams<TAbi, TEventName>): EventLog<TAbi, TEventName> {
+  const { abi, ...overrides } = params;
   return {
-    eventName,
-    args,
     blockNumber: 1n,
     data: randomHex(),
     transactionHash: randomHex(),
     ...overrides,
-  } as EventLog<TAbi, TEventName>;
+  };
 }
 
 type CreateStubEventsParams<
@@ -57,20 +50,16 @@ type CreateStubEventsParams<
 }>;
 
 /**
- * Creates multiple stub events for testing.
+ * Creates multiple stub event logs for testing.
  */
 export function createStubEvents<
   TAbi extends Abi,
   TEventName extends EventName<TAbi>,
->({
-  abi,
-  eventName,
-  events,
-}: CreateStubEventsParams<TAbi, TEventName>): EventLog<TAbi, TEventName>[] {
-  return events.map((event) =>
-    createStubEvent({ abi, eventName, ...event } as CreateStubEventParams<
-      TAbi,
-      TEventName
-    >),
+>(
+  params: CreateStubEventsParams<TAbi, TEventName>,
+): EventLog<TAbi, TEventName>[] {
+  const { abi, eventName, events } = params;
+  return events.map((overrides) =>
+    createStubEvent({ abi, eventName, ...overrides }),
   );
 }

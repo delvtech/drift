@@ -1,12 +1,12 @@
 import { MockAdapter } from "src/adapter/MockAdapter";
-import type { EventLog } from "src/adapter/types/Event";
+import { createStubEvents } from "src/adapter/utils/testing/createStubEvent";
 import { IERC20 } from "src/artifacts/IERC20";
 import { createContract } from "src/client/contract/Contract";
+import { ALICE, BOB } from "src/utils/testing/accounts";
 import { describe, expect, it, vi } from "vitest";
 
 describe("Contract", () => {
   const abi = IERC20.abi;
-  type Erc20Abi = typeof abi;
   const address = "0xAddress";
   const adapter = new MockAdapter();
   adapter.onGetChainId().resolves(0);
@@ -14,127 +14,70 @@ describe("Contract", () => {
   describe("getEvents", () => {
     it("Can be preloaded", async () => {
       const contract = createContract({ abi, address, adapter });
-
-      const events: EventLog<Erc20Abi, "Transfer">[] = [
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0xBob",
-            to: "0xAlice",
-            value: 100n,
-          },
-        },
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0xAlice",
-            to: "0xBob",
-            value: 120n,
-          },
-        },
-      ];
+      const events = createStubEvents({
+        abi,
+        eventName: "Transfer",
+        events: [
+          { args: { from: BOB, to: ALICE, value: 123n } },
+          { args: { from: ALICE, to: BOB, value: 456n } },
+        ],
+      });
 
       contract.cache.preloadEvents({ event: "Transfer", value: events });
+
       expect(await contract.getEvents("Transfer")).toBe(events);
     });
 
     describe("epochBlock", () => {
+      const event = "Transfer";
       const epochBlock = 123n;
-      const eventsAtEpoch: EventLog<Erc20Abi, "Transfer">[] = [
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0xBob",
-            to: "0xAlice",
-            value: 100n,
-          },
-        },
-      ];
+      const eventsAtEpoch = createStubEvents({
+        abi,
+        eventName: event,
+        events: [{ args: { from: ALICE, to: BOB, value: 123n } }],
+      });
 
       it("Is used by default if defined", async () => {
+        adapter.onGetEvents({ abi, address, event }).resolves([]);
         adapter
-          .onGetEvents({
-            abi,
-            address,
-            event: "Transfer",
-          })
-          .resolves([]);
-        adapter
-          .onGetEvents({
-            abi,
-            address,
-            event: "Transfer",
-            fromBlock: epochBlock,
-          })
+          .onGetEvents({ abi, address, event, fromBlock: epochBlock })
           .resolves(eventsAtEpoch);
-        const contract = createContract({
-          abi,
-          address,
-          adapter,
-          epochBlock,
-        });
 
-        const returnedEvents = await contract.getEvents("Transfer");
+        const contract = createContract({ abi, address, adapter, epochBlock });
+        const returnedEvents = await contract.getEvents(event);
+
         expect(returnedEvents).toBe(eventsAtEpoch);
       });
 
       it("Is used in place of 'earliest' if defined", async () => {
         adapter
-          .onGetEvents({
-            abi,
-            address,
-            event: "Transfer",
-            fromBlock: "earliest",
-          })
+          .onGetEvents({ abi, address, event, fromBlock: "earliest" })
           .resolves([]);
         adapter
-          .onGetEvents({
-            abi,
-            address,
-            event: "Transfer",
-            fromBlock: epochBlock,
-          })
+          .onGetEvents({ abi, address, event, fromBlock: epochBlock })
           .resolves(eventsAtEpoch);
-        const contract = createContract({
-          abi,
-          address,
-          adapter,
-          epochBlock,
-        });
 
-        const returnedEvents = await contract.getEvents("Transfer", {
+        const contract = createContract({ abi, address, adapter, epochBlock });
+        const returnedEvents = await contract.getEvents(event, {
           fromBlock: "earliest",
         });
+
         expect(returnedEvents).toBe(eventsAtEpoch);
       });
 
       it("Is used in place of lower block numbers if defined", async () => {
         adapter
-          .onGetEvents({
-            abi,
-            address,
-            event: "Transfer",
-            fromBlock: 0n,
-          })
+          .onGetEvents({ abi, address, event, fromBlock: 0n })
           .resolves([]);
         adapter
-          .onGetEvents({
-            abi,
-            address,
-            event: "Transfer",
-            fromBlock: epochBlock,
-          })
+          .onGetEvents({ abi, address, event, fromBlock: epochBlock })
           .resolves(eventsAtEpoch);
-        const contract = createContract({
-          abi,
-          address,
-          adapter,
-          epochBlock,
-        });
 
-        const returnedEvents = await contract.getEvents("Transfer", {
+        const contract = createContract({ abi, address, adapter, epochBlock });
+        const returnedEvents = await contract.getEvents(event, {
           fromBlock: 0n,
         });
+
         expect(returnedEvents).toBe(eventsAtEpoch);
       });
     });
@@ -152,62 +95,33 @@ describe("Contract", () => {
     });
 
     describe("epochBlock", () => {
+      const fn = "name";
       const epochBlock = 123n;
       const nameAtEpoch = "Name at Epoch";
 
       it("Is used in place of 'earliest' if defined", async () => {
         adapter
-          .onRead({
-            abi,
-            address,
-            fn: "name",
-            block: "earliest",
-          })
+          .onRead({ abi, address, fn, block: "earliest" })
           .resolves("Name at Earliest");
         adapter
-          .onRead({
-            abi,
-            address,
-            fn: "name",
-            block: epochBlock,
-          })
+          .onRead({ abi, address, fn, block: epochBlock })
           .resolves(nameAtEpoch);
-        const contract = createContract({
-          abi,
-          address,
-          adapter,
-          epochBlock,
-        });
 
-        const returnedName = await contract.read("name", {}, { block: 0n });
+        const contract = createContract({ abi, address, adapter, epochBlock });
+        const returnedName = await contract.read(fn, {}, { block: 0n });
+
         expect(returnedName).toBe(nameAtEpoch);
       });
 
       it("Is used in place of lower block numbers if defined", async () => {
+        adapter.onRead({ abi, address, fn, block: 0n }).resolves("Name at 0");
         adapter
-          .onRead({
-            abi,
-            address,
-            fn: "name",
-            block: 0n,
-          })
-          .resolves("Name at 0");
-        adapter
-          .onRead({
-            abi,
-            address,
-            fn: "name",
-            block: epochBlock,
-          })
+          .onRead({ abi, address, fn, block: epochBlock })
           .resolves(nameAtEpoch);
-        const contract = createContract({
-          abi,
-          address,
-          adapter,
-          epochBlock,
-        });
 
-        const returnedName = await contract.read("name", {}, { block: 0n });
+        const contract = createContract({ abi, address, adapter, epochBlock });
+        const returnedName = await contract.read(fn, {}, { block: 0n });
+
         expect(returnedName).toBe(nameAtEpoch);
       });
     });
