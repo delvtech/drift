@@ -37,7 +37,8 @@
   },
   "scripts": {
     "generate:artifacts": "sh scripts/generateArtifacts.sh",
-    "generate:ethereum": "sh scripts/generateEthereum.sh",
+    "generate:ethereum": "tsx scripts/generateEthereum.ts",
+    "fix": "tsx scripts/fixEthereum.ts",
     "build": "tsup",
     "watch": "tsup --watch",
     "test": "vitest run",
@@ -63,6 +64,7 @@
   "devDependencies": {
     "@open-rpc/typings": "^1.12.4",
     "@types/lodash.ismatch": "^4.4.9",
+    "@types/node": "^22.14.0",
     "@types/sinon": "^17.0.4",
     "@vitest/coverage-v8": "3.1.1",
     "abitype": "^1.0.8",
@@ -70,6 +72,7 @@
     "sinon": "^20.0.0",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.4.0",
+    "tsx": "^4.19.3",
     "typescript": "^5.8.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.1.1"

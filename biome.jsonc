@@ -24,6 +24,9 @@
       "complexity": {
         "noBannedTypes": "off"
       },
+      "correctness": {
+        "noEmptyCharacterClassInRegex": "off"
+      },
       "style": {
         "noNonNullAssertion": {
           "level": "info",
