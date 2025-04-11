@@ -1,13 +1,42 @@
 # Contributing
 
+- [Branch Naming](#branch-naming)
+- [Creating a release](#creating-a-release)
+
+## Branch Naming
+
+Use lower-hyphen-case in the following format for branch names:
+
+```sh
+<user-alias>/[docs/feature/bugfix/hotfix/chore]/<title>
+```
+
+- `user-alias`: Your GitHub username or alias.
+- `docs/feature/bugfix/hotfix/chore`: The type of change you're making.
+- `title`: A short description of the change.
+
+**Examples**:
+
+```sh
+ryangoree/bugfix/typo
+ryangoree/docs/update-readme
+ryangoree/feature/epoch-block
+```
+
 ## Creating a release
 
 This repo uses [changesets](https://github.com/changesets/changesets) to manage
 versioning and changelogs. This means you shouldn't need to manually change any
 of the internal package versions.
 
-Before opening a PR, run `yarn changeset` and follow the prompts to describe the
-changes you've made. This will create a changeset file that should be committed.
+Before opening a PR, run:
+
+```sh
+yarn changeset
+```
+
+Follow the prompts to describe the changes you've made and commit the changeset
+file that it generates.
 
 As changesets are committed to the `main` branch, the [changesets github
 action](https://github.com/changesets/action) in the release workflow will
