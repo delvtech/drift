@@ -47,7 +47,7 @@
     "typecheck:watch": "tsc --noEmit --p tsconfig.typecheck.json --watch"
   },
   "peerDependencies": {
-    "sinon": "^17.0.1"
+    "sinon": "^20.0.0"
   },
   "peerDependenciesMeta": {
     "sinon": {
@@ -56,23 +56,23 @@
   },
   "dependencies": {
     "lodash.ismatch": "^4.4.0",
-    "lru-cache": "^11.0.2",
-    "ox": "^0.6.9",
+    "lru-cache": "^11.1.0",
+    "ox": "^0.7.0",
     "safe-stable-stringify": "^2.5.0"
   },
   "devDependencies": {
     "@open-rpc/typings": "^1.12.4",
     "@types/lodash.ismatch": "^4.4.9",
-    "@types/sinon": "^17.0.3",
-    "@vitest/coverage-v8": "3.0.4",
+    "@types/sinon": "^17.0.4",
+    "@vitest/coverage-v8": "3.1.1",
     "abitype": "^1.0.8",
     "fast-json-stable-stringify": "^2.1.0",
-    "sinon": "^17.0.1",
+    "sinon": "^20.0.0",
     "tsconfig-paths": "^4.2.0",
-    "tsup": "^8.3.6",
-    "typescript": "^5.7.3",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.0.4"
+    "vitest": "^3.1.1"
   },
   "author": {
     "name": "DELV",
