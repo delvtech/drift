@@ -71,21 +71,18 @@ export class StubStore<T> {
       };
       this.#methodStores.set(method, methodStore);
 
-      // Call the create function and return early if no key is provided or if
-      // partial matching is enabled.
+      // Call the create function and return early if provided.
       if (create) {
-        if (!key) {
-          methodStore.defaultStub = create(createDefaultStub(methodName));
-          return methodStore.defaultStub as SinonStub<TArgs, TReturnType>;
-        }
-        if (matchPartial) {
-          const newStub = create(createDefaultStub(methodName)) as SinonStub<
-            TArgs,
-            TReturnType
-          >;
+        const newStub = create(createDefaultStub(methodName)) as SinonStub<
+          TArgs,
+          TReturnType
+        >;
+        if (key) {
           methodStore.keyedStubs.set(key, newStub);
-          return newStub;
+        } else {
+          methodStore.defaultStub = newStub;
         }
+        return newStub;
       }
     }
 
