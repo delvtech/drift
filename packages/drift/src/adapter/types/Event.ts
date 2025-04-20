@@ -54,13 +54,14 @@ export type EventFilter<
 /**
  * A strongly typed event object based on an abi
  */
+// https://github.com/ethereum/execution-apis/blob/de87e24e0f2fbdbaee0fa36ab61b8ec25d3013d0/src/schemas/receipt.yaml#L1
 export type EventLog<
   TAbi extends Abi = Abi,
   TEventName extends EventName<TAbi> = EventName<TAbi>,
 > = {
   eventName: TEventName;
   args: EventArgs<TAbi, TEventName>;
-  data?: Bytes;
+  data: Bytes;
   blockNumber?: bigint;
   transactionHash?: Hash;
 };
