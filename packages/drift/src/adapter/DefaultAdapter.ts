@@ -293,10 +293,16 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
     fn,
     args = {} as FunctionArgs<TAbi, TFunctionName>,
     address,
+    from,
     ...options
   }: SimulateWriteParams<TAbi, TFunctionName>) {
     const { abiFn, data } = prepareFunctionData({ abi, fn, args });
-    const result = await this.call({ to: address, data, ...options });
+    const result = await this.call({
+      data,
+      to: address,
+      from: from ?? (await this.getSignerAddress().catch(() => undefined)),
+      ...options,
+    });
     return _decodeFunctionReturn<TAbi, TFunctionName>({
       abi,
       data: result,
