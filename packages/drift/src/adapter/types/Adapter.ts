@@ -155,7 +155,7 @@ export interface ReadAdapter extends Network {
  */
 export interface WriteAdapter {
   /**
-   * Get's the address of the account that will be used to sign transactions.
+   * Gets the address of the account that will be used to sign transactions.
    * @returns The address of the signer.
    */
   getSignerAddress(): Promise<Address>;
