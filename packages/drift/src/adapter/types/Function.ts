@@ -7,7 +7,7 @@ import type {
 } from "src/adapter/types/Abi";
 
 /**
- * Get a union of function names from an abi
+ * Get a union of function names from an abi.
  */
 export type FunctionName<
   TAbi extends Abi,

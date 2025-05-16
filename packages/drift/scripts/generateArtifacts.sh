@@ -11,7 +11,6 @@ package_name=$(jq -r .name package.json)
 script_name=$(basename "$0")
 
 cat <<EOF
-
 +
 |  $package_name $script_name
 |
@@ -21,7 +20,6 @@ cat <<EOF
 |  Output directory:    $ts_out_dir
 |  Max file size:       $max_file_size bytes
 +
-
 EOF
 
 echo "Compiling contracts..."
