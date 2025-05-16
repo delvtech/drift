@@ -39,7 +39,6 @@
   "scripts": {
     "generate:artifacts": "sh scripts/generateArtifacts.sh",
     "generate:ethereum": "tsx scripts/generateEthereum.ts",
-    "fix": "tsx scripts/fixEthereum.ts",
     "build": "tsup",
     "watch": "tsup --watch",
     "test": "vitest run",
