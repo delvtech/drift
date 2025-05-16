@@ -1,5 +1,17 @@
 # @delvtech/drift
 
+## 0.9.0
+
+### Minor Changes
+
+- ce25bb5: Renamed `prepareParamsArray` util to `prepareParams`.
+
+### Patch Changes
+
+- e7ec38c: Modified the `simulateWrite` method in the `DefaultAdapter` to use the connected account when available.
+- 893ec5e: Added `createStubEvent` and `createStubEvents` testing utils.
+- f623fff: Fixed a bug in the `StubStore` where the `create` function wasn't being called unless no key was provided or `matchPartial` was `true`.
+
 ## 0.8.4
 
 ### Patch Changes
