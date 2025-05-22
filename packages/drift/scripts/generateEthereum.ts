@@ -36,9 +36,10 @@ const tempTsOutPath = join(tempCloneDir, sanitizedTsOutFilename);
 const tempSchemaOutPath = join(tempCloneDir, schemaDoc);
 
 // Relative paths (for logging and final doc comment)
-const relativeScriptPath = relative(process.cwd(), import.meta.filename);
-const relativeTsOutPath = relative(process.cwd(), tsOutPath);
-const relativeSchemaOutPath = relative(process.cwd(), schemaOutPath);
+const cwd = process.cwd();
+const relativeScriptPath = relative(cwd, import.meta.filename);
+const relativeTsOutPath = relative(cwd, tsOutPath);
+const relativeSchemaOutPath = relative(cwd, schemaOutPath);
 
 console.log(`+
 |  ${manifest.name} - ${relativeScriptPath}
@@ -48,8 +49,8 @@ console.log(`+
 |  Branch:        ${branch}
 |  Repository:    ${repoUrl}
 |  Output paths:
-|    - Schema:    ${relative(process.cwd(), schemaOutPath)}
-|    - Types:     ${relative(process.cwd(), tsOutPath)}
+|    - Types:     ${relativeTsOutPath}
+|    - Schema:    ${relativeSchemaOutPath}
 +`);
 
 // 1. Clone or update the repo
@@ -127,8 +128,8 @@ renameSync(tempSchemaOutPath, schemaOutPath);
 rmSync(tempCloneDir, { recursive: true, force: true });
 
 // Done
-console.log(`✅ Schema: ${relativeSchemaOutPath}`);
 console.log(`✅ Types: ${relativeTsOutPath}`);
+console.log(`✅ Schema: ${relativeSchemaOutPath}`);
 
 // Helper Functions //
 
