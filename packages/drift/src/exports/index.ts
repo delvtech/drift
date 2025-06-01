@@ -66,7 +66,7 @@ export type {
 } from "src/adapter/types/Function";
 export type {
   GetBalanceParams,
-  GetBlockReturnType,
+  GetBlockReturn,
   GetTransactionParams,
   Network,
   WaitForTransactionParams,
@@ -116,6 +116,8 @@ export {
   createClient,
   type Client,
   type ClientOptions,
+  type GetBlockOptions,
+  type GetBlockWithOptionsReturn,
 } from "src/client/Client";
 
 export {

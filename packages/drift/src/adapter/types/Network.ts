@@ -27,7 +27,7 @@ export interface Network {
    */
   getBlock<T extends BlockIdentifier | undefined = undefined>(
     block?: T,
-  ): Promise<GetBlockReturnType<T>>;
+  ): Promise<GetBlockReturn<T>>;
 
   /**
    * Get the balance of native currency for an account.
@@ -63,9 +63,8 @@ export interface GetTransactionParams {
  * The awaited return type of a {@linkcode Network.getBlock} call considering
  * the provided {@linkcode BlockIdentifier}.
  */
-export type GetBlockReturnType<
-  T extends BlockIdentifier | undefined = undefined,
-> = T extends BlockTag | undefined ? Block<T> : Block<T> | undefined;
+export type GetBlockReturn<T extends BlockIdentifier | undefined = undefined> =
+  T extends BlockTag | undefined ? Block<T> : Block<T> | undefined;
 
 export interface WaitForTransactionParams extends GetTransactionParams {
   /**

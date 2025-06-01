@@ -4,7 +4,7 @@ import {
 } from "src/adapter/DefaultAdapter";
 import type { Adapter, ReadWriteAdapter } from "src/adapter/types/Adapter";
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
-import type { GetBlockReturnType } from "src/adapter/types/Network";
+import type { GetBlockReturn } from "src/adapter/types/Network";
 import { ClientCache } from "src/client/cache/ClientCache";
 import { BlockNotFoundError } from "src/client/errors";
 import type { HookRegistry } from "src/client/hooks/HookRegistry";
@@ -73,7 +73,7 @@ export type Client<
   >(
     block?: T,
     options?: Eval<GetBlockOptions & TOptions>,
-  ): Promise<ClientGetBlockReturnType<T, TOptions>>;
+  ): Promise<GetBlockWithOptionsReturn<T, TOptions>>;
 } & TAdapter &
   TExtension;
 
@@ -90,10 +90,10 @@ export interface GetBlockOptions {
  * The awaited return type of a {@linkcode Client.getBlock} call considering the
  * provided {@linkcode BlockIdentifier} and {@linkcode GetBlockOptions}.
  */
-export type ClientGetBlockReturnType<
+export type GetBlockWithOptionsReturn<
   T extends BlockIdentifier | undefined = undefined,
   TOptions extends GetBlockOptions = {},
-> = TOptions extends { throws: true } ? Block<T> : GetBlockReturnType<T>;
+> = TOptions extends { throws: true } ? Block<T> : GetBlockReturn<T>;
 
 /**
  * Configuration options for creating a {@linkcode Client}.

@@ -28,7 +28,7 @@ import type {
 } from "src/adapter/types/Function";
 import type {
   GetBalanceParams,
-  GetBlockReturnType,
+  GetBlockReturn,
   GetTransactionParams,
   WaitForTransactionParams,
 } from "src/adapter/types/Network";
@@ -126,7 +126,7 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
             }
           : undefined,
       )
-      .catch(handleError) as Promise<GetBlockReturnType<T>>;
+      .catch(handleError) as Promise<GetBlockReturn<T>>;
   }
 
   getBalance(params: GetBalanceParams) {

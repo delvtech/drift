@@ -20,7 +20,7 @@ import type {
 } from "src/adapter/types/Function";
 import type {
   GetBalanceParams,
-  GetBlockReturnType,
+  GetBlockReturn,
   GetTransactionParams,
   WaitForTransactionParams,
 } from "src/adapter/types/Network";
@@ -75,14 +75,14 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   // getBlock //
 
   onGetBlock<T extends BlockIdentifier | undefined = undefined>(block?: T) {
-    return this.stubs.get<[block?: T], Promise<GetBlockReturnType<T>>>({
+    return this.stubs.get<[block?: T], Promise<GetBlockReturn<T>>>({
       method: "getBlock",
       key: block === undefined ? undefined : this.createKey({ block }),
     });
   }
 
   async getBlock<T extends BlockIdentifier | undefined = undefined>(block?: T) {
-    return this.stubs.get<[block?: T], Promise<GetBlockReturnType<T>>>({
+    return this.stubs.get<[block?: T], Promise<GetBlockReturn<T>>>({
       method: "getBlock",
       key: block === undefined ? undefined : this.createKey({ block }),
       matchPartial: true,
