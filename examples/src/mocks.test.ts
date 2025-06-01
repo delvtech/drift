@@ -7,7 +7,7 @@ import {
   createDrift,
 } from "@delvtech/drift";
 import { createMockDrift, randomAddress } from "@delvtech/drift/testing";
-import { fixed } from "@delvtech/fixed-point-wasm";
+import { fixed } from "@gud/math";
 import { ERC4626 } from "src/abis/Erc4626";
 
 class ReadVault {

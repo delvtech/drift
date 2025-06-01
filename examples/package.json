@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@delvtech/drift": "^0.8.4",
-    "@delvtech/fixed-point-wasm": "^0.0.8"
+    "@gud/math": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

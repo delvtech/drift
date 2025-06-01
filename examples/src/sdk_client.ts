@@ -4,7 +4,7 @@ import {
   type Drift,
   createDrift,
 } from "@delvtech/drift";
-import { fixed } from "@delvtech/fixed-point-wasm";
+import { fixed } from "@gud/math";
 import { ERC4626 } from "src/abis/Erc4626";
 
 type Erc4626Abi = typeof ERC4626.abi;

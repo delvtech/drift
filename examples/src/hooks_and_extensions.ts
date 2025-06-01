@@ -1,6 +1,6 @@
 import { type Address, createDrift } from "@delvtech/drift";
 import { erc20 } from "@delvtech/drift/testing";
-import { fixed } from "@delvtech/fixed-point-wasm";
+import { fixed } from "@gud/math";
 
 // Create a Drift client.
 const drift = createDrift({
