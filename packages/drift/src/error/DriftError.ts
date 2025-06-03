@@ -66,11 +66,11 @@ export class DriftError extends Error {
     }
     const targetStack = stackTarget.stack;
 
-    let customName: string | undefined;
+    let wrappedName: string | undefined;
     if (error?.name && error.name !== "Error") {
-      customName = error.name;
+      wrappedName = error.name;
     } else if (isError && error.constructor.name !== "Error") {
-      customName = error.constructor.name;
+      wrappedName = error.constructor.name;
     }
 
     // Doing this in the constructor avoids modifying the properties of the
@@ -81,8 +81,8 @@ export class DriftError extends Error {
       get(): string {
         let stack = `${options?.prefix ?? DriftError.prefix}${this.name}`;
 
-        if (customName) {
-          stack += ` [${customName}]`;
+        if (wrappedName) {
+          stack += ` [${wrappedName}]`;
         }
 
         if (this.message) {
