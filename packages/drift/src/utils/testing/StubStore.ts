@@ -1,7 +1,7 @@
 import isMatch from "lodash.ismatch";
-import stringify from "safe-stable-stringify";
 import { type SinonStub, stub as sinonStub } from "sinon";
 import { DriftError } from "src/error/DriftError";
+import { formatArgsForDisplay } from "src/utils/formatArgsForDisplay";
 import type { FunctionKey, Replace } from "src/utils/types";
 
 /**
@@ -204,37 +204,9 @@ function createMissingStubMessage(method: string, args?: any[]) {
 
   if (args) {
     message += `
-  args: [
-    ${args
-      .map((arg) => {
-        let argString: string | undefined;
-
-        // Truncate ABIs.
-        if (typeof arg === "object" && "abi" in arg) {
-          const { abi, ...rest } = arg;
-          const truncatedAbi = stringify(abi)?.replace(/(?<=.{100}).+/, "...]");
-          argString = stringify(
-            { abi: truncatedAbi, ...rest },
-            argStringReplacer,
-            2,
-          )?.replace(/"abi": "(.+)"/, "abi: $1");
-        } else {
-          argString = stringify(arg, argStringReplacer, 2);
-        }
-
-        return (
-          argString
-            // Indent new lines.
-            ?.replaceAll("\n", "\n    ")
-            // Remove backslashes from escaped characters.
-            ?.replaceAll("\\", "")
-            // Remove quotes around object keys and stringified bigints.
-            // https://regex101.com/r/hW0rCo/1
-            ?.replace(/"([^"]+)"(:)|"(\d+n)"/g, "$1$2$3")
-        );
-      })
-      .join(",\n    ")}
-  ]`;
+  args: ${formatArgsForDisplay(args)
+    // Indent new lines.
+    ?.replaceAll("\n", "\n  ")}`;
   }
 
   const capitalizedMethod = method.replace(/^./, (c) => c.toUpperCase());
@@ -247,8 +219,4 @@ The value must be stubbed first. For example:
     return value;
   });
 `;
-}
-
-function argStringReplacer(_key: string, value: unknown) {
-  return typeof value === "bigint" ? `${value}n` : value;
 }
