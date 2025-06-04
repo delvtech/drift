@@ -2,6 +2,7 @@ import type { HexString } from "src/adapter/types/Abi";
 
 /**
  * Get a random hex string of a given byte length.
+ *
  * @param bytes - The number of bytes to generate.
  * @param prefix - The prefix to add to the hex string after the 0x.
  *
@@ -12,11 +13,13 @@ import type { HexString } from "src/adapter/types/Abi";
  * ```
  */
 export function randomHex(bytes = 32, prefix = ""): HexString {
-  const array = new Uint8Array(bytes);
-  crypto.getRandomValues(array);
-  const hex = Array.from(array, (b) => b.toString(16).padStart(2, "0")).join(
-    "",
-  );
   const paddedPrefix = prefix.length % 2 ? `${prefix}0` : prefix;
-  return `0x${paddedPrefix}${hex.slice(paddedPrefix.length)}` as HexString;
+  // Short-circuit if the prefix is longer than the desired byte length
+  if (paddedPrefix.length / 2 > bytes) {
+    return `0x${paddedPrefix.slice(0, bytes * 2)}`;
+  }
+  const ints = new Uint8Array(bytes - paddedPrefix.length / 2);
+  crypto.getRandomValues(ints);
+  const hex = Array.from(ints, (b) => b.toString(16).padStart(2, "0")).join("");
+  return `0x${paddedPrefix}${hex}`;
 }
