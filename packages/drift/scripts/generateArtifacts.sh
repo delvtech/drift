@@ -54,8 +54,9 @@ find "$compile_out_dir" \
     cat >"$temp_out_dir/$contract_name.ts" <<-EOF
 			export const $contract_name = {
 			  name: '$contract_name' as const,
-			  abi: $abi as const,
-			  bytecode: '$bytecode' as \`0x\${string}\`,
+			  abi: $abi as const,$(if [ $bytecode != "0x" ]; then
+      echo "\n  bytecode: '$bytecode' as \`0x\${string}\`,"
+    fi)
 			  methodIdentifiers: $methodIdentifiers as const,
 			};
 		EOF

@@ -163,6 +163,13 @@ export type {
 
 export { BlockNotFoundError } from "src/client/errors";
 
+// Artifacts //
+
+export { IERC20 as erc20 } from "src/artifacts/IERC20";
+export { IERC721 as erc721 } from "src/artifacts/IERC721";
+export { IERC1155 as erc1155 } from "src/artifacts/IERC1155";
+export { IMulticall3 as multicall3 } from "src/artifacts/IMulticall3";
+
 // DriftError //
 
 export { DriftError, type DriftErrorOptions } from "src/error/DriftError";

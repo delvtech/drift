@@ -18,7 +18,10 @@ export {
   type MockClientOptions,
 } from "src/client/MockClient";
 
-export { type MockDrift, createMockDrift } from "src/client/MockDrift";
+export {
+  createMockDrift,
+  type MockDrift,
+} from "src/client/MockDrift";
 
 export {
   MockContract,
@@ -28,7 +31,6 @@ export {
 
 // Artifacts
 
-export { IERC20 as erc20 } from "src/artifacts/IERC20";
 export { MockERC20 as mockErc20 } from "src/artifacts/MockERC20";
 export { TestToken as testToken } from "src/artifacts/TestToken";
 
