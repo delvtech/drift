@@ -14,7 +14,7 @@ import type {
   TransactionOptions,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
-import type { EmptyObject, OneOf } from "src/utils/types";
+import type { EmptyObject, NarrowTo, OneOf } from "src/utils/types";
 
 /**
  * An interface for interacting with a blockchain network and its contracts,
@@ -67,6 +67,13 @@ export interface ReadAdapter extends Network {
    * ```
    */
   call(params: CallParams): Promise<Bytes>;
+
+  multicall<
+    TCalls extends { abi: Abi }[],
+    TAllowFailure extends boolean = true,
+  >(
+    params: MulticallParams<TCalls, TAllowFailure>,
+  ): Promise<MulticallReturn<TCalls, TAllowFailure>>;
 
   /**
    * Submits a raw signed transaction. For
@@ -200,6 +207,29 @@ export interface ContractParams<TAbi extends Abi = Abi> {
   address: Address;
 }
 
+/**
+ * A dynamic arguments parameter that is optional if the arguments are empty.
+ * @internal
+ */
+export type ArgsParam<Args> = EmptyObject extends Args
+  ? {
+      args?: Args;
+    }
+  : {
+      args: Args;
+    };
+
+/**
+ * Base params for a function call.
+ * @internal
+ */
+export type FunctionCall<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+> = ContractParams<TAbi> & {
+  fn: TFunctionName;
+} & ArgsParam<FunctionArgs<TAbi, TFunctionName>>;
+
 // Encode/Decode //
 
 export type EncodeDeployDataParams<TAbi extends Abi = Abi> = {
@@ -301,12 +331,14 @@ export type ReadParams<
     TAbi,
     "pure" | "view"
   >,
-> = ContractParams<TAbi> & {
-  fn: TFunctionName;
-} & ArgsParam<FunctionArgs<TAbi, TFunctionName>> &
-  ReadOptions;
+> = FunctionCall<TAbi, TFunctionName> & ReadOptions;
 
 // Write //
+
+/**
+ * Options for simulating a transaction.
+ */
+export interface SimulateWriteOptions extends ReadOptions, TransactionOptions {}
 
 export type SimulateWriteParams<
   TAbi extends Abi = Abi,
@@ -314,11 +346,11 @@ export type SimulateWriteParams<
     TAbi,
     "nonpayable" | "payable"
   > = FunctionName<TAbi, "nonpayable" | "payable">,
-> = ContractParams<TAbi> & {
-  fn: TFunctionName;
-} & ArgsParam<FunctionArgs<TAbi, TFunctionName>> &
-  TransactionOptions;
+> = FunctionCall<TAbi, TFunctionName> & SimulateWriteOptions;
 
+/**
+ * Options for writing state by calling a contract function.
+ */
 export interface WriteOptions extends TransactionOptions {
   onMined?: (receipt: TransactionReceipt | undefined) => void;
 }
@@ -329,7 +361,7 @@ export type WriteParams<
     TAbi,
     "nonpayable" | "payable"
   > = FunctionName<TAbi, "nonpayable" | "payable">,
-> = SimulateWriteParams<TAbi, TFunctionName> & WriteOptions;
+> = FunctionCall<TAbi, TFunctionName> & WriteOptions;
 
 // Deploy //
 
@@ -339,10 +371,7 @@ export type DeployParams<TAbi extends Abi = Abi> =
 // Call //
 
 // https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/eth/execute.yaml#L1
-export interface CallOptions
-  extends ReadOptions,
-    TransactionOptions,
-    Eip4844Options {}
+export interface CallOptions extends SimulateWriteOptions, Eip4844Options {}
 
 export type CallParams = {
   data?: Bytes;
@@ -361,6 +390,75 @@ export type CallParams = {
     }
 > &
   CallOptions;
+
+// Multicall //
+
+/**
+ * @internal
+ */
+export type MulticallCalls<TCalls extends { abi: Abi }[] = { abi: Abi }[]> = {
+  [K in keyof TCalls]: NarrowTo<
+    FunctionCall<
+      TCalls[K]["abi"],
+      NarrowTo<
+        FunctionName<TCalls[K]["abi"]>,
+        NarrowTo<FunctionCall, TCalls[K]>["fn"]
+      >
+    >,
+    TCalls[K]
+  >;
+};
+
+/**
+ * Options for multicall operations.
+ */
+export interface MulticallOptions<TAllowFailure extends boolean = boolean>
+  extends ReadOptions,
+    TransactionOptions {
+  multicallAddress?: Address;
+  allowFailure?: TAllowFailure;
+}
+
+export type MulticallParams<
+  TCalls extends { abi: Abi }[] = { abi: Abi }[],
+  TAllowFailure extends boolean = boolean,
+> = {
+  calls: MulticallCalls<TCalls>;
+} & MulticallOptions<TAllowFailure>;
+
+/**
+ * The result object for single multicall call.
+ */
+export type MulticallCallResult<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+> = OneOf<
+  | {
+      success: true;
+      value: FunctionReturn<TAbi, TFunctionName>;
+    }
+  | {
+      success: false;
+      error: Error;
+    }
+>;
+
+export type MulticallReturn<
+  TCalls extends { abi: Abi }[] = { abi: Abi }[],
+  TAllowFailure extends boolean = boolean,
+> = MulticallCalls<TCalls> extends infer T extends FunctionCall[]
+  ? {
+      [K in keyof T]: T[K] extends {
+        fn: infer TFunctionName extends FunctionName<T[K]["abi"]>;
+      }
+        ? TAllowFailure extends true
+          ? MulticallCallResult<T[K]["abi"], TFunctionName>
+          : FunctionReturn<T[K]["abi"], TFunctionName>
+        : TAllowFailure extends true
+          ? MulticallCallResult<T[K]["abi"], FunctionName<T[K]["abi"]>>
+          : FunctionReturn<T[K]["abi"], FunctionName<T[K]["abi"]>>;
+    }
+  : never;
 
 // Send transaction //
 
@@ -386,17 +484,3 @@ export type SendTransactionParams = {
     }
 > &
   WriteOptions;
-
-// Internal //
-
-/**
- * A dynamic arguments parameter that is optional if the arguments are empty.
- * @internal
- */
-type ArgsParam<Args> = EmptyObject extends Args
-  ? {
-      args?: Args;
-    }
-  : {
-      args: Args;
-    };

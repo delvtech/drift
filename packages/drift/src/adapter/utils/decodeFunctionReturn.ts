@@ -33,6 +33,9 @@ export function decodeFunctionReturn<
 /**
  * An internal version of {@linkcode decodeFunctionReturn} that takes an
  * {@linkcode AbiFunction} instance instead of just a function name.
+ *
+ * Useful for preventing redundant ABI lookups.
+ *
  * @internal
  */
 export function _decodeFunctionReturn<

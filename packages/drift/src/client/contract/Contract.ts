@@ -1,8 +1,11 @@
 import type { Abi, Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
+  ArgsParam,
   ContractParams,
   GetEventsOptions,
+  MulticallOptions,
+  MulticallReturn,
   ReadAdapter,
   ReadOptions,
   ReadWriteAdapter,
@@ -24,7 +27,13 @@ import {
 } from "src/client/Client";
 import { ContractCache } from "src/client/contract/cache/ContractCache";
 import type { Store } from "src/store/Store";
-import type { EmptyObject, Eval, Extended, OneOf } from "src/utils/types";
+import type {
+  EmptyObject,
+  Eval,
+  Extended,
+  NarrowTo,
+  OneOf,
+} from "src/utils/types";
 
 /**
  * An interface for interacting with a smart contract through a drift
@@ -227,6 +236,29 @@ export class ReadContract<
   }
 
   /**
+   * Uses Multicall3 to read multiple functions from the contract in a
+   * single request.
+   */
+  async multicall<
+    TCalls extends { fn: FunctionName<TAbi> }[],
+    TAllowFailure extends boolean = true,
+  >({
+    calls,
+    ...options
+  }: ContractMulticallParams<TAbi, TCalls, TAllowFailure>): Promise<
+    ContractMulticallReturn<TAbi, TCalls, TAllowFailure>
+  > {
+    return this.client.multicall({
+      calls: calls.map((call) => ({
+        abi: this.abi,
+        address: this.address,
+        ...call,
+      })),
+      ...options,
+    }) as Promise<ContractMulticallReturn<TAbi, TCalls, TAllowFailure>>;
+  }
+
+  /**
    * Reads a specified function from the contract.
    */
   read<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
@@ -408,3 +440,29 @@ export type ContractWriteArgs<
       args: FunctionArgs<TAbi, TFunctionName>,
       options?: WriteOptions,
     ];
+
+export type ContractMulticallParams<
+  TAbi extends Abi = Abi,
+  TCalls extends { fn: FunctionName<TAbi> }[] = { fn: FunctionName<TAbi> }[],
+  TAllowFailure extends boolean = boolean,
+> = {
+  calls: {
+    [K in keyof TCalls]: NarrowTo<
+      {
+        fn: TCalls[K]["fn"];
+      } & ArgsParam<FunctionArgs<TAbi, TCalls[K]["fn"]>>,
+      TCalls[K]
+    >;
+  };
+} & MulticallOptions<TAllowFailure>;
+
+export type ContractMulticallReturn<
+  TAbi extends Abi = Abi,
+  TCalls extends { fn: FunctionName<TAbi> }[] = { fn: FunctionName<TAbi> }[],
+  TAllowFailure extends boolean = boolean,
+> = MulticallReturn<
+  {
+    [K in keyof TCalls]: ContractParams<TAbi> & TCalls[K];
+  },
+  TAllowFailure
+>;

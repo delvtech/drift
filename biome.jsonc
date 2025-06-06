@@ -31,7 +31,8 @@
         "noNonNullAssertion": {
           "level": "info",
           "fix": "none"
-        }
+        },
+        "noParameterAssign": "off"
       },
       "suspicious": {
         "noExplicitAny": "off",

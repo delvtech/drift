@@ -8,17 +8,26 @@ import {
   TransactionReceipt,
 } from "ox";
 import { AbiEncoder } from "src/adapter/AbiEncoder";
-import type { Abi, Bytes, Hash, HexString } from "src/adapter/types/Abi";
+import type {
+  Abi,
+  Address as AddressType,
+  Bytes,
+  Hash,
+  HexString,
+} from "src/adapter/types/Abi";
 import type {
   CallParams,
   DeployParams,
   GetEventsParams,
+  MulticallParams,
+  MulticallReturn,
   ReadParams,
   ReadWriteAdapter,
   SendTransactionParams,
   SimulateWriteParams,
   WriteParams,
 } from "src/adapter/types/Adapter";
+import type { Adapter } from "src/adapter/types/Adapter";
 import type { BlockIdentifier, BlockTag } from "src/adapter/types/Block";
 import type { EventArgs, EventName } from "src/adapter/types/Event";
 import type {
@@ -43,28 +52,50 @@ import { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData
 import { prepareFunctionData } from "src/adapter/utils/encodeFunctionData";
 import { handleError } from "src/adapter/utils/internal/handleError";
 import { prepareParams } from "src/adapter/utils/prepareParams";
+import { IMulticall3 } from "src/artifacts/IMulticall3";
 import { DriftError } from "src/error/DriftError";
 import { isHexString } from "src/utils/isHexString";
 
 export interface DefaultAdapterOptions {
   rpcUrl?: string;
   /**
-   * Polling frequency in milliseconds
-   * @default 4_000
+   * The default polling frequency for polling calls (e.g.
+   * {@linkcode Adapter.waitForTransaction waitForTransaction}) in milliseconds.
+   * @default 4_000 // 4 seconds
    */
   pollingInterval?: number;
+  /**
+   * The default timeout for polling calls (e.g.
+   * {@linkcode Adapter.waitForTransaction waitForTransaction}) in milliseconds.
+   * @default 60_000 // 1 minute
+   */
+  pollingTimeout?: number;
+  /**
+   * The default Multicall3 address to use for the
+   * {@linkcode Adapter.multicall multicall} method.
+   * @default "0xcA11bde05977b3631167028862bE2a173976CA11"
+   *
+   * @see [Multicall3](https://www.multicall3.com)
+   */
+  multicallAddress?: AddressType;
 }
 
 export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
   provider: Provider.Provider;
   pollingInterval: number;
+  pollingTimeout: number;
+  multicallAddress: AddressType;
 
-  static DEFAULT_POLLING_INTERVAL = 4_000;
-  static DEFAULT_TIMEOUT = 60_000; // 1 minute
+  static DEFAULT_POLLING_INTERVAL = 4_000 as const;
+  static DEFAULT_TIMEOUT = 60_000 as const; // 1 minute
+  static DEFAULT_MULTICALL_ADDRESS =
+    "0xcA11bde05977b3631167028862bE2a173976CA11" as const;
 
   constructor({
     rpcUrl,
     pollingInterval = DefaultAdapter.DEFAULT_POLLING_INTERVAL,
+    pollingTimeout = DefaultAdapter.DEFAULT_TIMEOUT,
+    multicallAddress = DefaultAdapter.DEFAULT_MULTICALL_ADDRESS,
   }: DefaultAdapterOptions = {}) {
     super();
     try {
@@ -83,6 +114,8 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
       handleError(e);
     }
     this.pollingInterval = pollingInterval;
+    this.pollingTimeout = pollingTimeout;
+    this.multicallAddress = multicallAddress;
   }
 
   getChainId() {
@@ -162,7 +195,7 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   async waitForTransaction({
     hash,
-    timeout = DefaultAdapter.DEFAULT_TIMEOUT,
+    timeout = this.pollingTimeout,
   }: WaitForTransactionParams) {
     return new Promise<TransactionReceiptType | undefined>(
       (resolve, reject) => {
@@ -264,6 +297,60 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
         ],
       })
       .catch(handleError);
+  }
+
+  async multicall<
+    TCalls extends { abi: Abi }[],
+    TAllowFailure extends boolean = true,
+  >({
+    calls,
+    multicallAddress = this.multicallAddress,
+    allowFailure = true as TAllowFailure,
+    ...options
+  }: MulticallParams<TCalls, TAllowFailure>) {
+    const results = await this.simulateWrite({
+      abi: IMulticall3.abi,
+      address: multicallAddress,
+      fn: "aggregate3",
+      args: {
+        calls: calls.map((read) => ({
+          target: read.address,
+          callData: this.encodeFunctionData({
+            abi: read.abi,
+            fn: read.fn,
+            args: read.args,
+          }),
+          allowFailure,
+        })),
+      },
+      ...options,
+    });
+
+    return results.map(({ returnData, success }, i) => {
+      const { abi, fn } = calls[i]!; // Assume a read for each result
+
+      // TODO: If allowFailure is true but the call fails, will it reach this
+      // point? And, how will decodeFunctionReturn handle it?
+      if (!allowFailure) {
+        return this.decodeFunctionReturn({ abi, data: returnData, fn });
+      }
+
+      if (!success) {
+        return {
+          success,
+          error: new DriftError(
+            // Slice off the `0x` prefix and the first 4 bytes (function
+            // selector) to get the error message.
+            Buffer.from(returnData.slice(10), "hex").toString(),
+          ),
+        };
+      }
+
+      return {
+        success,
+        value: this.decodeFunctionReturn({ abi, data: returnData, fn }),
+      };
+    }) as MulticallReturn<TCalls, TAllowFailure>;
   }
 
   async read<

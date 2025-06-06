@@ -1,12 +1,12 @@
 import { MockAdapter } from "src/adapter/MockAdapter";
 import { createStubEvents } from "src/adapter/utils/testing/createStubEvent";
-import { IERC20 } from "src/artifacts/IERC20";
+import { TestToken } from "src/artifacts/TestToken";
 import { createContract } from "src/client/contract/Contract";
 import { ALICE, BOB } from "src/utils/testing/accounts";
 import { describe, expect, it, vi } from "vitest";
 
 describe("Contract", () => {
-  const abi = IERC20.abi;
+  const abi = TestToken.abi;
   const address = "0xAddress";
   const adapter = new MockAdapter();
   adapter.onGetChainId().resolves(0);

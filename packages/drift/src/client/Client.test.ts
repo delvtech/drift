@@ -2,6 +2,7 @@ import { MockAdapter } from "src/adapter/MockAdapter";
 import type { Abi } from "src/adapter/types/Abi";
 import type { GetEventsParams } from "src/adapter/types/Adapter";
 import type { EventLog } from "src/adapter/types/Event";
+import { TestToken } from "src/artifacts/TestToken";
 import { createClient } from "src/client/Client";
 import { BlockNotFoundError } from "src/client/errors";
 import { ALICE } from "src/utils/testing/accounts";
@@ -17,6 +18,34 @@ describe("Client", () => {
     const client = createClient({ adapter: new CustomAdapter() });
     expect(client).toBeInstanceOf(CustomAdapter);
     expect(client).toBeInstanceOf(MockAdapter);
+  });
+
+  describe("multicall", () => {
+    it("Returns cached read calls", async () => {
+      const client = createClient({ adapter });
+      const abi = TestToken.abi;
+      client.cache.preloadRead({
+        abi,
+        address: "0x",
+        fn: "symbol",
+        value: "TEST",
+      });
+      client.cache.preloadRead({
+        abi,
+        address: "0x",
+        fn: "name",
+        value: "Test Token",
+      });
+      const [symbol, name] = await client.multicall({
+        calls: [
+          { abi, address: "0x", fn: "symbol" },
+          { abi, address: "0x", fn: "name" },
+        ],
+        allowFailure: false,
+      });
+      expect(symbol).toBe("TEST");
+      expect(name).toBe("Test Token");
+    });
   });
 
   describe("getEvents", () => {
@@ -199,6 +228,19 @@ describe("Client", () => {
       client.hooks.on("before:call", beforeHandler);
       client.hooks.on("after:call", afterHandler);
       await client.call({ to: "0x" });
+
+      expect(beforeHandler).toHaveBeenCalledTimes(1);
+      expect(afterHandler).toHaveBeenCalledTimes(1);
+    });
+
+    it("Calls multicall hooks", async () => {
+      const client = createClient({ adapter });
+      const beforeHandler = vi.fn(async ({ resolve }) => resolve());
+      const afterHandler = vi.fn();
+
+      client.hooks.on("before:multicall", beforeHandler);
+      client.hooks.on("after:multicall", afterHandler);
+      await client.multicall({ calls: [] });
 
       expect(beforeHandler).toHaveBeenCalledTimes(1);
       expect(afterHandler).toHaveBeenCalledTimes(1);

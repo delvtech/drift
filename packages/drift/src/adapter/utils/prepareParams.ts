@@ -8,7 +8,7 @@ import type {
   AbiObjectType,
   AbiSimplifiedType,
 } from "src/adapter/types/Abi";
-import { handleError } from "src/adapter/utils/internal/handleError";
+import { DriftError } from "src/error/DriftError";
 import type { AnyObject } from "src/utils/types";
 
 /**
@@ -77,7 +77,9 @@ export function prepareParams<
     AbiFilter<TItemType, TName, any, TParameterKind>)[];
 
   if (!matches.length) {
-    handleError(`No matching ABI entry for ${type} ${name} with ${kind}`);
+    throw new DriftError(
+      `No matching ABI entry for ${type} ${name} with ${kind}`,
+    );
   }
 
   // If there's only 1 matching entry, it's the entry we're looking for.

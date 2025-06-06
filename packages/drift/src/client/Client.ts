@@ -2,7 +2,13 @@ import {
   DefaultAdapter,
   type DefaultAdapterOptions,
 } from "src/adapter/DefaultAdapter";
-import type { Adapter, ReadWriteAdapter } from "src/adapter/types/Adapter";
+import type {
+  Adapter,
+  MulticallCallResult,
+  MulticallCalls,
+  ReadParams,
+  ReadWriteAdapter,
+} from "src/adapter/types/Adapter";
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
 import type { GetBlockReturn } from "src/adapter/types/Network";
 import { ClientCache } from "src/client/cache/ClientCache";
@@ -61,7 +67,7 @@ export type Client<
       // intersected with Client<TAdapter, TStore, TExtension> results in the
       // full expected return type. This is necessary to correctly infer the
       // required props and return type on a dynamic interface.
-      T extends any ? Omit<T, keyof Client | keyof TExtension> : T
+      T extends T ? Omit<T, keyof Client | keyof TExtension> : T
     > &
       Partial<Client & TExtension> &
       ThisType<Client<TAdapter, TStore, TExtension & T>>,
@@ -113,7 +119,7 @@ export type ClientOptions<
       }
     | DefaultAdapterOptions
   > & {
-    // Accept LRU config if LRU can be assigned to T
+    // Accept LRU config if LRU can be assigned to TStore
     store?: LruStore extends TStore ? TStore | LruStoreOptions : TStore;
 
     /**
@@ -218,6 +224,71 @@ export function createClient<
         key: this.cache.callKey(params),
         fn: () => this.adapter.call(params),
       });
+    },
+
+    async multicall({ calls, ...options }) {
+      const unCachedCalls: MulticallCalls = [];
+
+      // Check the cache for each call to ensure we only fetch uncached calls.
+      const cachedResults: unknown[] = await Promise.all(
+        calls.map(async (call) => {
+          const cached = await this.cache.getRead({
+            ...call,
+            block: options?.block,
+          });
+          if (cached !== undefined) {
+            return options.allowFailure
+              ? ({
+                  success: true,
+                  value: cached,
+                } satisfies MulticallCallResult)
+              : cached;
+          }
+          unCachedCalls.push(call);
+          return undefined;
+        }),
+      );
+
+      if (!unCachedCalls.length) return cachedResults;
+
+      const fetched = await this.adapter.multicall({
+        calls: unCachedCalls,
+        ...options,
+      });
+
+      // Merge cached results with fetched results and return in the same order.
+      return Promise.all(
+        cachedResults.map(async (cachedResult) => {
+          // If the value was cached, return it directly.
+          if (cachedResult !== undefined) return cachedResult;
+
+          const { abi, address, fn, args } = unCachedCalls.shift() || {};
+          const fetchedResult = fetched.shift();
+          let fetchedValue: unknown;
+
+          if (options.allowFailure) {
+            fetchedValue = (fetchedResult as MulticallCallResult).value;
+          } else {
+            fetchedValue = fetchedResult;
+          }
+
+          // Cache the newly fetched value.
+          if (fetchedValue !== undefined) {
+            await this.cache.preloadRead({
+              abi,
+              address,
+              fn,
+              args,
+              block: options?.block,
+              value: fetchedValue,
+            } as ReadParams & {
+              value: unknown;
+            });
+          }
+
+          return fetchedResult;
+        }),
+      );
     },
 
     getEvents({ fromBlock = "earliest", toBlock = "latest", ...restParams }) {

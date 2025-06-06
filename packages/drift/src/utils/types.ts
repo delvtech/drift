@@ -27,8 +27,36 @@ export type AwaitedReturnType<T extends AnyFunction> = T extends (
  * reference.
  */
 // The `& {}` intersection trick works because it forces TypeScript to create a
-// new object type rather than just reference the existing one.
+// new object type rather than just referencing the existing one.
 export type Eval<T> = { [K in keyof T]: T[K] } & {};
+
+/**
+ * Narrow a base type to a specific subtype if the subtype is assignable to it,
+ * otherwise keep the base type.
+ *
+ * @example
+ * ```ts
+ * type a = NarrowTo<string, "foo">  // "foo"
+ * type b = NarrowTo<string, 123>    // string
+ * ```
+ *
+ * @internal
+ */
+export type NarrowTo<Base, Specific> = Specific extends Base ? Specific : Base;
+
+/**
+ * Widen a specific type to a base type if it's assignable to the base,
+ * otherwise keep the specific type.
+ *
+ * @example
+ * ```ts
+ * type a = WidenTo<"foo", string>   // string
+ * type b = WidenTo<123, string>     // 123
+ * ```
+ *
+ * @internal
+ */
+export type WidenTo<Specific, Base> = Specific extends Base ? Base : Specific;
 
 /**
  * Replace properties in `T` with properties in `U`.
@@ -55,7 +83,7 @@ export type PartialBy<T, K extends keyof T | (string & {})> = Omit<T, K> &
 export type Writable<T> = { -readonly [P in keyof T]: T[P] };
 
 /**
- * Get a superset of `T` that allows for arbitrary properties.
+ * Get a superset of `T` that allows additional arbitrary properties.
  *
  * @example
  *
@@ -113,23 +141,13 @@ export type UnionKey<T> = T extends T ? keyof T : never;
  *
  * @example
  * ```ts
- * type U = OneOf<
- *   | {
- *       a: string;
- *     }
- *   | {
- *       b: string;
- *       c: number;
- *     }
- * >;
+ * type U = OneOf<{ a: string } | { b: number }>;
  * // {
  * //   a: string;
  * //   b?: undefined;
- * //   c?: undefined;
  * // } | {
  * //   a?: undefined;
- * //   b: string;
- * //   c: number;
+ * //   b: number;
  * // }
  * ```
  */
@@ -216,9 +234,7 @@ export type ExtractFiltered<T, F = {}> = T extends T // <- Distribute union
  */
 export type ApplyFilter<T, F> = {
   [K in keyof T]: K extends keyof F
-    ? T[K] extends F[K]
-      ? T[K] // <- Leave value as-is if it fits the filter
-      : F[K] // <- Use filter value otherwise
+    ? NarrowTo<F[K], T[K]> // <- Leave value as-is if it fits the filter
     : T[K]; // <- Leave value as-is if the key isn't in the filter
 } extends infer TF extends T
   ? TF // <- Return the transformed type if it's assignable to T

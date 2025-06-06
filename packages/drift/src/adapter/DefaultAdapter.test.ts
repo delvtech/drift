@@ -1,5 +1,6 @@
 import { DefaultAdapter } from "src/adapter/DefaultAdapter";
 import type { Address as AddressType } from "src/adapter/types/Abi";
+import type { MulticallCallResult } from "src/adapter/types/Adapter";
 import type { Block } from "src/adapter/types/Block";
 import type { EventLog } from "src/adapter/types/Event";
 import type {
@@ -13,6 +14,7 @@ import type {
 import { MockERC20 } from "src/artifacts/MockERC20";
 import { TestToken } from "src/artifacts/TestToken";
 import { ZERO_ADDRESS } from "src/constants";
+import { DriftError } from "src/error/DriftError";
 import { HEX_REGEX } from "src/utils/isHexString";
 import { assert, describe, expect, it } from "vitest";
 
@@ -148,17 +150,119 @@ describe("DefaultAdapter", () => {
     });
   });
 
+  describe("multicall", () => {
+    it("reads multiple functions from contracts", async () => {
+      const adapter = new DefaultAdapter({ rpcUrl });
+      const [symbolResult, decimalsResult] = await adapter.multicall({
+        calls: [
+          {
+            abi: TestToken.abi,
+            address,
+            fn: "symbol",
+          },
+          {
+            abi: TestToken.abi,
+            address,
+            fn: "decimals",
+          },
+        ],
+      });
+      expect(symbolResult).toMatchObject({
+        success: true,
+        value: expect.any(String),
+      } satisfies MulticallCallResult);
+      expect(decimalsResult).toMatchObject({
+        success: true,
+        value: expect.any(Number),
+      } satisfies MulticallCallResult);
+    });
+
+    it("reads from contracts with args", async () => {
+      const adapter = new DefaultAdapter({ rpcUrl });
+
+      const [balanceResult, transferResult] = await adapter.multicall({
+        calls: [
+          {
+            abi: TestToken.abi,
+            address,
+            fn: "balanceOf",
+            args: { owner: address },
+          },
+
+          {
+            abi: TestToken.abi,
+            address,
+            fn: "allowance",
+            args: { owner: address, spender: address },
+          },
+        ],
+      });
+
+      expect(balanceResult).toMatchObject({
+        success: true,
+        value: expect.any(BigInt),
+      } satisfies MulticallCallResult);
+      expect(transferResult).toMatchObject({
+        success: true,
+        value: expect.any(BigInt),
+      } satisfies MulticallCallResult);
+    });
+
+    it("returns errors for failed calls", async () => {
+      const adapter = new DefaultAdapter({ rpcUrl });
+      const signerAddress = await adapter.getSignerAddress();
+      const [transferResult] = await adapter.multicall({
+        calls: [
+          {
+            abi: TestToken.abi,
+            address,
+            fn: "transfer",
+            args: {
+              amount: BigInt(10_000e18),
+              to: signerAddress,
+            },
+          },
+        ],
+      });
+
+      expect(transferResult).toMatchObject({
+        success: false,
+        error: expect.any(DriftError),
+      } satisfies MulticallCallResult);
+    });
+
+    it("returns function values directly when allowFailure is false", async () => {
+      const adapter = new DefaultAdapter({ rpcUrl });
+      const [decimals, symbol] = await adapter.multicall({
+        allowFailure: false,
+        calls: [
+          {
+            abi: TestToken.abi,
+            address,
+            fn: "decimals",
+          },
+          {
+            abi: TestToken.abi,
+            address,
+            fn: "symbol",
+          },
+        ],
+      });
+      expect(decimals).toBeTypeOf("number");
+      expect(symbol).toBeTypeOf("string");
+    });
+  });
+
   it("fetches events", async () => {
     const adapter = new DefaultAdapter({ rpcUrl });
     const currentBlock = await adapter.getBlockNumber();
-    const events = await adapter.getEvents({
+    const [event] = await adapter.getEvents({
       abi: TestToken.abi,
       address,
       event: "Transfer",
       fromBlock: currentBlock - 100n,
     });
-    expect(events).toBeInstanceOf(Array);
-    expect(events[0]).toMatchObject({
+    expect(event).toMatchObject({
       args: expect.any(Object),
       blockNumber: expect.any(BigInt),
       data: expect.stringMatching(HEX_REGEX),
@@ -195,10 +299,10 @@ describe("DefaultAdapter", () => {
     const balance = await adapter.simulateWrite({
       abi: TestToken.abi,
       address,
-      fn: "transfer",
+      fn: "approve",
       args: {
-        amount: 1n,
-        to: address,
+        amount: 0n,
+        spender: address,
       },
     });
     expect(balance).toBeTypeOf("boolean");
