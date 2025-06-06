@@ -11,11 +11,15 @@ export function formatArgsForDisplay(args: any, truncateAbi = true) {
   if (truncateAbi) {
     args = convertType(
       args,
-      (v): v is Extended<{ abi: Abi }> => v && "abi" in v,
-      ({ abi, ...rest }) => ({
-        abi: stringify(abi)?.replace(/(?<=.{100}).+/, "...]"),
-        ...rest,
-      }),
+      (v): v is Extended<{ abi: Abi }> => {
+        return v && typeof v === "object" && "abi" in v;
+      },
+      ({ abi, ...rest }) => {
+        return {
+          abi: stringify(abi)?.replace(/(?<=.{100}).+/, "...]"),
+          ...rest,
+        };
+      },
     );
   }
 

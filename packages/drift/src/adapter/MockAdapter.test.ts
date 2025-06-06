@@ -2,8 +2,11 @@ import { MockAdapter } from "src/adapter/MockAdapter";
 import type {
   CallParams,
   DeployParams,
+  FunctionCall,
   GetEventsParams,
+  MulticallParams,
   ReadParams,
+  SimulateWriteParams,
   WriteParams,
 } from "src/adapter/types/Adapter";
 import type { EventLog } from "src/adapter/types/Event";
@@ -11,6 +14,7 @@ import { createStubBlock } from "src/adapter/utils/testing/createStubBlock";
 import { createStubTransaction } from "src/adapter/utils/testing/createStubTransaction";
 import { createStubTransactionReceipt } from "src/adapter/utils/testing/createStubTransactionReceipt";
 import { TestToken } from "src/artifacts/TestToken";
+import { NotImplementedError } from "src/utils/testing/StubStore";
 import { describe, expect, it, vi } from "vitest";
 
 type TestTokenAbi = typeof TestToken.abi;
@@ -239,6 +243,171 @@ describe("MockAdapter", () => {
           data: "0x2",
         }),
       ).toBe("0xA");
+    });
+  });
+
+  describe("multicall", () => {
+    it("Returns an error result by default", async () => {
+      const adapter = new MockAdapter();
+      const [result] = await adapter.multicall({
+        calls: [
+          {
+            abi: TestToken.abi,
+            address: "0x",
+            fn: "symbol",
+          },
+        ],
+      });
+      expect(result).toStrictEqual({
+        success: false,
+        error: expect.any(NotImplementedError),
+      });
+    });
+
+    it("Can be stubbed with args", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onMulticall({
+          calls: [
+            {
+              abi: TestToken.abi,
+              address: "0x1",
+              fn: "balanceOf",
+              args: { owner: "0x1" },
+            },
+          ],
+        })
+        .resolves([{ success: true, value: 123n }]);
+      expect(
+        await adapter.multicall({
+          calls: [
+            {
+              abi: TestToken.abi,
+              address: "0x1",
+              fn: "balanceOf",
+              args: { owner: "0x1" },
+            },
+          ],
+        }),
+      ).toStrictEqual([{ success: true, value: 123n }]);
+    });
+
+    it("Can stub different values for different args", async () => {
+      const adapter = new MockAdapter();
+      const params1: MulticallParams<
+        [FunctionCall<TestTokenAbi, "allowance">]
+      > = {
+        calls: [
+          {
+            abi: TestToken.abi,
+            address: "0x1",
+            fn: "allowance",
+            args: { owner: "0x1", spender: "0x1" },
+          },
+        ],
+      };
+      const params2: MulticallParams<
+        [FunctionCall<TestTokenAbi, "allowance">]
+      > = {
+        calls: [
+          {
+            ...params1.calls[0],
+            args: { owner: "0x2", spender: "0x2" },
+          },
+        ],
+        allowFailure: false,
+      };
+      adapter.onMulticall(params1).resolves([{ success: true, value: 1n }]);
+      adapter.onMulticall(params2).resolves([2n]);
+      expect(await adapter.multicall(params1)).toStrictEqual([
+        { success: true, value: 1n },
+      ]);
+      expect(await adapter.multicall(params2)).toStrictEqual([2n]);
+    });
+
+    it("Can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onMulticall({
+          calls: [
+            {
+              abi: TestToken.abi,
+              fn: "balanceOf",
+            },
+          ],
+        })
+        .resolves([{ success: true, value: 123n }]);
+      expect(
+        await adapter.multicall({
+          calls: [
+            {
+              abi: TestToken.abi,
+              address: "0x",
+              fn: "balanceOf",
+              args: { owner: "0x1" },
+            },
+          ],
+        }),
+      ).toStrictEqual([{ success: true, value: 123n }]);
+    });
+
+    it("Can be stubbed with partial args", async () => {
+      const adapter = new MockAdapter();
+      adapter
+        .onMulticall({
+          calls: [
+            {
+              abi: TestToken.abi,
+              fn: "allowance",
+              args: { owner: "0x1" },
+            },
+          ],
+        })
+        .resolves([{ success: true, value: 123n }]);
+      expect(
+        await adapter.multicall({
+          calls: [
+            {
+              abi: TestToken.abi,
+              address: "0x",
+              fn: "allowance",
+              args: { owner: "0x1", spender: "0x" },
+            },
+          ],
+        }),
+      ).toStrictEqual([{ success: true, value: 123n }]);
+    });
+
+    it("Returns stubbed read and simulateWrite values", async () => {
+      const adapter = new MockAdapter();
+      const readParams: ReadParams<TestTokenAbi> = {
+        abi: TestToken.abi,
+        address: "0x1",
+        fn: "symbol",
+      };
+      const simulateWriteParams: SimulateWriteParams<TestTokenAbi> = {
+        abi: TestToken.abi,
+        address: "0x1",
+        fn: "approve",
+        args: { spender: "0x1", amount: 123n },
+      };
+
+      adapter.onRead(readParams).resolves("TEST");
+      adapter.onSimulateWrite(simulateWriteParams).resolves(true);
+
+      expect(
+        await adapter.multicall({
+          calls: [
+            readParams,
+            simulateWriteParams,
+            { abi: TestToken.abi, address: "0x1", fn: "name" },
+          ],
+        }),
+      ).toStrictEqual([
+        { success: true, value: "TEST" },
+        { success: true, value: true },
+        { success: false, error: expect.any(NotImplementedError) },
+      ]);
     });
   });
 

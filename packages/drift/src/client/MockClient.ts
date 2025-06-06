@@ -28,7 +28,7 @@ export function createMockClient<
     chainId,
     ...restOptions
   } = options;
-  if (!adapter.stubs.has("getChainId")) {
+  if (!adapter.stubs.has({ method: "getChainId" })) {
     adapter.onGetChainId().resolves(chainId ?? 0);
   }
   return createClient({

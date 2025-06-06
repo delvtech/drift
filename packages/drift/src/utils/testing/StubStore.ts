@@ -33,8 +33,20 @@ export class StubStore<T> {
   /**
    * Find out if a method has been stubbed.
    */
-  has(method: FunctionKey<T>) {
-    return this.#methodStores.has(method);
+  has(params: HasStubParams<T>): boolean {
+    const { method, key, matchPartial } = params;
+    const methodStore = this.#methodStores.get(method);
+    if (!methodStore) return false;
+    if (!key) return true;
+    if (methodStore.keyedStubs.has(key)) return true;
+    if (!matchPartial) return false;
+    const parsedKey = JSON.parse(key);
+    for (const storedKey of methodStore.keyedStubs.keys()) {
+      if (isMatch(parsedKey, JSON.parse(storedKey))) {
+        return true;
+      }
+    }
+    return !!methodStore.defaultStub;
   }
 
   /**
@@ -130,7 +142,11 @@ export class StubStore<T> {
   }
 }
 
-export interface GetStubParams<T, TArgs extends any[], TReturnType> {
+export interface GetStubParams<
+  T,
+  TArgs extends any[] = any[],
+  TReturnType = any,
+> {
   /**
    * The method to get a stub for.
    */
@@ -179,6 +195,8 @@ export interface GetStubParams<T, TArgs extends any[], TReturnType> {
    */
   create?: (stub: SinonStub<TArgs, TReturnType>) => SinonStub;
 }
+
+export type HasStubParams<T> = Omit<GetStubParams<T>, "create">;
 
 export class NotImplementedError extends DriftError {
   constructor({ method, args }: { method: string; args?: any[] }) {

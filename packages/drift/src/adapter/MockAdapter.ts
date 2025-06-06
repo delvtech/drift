@@ -3,7 +3,11 @@ import type { Abi, Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   CallParams,
   DeployParams,
+  FunctionCall,
   GetEventsParams,
+  MulticallOptions,
+  MulticallParams,
+  MulticallReturn,
   ReadParams,
   ReadWriteAdapter,
   SendTransactionParams,
@@ -28,9 +32,15 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
+import { convertType } from "src/utils/convertType";
 import { stringifyKey } from "src/utils/stringifyKey";
-import { StubStore } from "src/utils/testing/StubStore";
-import type { AnyObject, FunctionKey, Replace } from "src/utils/types";
+import { NotImplementedError, StubStore } from "src/utils/testing/StubStore";
+import type {
+  AnyObject,
+  Extended,
+  FunctionKey,
+  Replace,
+} from "src/utils/types";
 
 export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   stubs = new StubStore<ReadWriteAdapter>();
@@ -39,9 +49,17 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     return this.stubs.reset(method);
   }
 
-  // Remove the abi from the key
-  protected createKey({ abi, ...params }: AnyObject) {
-    return stringifyKey(params);
+  protected createKey(params?: AnyObject) {
+    if (!params) return undefined;
+    // Remove ABIs
+    const keyParams = convertType(
+      params,
+      (v): v is Extended<{ abi: Abi }> =>
+        v && typeof v === "object" && "abi" in v,
+      ({ abi, ...rest }) => rest,
+    );
+    const key = stringifyKey(keyParams);
+    return key;
   }
 
   // getChainId //
@@ -94,7 +112,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   onGetBalance(params?: Partial<GetBalanceParams>) {
     const stub = this.stubs.get<[GetBalanceParams], Promise<bigint>>({
       method: "getBalance",
-      key: params ? this.createKey(params) : undefined,
+      key: this.createKey(params),
     });
     return stub;
   }
@@ -115,7 +133,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
       Promise<Transaction | undefined>
     >({
       method: "getTransaction",
-      key: params ? this.createKey(params) : undefined,
+      key: this.createKey(params),
       create: (stub) => stub.resolves(undefined),
     });
   }
@@ -140,7 +158,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
       Promise<TransactionReceipt | undefined>
     >({
       method: "waitForTransaction",
-      key: params ? this.createKey(params) : undefined,
+      key: this.createKey(params),
       create: (stub) => stub.resolves(undefined),
     });
   }
@@ -162,7 +180,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   onCall(params?: Partial<CallParams>) {
     return this.stubs.get<[CallParams], Promise<Bytes>>({
       method: "call",
-      key: params ? this.createKey(params) : undefined,
+      key: this.createKey(params),
     });
   }
 
@@ -172,6 +190,86 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
       key: this.createKey(params),
       matchPartial: true,
     })(params);
+  }
+
+  // multicall //
+
+  onMulticall<
+    TAbis extends { abi: Abi }[],
+    TFns extends {
+      [K in keyof TAbis]: { fn: FunctionName<TAbis[K]["abi"]> };
+    },
+    TAllowFailure extends boolean = true,
+  >(params?: OnMulticallParams<TAbis, TFns, TAllowFailure>) {
+    return this.stubs.get<
+      [MulticallParams<TAbis, TAllowFailure>],
+      Promise<MulticallReturn<TAbis, TAllowFailure>>
+    >({
+      method: "multicall",
+      key: this.createKey(params),
+    });
+  }
+
+  async multicall<
+    TCalls extends { abi: Abi }[],
+    TAllowFailure extends boolean = true,
+  >(params: MulticallParams<TCalls, TAllowFailure>) {
+    try {
+      return this.stubs.get<
+        [MulticallParams<TCalls, TAllowFailure>],
+        Promise<MulticallReturn<TCalls, TAllowFailure>>
+      >({
+        method: "multicall",
+        key: this.createKey(params),
+        matchPartial: true,
+      })(params);
+    } catch (error) {
+      if (!(error instanceof NotImplementedError)) throw error;
+
+      // If the multicall hasn't been stubbed, check the read and
+      // simulateWrite stubs for each individual call.
+      const { calls, ...options } = params;
+      const results: Promise<unknown>[] = [];
+
+      for (const call of calls) {
+        // Check for a read stub
+        if (
+          this.stubs.has({
+            method: "read",
+            key: this.createKey({ ...call, block: options.block }),
+            matchPartial: true,
+          })
+        ) {
+          results.push(this.read({ ...call, block: options.block }));
+          continue;
+        }
+
+        // Check for a simulateWrite stub
+        if (
+          this.stubs.has({
+            method: "simulateWrite",
+            key: this.createKey({ ...call, ...options }),
+            matchPartial: true,
+          })
+        ) {
+          results.push(this.simulateWrite({ ...call, ...options }));
+          continue;
+        }
+
+        // Otherwise, handle the NotImplementedError
+        if (options.allowFailure === false) throw error;
+        results.push(Promise.resolve(error));
+      }
+
+      return Promise.all(
+        results.map(async (result) => {
+          const value = await result;
+          if (options.allowFailure === false) return value;
+          if (value instanceof Error) return { success: false, error: value };
+          return { success: true, value };
+        }),
+      ) as Promise<MulticallReturn<TCalls, TAllowFailure>>;
+    }
   }
 
   // sendRawTransaction //
@@ -203,7 +301,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
       Promise<EventLog<TAbi, TEventName>[]>
     >({
       method: "getEvents",
-      key: params ? this.createKey(params) : undefined,
+      key: this.createKey(params),
     });
   }
 
@@ -225,18 +323,13 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   onRead<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(
-    params?: Replace<
-      Partial<ReadParams<TAbi, TFunctionName>>,
-      { args?: Partial<FunctionArgs<TAbi, TFunctionName>> }
-    >,
-  ) {
+  >(params?: OnReadParams<TAbi, TFunctionName>) {
     return this.stubs.get<
       [ReadParams<TAbi, TFunctionName>],
       Promise<FunctionReturn<TAbi, TFunctionName>>
     >({
       method: "read",
-      key: params ? this.createKey(params) : undefined,
+      key: this.createKey(params),
     });
   }
 
@@ -259,18 +352,13 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   onSimulateWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(
-    params?: Replace<
-      Partial<SimulateWriteParams<TAbi, TFunctionName>>,
-      { args?: Partial<FunctionArgs<TAbi, TFunctionName>> }
-    >,
-  ) {
+  >(params?: OnSimulateWriteParams<TAbi, TFunctionName>) {
     return this.stubs.get<
       [SimulateWriteParams<TAbi, TFunctionName>],
       Promise<FunctionReturn<TAbi, TFunctionName>>
     >({
       method: "simulateWrite",
-      key: params ? this.createKey(params) : undefined,
+      key: this.createKey(params),
     });
   }
 
@@ -293,15 +381,10 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   onWrite<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(
-    params?: Replace<
-      Partial<WriteParams<TAbi, TFunctionName>>,
-      { args?: Partial<FunctionArgs<TAbi, TFunctionName>> }
-    >,
-  ) {
+  >(params?: OnWriteParams<TAbi, TFunctionName>) {
     return this.stubs.get<[WriteParams<TAbi, TFunctionName>], Promise<Hash>>({
       method: "write",
-      key: params ? this.createKey(params) : undefined,
+      key: this.createKey(params),
     });
   }
 
@@ -341,15 +424,10 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   // deploy //
 
-  onDeploy<TAbi extends Abi>(
-    params?: Replace<
-      Partial<DeployParams<TAbi>>,
-      { args?: Partial<ConstructorArgs<TAbi>> }
-    >,
-  ) {
+  onDeploy<TAbi extends Abi>(params?: OnDeployParams<TAbi>) {
     return this.stubs.get<[DeployParams<TAbi>], Promise<Hash>>({
       method: "deploy",
-      key: params ? this.createKey(params) : undefined,
+      key: this.createKey(params),
     });
   }
 
@@ -374,7 +452,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   onSendTransaction(params?: Partial<SendTransactionParams>) {
     return this.stubs.get<[SendTransactionParams], Promise<Hash>>({
       method: "sendTransaction",
-      key: params ? this.createKey(params) : undefined,
+      key: this.createKey(params),
     });
   }
 
@@ -392,3 +470,78 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     return hash;
   }
 }
+
+export type OnMulticallParams<
+  TAbis extends { abi: Abi }[] = { abi: Abi }[],
+  TFns extends {
+    [K in keyof TAbis]: { fn: FunctionName<TAbis[K]["abi"]> };
+  } = {
+    [K in keyof TAbis]: { fn: FunctionName<TAbis[K]["abi"]> };
+  },
+  TAllowFailure extends boolean = true,
+> = {
+  calls?: {
+    [K in keyof TAbis]: TAbis[K] & TFns[K] extends {
+      abi?: infer TAbi extends TAbis[K]["abi"];
+      fn?: infer TFn extends TFns[K]["fn"];
+    }
+      ? Replace<
+          Partial<FunctionCall<TAbi, TFn>>,
+          {
+            args?: Partial<FunctionArgs<TAbi, TFn>>;
+            fn?: TFns[K] extends { fn: infer TFn }
+              ? string extends TFn
+                ? never // <- Avoid widening to `string`
+                : TFn
+              : never;
+          }
+        >
+      : TAbis[K] & TFns[K];
+  };
+} & MulticallOptions<TAllowFailure>;
+
+export type OnReadParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi, "pure" | "view"> = FunctionName<
+    TAbi,
+    "pure" | "view"
+  >,
+> = Replace<
+  Partial<ReadParams<TAbi, TFunctionName>>,
+  {
+    args?: Partial<FunctionArgs<TAbi, TFunctionName>>;
+  }
+>;
+
+export type OnSimulateWriteParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<
+    TAbi,
+    "nonpayable" | "payable"
+  > = FunctionName<TAbi, "nonpayable" | "payable">,
+> = Replace<
+  Partial<SimulateWriteParams<TAbi, TFunctionName>>,
+  {
+    args?: Partial<FunctionArgs<TAbi, TFunctionName>>;
+  }
+>;
+
+export type OnWriteParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<
+    TAbi,
+    "nonpayable" | "payable"
+  > = FunctionName<TAbi, "nonpayable" | "payable">,
+> = Replace<
+  Partial<WriteParams<TAbi, TFunctionName>>,
+  {
+    args?: Partial<FunctionArgs<TAbi, TFunctionName>>;
+  }
+>;
+
+export type OnDeployParams<TAbi extends Abi = Abi> = Replace<
+  Partial<DeployParams<TAbi>>,
+  {
+    args?: Partial<ConstructorArgs<TAbi>>;
+  }
+>;
