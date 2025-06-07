@@ -392,7 +392,10 @@ export type ContractEncodeFunctionDataArgs<
 
 export type ContractReadArgs<
   TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+  TFunctionName extends FunctionName<TAbi, "pure" | "view"> = FunctionName<
+    TAbi,
+    "pure" | "view"
+  >,
 > = EmptyObject extends FunctionArgs<TAbi, TFunctionName>
   ? [
       functionName: TFunctionName,

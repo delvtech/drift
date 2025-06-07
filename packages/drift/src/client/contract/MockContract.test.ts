@@ -1,12 +1,120 @@
 import type { EventLog } from "src/adapter/types/Event";
-import { IERC20 } from "src/artifacts/IERC20";
+import { TestToken } from "src/artifacts/TestToken";
+import type {
+  ContractMulticallParams,
+  ContractReadArgs,
+  ContractSimulateWriteArgs,
+} from "src/client/contract/Contract";
 import { MockContract } from "src/client/contract/MockContract";
+import { NotImplementedError } from "src/utils/testing/StubStore";
 import { describe, expect, it } from "vitest";
 
-const abi = IERC20.abi;
-type Erc20Abi = typeof abi;
+const abi = TestToken.abi;
+type TestTokenAbi = typeof abi;
 
 describe("MockContract", () => {
+  describe("multicall", () => {
+    it("Returns an error result by default", async () => {
+      const contract = new MockContract({ abi });
+      const [result] = await contract.multicall({ calls: [{ fn: "symbol" }] });
+      expect(result).toStrictEqual({
+        success: false,
+        error: expect.any(NotImplementedError),
+      });
+    });
+
+    it("Can be stubbed with args", async () => {
+      const contract = new MockContract({ abi });
+      contract
+        .onMulticall({ calls: [{ fn: "balanceOf", args: { owner: "0x1" } }] })
+        .resolves([{ success: true, value: 123n }]);
+      expect(
+        await contract.multicall({
+          calls: [{ fn: "balanceOf", args: { owner: "0x1" } }],
+        }),
+      ).toStrictEqual([{ success: true, value: 123n }]);
+    });
+
+    it("Can stub different values for different args", async () => {
+      const contract = new MockContract({ abi });
+      const params1: ContractMulticallParams<
+        TestTokenAbi,
+        [{ fn: "allowance" }]
+      > = {
+        calls: [{ fn: "allowance", args: { owner: "0x1", spender: "0x1" } }],
+      };
+      const params2: ContractMulticallParams<
+        TestTokenAbi,
+        [{ fn: "allowance" }]
+      > = {
+        calls: [
+          { ...params1.calls[0], args: { owner: "0x2", spender: "0x2" } },
+        ],
+        allowFailure: false,
+      };
+      contract.onMulticall(params1).resolves([{ success: true, value: 1n }]);
+      contract.onMulticall(params2).resolves([2n]);
+      expect(await contract.multicall(params1)).toStrictEqual([
+        { success: true, value: 1n },
+      ]);
+      expect(await contract.multicall(params2)).toStrictEqual([2n]);
+    });
+
+    it("Can be stubbed with partial params", async () => {
+      const contract = new MockContract({ abi });
+      contract
+        .onMulticall({
+          calls: [{ fn: "balanceOf" }],
+        })
+        .resolves([{ success: true, value: 123n }]);
+      expect(
+        await contract.multicall({
+          calls: [{ fn: "balanceOf", args: { owner: "0x1" } }],
+        }),
+      ).toStrictEqual([{ success: true, value: 123n }]);
+    });
+
+    it("Can be stubbed with partial args", async () => {
+      const contract = new MockContract({ abi });
+      contract
+        .onMulticall({
+          calls: [{ fn: "allowance", args: { owner: "0x1" } }],
+        })
+        .resolves([{ success: true, value: 123n }]);
+      expect(
+        await contract.multicall({
+          calls: [{ fn: "allowance", args: { owner: "0x1", spender: "0x" } }],
+        }),
+      ).toStrictEqual([{ success: true, value: 123n }]);
+    });
+
+    it("Returns stubbed read and simulateWrite values", async () => {
+      const contract = new MockContract({ abi });
+      const readArgs: ContractReadArgs<TestTokenAbi> = ["symbol"];
+      const simulateWriteArgs: ContractSimulateWriteArgs<TestTokenAbi> = [
+        "approve",
+        { spender: "0x1", amount: 123n },
+      ];
+
+      contract.onRead(...readArgs).resolves("TEST");
+      contract.onSimulateWrite(...simulateWriteArgs).resolves(true);
+
+      expect(
+        await contract.multicall({
+          calls: [
+            { fn: readArgs[0] },
+            { fn: simulateWriteArgs[0], args: simulateWriteArgs[1] },
+            { fn: "name" },
+          ],
+        }),
+      ).toStrictEqual([
+        { success: true, value: "TEST" },
+        { success: true, value: true },
+        { success: false, error: expect.any(NotImplementedError) },
+      ]);
+    });
+  });
+
   describe("getEvents", async () => {
     it("Throws an error by default", async () => {
       const contract = new MockContract({ abi });
@@ -21,7 +129,7 @@ describe("MockContract", () => {
 
     it("Can be stubbed with specific args", async () => {
       const contract = new MockContract({ abi });
-      const events1: EventLog<Erc20Abi, "Transfer">[] = [
+      const events1: EventLog<TestTokenAbi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -31,7 +139,7 @@ describe("MockContract", () => {
           },
         },
       ];
-      const events2: EventLog<Erc20Abi, "Transfer">[] = [
+      const events2: EventLog<TestTokenAbi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -57,7 +165,7 @@ describe("MockContract", () => {
 
     it("Can be stubbed with partial args", async () => {
       const contract = new MockContract({ abi });
-      const events: EventLog<Erc20Abi, "Transfer">[] = [
+      const events: EventLog<TestTokenAbi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -75,7 +183,7 @@ describe("MockContract", () => {
 
     it("Inherits stubbed values from the client", async () => {
       const contract = new MockContract({ abi });
-      const events: EventLog<Erc20Abi, "Transfer">[] = [
+      const events: EventLog<TestTokenAbi, "Transfer">[] = [
         {
           eventName: "Transfer",
           args: {
@@ -135,7 +243,7 @@ describe("MockContract", () => {
     it("Can be stubbed with partial params", async () => {
       const contract = new MockContract({ abi });
       contract.onRead("balanceOf").resolves(123n);
-      expect(await contract.read("balanceOf", { account: "0x" })).toBe(123n);
+      expect(await contract.read("balanceOf", { owner: "0x" })).toBe(123n);
     });
 
     it("Inherits stubbed values from the client", async () => {

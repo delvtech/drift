@@ -446,7 +446,7 @@ export type MulticallCallResult<
 export type MulticallReturn<
   TCalls extends { abi: Abi }[] = { abi: Abi }[],
   TAllowFailure extends boolean = boolean,
-> = MulticallCalls<TCalls> extends infer T extends FunctionCall[]
+> = MulticallCalls<TCalls> extends infer T extends { abi: Abi; fn: string }[]
   ? {
       [K in keyof T]: T[K] extends {
         fn: infer TFunctionName extends FunctionName<T[K]["abi"]>;

@@ -471,6 +471,32 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   }
 }
 
+export type OnMulticallCalls<
+  TAbis extends { abi: Abi }[] = { abi: Abi }[],
+  TFns extends {
+    [K in keyof TAbis]: { fn: FunctionName<TAbis[K]["abi"]> };
+  } = {
+    [K in keyof TAbis]: { fn: FunctionName<TAbis[K]["abi"]> };
+  },
+> = {
+  [K in keyof TAbis]: TAbis[K] & TFns[K] extends {
+    abi?: infer TAbi extends TAbis[K]["abi"];
+    fn?: infer TFunctionName extends TFns[K]["fn"];
+  }
+    ? Replace<
+        Partial<FunctionCall<TAbi, TFunctionName>>,
+        {
+          args?: Partial<FunctionArgs<TAbi, TFunctionName>>;
+          fn?: TFns[K] extends { fn: infer TFunctionName }
+            ? string extends TFunctionName
+              ? never // <- Avoid widening to `string`
+              : TFunctionName
+            : never;
+        }
+      >
+    : TAbis[K] & TFns[K];
+};
+
 export type OnMulticallParams<
   TAbis extends { abi: Abi }[] = { abi: Abi }[],
   TFns extends {
@@ -478,26 +504,9 @@ export type OnMulticallParams<
   } = {
     [K in keyof TAbis]: { fn: FunctionName<TAbis[K]["abi"]> };
   },
-  TAllowFailure extends boolean = true,
+  TAllowFailure extends boolean = boolean,
 > = {
-  calls?: {
-    [K in keyof TAbis]: TAbis[K] & TFns[K] extends {
-      abi?: infer TAbi extends TAbis[K]["abi"];
-      fn?: infer TFn extends TFns[K]["fn"];
-    }
-      ? Replace<
-          Partial<FunctionCall<TAbi, TFn>>,
-          {
-            args?: Partial<FunctionArgs<TAbi, TFn>>;
-            fn?: TFns[K] extends { fn: infer TFn }
-              ? string extends TFn
-                ? never // <- Avoid widening to `string`
-                : TFn
-              : never;
-          }
-        >
-      : TAbis[K] & TFns[K];
-  };
+  calls?: OnMulticallCalls<TAbis, TFns>;
 } & MulticallOptions<TAllowFailure>;
 
 export type OnReadParams<

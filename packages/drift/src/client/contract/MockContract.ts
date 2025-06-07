@@ -1,12 +1,16 @@
-import type { MockAdapter } from "src/adapter/MockAdapter";
+import type {
+  MockAdapter,
+  OnReadParams,
+  OnSimulateWriteParams,
+  OnWriteParams,
+} from "src/adapter/MockAdapter";
 import type { Abi } from "src/adapter/types/Abi";
 import type {
   GetEventsOptions,
+  MulticallOptions,
   ReadOptions,
-  ReadParams,
   ReadWriteAdapter,
   WriteOptions,
-  WriteParams,
 } from "src/adapter/types/Adapter";
 import type { EventName } from "src/adapter/types/Event";
 import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
@@ -68,6 +72,27 @@ export class MockContract<
     return this.adapter.reset(method);
   }
 
+  onMulticall<
+    TCalls extends ContractOnMulticallCall<TAbi>[],
+    TAllowFailure extends boolean = true,
+  >({
+    calls,
+    ...options
+  }: ContractOnMulticallParams<TAbi, TCalls, TAllowFailure>) {
+    return this.adapter.onMulticall<
+      { [K in keyof TCalls]: { abi: TAbi; fn: NonNullable<TCalls[K]["fn"]> } },
+      { [K in keyof TCalls]: { fn: NonNullable<TCalls[K]["fn"]> } },
+      TAllowFailure
+    >({
+      calls: calls?.map((call) => ({
+        abi: this.abi,
+        address: this.address,
+        ...call,
+      })) as any,
+      ...options,
+    });
+  }
+
   onGetEvents<TEventName extends EventName<TAbi>>(
     event: TEventName,
     options?: GetEventsOptions<TAbi, TEventName>,
@@ -91,7 +116,7 @@ export class MockContract<
       fn,
       args,
       ...options,
-    } as Partial<ReadParams<TAbi, TFunctionName>>);
+    } as OnReadParams<TAbi, TFunctionName>);
   }
 
   onSimulateWrite<
@@ -107,7 +132,7 @@ export class MockContract<
       fn,
       args,
       ...options,
-    } as Partial<WriteParams<TAbi, TFunctionName>>);
+    } as OnSimulateWriteParams<TAbi, TFunctionName>);
   }
 
   onGetSignerAddress() {
@@ -125,7 +150,7 @@ export class MockContract<
       fn,
       args,
       ...options,
-    } as Partial<WriteParams<TAbi, TFunctionName>>);
+    } as OnWriteParams<TAbi, TFunctionName>);
   }
 }
 
@@ -139,3 +164,19 @@ export type MockContractClientOptions<
     }
   | MockClientOptions<TAdapter, TStore>
 >;
+
+type ContractOnMulticallCall<TAbi extends Abi> = {
+  [F in FunctionName<TAbi>]: {
+    fn?: F;
+    args?: Partial<FunctionArgs<TAbi, F>>;
+  };
+}[FunctionName<TAbi>];
+
+export type ContractOnMulticallParams<
+  TAbi extends Abi = Abi,
+  TCalls extends
+    ContractOnMulticallCall<TAbi>[] = ContractOnMulticallCall<TAbi>[],
+  TAllowFailure extends boolean = boolean,
+> = {
+  calls: TCalls;
+} & MulticallOptions<TAllowFailure>;
