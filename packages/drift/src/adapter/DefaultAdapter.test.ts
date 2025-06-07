@@ -12,6 +12,9 @@ import type {
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
 import { MockERC20 } from "src/artifacts/MockERC20";
+import { Overloaded } from "src/artifacts/Overloaded";
+import { Overloaded1 } from "src/artifacts/Overloaded1";
+import { Overloaded2 } from "src/artifacts/Overloaded2";
 import { TestToken } from "src/artifacts/TestToken";
 import { ZERO_ADDRESS } from "src/constants";
 import { DriftError } from "src/error/DriftError";
@@ -23,32 +26,14 @@ describe("DefaultAdapter", () => {
     process.env.VITE_TOKEN_ADDRESS || ZERO_ADDRESS
   ).toLowerCase() as AddressType;
   const rpcUrl = process.env.VITE_RPC_URL;
-  const transactionReceiptMatch: TransactionReceipt = {
-    blockHash: expect.stringMatching(HEX_REGEX),
-    blockNumber: expect.any(BigInt),
-    from: expect.stringMatching(HEX_REGEX),
-    cumulativeGasUsed: expect.any(BigInt),
-    effectiveGasPrice: expect.any(BigInt),
-    gasUsed: expect.any(BigInt),
-    logsBloom: expect.stringMatching(HEX_REGEX),
-    status: expect.stringMatching(/^(success|reverted)$/),
-    to: expect.stringMatching(HEX_REGEX),
-    transactionHash: expect.stringMatching(HEX_REGEX),
-    transactionIndex: expect.any(BigInt),
-    contractAddress: expect.toBeOneOf([
-      expect.stringMatching(HEX_REGEX),
-      undefined,
-    ]),
-  };
+  const adapter = new DefaultAdapter({ rpcUrl });
 
   it("fetches the chain id", async () => {
-    const adapter = new DefaultAdapter({ rpcUrl });
     const chainId = await adapter.getChainId();
     expect(chainId).toBeTypeOf("number");
   });
 
   it("fetches the current block", async () => {
-    const adapter = new DefaultAdapter({ rpcUrl });
     const block = await adapter.getBlock();
     expect(block).toMatchObject({
       timestamp: expect.any(BigInt),
@@ -72,13 +57,11 @@ describe("DefaultAdapter", () => {
   });
 
   it("fetches account balances", async () => {
-    const adapter = new DefaultAdapter({ rpcUrl });
     const balance = await adapter.getBalance({ address });
     expect(balance).toBeTypeOf("bigint");
   });
 
   it("fetches transactions", async () => {
-    const adapter = new DefaultAdapter({ rpcUrl });
     let block: Block | undefined = await adapter.getBlock();
     while (block?.transactions.length === 0) {
       console.log(
@@ -107,7 +90,6 @@ describe("DefaultAdapter", () => {
   });
 
   it("returns receipts for waited transactions", async () => {
-    const adapter = new DefaultAdapter({ rpcUrl });
     const blockNumber = await adapter.getBlockNumber();
     let block = await adapter.getBlock(blockNumber - 12n * 60n * 24n);
     while (block?.transactions.length === 0) {
@@ -119,12 +101,27 @@ describe("DefaultAdapter", () => {
     const tx = await adapter.waitForTransaction({
       hash: block!.transactions[0]!,
     });
-    expect(tx).toMatchObject(transactionReceiptMatch);
+    expect(tx).toMatchObject({
+      blockHash: expect.stringMatching(HEX_REGEX),
+      blockNumber: expect.any(BigInt),
+      from: expect.stringMatching(HEX_REGEX),
+      cumulativeGasUsed: expect.any(BigInt),
+      effectiveGasPrice: expect.any(BigInt),
+      gasUsed: expect.any(BigInt),
+      logsBloom: expect.stringMatching(HEX_REGEX),
+      status: expect.stringMatching(/^(success|reverted)$/),
+      to: expect.stringMatching(HEX_REGEX),
+      transactionHash: expect.stringMatching(HEX_REGEX),
+      transactionIndex: expect.any(BigInt),
+      contractAddress: expect.toBeOneOf([
+        expect.stringMatching(HEX_REGEX),
+        undefined,
+      ]),
+    } satisfies TransactionReceipt);
   });
 
   describe("call", () => {
     it("reads from deployed contracts", async () => {
-      const adapter = new DefaultAdapter({ rpcUrl });
       const data = adapter.encodeFunctionData({
         abi: TestToken.abi,
         fn: "symbol",
@@ -152,7 +149,6 @@ describe("DefaultAdapter", () => {
 
   describe("multicall", () => {
     it("reads multiple functions from contracts", async () => {
-      const adapter = new DefaultAdapter({ rpcUrl });
       const [symbolResult, decimalsResult] = await adapter.multicall({
         calls: [
           {
@@ -178,8 +174,6 @@ describe("DefaultAdapter", () => {
     });
 
     it("reads from contracts with args", async () => {
-      const adapter = new DefaultAdapter({ rpcUrl });
-
       const [balanceResult, transferResult] = await adapter.multicall({
         calls: [
           {
@@ -209,7 +203,6 @@ describe("DefaultAdapter", () => {
     });
 
     it("returns errors for failed calls", async () => {
-      const adapter = new DefaultAdapter({ rpcUrl });
       const signerAddress = await adapter.getSignerAddress();
       const [transferResult] = await adapter.multicall({
         calls: [
@@ -232,7 +225,6 @@ describe("DefaultAdapter", () => {
     });
 
     it("returns function values directly when allowFailure is false", async () => {
-      const adapter = new DefaultAdapter({ rpcUrl });
       const [decimals, symbol] = await adapter.multicall({
         allowFailure: false,
         calls: [
@@ -254,13 +246,12 @@ describe("DefaultAdapter", () => {
   });
 
   it("fetches events", async () => {
-    const adapter = new DefaultAdapter({ rpcUrl });
     const currentBlock = await adapter.getBlockNumber();
     const [event] = await adapter.getEvents({
       abi: TestToken.abi,
       address,
       event: "Transfer",
-      fromBlock: currentBlock - 100n,
+      fromBlock: currentBlock - 1000n,
     });
     expect(event).toMatchObject({
       args: expect.any(Object),
@@ -273,7 +264,6 @@ describe("DefaultAdapter", () => {
 
   describe("read", () => {
     it("reads from contracts", async () => {
-      const adapter = new DefaultAdapter({ rpcUrl });
       const symbol = await adapter.read({
         abi: TestToken.abi,
         address,
@@ -283,7 +273,6 @@ describe("DefaultAdapter", () => {
     });
 
     it("reads from contracts with args", async () => {
-      const adapter = new DefaultAdapter({ rpcUrl });
       const balance = await adapter.read({
         abi: TestToken.abi,
         address,
@@ -294,8 +283,19 @@ describe("DefaultAdapter", () => {
     });
   });
 
+  it("deploys contracts", async () => {
+    const hash = await adapter.deploy({
+      abi: TestToken.abi,
+      bytecode: TestToken.bytecode,
+      args: { decimals_: 18, initialSupply: 123n },
+    });
+    const receipt = await adapter.waitForTransaction({ hash });
+
+    expect(hash).toMatch(HEX_REGEX);
+    expect(receipt?.contractAddress).toMatch(HEX_REGEX);
+  });
+
   it("simulates writes to a contracts", async () => {
-    const adapter = new DefaultAdapter({ rpcUrl });
     const balance = await adapter.simulateWrite({
       abi: TestToken.abi,
       address,
@@ -308,23 +308,7 @@ describe("DefaultAdapter", () => {
     expect(balance).toBeTypeOf("boolean");
   });
 
-  it("deploys contracts", async () => {
-    const adapter = new DefaultAdapter({ rpcUrl });
-
-    const hash = await adapter.deploy({
-      abi: TestToken.abi,
-      bytecode: TestToken.bytecode,
-      args: { decimals_: 18, initialSupply: 123n },
-    });
-    const receipt = await adapter.waitForTransaction({ hash });
-
-    expect(hash).toMatch(HEX_REGEX);
-    expect(receipt?.contractAddress).toMatch(HEX_REGEX);
-  });
-
   it("sends transactions", async () => {
-    const adapter = new DefaultAdapter({ rpcUrl });
-
     const hash = await adapter.sendTransaction({
       data: adapter.encodeDeployData({
         abi: TestToken.abi,
@@ -339,7 +323,6 @@ describe("DefaultAdapter", () => {
   });
 
   it("encodes deploy data", async () => {
-    const adapter = new DefaultAdapter({ rpcUrl });
     const encoded = adapter.encodeDeployData({
       abi: TestToken.abi,
       bytecode: TestToken.bytecode,
@@ -349,7 +332,6 @@ describe("DefaultAdapter", () => {
   });
 
   it("encodes function data", async () => {
-    const adapter = new DefaultAdapter({ rpcUrl });
     const encoded = adapter.encodeFunctionData({
       abi: TestToken.abi,
       fn: "transfer",
@@ -376,7 +358,6 @@ describe("DefaultAdapter", () => {
   ] as const;
 
   it("encodes function return data", async () => {
-    const adapter = new DefaultAdapter({ rpcUrl });
     const encoded = adapter.encodeFunctionReturn({
       abi: tupleParamsAbi,
       fn: "names",
@@ -388,7 +369,6 @@ describe("DefaultAdapter", () => {
   });
 
   it("decodes function data", async () => {
-    const adapter = new DefaultAdapter({ rpcUrl });
     const args: FunctionArgs<typeof tupleParamsAbi, "names"> = {
       0: "delv",
       1: "drift",
@@ -409,12 +389,592 @@ describe("DefaultAdapter", () => {
   });
 
   it("decodes function return data", async () => {
-    const adapter = new DefaultAdapter({ rpcUrl });
     const decoded = adapter.decodeFunctionReturn({
       abi: tupleParamsAbi,
       fn: "names",
       data: "0x00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000464656c760000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000056472696674000000000000000000000000000000000000000000000000000000",
     });
     expect(decoded).toMatchObject({ 0: "delv", 1: "drift" });
+  });
+
+  describe("overloaded functions", async () => {
+    const hash = await adapter.deploy({
+      abi: Overloaded.abi,
+      bytecode: Overloaded.bytecode,
+    });
+    const receipt = await adapter.waitForTransaction({ hash });
+    const address = receipt?.contractAddress!;
+
+    describe("multicall", () => {
+      it("returns the correct value for overloaded functions with different args", async () => {
+        const [return1, return2] = await adapter.multicall({
+          calls: [
+            {
+              abi: Overloaded.abi,
+              address,
+              fn: "diffArgs",
+              args: { a: 123n },
+            },
+            {
+              abi: Overloaded.abi,
+              address,
+              fn: "diffArgs",
+              args: { a: 123n, b: "foo" },
+            },
+          ],
+          allowFailure: false,
+        });
+        expect(return1).toStrictEqual(123n);
+        expect(return2).toStrictEqual("foo");
+      });
+
+      it("returns the correct value for overloaded functions with different arg names", async () => {
+        const [return1, return2] = await adapter.multicall({
+          calls: [
+            {
+              abi: Overloaded.abi,
+              address,
+              fn: "diffArgNames",
+              args: { num: 123n },
+            },
+            {
+              abi: Overloaded.abi,
+              address,
+              fn: "diffArgNames",
+              args: { name: "foo" },
+            },
+          ],
+          allowFailure: false,
+        });
+        expect(return1).toStrictEqual(123n);
+        expect(return2).toStrictEqual("foo");
+      });
+
+      // FIXME:
+      it.todo(
+        "returns the correct value for overloaded functions with the same arg names",
+        async () => {
+          const [return1, return2] = await adapter.multicall({
+            calls: [
+              {
+                abi: Overloaded.abi,
+                address,
+                fn: "sameArgNames",
+                args: { a: 123n },
+              },
+              {
+                abi: Overloaded.abi,
+                address,
+                fn: "sameArgNames",
+                args: { a: "foo" },
+              },
+            ],
+            allowFailure: false,
+          });
+          expect(return1).toStrictEqual(123n);
+          expect(return2).toStrictEqual("foo");
+        },
+      );
+    });
+
+    describe("simulateWrite", () => {
+      it("returns the correct value for overloaded functions with different args", async () => {
+        const return1 = await adapter.simulateWrite({
+          abi: Overloaded.abi,
+          address,
+          fn: "diffArgs",
+          args: { a: 123n },
+        });
+        expect(return1).toStrictEqual(123n);
+
+        const return2 = await adapter.simulateWrite({
+          abi: Overloaded.abi,
+          address,
+          fn: "diffArgs",
+          args: { a: 123n, b: "foo" },
+        });
+        expect(return2).toStrictEqual("foo");
+      });
+
+      it("returns the correct value for overloaded functions with different arg names", async () => {
+        const return1 = await adapter.simulateWrite({
+          abi: Overloaded.abi,
+          address,
+          fn: "diffArgNames",
+          args: { num: 123n },
+        });
+        expect(return1).toStrictEqual(123n);
+
+        const return2 = await adapter.simulateWrite({
+          abi: Overloaded.abi,
+          address,
+          fn: "diffArgNames",
+          args: { name: "foo" },
+        });
+        expect(return2).toStrictEqual("foo");
+      });
+
+      // FIXME:
+      it.todo(
+        "returns the correct value for overloaded functions with the same arg names",
+        async () => {
+          const return1 = await adapter.simulateWrite({
+            abi: Overloaded.abi,
+            address,
+            fn: "sameArgNames",
+            args: { a: 123n },
+          });
+          expect(return1).toStrictEqual(123n);
+
+          const return2 = await adapter.simulateWrite({
+            abi: Overloaded.abi,
+            address,
+            fn: "sameArgNames",
+            args: { a: "foo" },
+          });
+          expect(return2).toStrictEqual("foo");
+        },
+      );
+    });
+
+    describe("read", () => {
+      it("returns the correct value for overloaded functions with different args", async () => {
+        const return1 = await adapter.read({
+          abi: Overloaded.abi,
+          address,
+          fn: "diffArgs",
+          args: { a: 123n },
+        });
+        expect(return1).toStrictEqual(123n);
+
+        const return2 = await adapter.read({
+          abi: Overloaded.abi,
+          address,
+          fn: "diffArgs",
+          args: { a: 123n, b: "foo" },
+        });
+        expect(return2).toStrictEqual("foo");
+      });
+
+      it("returns the correct value for overloaded functions with different arg names", async () => {
+        const return1 = await adapter.read({
+          abi: Overloaded.abi,
+          address,
+          fn: "diffArgNames",
+          args: { num: 123n },
+        });
+        expect(return1).toStrictEqual(123n);
+
+        const return2 = await adapter.read({
+          abi: Overloaded.abi,
+          address,
+          fn: "diffArgNames",
+          args: { name: "foo" },
+        });
+        expect(return2).toStrictEqual("foo");
+      });
+
+      // FIXME:
+      it.todo(
+        "returns the correct value for overloaded functions with the same arg names",
+        async () => {
+          const return1 = await adapter.read({
+            abi: Overloaded.abi,
+            address,
+            fn: "sameArgNames",
+            args: { a: 123n },
+          });
+          expect(return1).toStrictEqual(123n);
+
+          const return2 = await adapter.read({
+            abi: Overloaded.abi,
+            address,
+            fn: "sameArgNames",
+            args: { a: "foo" },
+          });
+          expect(return2).toStrictEqual("foo");
+        },
+      );
+    });
+
+    describe("encodeFunctionData", () => {
+      it("encodes function data for overloaded functions with different args", () => {
+        const data1 = adapter.encodeFunctionData({
+          abi: Overloaded.abi,
+          fn: "diffArgs",
+          args: { a: 123n },
+        });
+        const expectedData1 = adapter.encodeFunctionData({
+          abi: Overloaded1.abi,
+          fn: "diffArgs",
+          args: { a: 123n },
+        });
+        expect(data1).toEqual(expectedData1);
+
+        const data2 = adapter.encodeFunctionData({
+          abi: Overloaded.abi,
+          fn: "diffArgs",
+          args: { a: 123n, b: "foo" },
+        });
+        const expectedData2 = adapter.encodeFunctionData({
+          abi: Overloaded2.abi,
+          fn: "diffArgs",
+          args: { a: 123n, b: "foo" },
+        });
+        expect(data2).toEqual(expectedData2);
+      });
+
+      it("encodes function data for overloaded functions with different arg names", () => {
+        const data1 = adapter.encodeFunctionData({
+          abi: Overloaded.abi,
+          fn: "diffArgNames",
+          args: { num: 123n },
+        });
+        const expectedData1 = adapter.encodeFunctionData({
+          abi: Overloaded1.abi,
+          fn: "diffArgNames",
+          args: { num: 123n },
+        });
+        expect(data1).toEqual(expectedData1);
+
+        const data2 = adapter.encodeFunctionData({
+          abi: Overloaded.abi,
+          fn: "diffArgNames",
+          args: { name: "foo" },
+        });
+        const expectedData2 = adapter.encodeFunctionData({
+          abi: Overloaded2.abi,
+          fn: "diffArgNames",
+          args: { name: "foo" },
+        });
+        expect(data2).toEqual(expectedData2);
+      });
+
+      // FIXME:
+      it.todo(
+        "encodes function data for overloaded functions with the same arg names",
+        () => {
+          const data1 = adapter.encodeFunctionData({
+            abi: Overloaded.abi,
+            fn: "sameArgNames",
+            args: { a: 123n },
+          });
+          const expectedData1 = adapter.encodeFunctionData({
+            abi: Overloaded1.abi,
+            fn: "sameArgNames",
+            args: { a: 123n },
+          });
+          expect(data1).toEqual(expectedData1);
+
+          const data2 = adapter.encodeFunctionData({
+            abi: Overloaded.abi,
+            fn: "sameArgNames",
+            args: { a: "foo" },
+          });
+          const expectedData2 = adapter.encodeFunctionData({
+            abi: Overloaded2.abi,
+            fn: "sameArgNames",
+            args: { a: "foo" },
+          });
+          expect(data2).toEqual(expectedData2);
+        },
+      );
+    });
+
+    describe("encodeFunctionReturn", () => {
+      // FIXME:
+      it.todo(
+        "encodes function return data for overloaded functions with different args",
+        () => {
+          const data1 = adapter.encodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "diffArgs",
+            value: 123n,
+          });
+          const expectedData1 = adapter.encodeFunctionReturn({
+            abi: Overloaded1.abi,
+            fn: "diffArgs",
+            value: 123n,
+          });
+          expect(data1).toEqual(expectedData1);
+
+          const data2 = adapter.encodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "diffArgs",
+            value: "foo",
+          });
+          const expectedData2 = adapter.encodeFunctionReturn({
+            abi: Overloaded2.abi,
+            fn: "diffArgs",
+            value: "foo",
+          });
+          expect(data2).toEqual(expectedData2);
+        },
+      );
+
+      // FIXME:
+      it.todo(
+        "encodes function return data for overloaded functions with different arg names",
+        () => {
+          const data1 = adapter.encodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "diffArgNames",
+            value: 123n,
+          });
+          const expectedData1 = adapter.encodeFunctionReturn({
+            abi: Overloaded1.abi,
+            fn: "diffArgNames",
+            value: 123n,
+          });
+          expect(data1).toEqual(expectedData1);
+
+          const data2 = adapter.encodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "diffArgNames",
+            value: "foo",
+          });
+          const expectedData2 = adapter.encodeFunctionReturn({
+            abi: Overloaded2.abi,
+            fn: "diffArgNames",
+            value: "foo",
+          });
+          expect(data2).toEqual(expectedData2);
+        },
+      );
+
+      // FIXME:
+      it.todo(
+        "encodes function return data for overloaded functions with the same arg names",
+        () => {
+          const data1 = adapter.encodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "sameArgNames",
+            value: 123n,
+          });
+          const expectedData1 = adapter.encodeFunctionReturn({
+            abi: Overloaded1.abi,
+            fn: "sameArgNames",
+            value: 123n,
+          });
+          expect(data1).toEqual(expectedData1);
+
+          const data2 = adapter.encodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "sameArgNames",
+            value: "foo",
+          });
+          const expectedData2 = adapter.encodeFunctionReturn({
+            abi: Overloaded2.abi,
+            fn: "sameArgNames",
+            value: "foo",
+          });
+          expect(data2).toEqual(expectedData2);
+        },
+      );
+    });
+
+    describe("decodeFunctionData", () => {
+      // FIXME:
+      it.todo(
+        "decodes function data for overloaded functions with different args",
+        () => {
+          const data1 = adapter.encodeFunctionData({
+            abi: Overloaded.abi,
+            fn: "diffArgs",
+            args: { a: 123n },
+          });
+          const decoded1 = adapter.decodeFunctionData({
+            abi: Overloaded.abi,
+            fn: "diffArgs",
+            data: data1,
+          });
+          expect(decoded1).toStrictEqual({
+            args: { a: 123n },
+            functionName: "diffArgs",
+          } satisfies DecodedFunctionData<typeof Overloaded.abi, "diffArgs">);
+
+          const data2 = adapter.encodeFunctionData({
+            abi: Overloaded.abi,
+            fn: "diffArgs",
+            args: { a: 123n, b: "foo" },
+          });
+          const decoded2 = adapter.decodeFunctionData({
+            abi: Overloaded.abi,
+            fn: "diffArgs",
+            data: data2,
+          });
+          expect(decoded2).toStrictEqual({
+            args: { a: 123n, b: "foo" },
+            functionName: "diffArgs",
+          } satisfies DecodedFunctionData<typeof Overloaded.abi, "diffArgs">);
+        },
+      );
+
+      it("decodes function data for overloaded functions with different arg names", () => {
+        const data1 = adapter.encodeFunctionData({
+          abi: Overloaded.abi,
+          fn: "diffArgNames",
+          args: { num: 123n },
+        });
+        const decoded1 = adapter.decodeFunctionData({
+          abi: Overloaded.abi,
+          fn: "diffArgNames",
+          data: data1,
+        });
+        expect(decoded1).toStrictEqual({
+          args: { num: 123n },
+          functionName: "diffArgNames",
+        } satisfies DecodedFunctionData<typeof Overloaded.abi, "diffArgNames">);
+
+        const data2 = adapter.encodeFunctionData({
+          abi: Overloaded.abi,
+          fn: "diffArgNames",
+          args: { name: "foo" },
+        });
+        const decoded2 = adapter.decodeFunctionData({
+          abi: Overloaded.abi,
+          fn: "diffArgNames",
+          data: data2,
+        });
+        expect(decoded2).toStrictEqual({
+          args: { name: "foo" },
+          functionName: "diffArgNames",
+        } satisfies DecodedFunctionData<typeof Overloaded.abi, "diffArgNames">);
+      });
+
+      // FIXME:
+      it.todo(
+        "decodes function data for overloaded functions with the same arg names",
+        () => {
+          const data1 = adapter.encodeFunctionData({
+            abi: Overloaded.abi,
+            fn: "sameArgNames",
+            args: { a: 123n },
+          });
+          const decoded1 = adapter.decodeFunctionData({
+            abi: Overloaded.abi,
+            fn: "sameArgNames",
+            data: data1,
+          });
+          expect(decoded1).toStrictEqual({
+            args: { a: 123n },
+            functionName: "sameArgNames",
+          } satisfies DecodedFunctionData<
+            typeof Overloaded.abi,
+            "sameArgNames"
+          >);
+
+          const data2 = adapter.encodeFunctionData({
+            abi: Overloaded.abi,
+            fn: "sameArgNames",
+            args: { a: "foo" },
+          });
+          const decoded2 = adapter.decodeFunctionData({
+            abi: Overloaded.abi,
+            fn: "sameArgNames",
+            data: data2,
+          });
+          expect(decoded2).toStrictEqual({
+            args: { a: "foo" },
+            functionName: "sameArgNames",
+          } satisfies DecodedFunctionData<
+            typeof Overloaded.abi,
+            "sameArgNames"
+          >);
+        },
+      );
+    });
+
+    describe("decodeFunctionReturn", () => {
+      // FIXME:
+      it.todo(
+        "decodes function return data for overloaded functions with different args",
+        () => {
+          const data1 = adapter.encodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "diffArgs",
+            value: 123n,
+          });
+          const decoded1 = adapter.decodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "diffArgs",
+            data: data1,
+          });
+          expect(decoded1).toStrictEqual(123n);
+
+          const data2 = adapter.encodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "diffArgs",
+            value: "foo",
+          });
+          const decoded2 = adapter.decodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "diffArgs",
+            data: data2,
+          });
+          expect(decoded2).toStrictEqual("foo");
+        },
+      );
+
+      // FIXME:
+      it.todo(
+        "decodes function return data for overloaded functions with different arg names",
+        () => {
+          const data1 = adapter.encodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "diffArgNames",
+            value: 123n,
+          });
+          const decoded1 = adapter.decodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "diffArgNames",
+            data: data1,
+          });
+          expect(decoded1).toStrictEqual(123n);
+
+          const data2 = adapter.encodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "diffArgNames",
+            value: "foo",
+          });
+          const decoded2 = adapter.decodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "diffArgNames",
+            data: data2,
+          });
+          expect(decoded2).toStrictEqual("foo");
+        },
+      );
+
+      // FIXME:
+      it.todo(
+        "decodes function return data for overloaded functions with the same arg names",
+        () => {
+          const data1 = adapter.encodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "sameArgNames",
+            value: 123n,
+          });
+          const decoded1 = adapter.decodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "sameArgNames",
+            data: data1,
+          });
+          expect(decoded1).toStrictEqual(123n);
+
+          const data2 = adapter.encodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "sameArgNames",
+            value: "foo",
+          });
+          const decoded2 = adapter.decodeFunctionReturn({
+            abi: Overloaded.abi,
+            fn: "sameArgNames",
+            data: data2,
+          });
+          expect(decoded2).toStrictEqual("foo");
+        },
+      );
+    });
   });
 });

@@ -10,8 +10,8 @@ contract Overloaded {
 
     uint256 public callCount;
 
-    function diffArgs(uint256 a) public returns (uint256) {
-        callCount++;
+    function diffArgs(uint256 a) public pure returns (uint256) {
+        // callCount++;
         return a;
     }
 
@@ -21,8 +21,7 @@ contract Overloaded {
         return b;
     }
 
-    function diffArgNames(uint256 num) public returns (uint256) {
-        callCount++;
+    function diffArgNames(uint256 num) public pure returns (uint256) {
         return num;
     }
 
@@ -31,8 +30,7 @@ contract Overloaded {
         return name;
     }
 
-    function sameArgNames(uint256 a) public returns (uint256) {
-        callCount++;
+    function sameArgNames(uint256 a) public pure returns (uint256) {
         return a;
     }
 

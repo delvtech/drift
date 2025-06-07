@@ -387,7 +387,7 @@ export class DefaultReadAdapter extends AbiEncoder implements ReadAdapter {
     const { data, abiFn } = prepareFunctionData({ abi, fn, args });
     const returnData = await this.call({ to: address, data, block });
     return this.decodeFunctionReturn({
-      abi: [abiFn] as Abi as TAbi,
+      abi: [abiFn] as Abi,
       data: returnData,
       fn,
     });
@@ -408,7 +408,7 @@ export class DefaultReadAdapter extends AbiEncoder implements ReadAdapter {
     const { abiFn, data } = prepareFunctionData({ abi, fn, args });
     const result = await this.call({ data, to: address, ...options });
     return this.decodeFunctionReturn({
-      abi: [abiFn] as Abi as TAbi,
+      abi: [abiFn] as Abi,
       data: result,
       fn,
     });
