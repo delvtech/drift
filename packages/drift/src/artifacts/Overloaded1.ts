@@ -1,0 +1,6 @@
+export const Overloaded1 = {
+  name: 'Overloaded1' as const,
+  abi: [{"type":"function","name":"diffArgNames","inputs":[{"name":"num","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"pure"},{"type":"function","name":"diffArgs","inputs":[{"name":"a","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"pure"},{"type":"function","name":"sameArgNames","inputs":[{"name":"a","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"pure"}] as const,
+  bytecode: '0x6080604052348015600e575f80fd5b5060aa8061001b5f395ff3fe6080604052348015600e575f80fd5b5060043610603a575f3560e01c806340b3618c14603e5780637a77802d14603e578063be0a86d214603e575b5f80fd5b604c6049366004605e565b90565b60405190815260200160405180910390f35b5f60208284031215606d575f80fd5b503591905056fea2646970667358221220ab38f178e93ae31e77ff4cebb96f52cb08230f91d39dd75e0ad9d88e5a8b02a964736f6c63430008180033' as `0x${string}`,
+  methodIdentifiers: {"diffArgNames(uint256)":"7a77802d","diffArgs(uint256)":"40b3618c","sameArgNames(uint256)":"be0a86d2"} as const,
+};
