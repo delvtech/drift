@@ -20,7 +20,8 @@
   },
   "cSpell.words": [
     "delvtech",
-    "multicall"
+    "multicall",
+    "viem"
   ],
   "typescript.preferences.autoImportFileExcludePatterns": ["**/exports/**"]
 }

@@ -212,7 +212,6 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
    * {@linkcode Contract.read} re-fetches them when called.
    */
   async clearReads(): Promise<void> {
-    // TODO: Cleanup type cast
     return this.#clientCache.invalidateReadsMatching({
       abi: this.#abi as Abi,
       address: this.#address,

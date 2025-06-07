@@ -3,7 +3,7 @@ import type { Address, Bytes, Hash, HexString } from "src/adapter/types/Abi";
 /** Legacy + EIP-1559 compatible transaction */
 // https://github.com/ethereum/execution-apis/blob/e8727564bb74a1ebcd22a933b7b57eb7b71a11c3/src/schemas/transaction.yaml#L78
 // https://github.com/ethereum/execution-apis/blob/e8727564bb74a1ebcd22a933b7b57eb7b71a11c3/src/schemas/transaction.yaml#L184
-interface TransactionBase {
+interface BaseTransactionProps {
   type: string;
   nonce: bigint;
   gas: bigint;
@@ -23,10 +23,10 @@ export interface TransactionInfo {
   transactionIndex?: bigint;
 }
 
-export interface Transaction extends TransactionBase, TransactionInfo {}
+export interface Transaction extends BaseTransactionProps, TransactionInfo {}
 
 export interface MinedTransaction
-  extends TransactionBase,
+  extends BaseTransactionProps,
     Required<TransactionInfo> {}
 
 // https://github.com/ethereum/execution-apis/blob/e3d2745289bd2bb61dc8593069871be4be441952/src/schemas/receipt.yaml#L37
