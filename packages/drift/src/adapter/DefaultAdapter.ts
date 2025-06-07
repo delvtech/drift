@@ -83,10 +83,10 @@ export interface DefaultAdapterOptions {
 }
 
 export class DefaultReadAdapter extends AbiEncoder implements ReadAdapter {
-  provider: Provider.Provider;
   pollingInterval: number;
   pollingTimeout: number;
   multicallAddress: AddressType;
+  protected provider: Provider.Provider;
 
   static DEFAULT_POLLING_INTERVAL = 4_000 as const;
   static DEFAULT_TIMEOUT = 60_000 as const; // 1 minute
