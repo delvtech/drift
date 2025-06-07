@@ -21,6 +21,7 @@ import type {
   GetEventsParams,
   MulticallParams,
   MulticallReturn,
+  ReadAdapter,
   ReadParams,
   ReadWriteAdapter,
   SendTransactionParams,
@@ -29,11 +30,12 @@ import type {
 } from "src/adapter/types/Adapter";
 import type { Adapter } from "src/adapter/types/Adapter";
 import type { BlockIdentifier, BlockTag } from "src/adapter/types/Block";
-import type { EventArgs, EventName } from "src/adapter/types/Event";
+import type { EventArgs, EventLog, EventName } from "src/adapter/types/Event";
 import type {
   ConstructorArgs,
   FunctionArgs,
   FunctionName,
+  FunctionReturn,
 } from "src/adapter/types/Function";
 import type {
   GetBalanceParams,
@@ -80,7 +82,7 @@ export interface DefaultAdapterOptions {
   multicallAddress?: AddressType;
 }
 
-export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
+export class DefaultReadAdapter extends AbiEncoder implements ReadAdapter {
   provider: Provider.Provider;
   pollingInterval: number;
   pollingTimeout: number;
@@ -93,9 +95,9 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   constructor({
     rpcUrl,
-    pollingInterval = DefaultAdapter.DEFAULT_POLLING_INTERVAL,
-    pollingTimeout = DefaultAdapter.DEFAULT_TIMEOUT,
-    multicallAddress = DefaultAdapter.DEFAULT_MULTICALL_ADDRESS,
+    pollingInterval = DefaultReadAdapter.DEFAULT_POLLING_INTERVAL,
+    pollingTimeout = DefaultReadAdapter.DEFAULT_TIMEOUT,
+    multicallAddress = DefaultReadAdapter.DEFAULT_MULTICALL_ADDRESS,
   }: DefaultAdapterOptions = {}) {
     super();
     try {
@@ -136,7 +138,9 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
       .catch(handleError);
   }
 
-  getBlock<T extends BlockIdentifier | undefined = undefined>(blockId?: T) {
+  getBlock<T extends BlockIdentifier | undefined = undefined>(
+    blockId?: T,
+  ): Promise<GetBlockReturn<T>> {
     return this.provider
       .request(
         isHexString(blockId)
@@ -162,7 +166,7 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
       .catch(handleError) as Promise<GetBlockReturn<T>>;
   }
 
-  getBalance(params: GetBalanceParams) {
+  getBalance(params: GetBalanceParams): Promise<bigint> {
     return this.provider
       .request({
         method: "eth_getBalance",
@@ -231,7 +235,7 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
     ).catch(handleError);
   }
 
-  sendRawTransaction(transaction: Bytes) {
+  sendRawTransaction(transaction: Bytes): Promise<Hash> {
     return this.provider.request({
       method: "eth_sendRawTransaction",
       params: [transaction],
@@ -245,7 +249,7 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
     filter,
     fromBlock,
     toBlock,
-  }: GetEventsParams<TAbi, TEventName>) {
+  }: GetEventsParams<TAbi, TEventName>): Promise<EventLog<TAbi, TEventName>[]> {
     const { abiEntry } = prepareParams({
       abi,
       type: "event",
@@ -279,7 +283,7 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
     });
   }
 
-  call({ to, data, bytecode, block, ...options }: CallParams) {
+  call({ to, data, bytecode, block, ...options }: CallParams): Promise<Bytes> {
     if (bytecode && data) {
       data = encodeBytecodeCallData(bytecode, data);
     }
@@ -307,7 +311,9 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
     multicallAddress = this.multicallAddress,
     allowFailure = true as TAllowFailure,
     ...options
-  }: MulticallParams<TCalls, TAllowFailure>) {
+  }: MulticallParams<TCalls, TAllowFailure>): Promise<
+    MulticallReturn<TCalls, TAllowFailure>
+  > {
     const results = await this.simulateWrite({
       abi: IMulticall3.abi,
       address: multicallAddress,
@@ -362,7 +368,9 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
     fn,
     args = {} as FunctionArgs<TAbi, TFunctionName>,
     block,
-  }: ReadParams<TAbi, TFunctionName>) {
+  }: ReadParams<TAbi, TFunctionName>): Promise<
+    FunctionReturn<TAbi, TFunctionName>
+  > {
     const { data, abiFn } = prepareFunctionData({ abi, fn, args });
     const returnData = await this.call({ to: address, data, block });
     return _decodeFunctionReturn<TAbi, TFunctionName>({
@@ -380,14 +388,14 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
     fn,
     args = {} as FunctionArgs<TAbi, TFunctionName>,
     address,
-    from,
     ...options
-  }: SimulateWriteParams<TAbi, TFunctionName>) {
+  }: SimulateWriteParams<TAbi, TFunctionName>): Promise<
+    FunctionReturn<TAbi, TFunctionName>
+  > {
     const { abiFn, data } = prepareFunctionData({ abi, fn, args });
     const result = await this.call({
       data,
       to: address,
-      from: from ?? (await this.getSignerAddress().catch(() => undefined)),
       ...options,
     });
     return _decodeFunctionReturn<TAbi, TFunctionName>({
@@ -396,8 +404,28 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
       fn: abiFn,
     });
   }
+}
 
-  async getSignerAddress() {
+export class DefaultAdapter
+  extends DefaultReadAdapter
+  implements ReadWriteAdapter
+{
+  async simulateWrite<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >({
+    from,
+    ...restParams
+  }: SimulateWriteParams<TAbi, TFunctionName>): Promise<
+    FunctionReturn<TAbi, TFunctionName>
+  > {
+    return super.simulateWrite({
+      from: from ?? (await this.getSignerAddress().catch(() => undefined)),
+      ...restParams,
+    } as SimulateWriteParams<TAbi, TFunctionName>);
+  }
+
+  async getSignerAddress(): Promise<AddressType> {
     const [address] = await this.provider
       .request({ method: "eth_accounts" })
       .catch(handleError);
@@ -438,7 +466,7 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
     bytecode,
     args = {} as ConstructorArgs<TAbi>,
     ...options
-  }: DeployParams<TAbi>) {
+  }: DeployParams<TAbi>): Promise<Hash> {
     const data = this.encodeDeployData({ abi, bytecode, args });
     return this.sendTransaction({ data, ...options });
   }
@@ -452,7 +480,7 @@ export class DefaultAdapter extends AbiEncoder implements ReadWriteAdapter {
     args = {} as FunctionArgs<TAbi, TFunctionName>,
     address,
     ...options
-  }: WriteParams<TAbi, TFunctionName>) {
+  }: WriteParams<TAbi, TFunctionName>): Promise<Hash> {
     const data = this.encodeFunctionData({ abi, fn, args });
     return this.sendTransaction({ data, to: address, ...options });
   }

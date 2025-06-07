@@ -89,6 +89,7 @@ export { AbiEncoder } from "src/adapter/AbiEncoder";
 
 export {
   DefaultAdapter,
+  DefaultReadAdapter,
   type DefaultAdapterOptions,
 } from "src/adapter/DefaultAdapter";
 
