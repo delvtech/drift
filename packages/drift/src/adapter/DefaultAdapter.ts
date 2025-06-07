@@ -10,6 +10,7 @@ import {
 import { AbiEncoder } from "src/adapter/AbiEncoder";
 import type {
   Abi,
+  AbiEntry,
   Address as AddressType,
   Bytes,
   Hash,
@@ -49,7 +50,6 @@ import type {
   TransactionReceipt as TransactionReceiptType,
   Transaction as TransactionType,
 } from "src/adapter/types/Transaction";
-import { _decodeFunctionReturn } from "src/adapter/utils/decodeFunctionReturn";
 import { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
 import { prepareFunctionData } from "src/adapter/utils/encodeFunctionData";
 import { handleError } from "src/adapter/utils/internal/handleError";
@@ -314,31 +314,40 @@ export class DefaultReadAdapter extends AbiEncoder implements ReadAdapter {
   }: MulticallParams<TCalls, TAllowFailure>): Promise<
     MulticallReturn<TCalls, TAllowFailure>
   > {
+    const abiFns: AbiEntry<Abi, "function">[] = [];
+
     const results = await this.simulateWrite({
       abi: IMulticall3.abi,
       address: multicallAddress,
       fn: "aggregate3",
       args: {
-        calls: calls.map((read) => ({
-          target: read.address,
-          callData: this.encodeFunctionData({
+        calls: calls.map((read) => {
+          const { abiFn, data } = prepareFunctionData({
             abi: read.abi,
             fn: read.fn,
             args: read.args,
-          }),
-          allowFailure,
-        })),
+          });
+          abiFns.push(abiFn);
+          return {
+            target: read.address,
+            callData: data,
+            allowFailure,
+          };
+        }),
       },
       ...options,
     });
 
     return results.map(({ returnData, success }, i) => {
-      const { abi, fn } = calls[i]!; // Assume a read for each result
+      const { fn } = calls[i]!;
+      const abiFn = abiFns[i]!;
 
-      // TODO: If allowFailure is true but the call fails, will it reach this
-      // point? And, how will decodeFunctionReturn handle it?
       if (!allowFailure) {
-        return this.decodeFunctionReturn({ abi, data: returnData, fn });
+        return this.decodeFunctionReturn({
+          abi: [abiFn],
+          data: returnData,
+          fn,
+        });
       }
 
       if (!success) {
@@ -354,7 +363,11 @@ export class DefaultReadAdapter extends AbiEncoder implements ReadAdapter {
 
       return {
         success,
-        value: this.decodeFunctionReturn({ abi, data: returnData, fn }),
+        value: this.decodeFunctionReturn({
+          abi: [abiFn],
+          data: returnData,
+          fn,
+        }),
       };
     }) as MulticallReturn<TCalls, TAllowFailure>;
   }
@@ -373,10 +386,10 @@ export class DefaultReadAdapter extends AbiEncoder implements ReadAdapter {
   > {
     const { data, abiFn } = prepareFunctionData({ abi, fn, args });
     const returnData = await this.call({ to: address, data, block });
-    return _decodeFunctionReturn<TAbi, TFunctionName>({
-      abi,
+    return this.decodeFunctionReturn({
+      abi: [abiFn] as Abi as TAbi,
       data: returnData,
-      fn: abiFn,
+      fn,
     });
   }
 
@@ -393,15 +406,11 @@ export class DefaultReadAdapter extends AbiEncoder implements ReadAdapter {
     FunctionReturn<TAbi, TFunctionName>
   > {
     const { abiFn, data } = prepareFunctionData({ abi, fn, args });
-    const result = await this.call({
-      data,
-      to: address,
-      ...options,
-    });
-    return _decodeFunctionReturn<TAbi, TFunctionName>({
-      abi,
+    const result = await this.call({ data, to: address, ...options });
+    return this.decodeFunctionReturn({
+      abi: [abiFn] as Abi as TAbi,
       data: result,
-      fn: abiFn,
+      fn,
     });
   }
 }
