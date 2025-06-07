@@ -211,13 +211,11 @@ export interface ContractParams<TAbi extends Abi = Abi> {
  * A dynamic arguments parameter that is optional if the arguments are empty.
  * @internal
  */
-export type ArgsParam<Args> = EmptyObject extends Args
-  ? {
-      args?: Args;
-    }
-  : {
-      args: Args;
-    };
+export type ArgsParam<Args> = {} | Args extends EmptyObject
+  ? { args?: Args }
+  : {} extends Args
+    ? { args?: Args }
+    : { args: Args };
 
 /**
  * Base params for a function call.
