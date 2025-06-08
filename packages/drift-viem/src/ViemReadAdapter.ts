@@ -1,6 +1,6 @@
 import {
   type Abi,
-  AbiEncoder,
+  BaseReadAdapter,
   type Block,
   type BlockIdentifier,
   type Bytes,
@@ -10,7 +10,7 @@ import {
   type FunctionArgs,
   type FunctionName,
   type GetBalanceParams,
-  type GetBlockReturnType,
+  type GetBlockReturn,
   type GetEventsParams,
   type GetTransactionParams,
   type ReadAdapter,
@@ -37,7 +37,7 @@ export interface ViemReadAdapterParams<
 }
 
 export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
-  extends AbiEncoder
+  extends BaseReadAdapter
   implements ReadAdapter
 {
   publicClient: TClient;
@@ -96,7 +96,7 @@ export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
       transactionsRoot: viemBlock.transactionsRoot,
     };
 
-    return block as GetBlockReturnType<T>;
+    return block as GetBlockReturn<T>;
   }
 
   getBalance({ address, block }: GetBalanceParams) {

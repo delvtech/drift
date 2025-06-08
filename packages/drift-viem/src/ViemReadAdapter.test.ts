@@ -1,33 +1,39 @@
 import {
   type Block,
   type DecodedFunctionData,
+  DriftError,
   type EventLog,
   type FunctionArgs,
   HEX_REGEX,
+  type MulticallCallResult,
   type Transaction,
   type TransactionReceipt,
 } from "@delvtech/drift";
 import { mockErc20, testToken } from "@delvtech/drift/testing";
 import { ViemReadAdapter } from "src/ViemReadAdapter";
-import { http, type Address, createPublicClient, erc20Abi } from "viem";
+import {
+  http,
+  type Address,
+  createPublicClient,
+  erc20Abi,
+  zeroAddress,
+} from "viem";
 import { assert, describe, expect, it } from "vitest";
 
-const { VITE_RPC_URL = "", VITE_TOKEN_ADDRESS = "0x0" } = process.env;
-const publicClient = createPublicClient({
-  transport: http(VITE_RPC_URL),
-});
-
-const address = VITE_TOKEN_ADDRESS as Address;
-
 describe("ViemReadAdapter", () => {
+  const { VITE_RPC_URL = "", VITE_TOKEN_ADDRESS = "0x0" } = process.env;
+  const publicClient = createPublicClient({
+    transport: http(VITE_RPC_URL),
+  });
+  const address = VITE_TOKEN_ADDRESS as Address;
+  const adapter = new ViemReadAdapter({ publicClient });
+
   it("fetches the chain id", async () => {
-    const adapter = new ViemReadAdapter({ publicClient });
     const chainId = await adapter.getChainId();
     expect(chainId).toBeTypeOf("number");
   });
 
   it("fetches the current block", async () => {
-    const adapter = new ViemReadAdapter({ publicClient });
     const block = await adapter.getBlock();
     expect(block).toMatchObject({
       number: expect.any(BigInt),
@@ -36,13 +42,11 @@ describe("ViemReadAdapter", () => {
   });
 
   it("fetches account balances", async () => {
-    const adapter = new ViemReadAdapter({ publicClient });
     const balance = await adapter.getBalance({ address });
     expect(balance).toBeTypeOf("bigint");
   });
 
   it("fetches transactions", async () => {
-    const adapter = new ViemReadAdapter({ publicClient });
     let block = await publicClient.getBlock();
     while (block.transactions.length === 0) {
       console.log(
@@ -71,7 +75,6 @@ describe("ViemReadAdapter", () => {
   });
 
   it("returns receipts for waited transactions", async () => {
-    const adapter = new ViemReadAdapter({ publicClient });
     let block = await publicClient.getBlock();
     while (block.transactions.length === 0) {
       console.log(
@@ -103,7 +106,6 @@ describe("ViemReadAdapter", () => {
 
   describe("call", () => {
     it("reads from deployed contracts", async () => {
-      const adapter = new ViemReadAdapter({ publicClient });
       const data = adapter.encodeFunctionData({
         abi: erc20Abi,
         fn: "symbol",
@@ -116,7 +118,6 @@ describe("ViemReadAdapter", () => {
     });
 
     it("reads from bytecodes", async () => {
-      const adapter = new ViemReadAdapter({ publicClient });
       const data = adapter.encodeFunctionData({
         abi: mockErc20.abi,
         fn: "name",
@@ -130,7 +131,6 @@ describe("ViemReadAdapter", () => {
   });
 
   it("fetches events", async () => {
-    const adapter = new ViemReadAdapter({ publicClient });
     const currentBlock = await publicClient.getBlockNumber();
     const events = await adapter.getEvents({
       abi: erc20Abi,
@@ -148,9 +148,105 @@ describe("ViemReadAdapter", () => {
     } satisfies EventLog<typeof erc20Abi, "Transfer">);
   });
 
+  describe("multicall", () => {
+    it("reads multiple functions from contracts", async () => {
+      const [symbolResult, decimalsResult] = await adapter.multicall({
+        calls: [
+          {
+            abi: erc20Abi,
+            address,
+            fn: "symbol",
+          },
+          {
+            abi: erc20Abi,
+            address,
+            fn: "decimals",
+          },
+        ],
+      });
+      expect(symbolResult).toMatchObject({
+        success: true,
+        value: expect.any(String),
+      } satisfies MulticallCallResult);
+      expect(decimalsResult).toMatchObject({
+        success: true,
+        value: expect.any(Number),
+      } satisfies MulticallCallResult);
+    });
+
+    it("reads from contracts with args", async () => {
+      const [balanceResult, transferResult] = await adapter.multicall({
+        calls: [
+          {
+            abi: erc20Abi,
+            address,
+            fn: "balanceOf",
+            args: { account: address },
+          },
+
+          {
+            abi: erc20Abi,
+            address,
+            fn: "allowance",
+            args: { owner: address, spender: address },
+          },
+        ],
+      });
+
+      expect(balanceResult).toMatchObject({
+        success: true,
+        value: expect.any(BigInt),
+      } satisfies MulticallCallResult);
+      expect(transferResult).toMatchObject({
+        success: true,
+        value: expect.any(BigInt),
+      } satisfies MulticallCallResult);
+    });
+
+    it("returns errors for failed calls", async () => {
+      const [transferResult] = await adapter.multicall({
+        calls: [
+          {
+            abi: erc20Abi,
+            address,
+            fn: "transfer",
+            args: {
+              amount: BigInt(10_000e18),
+              recipient: zeroAddress,
+            },
+          },
+        ],
+      });
+
+      expect(transferResult).toMatchObject({
+        success: false,
+        error: expect.any(DriftError),
+      } satisfies MulticallCallResult);
+    });
+
+    it("returns function values directly when allowFailure is false", async () => {
+      const [decimals, symbol] = await adapter.multicall({
+        allowFailure: false,
+        calls: [
+          {
+            abi: erc20Abi,
+            address,
+            fn: "decimals",
+          },
+          {
+            abi: erc20Abi,
+            address,
+            fn: "symbol",
+          },
+        ],
+      });
+      expect(decimals).toBeTypeOf("number");
+      expect(symbol).toBeTypeOf("string");
+    });
+  });
+
   describe("read", () => {
     it("reads from contracts", async () => {
-      const adapter = new ViemReadAdapter({ publicClient });
       const symbol = await adapter.read({
         abi: erc20Abi,
         address,
@@ -160,7 +256,6 @@ describe("ViemReadAdapter", () => {
     });
 
     it("reads from contracts with args", async () => {
-      const adapter = new ViemReadAdapter({ publicClient });
       const balance = await adapter.read({
         abi: erc20Abi,
         address,
@@ -172,7 +267,6 @@ describe("ViemReadAdapter", () => {
   });
 
   it("simulates writes to a contracts", async () => {
-    const adapter = new ViemReadAdapter({ publicClient });
     const balance = await adapter.simulateWrite({
       abi: erc20Abi,
       address,
@@ -186,7 +280,6 @@ describe("ViemReadAdapter", () => {
   });
 
   it("encodes deploy data", async () => {
-    const adapter = new ViemReadAdapter({ publicClient });
     const encoded = adapter.encodeDeployData({
       abi: testToken.abi,
       bytecode: testToken.bytecode,
@@ -199,7 +292,6 @@ describe("ViemReadAdapter", () => {
   });
 
   it("encodes function data", async () => {
-    const adapter = new ViemReadAdapter({ publicClient });
     const encoded = adapter.encodeFunctionData({
       abi: erc20Abi,
       fn: "transfer",
@@ -212,7 +304,6 @@ describe("ViemReadAdapter", () => {
   });
 
   it("encodes function return data", async () => {
-    const adapter = new ViemReadAdapter({ publicClient });
     const encoded = adapter.encodeFunctionReturn({
       abi: erc20Abi,
       fn: "balanceOf",
@@ -224,7 +315,6 @@ describe("ViemReadAdapter", () => {
   });
 
   it("decodes function data", async () => {
-    const adapter = new ViemReadAdapter({ publicClient });
     const args: FunctionArgs<typeof erc20Abi, "transfer"> = {
       amount: 123n,
       recipient: address,
@@ -245,7 +335,6 @@ describe("ViemReadAdapter", () => {
   });
 
   it("decodes function return data", async () => {
-    const adapter = new ViemReadAdapter({ publicClient });
     const decoded = adapter.decodeFunctionReturn({
       abi: erc20Abi,
       fn: "balanceOf",
