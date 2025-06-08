@@ -19,17 +19,17 @@ import { EthersReadAdapter } from "src/EthersReadAdapter";
 import { assert, describe, expect, it } from "vitest";
 
 describe("EthersReadAdapter", () => {
+  const { VITE_RPC_URL = "", VITE_TOKEN_ADDRESS = "0x0" } = process.env;
+  const provider = new JsonRpcProvider(VITE_RPC_URL);
+  const address = VITE_TOKEN_ADDRESS as Address;
+  const adapter = new EthersReadAdapter({ provider });
+
   it("can be initialized with either a provider instance or RPC url", async () => {
     const fromInstance = new EthersReadAdapter({ provider });
     expect(fromInstance.getChainId()).resolves;
     const fromUrl = new EthersReadAdapter({ provider: VITE_RPC_URL });
     expect(fromUrl.getChainId()).resolves;
   });
-
-  const { VITE_RPC_URL = "", VITE_TOKEN_ADDRESS = "0x0" } = process.env;
-  const provider = new JsonRpcProvider(VITE_RPC_URL);
-  const address = VITE_TOKEN_ADDRESS as Address;
-  const adapter = new EthersReadAdapter({ provider });
 
   it("fetches the chain id", async () => {
     const chainId = await adapter.getChainId();

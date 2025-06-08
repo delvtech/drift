@@ -1,6 +1,6 @@
 import {
   type Abi,
-  AbiEncoder,
+  BaseReadAdapter,
   type Block,
   type BlockIdentifier,
   type Bytes,
@@ -11,7 +11,7 @@ import {
   type FunctionArgs,
   type FunctionName,
   type GetBalanceParams,
-  type GetBlockReturnType,
+  type GetBlockReturn,
   type GetEventsParams,
   type GetTransactionParams,
   type ReadAdapter,
@@ -44,7 +44,7 @@ export interface EthersReadAdapterParams<
 }
 
 export class EthersReadAdapter<TProvider extends Provider = Provider>
-  extends AbiEncoder
+  extends BaseReadAdapter
   implements ReadAdapter
 {
   provider: TProvider;
@@ -79,7 +79,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     const ethersBlock = await this.provider.getBlock(blockParam(blockId));
 
     if (!ethersBlock) {
-      return undefined as GetBlockReturnType<T>;
+      return undefined as GetBlockReturn<T>;
     }
 
     const block: Block<any> = {
@@ -102,7 +102,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
       transactionsRoot: undefined,
     };
 
-    return block as GetBlockReturnType<T>;
+    return block as GetBlockReturn<T>;
   }
 
   async getBalance({ address, block }: GetBalanceParams) {

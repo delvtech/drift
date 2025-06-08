@@ -2,24 +2,28 @@ import {
   type Address,
   type Block,
   type DecodedFunctionData,
+  DriftError,
   type EventLog,
   type FunctionArgs,
   HEX_REGEX,
   type Hash,
+  type MulticallCallResult,
   type Transaction,
   type TransactionReceipt,
+  ZERO_ADDRESS,
+  erc20,
 } from "@delvtech/drift";
-import { erc20, mockErc20, testToken } from "@delvtech/drift/testing";
+import { mockErc20, testToken } from "@delvtech/drift/testing";
 import { providers } from "ethers";
 import { EthersReadAdapter } from "src/EthersReadAdapter";
 import { assert, describe, expect, it } from "vitest";
 
-const { VITE_RPC_URL = "", VITE_TOKEN_ADDRESS = "0x0" } = process.env;
-const provider = new providers.JsonRpcProvider(VITE_RPC_URL);
-
-const address = VITE_TOKEN_ADDRESS as Address;
-
 describe("EthersReadAdapter", () => {
+  const { VITE_RPC_URL = "", VITE_TOKEN_ADDRESS = "0x0" } = process.env;
+  const provider = new providers.JsonRpcProvider(VITE_RPC_URL);
+  const address = VITE_TOKEN_ADDRESS as Address;
+  const adapter = new EthersReadAdapter({ provider });
+
   it("can be initialized with either a provider instance or RPC url", async () => {
     const fromInstance = new EthersReadAdapter({ provider });
     expect(fromInstance.getChainId()).resolves;
@@ -28,13 +32,11 @@ describe("EthersReadAdapter", () => {
   });
 
   it("fetches the chain id", async () => {
-    const adapter = new EthersReadAdapter({ provider });
     const chainId = await adapter.getChainId();
     expect(chainId).toBeTypeOf("number");
   });
 
   it("fetches the current block", async () => {
-    const adapter = new EthersReadAdapter({ provider });
     const block = await adapter.getBlock();
     expect(block).toMatchObject({
       number: expect.any(BigInt),
@@ -43,13 +45,11 @@ describe("EthersReadAdapter", () => {
   });
 
   it("fetches account balances", async () => {
-    const adapter = new EthersReadAdapter({ provider });
     const balance = await adapter.getBalance({ address });
     expect(balance).toBeTypeOf("bigint");
   });
 
   it("fetches transactions", async () => {
-    const adapter = new EthersReadAdapter({ provider });
     let block = await provider.getBlock("latest");
     expect(block).toBeDefined();
     while (block?.transactions.length === 0) {
@@ -79,7 +79,6 @@ describe("EthersReadAdapter", () => {
   });
 
   it("returns receipts for waited transactions", async () => {
-    const adapter = new EthersReadAdapter({ provider });
     let block = await provider.getBlock("latest");
     expect(block).toBeDefined();
     while (block?.transactions.length === 0) {
@@ -112,7 +111,6 @@ describe("EthersReadAdapter", () => {
 
   describe("call", () => {
     it("reads from deployed contracts", async () => {
-      const adapter = new EthersReadAdapter({ provider });
       const data = adapter.encodeFunctionData({
         abi: erc20.abi,
         fn: "symbol",
@@ -125,7 +123,6 @@ describe("EthersReadAdapter", () => {
     });
 
     it("reads from bytecodes", async () => {
-      const adapter = new EthersReadAdapter({ provider });
       const data = adapter.encodeFunctionData({
         abi: mockErc20.abi,
         fn: "name",
@@ -138,8 +135,104 @@ describe("EthersReadAdapter", () => {
     });
   });
 
+  describe("multicall", () => {
+    it("reads multiple functions from contracts", async () => {
+      const [symbolResult, decimalsResult] = await adapter.multicall({
+        calls: [
+          {
+            abi: erc20.abi,
+            address,
+            fn: "symbol",
+          },
+          {
+            abi: erc20.abi,
+            address,
+            fn: "decimals",
+          },
+        ],
+      });
+      expect(symbolResult).toMatchObject({
+        success: true,
+        value: expect.any(String),
+      } satisfies MulticallCallResult);
+      expect(decimalsResult).toMatchObject({
+        success: true,
+        value: expect.any(Number),
+      } satisfies MulticallCallResult);
+    });
+
+    it("reads from contracts with args", async () => {
+      const [balanceResult, transferResult] = await adapter.multicall({
+        calls: [
+          {
+            abi: erc20.abi,
+            address,
+            fn: "balanceOf",
+            args: { account: address },
+          },
+
+          {
+            abi: erc20.abi,
+            address,
+            fn: "allowance",
+            args: { owner: address, spender: address },
+          },
+        ],
+      });
+
+      expect(balanceResult).toMatchObject({
+        success: true,
+        value: expect.any(BigInt),
+      } satisfies MulticallCallResult);
+      expect(transferResult).toMatchObject({
+        success: true,
+        value: expect.any(BigInt),
+      } satisfies MulticallCallResult);
+    });
+
+    it("returns errors for failed calls", async () => {
+      const [transferResult] = await adapter.multicall({
+        calls: [
+          {
+            abi: erc20.abi,
+            address,
+            fn: "transfer",
+            args: {
+              amount: BigInt(10_000e18),
+              to: ZERO_ADDRESS,
+            },
+          },
+        ],
+      });
+
+      expect(transferResult).toMatchObject({
+        success: false,
+        error: expect.any(DriftError),
+      } satisfies MulticallCallResult);
+    });
+
+    it("returns function values directly when allowFailure is false", async () => {
+      const [decimals, symbol] = await adapter.multicall({
+        allowFailure: false,
+        calls: [
+          {
+            abi: erc20.abi,
+            address,
+            fn: "decimals",
+          },
+          {
+            abi: erc20.abi,
+            address,
+            fn: "symbol",
+          },
+        ],
+      });
+      expect(decimals).toBeTypeOf("number");
+      expect(symbol).toBeTypeOf("string");
+    });
+  });
+
   it("fetches events", async () => {
-    const adapter = new EthersReadAdapter({ provider });
     const currentBlock = await provider.getBlockNumber();
     const events = await adapter.getEvents({
       abi: erc20.abi,
@@ -161,7 +254,6 @@ describe("EthersReadAdapter", () => {
 
   describe("read", () => {
     it("reads from contracts", async () => {
-      const adapter = new EthersReadAdapter({ provider });
       const symbol = await adapter.read({
         abi: erc20.abi,
         address,
@@ -171,7 +263,6 @@ describe("EthersReadAdapter", () => {
     });
 
     it("reads from contracts with args", async () => {
-      const adapter = new EthersReadAdapter({ provider });
       const balance = await adapter.read({
         abi: erc20.abi,
         address,
@@ -183,7 +274,6 @@ describe("EthersReadAdapter", () => {
   });
 
   it("simulates writes to a contracts", async () => {
-    const adapter = new EthersReadAdapter({ provider });
     const success = await adapter.simulateWrite({
       abi: erc20.abi,
       address,
@@ -197,7 +287,6 @@ describe("EthersReadAdapter", () => {
   });
 
   it("encodes deploy data", async () => {
-    const adapter = new EthersReadAdapter({ provider });
     const encoded = adapter.encodeDeployData({
       abi: testToken.abi,
       bytecode: testToken.bytecode,
@@ -210,7 +299,6 @@ describe("EthersReadAdapter", () => {
   });
 
   it("encodes function data", async () => {
-    const adapter = new EthersReadAdapter({ provider });
     const encoded = adapter.encodeFunctionData({
       abi: erc20.abi,
       fn: "transfer",
@@ -223,7 +311,6 @@ describe("EthersReadAdapter", () => {
   });
 
   it("encodes function return data", async () => {
-    const adapter = new EthersReadAdapter({ provider });
     const encoded = adapter.encodeFunctionReturn({
       abi: erc20.abi,
       fn: "balanceOf",
@@ -235,7 +322,6 @@ describe("EthersReadAdapter", () => {
   });
 
   it("decodes function data", async () => {
-    const adapter = new EthersReadAdapter({ provider });
     const args: FunctionArgs<typeof erc20.abi, "transfer"> = {
       amount: 123n,
       to: address,
@@ -256,7 +342,6 @@ describe("EthersReadAdapter", () => {
   });
 
   it("decodes function return data", async () => {
-    const adapter = new EthersReadAdapter({ provider });
     const decoded = adapter.decodeFunctionReturn({
       abi: erc20.abi,
       fn: "balanceOf",
