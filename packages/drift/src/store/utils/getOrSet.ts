@@ -20,7 +20,7 @@ export async function getOrSet<
   if (await store.has(key)) return store.get(key);
 
   const value = await fn();
-  if (!value) return value;
+  if (value === undefined) return value;
 
   const setOp = store.set(key, value);
   return setOp instanceof Promise ? setOp.then(() => value) : value;
