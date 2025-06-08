@@ -1,4 +1,9 @@
-import type { AbiItemType, AbiParameter, AbiParameterKind } from "abitype";
+import type {
+  AbiConstructor,
+  AbiItemType,
+  AbiParameter,
+  AbiParameterKind,
+} from "abitype";
 import type {
   Abi,
   AbiArrayType,
@@ -10,6 +15,12 @@ import type {
 } from "src/adapter/types/Abi";
 import { DriftError } from "src/error/DriftError";
 import type { AnyObject } from "src/utils/types";
+
+const DEFAULT_CONSTRUCTOR: AbiConstructor = {
+  type: "constructor",
+  inputs: [],
+  stateMutability: "nonpayable",
+};
 
 /**
  * Converts input or output values into an array, ensuring the correct number
@@ -77,6 +88,12 @@ export function prepareParams<
     AbiFilter<TItemType, TName, any, TParameterKind>)[];
 
   if (!matches.length) {
+    if (type === "constructor") {
+      return {
+        abiEntry: DEFAULT_CONSTRUCTOR as any,
+        params: [] as TArray,
+      };
+    }
     throw new DriftError(
       `No matching ABI entry for ${type} ${name} with ${kind}`,
     );
