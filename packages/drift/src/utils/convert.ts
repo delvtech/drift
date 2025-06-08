@@ -1,5 +1,5 @@
 /**
- * Recursively converts a type to a new type. The `predicateFn` is
+ * Recursively converts values. The `predicateFn` is
  * used to determine if the `converterFn` should be run on the value.
  *
  * The function first checks the value itself, if the `predicateFn` returns
@@ -9,19 +9,19 @@
  * @param value - The value to convert primitive types in.
  * @param predicateFn - A function that returns true if the `converterFn` should
  * be run on the value.
- * @param converterFn - A function that converts the value to a new type.
- * @returns - The converted value.
+ * @param converterFn - A function that converts the value.
+ * @returns - The recursively converted value.
  *
  * @example
  * // Convert all bigints to string.
- * convertType(
+ * convert(
  *   { a: 100n, b: { c: 200n }, d: [300n] },
  *   (value) => typeof value === "bigint",
  *   (value) => value.toString(),
  * );
  * // => { a: "100", b: { c: "200" }, d: ["300"] }
  */
-export function convertType<T, TOriginal, TNew>(
+export function convert<T, TOriginal, TNew>(
   value: T,
   predicateFn: (value: any) => value is TOriginal,
   converterFn: (value: TOriginal) => TNew,
@@ -32,7 +32,7 @@ export function convertType<T, TOriginal, TNew>(
 
   if (Array.isArray(value)) {
     return value.map((item) =>
-      convertType(item, predicateFn, converterFn),
+      convert(item, predicateFn, converterFn),
     ) as Converted<T, TOriginal, TNew>;
   }
 
@@ -40,7 +40,7 @@ export function convertType<T, TOriginal, TNew>(
     return Object.fromEntries(
       Object.entries(value).map(([key, value]) => [
         key,
-        convertType(value, predicateFn, converterFn),
+        convert(value, predicateFn, converterFn),
       ]),
     ) as Converted<T, TOriginal, TNew>;
   }

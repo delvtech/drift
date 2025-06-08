@@ -203,7 +203,6 @@ describe("DefaultAdapter", () => {
     });
 
     it("returns errors for failed calls", async () => {
-      const signerAddress = await adapter.getSignerAddress();
       const [transferResult] = await adapter.multicall({
         calls: [
           {
@@ -212,7 +211,7 @@ describe("DefaultAdapter", () => {
             fn: "transfer",
             args: {
               amount: BigInt(10_000e18),
-              to: signerAddress,
+              to: ZERO_ADDRESS,
             },
           },
         ],

@@ -655,8 +655,8 @@ Guide](./.github/CONTRIBUTING.md) to get started.
 
 Drift is open-source software licensed under the [Apache 2.0](./LICENSE).
 
-[Adapter]: ./packages/drift/src/adapter/types/Adapter.ts#L19
-[DefaultAdapter]: ./packages/drift/src/adapter/DefaultAdapter.ts#L49
+[Adapter]: ./packages/drift/src/adapter/types/Adapter.ts#L23
+[DefaultAdapter]: ./packages/drift/src/adapter/DefaultAdapter.ts#L57
 [Store]: ./packages/drift/src/store/Store.ts#L7
-[Client]: ./packages/drift/src/client/Client.ts#L24
+[Client]: ./packages/drift/src/client/Client.ts#L30
 [Drift]: ./packages/drift/src/client/Drift.ts#L27

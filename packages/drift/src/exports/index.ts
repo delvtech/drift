@@ -1,5 +1,10 @@
 // Adapter //
 
+export { deploy } from "src/adapter/methods/deploy";
+export { multicall } from "src/adapter/methods/multicall";
+export { read } from "src/adapter/methods/read";
+export { simulateWrite } from "src/adapter/methods/simulateWrite";
+export { write } from "src/adapter/methods/write";
 export type {
   Abi,
   AbiArrayType,
@@ -86,6 +91,12 @@ export type {
 } from "src/adapter/types/Transaction";
 
 export { AbiEncoder } from "src/adapter/AbiEncoder";
+
+export {
+  BaseReadAdapter,
+  BaseReadWriteAdapter,
+  type BaseAdapterOptions,
+} from "src/adapter/BaseAdapter";
 
 export {
   DefaultAdapter,
@@ -184,7 +195,7 @@ export { DriftError, type DriftErrorOptions } from "src/error/DriftError";
 
 // Utils //
 
-export { type Converted, convertType } from "src/utils/convertType";
+export { type Converted, convert } from "src/utils/convert";
 export { stringifyKey } from "src/utils/stringifyKey";
 export { isHexString, HEX_REGEX } from "src/utils/isHexString";
 export type {

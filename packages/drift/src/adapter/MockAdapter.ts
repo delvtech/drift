@@ -32,7 +32,7 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
-import { convertType } from "src/utils/convertType";
+import { convert } from "src/utils/convert";
 import { stringifyKey } from "src/utils/stringifyKey";
 import { NotImplementedError, StubStore } from "src/utils/testing/StubStore";
 import type {
@@ -52,7 +52,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   protected createKey(params?: AnyObject) {
     if (!params) return undefined;
     // Remove ABIs
-    const keyParams = convertType(
+    const keyParams = convert(
       params,
       (v): v is Extended<{ abi: Abi }> =>
         v && typeof v === "object" && "abi" in v,

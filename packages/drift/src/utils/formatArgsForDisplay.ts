@@ -1,6 +1,6 @@
 import stringify from "safe-stable-stringify";
 import type { Abi } from "src/adapter/types/Abi";
-import { convertType } from "src/utils/convertType";
+import { convert } from "src/utils/convert";
 import type { Extended } from "src/utils/types";
 
 /**
@@ -9,7 +9,7 @@ import type { Extended } from "src/utils/types";
  */
 export function formatArgsForDisplay(args: any, truncateAbi = true) {
   if (truncateAbi) {
-    args = convertType(
+    args = convert(
       args,
       (v): v is Extended<{ abi: Abi }> => {
         return v && typeof v === "object" && "abi" in v;
