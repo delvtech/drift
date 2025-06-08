@@ -196,7 +196,7 @@ export class DefaultReadAdapter extends BaseReadAdapter {
     });
   }
 
-  async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
+  getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
     abi,
     address,
     event,
