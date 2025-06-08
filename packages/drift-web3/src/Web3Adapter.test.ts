@@ -2,24 +2,28 @@ import {
   type Address,
   type Block,
   type DecodedFunctionData,
+  DriftError,
   type EventLog,
   type FunctionArgs,
   HEX_REGEX,
   type Hash,
+  type MulticallCallResult,
   type Transaction,
   type TransactionReceipt,
+  ZERO_ADDRESS,
+  erc20,
 } from "@delvtech/drift";
-import { erc20, mockErc20, testToken } from "@delvtech/drift/testing";
+import { mockErc20, testToken } from "@delvtech/drift/testing";
 import { Web3Adapter } from "src/Web3Adapter";
 import { assert, describe, expect, it } from "vitest";
 import Web3 from "web3";
 
-const { VITE_RPC_URL = "", VITE_TOKEN_ADDRESS = "0x0" } = process.env;
-const web3 = new Web3(VITE_RPC_URL);
-
-const address = VITE_TOKEN_ADDRESS as Address;
-
 describe("Web3Adapter", () => {
+  const { VITE_RPC_URL = "", VITE_TOKEN_ADDRESS = "0x0" } = process.env;
+  const web3 = new Web3(VITE_RPC_URL);
+  const adapter = new Web3Adapter(web3);
+  const address = VITE_TOKEN_ADDRESS as Address;
+
   it("can be initialized with either a web3 instance or forwarded args", async () => {
     const fromInstance = new Web3Adapter(web3);
     expect(fromInstance.getChainId()).resolves;
@@ -29,13 +33,11 @@ describe("Web3Adapter", () => {
   });
 
   it("fetches the chain id", async () => {
-    const adapter = new Web3Adapter(web3);
     const chainId = await adapter.getChainId();
     expect(chainId).toBeTypeOf("number");
   });
 
   it("fetches the current block", async () => {
-    const adapter = new Web3Adapter(web3);
     const block = await adapter.getBlock();
     expect(block).toMatchObject({
       number: expect.any(BigInt),
@@ -44,13 +46,11 @@ describe("Web3Adapter", () => {
   });
 
   it("fetches account balances", async () => {
-    const adapter = new Web3Adapter(web3);
     const balance = await adapter.getBalance({ address });
     expect(balance).toBeTypeOf("bigint");
   });
 
   it("fetches transactions", async () => {
-    const adapter = new Web3Adapter(web3);
     let block = await web3.eth.getBlock();
     while (block.transactions.length === 0) {
       console.log(
@@ -79,7 +79,6 @@ describe("Web3Adapter", () => {
   });
 
   it("returns receipts for waited transactions", async () => {
-    const adapter = new Web3Adapter(web3);
     let block = await web3.eth.getBlock();
     while (block.transactions.length === 0) {
       console.log(
@@ -111,7 +110,6 @@ describe("Web3Adapter", () => {
 
   describe("call", () => {
     it("reads from deployed contracts", async () => {
-      const adapter = new Web3Adapter(web3);
       const data = adapter.encodeFunctionData({
         abi: erc20.abi,
         fn: "symbol",
@@ -124,7 +122,6 @@ describe("Web3Adapter", () => {
     });
 
     it("reads from bytecodes", async () => {
-      const adapter = new Web3Adapter(web3);
       const data = adapter.encodeFunctionData({
         abi: mockErc20.abi,
         fn: "name",
@@ -137,8 +134,104 @@ describe("Web3Adapter", () => {
     });
   });
 
+  describe("multicall", () => {
+    it("reads multiple functions from contracts", async () => {
+      const [symbolResult, decimalsResult] = await adapter.multicall({
+        calls: [
+          {
+            abi: erc20.abi,
+            address,
+            fn: "symbol",
+          },
+          {
+            abi: erc20.abi,
+            address,
+            fn: "decimals",
+          },
+        ],
+      });
+      expect(symbolResult).toMatchObject({
+        success: true,
+        value: expect.any(String),
+      } satisfies MulticallCallResult);
+      expect(decimalsResult).toMatchObject({
+        success: true,
+        value: expect.any(Number),
+      } satisfies MulticallCallResult);
+    });
+
+    it("reads from contracts with args", async () => {
+      const [balanceResult, transferResult] = await adapter.multicall({
+        calls: [
+          {
+            abi: erc20.abi,
+            address,
+            fn: "balanceOf",
+            args: { account: address },
+          },
+
+          {
+            abi: erc20.abi,
+            address,
+            fn: "allowance",
+            args: { owner: address, spender: address },
+          },
+        ],
+      });
+
+      expect(balanceResult).toMatchObject({
+        success: true,
+        value: expect.any(BigInt),
+      } satisfies MulticallCallResult);
+      expect(transferResult).toMatchObject({
+        success: true,
+        value: expect.any(BigInt),
+      } satisfies MulticallCallResult);
+    });
+
+    it("returns errors for failed calls", async () => {
+      const [transferResult] = await adapter.multicall({
+        calls: [
+          {
+            abi: erc20.abi,
+            address,
+            fn: "transfer",
+            args: {
+              amount: BigInt(10_000e18),
+              to: ZERO_ADDRESS,
+            },
+          },
+        ],
+      });
+
+      expect(transferResult).toMatchObject({
+        success: false,
+        error: expect.any(DriftError),
+      } satisfies MulticallCallResult);
+    });
+
+    it("returns function values directly when allowFailure is false", async () => {
+      const [decimals, symbol] = await adapter.multicall({
+        allowFailure: false,
+        calls: [
+          {
+            abi: erc20.abi,
+            address,
+            fn: "decimals",
+          },
+          {
+            abi: erc20.abi,
+            address,
+            fn: "symbol",
+          },
+        ],
+      });
+      expect(decimals).toBeTypeOf("number");
+      expect(symbol).toBeTypeOf("string");
+    });
+  });
+
   it("fetches events", async () => {
-    const adapter = new Web3Adapter(web3);
     const currentBlock = await web3.eth.getBlockNumber();
     const events = await adapter.getEvents({
       abi: erc20.abi,
@@ -159,7 +252,6 @@ describe("Web3Adapter", () => {
 
   describe("read", () => {
     it("reads from contracts", async () => {
-      const adapter = new Web3Adapter(web3);
       const symbol = await adapter.read({
         abi: erc20.abi,
         address,
@@ -169,7 +261,6 @@ describe("Web3Adapter", () => {
     });
 
     it("reads from contracts with args", async () => {
-      const adapter = new Web3Adapter(web3);
       const balance = await adapter.read({
         abi: erc20.abi,
         address,
@@ -181,7 +272,6 @@ describe("Web3Adapter", () => {
   });
 
   it("simulates writes to a contracts", async () => {
-    const adapter = new Web3Adapter(web3);
     const success = await adapter.simulateWrite({
       abi: erc20.abi,
       address,
@@ -195,8 +285,6 @@ describe("Web3Adapter", () => {
   });
 
   it("deploys contracts", async () => {
-    const adapter = new Web3Adapter(web3);
-
     const hash = await adapter.deploy({
       abi: testToken.abi,
       bytecode: testToken.bytecode,
@@ -214,7 +302,6 @@ describe("Web3Adapter", () => {
   });
 
   it("encodes deploy data", async () => {
-    const adapter = new Web3Adapter(web3);
     const encoded = adapter.encodeDeployData({
       abi: testToken.abi,
       bytecode: testToken.bytecode,
@@ -227,7 +314,6 @@ describe("Web3Adapter", () => {
   });
 
   it("encodes function data", async () => {
-    const adapter = new Web3Adapter(web3);
     const encoded = adapter.encodeFunctionData({
       abi: erc20.abi,
       fn: "transfer",
@@ -240,7 +326,6 @@ describe("Web3Adapter", () => {
   });
 
   it("encodes function return data", async () => {
-    const adapter = new Web3Adapter(web3);
     const encoded = adapter.encodeFunctionReturn({
       abi: erc20.abi,
       fn: "balanceOf",
@@ -252,7 +337,6 @@ describe("Web3Adapter", () => {
   });
 
   it("decodes function data", async () => {
-    const adapter = new Web3Adapter(web3);
     const args: FunctionArgs<typeof erc20.abi, "transfer"> = {
       amount: 123n,
       to: address,
@@ -273,7 +357,6 @@ describe("Web3Adapter", () => {
   });
 
   it("decodes function return data", async () => {
-    const adapter = new Web3Adapter(web3);
     const decoded = adapter.decodeFunctionReturn({
       abi: erc20.abi,
       fn: "balanceOf",

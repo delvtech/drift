@@ -1,8 +1,8 @@
 import {
   type Abi,
-  AbiEncoder,
   type Address,
   type AnyObject,
+  BaseReadWriteAdapter,
   type BlockIdentifier,
   type Bytes,
   type CallParams,
@@ -13,7 +13,7 @@ import {
   type FunctionArgs,
   type FunctionName,
   type GetBalanceParams,
-  type GetBlockReturnType,
+  type GetBlockReturn,
   type GetEventsParams,
   type GetTransactionParams,
   type Hash,
@@ -31,7 +31,7 @@ import {
 import { type AbiFragment, type AccessList, default as Web3 } from "web3";
 
 export class Web3Adapter<TWeb3 extends Web3 = Web3>
-  extends AbiEncoder
+  extends BaseReadWriteAdapter
   implements ReadWriteAdapter
 {
   web3: TWeb3;
@@ -70,7 +70,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
         }
       : undefined;
 
-    return block as GetBlockReturnType<T>;
+    return block as GetBlockReturn<T>;
   }
 
   getBalance({ address, block }: GetBalanceParams) {
