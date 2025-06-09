@@ -37,7 +37,6 @@ import type {
 } from "src/adapter/types/Transaction";
 
 export interface BaseAdapterOptions {
-  rpcUrl?: string;
   /**
    * The default polling frequency for polling calls (e.g.
    * {@linkcode Adapter.waitForTransaction waitForTransaction}) in milliseconds.
