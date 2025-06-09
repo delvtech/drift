@@ -5,16 +5,16 @@ import {
   type Contract,
   type Drift,
   createDrift,
+  erc4626,
 } from "@delvtech/drift";
 import { createMockDrift, randomAddress } from "@delvtech/drift/testing";
 import { fixed } from "@gud/math";
-import { ERC4626 } from "src/abis/Erc4626";
 
 class ReadVault {
-  contract: Contract<typeof ERC4626.abi>;
+  contract: Contract<typeof erc4626.abi>;
   constructor(address: Address, drift: Drift = createDrift()) {
     this.contract = drift.contract({
-      abi: ERC4626.abi,
+      abi: erc4626.abi,
       address,
     });
   }
@@ -29,7 +29,7 @@ test("getAssetValue returns account balances converted to assets", async () => {
   const address = randomAddress();
   const account = randomAddress();
   const mockDrift = createMockDrift();
-  const mockContract = mockDrift.contract({ abi: ERC4626.abi, address });
+  const mockContract = mockDrift.contract({ abi: erc4626.abi, address });
 
   // Stub the vault's return values using `on*` methods
   mockContract.onRead("balanceOf", { account }).resolves(

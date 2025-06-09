@@ -3,11 +3,11 @@ import {
   type Contract,
   type Drift,
   createDrift,
+  erc4626,
 } from "@delvtech/drift";
 import { fixed } from "@gud/math";
-import { ERC4626 } from "src/abis/Erc4626";
 
-type Erc4626Abi = typeof ERC4626.abi;
+type Erc4626Abi = typeof erc4626.abi;
 
 /** A read-only Vault client */
 export class ReadVault {
@@ -15,7 +15,7 @@ export class ReadVault {
 
   constructor(address: Address, drift: Drift = createDrift()) {
     this.contract = drift.contract({
-      abi: ERC4626.abi,
+      abi: erc4626.abi,
       address,
     });
   }
@@ -58,7 +58,10 @@ const [decimals, totalAssets, deposits] = await Promise.all([
   vault.getDeposits(),
 ]);
 
-console.log("totalAssets", fixed(totalAssets, decimals).format());
+console.log(
+  "totalAssets:",
+  fixed(totalAssets, decimals).format({ decimals: 2 }),
+);
 console.log("Deposit count:", deposits.length);
 console.group("Last 3 deposits (in arbitrary order):");
 await Promise.all(
@@ -71,8 +74,8 @@ await Promise.all(
     if (!transaction) return;
 
     console.table({
-      assets: fixed(args.assets, decimals).format(),
-      shares: fixed(args.shares, decimals).format(),
+      assets: fixed(args.assets, decimals).format({ decimals: 2 }),
+      shares: fixed(args.shares, decimals).format({ decimals: 2 }),
       sender: args.sender,
       owner: args.owner,
       transactionHash,
