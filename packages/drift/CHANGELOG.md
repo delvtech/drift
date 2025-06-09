@@ -1,5 +1,12 @@
 # @delvtech/drift
 
+## 0.9.1
+
+### Patch Changes
+
+- 31952dc: Patched `multicall` to ensure results are returned in the correct order.
+- 8a331cc: Patched `multicall` to return the correct format when the cache is hit and `allowFailure` is changed.
+
 ## 0.9.0
 
 ### Minor Changes
