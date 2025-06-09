@@ -1,6 +1,9 @@
 import { MockAdapter } from "src/adapter/MockAdapter";
-import type { Abi } from "src/adapter/types/Abi";
-import type { GetEventsParams } from "src/adapter/types/Adapter";
+import type { Abi, Address } from "src/adapter/types/Abi";
+import type {
+  GetEventsParams,
+  MulticallCallResult,
+} from "src/adapter/types/Adapter";
 import type { EventLog } from "src/adapter/types/Event";
 import { TestToken } from "src/artifacts/TestToken";
 import { createClient } from "src/client/Client";
@@ -21,6 +24,37 @@ describe("Client", () => {
   });
 
   describe("multicall", () => {
+    it("returns results in the same order they're requested", async () => {
+      const client = createClient({ rpcUrl: process.env.VITE_RPC_URL });
+      const address = process.env.VITE_TOKEN_ADDRESS as Address;
+      const [nameResult, symbolResult, supplyResult, decimalsResult] =
+        await client.multicall({
+          calls: [
+            { abi: TestToken.abi, address, fn: "name" },
+            { abi: TestToken.abi, address, fn: "symbol" },
+            { abi: TestToken.abi, address, fn: "totalSupply" },
+            { abi: TestToken.abi, address, fn: "decimals" },
+          ],
+        });
+      console.table([nameResult, symbolResult, supplyResult, decimalsResult]);
+      expect(nameResult).toMatchObject({
+        success: true,
+        value: expect.any(String),
+      } satisfies MulticallCallResult);
+      expect(symbolResult).toMatchObject({
+        success: true,
+        value: expect.any(String),
+      } satisfies MulticallCallResult);
+      expect(supplyResult).toMatchObject({
+        success: true,
+        value: expect.any(BigInt),
+      } satisfies MulticallCallResult);
+      expect(decimalsResult).toMatchObject({
+        success: true,
+        value: expect.any(Number),
+      } satisfies MulticallCallResult);
+    });
+
     it("Returns cached read calls", async () => {
       const client = createClient({ adapter });
       const abi = TestToken.abi;
