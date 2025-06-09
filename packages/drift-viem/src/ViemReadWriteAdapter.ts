@@ -5,7 +5,6 @@ import {
   type FunctionName,
   type ReadWriteAdapter,
   type SendTransactionParams,
-  type SimulateWriteParams,
   type WriteParams,
   prepareParams,
 } from "@delvtech/drift";
@@ -59,7 +58,7 @@ export class ViemReadWriteAdapter<
     const hash = await this.walletClient.sendTransaction({
       data: params.data,
       to: params.to,
-      account: params.from ?? (await this.getSignerAddress()) ?? null,
+      account: params.from ?? (await this.#getAccount()),
       gas: params.gas,
       nonce: params.nonce !== undefined ? Number(params.nonce) : undefined,
       value: params.value,
@@ -103,7 +102,7 @@ export class ViemReadWriteAdapter<
       abi: params.abi as Abi,
       bytecode: params.bytecode,
       args: prepared.params,
-      account: params.from ?? (await this.getSignerAddress()) ?? null,
+      account: params.from ?? (await this.#getAccount()),
       gas: params.gas,
       nonce: params.nonce !== undefined ? Number(params.nonce) : undefined,
       value: params.value,
@@ -117,16 +116,6 @@ export class ViemReadWriteAdapter<
     }
 
     return hash;
-  }
-
-  async simulateWrite<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: SimulateWriteParams<TAbi, TFunctionName>) {
-    return super.simulateWrite({
-      ...params,
-      from: params.from ?? (await this.getSignerAddress()),
-    });
   }
 
   async write<
@@ -157,7 +146,7 @@ export class ViemReadWriteAdapter<
       functionName: params.fn,
       args: prepared.params,
       accessList: params.accessList,
-      account: params.from ?? (await this.getSignerAddress()) ?? null,
+      account: params.from ?? (await this.#getAccount()),
       gas: params.gas,
       nonce: params.nonce !== undefined ? Number(params.nonce) : undefined,
       value: params.value,
@@ -171,5 +160,11 @@ export class ViemReadWriteAdapter<
     }
 
     return hash;
+  }
+
+  async #getAccount() {
+    return (
+      this.walletClient.account ?? this.getSignerAddress().catch(() => null)
+    );
   }
 }
