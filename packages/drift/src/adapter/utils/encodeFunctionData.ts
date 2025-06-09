@@ -11,13 +11,8 @@ import { prepareParams } from "src/adapter/utils/prepareParams";
 export function encodeFunctionData<
   TAbi extends Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
->({ abi, fn, args }: EncodeFunctionDataParams<TAbi, TFunctionName>): Bytes {
-  const { data } = prepareFunctionData({
-    abi,
-    fn,
-    args: args as FunctionArgs<TAbi, TFunctionName>,
-  });
-  return data;
+>(params: EncodeFunctionDataParams<TAbi, TFunctionName>): Bytes {
+  return prepareFunctionData(params).data;
 }
 
 /**

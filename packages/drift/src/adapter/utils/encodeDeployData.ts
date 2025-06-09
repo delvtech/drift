@@ -1,24 +1,16 @@
 import { AbiConstructor } from "ox";
 import type { Abi, Bytes } from "src/adapter/types/Abi";
 import type { EncodeDeployDataParams } from "src/adapter/types/Adapter";
-import type { ConstructorArgs } from "src/adapter/types/Function";
 import { handleError } from "src/adapter/utils/internal/handleError";
 import { prepareParams } from "src/adapter/utils/prepareParams";
 
 /**
  * Encodes a contract deploy call into {@linkcode Bytes}.
  */
-export function encodeDeployData<TAbi extends Abi>({
-  abi,
-  bytecode,
-  args,
-}: EncodeDeployDataParams<TAbi>): Bytes {
-  const { data } = prepareDeployData({
-    abi,
-    bytecode,
-    args: args as ConstructorArgs<TAbi>,
-  });
-  return data;
+export function encodeDeployData<TAbi extends Abi>(
+  params: EncodeDeployDataParams<TAbi>,
+): Bytes {
+  return prepareDeployData(params).data;
 }
 
 /**

@@ -2,4 +2,4 @@
 "@delvtech/drift": patch
 ---
 
-Add `erc4626` artifact to exports (abi + method identifiers)
+Added `erc4626` artifact to exports (abi + method identifiers).

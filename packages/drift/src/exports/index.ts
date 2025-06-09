@@ -109,12 +109,19 @@ export { arrayToObject } from "src/adapter/utils/arrayToObject";
 export { prepareParams } from "src/adapter/utils/prepareParams";
 export { decodeFunctionData } from "src/adapter/utils/decodeFunctionData";
 export { decodeFunctionReturn } from "src/adapter/utils/decodeFunctionReturn";
+export { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
+export {
+  encodeDeployData,
+  prepareDeployData,
+} from "src/adapter/utils/encodeDeployData";
 export {
   encodeFunctionData,
   prepareFunctionData,
 } from "src/adapter/utils/encodeFunctionData";
-export { encodeFunctionReturn } from "src/adapter/utils/encodeFunctionReturn";
-export { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
+export {
+  encodeFunctionReturn,
+  prepareFunctionReturn,
+} from "src/adapter/utils/encodeFunctionReturn";
 
 // Store //
 

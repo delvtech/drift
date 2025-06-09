@@ -2,4 +2,4 @@
 "@delvtech/drift": patch
 ---
 
-Add `DynamicProperty` property type to exports
+Added `DynamicProperty` property type to exports.
