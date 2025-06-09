@@ -209,9 +209,8 @@ export interface ContractParams<TAbi extends Abi = Abi> {
 
 /**
  * Base params for a function call.
- * @internal
  */
-export type FunctionCall<
+export type FunctionCallParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 > = ContractParams<TAbi> & {
@@ -319,7 +318,7 @@ export type ReadParams<
     TAbi,
     "pure" | "view"
   >,
-> = FunctionCall<TAbi, TFunctionName> & ReadOptions;
+> = FunctionCallParams<TAbi, TFunctionName> & ReadOptions;
 
 // Write //
 
@@ -334,7 +333,7 @@ export type SimulateWriteParams<
     TAbi,
     "nonpayable" | "payable"
   > = FunctionName<TAbi, "nonpayable" | "payable">,
-> = FunctionCall<TAbi, TFunctionName> & SimulateWriteOptions;
+> = FunctionCallParams<TAbi, TFunctionName> & SimulateWriteOptions;
 
 /**
  * Options for writing state by calling a contract function.
@@ -349,7 +348,7 @@ export type WriteParams<
     TAbi,
     "nonpayable" | "payable"
   > = FunctionName<TAbi, "nonpayable" | "payable">,
-> = FunctionCall<TAbi, TFunctionName> & WriteOptions;
+> = FunctionCallParams<TAbi, TFunctionName> & WriteOptions;
 
 // Deploy //
 
@@ -386,11 +385,11 @@ export type CallParams = {
  */
 export type MulticallCalls<TCalls extends { abi: Abi }[] = { abi: Abi }[]> = {
   [K in keyof TCalls]: NarrowTo<
-    FunctionCall<
+    FunctionCallParams<
       TCalls[K]["abi"],
       NarrowTo<
         FunctionName<TCalls[K]["abi"]>,
-        NarrowTo<FunctionCall, TCalls[K]>["fn"]
+        NarrowTo<FunctionCallParams, TCalls[K]>["fn"]
       >
     >,
     TCalls[K]

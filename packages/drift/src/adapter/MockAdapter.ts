@@ -3,7 +3,7 @@ import type { Abi, Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   CallParams,
   DeployParams,
-  FunctionCall,
+  FunctionCallParams,
   GetEventsParams,
   MulticallOptions,
   MulticallParams,
@@ -484,7 +484,7 @@ export type OnMulticallCalls<
     fn?: infer TFunctionName extends TFns[K]["fn"];
   }
     ? Replace<
-        Partial<FunctionCall<TAbi, TFunctionName>>,
+        Partial<FunctionCallParams<TAbi, TFunctionName>>,
         {
           args?: Partial<FunctionArgs<TAbi, TFunctionName>>;
           fn?: TFns[K] extends { fn: infer TFunctionName }

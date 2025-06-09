@@ -2,7 +2,7 @@ import type { Abi } from "src/adapter/types/Abi";
 import type {
   CallParams,
   DeployParams,
-  FunctionCall,
+  FunctionCallParams,
   GetEventsParams,
   MulticallParams,
   ReadParams,
@@ -308,7 +308,7 @@ describe("MockClient", () => {
     it("Can stub different values for different args", async () => {
       const client = createMockClient();
       const params1: MulticallParams<
-        [FunctionCall<TestTokenAbi, "allowance">]
+        [FunctionCallParams<TestTokenAbi, "allowance">]
       > = {
         calls: [
           {
@@ -320,7 +320,7 @@ describe("MockClient", () => {
         ],
       };
       const params2: MulticallParams<
-        [FunctionCall<TestTokenAbi, "allowance">]
+        [FunctionCallParams<TestTokenAbi, "allowance">]
       > = {
         calls: [
           {

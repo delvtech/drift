@@ -32,6 +32,7 @@ export type {
   EncodeDeployDataParams,
   EncodeFunctionDataParams,
   EncodeFunctionReturnParams,
+  FunctionCallParams,
   GetEventsOptions,
   GetEventsParams,
   MinedRangeBlock,
@@ -178,6 +179,8 @@ export {
 
 export {
   MethodInterceptor,
+  type AfterMethodHook,
+  type BeforeMethodHook,
   type MethodHooks,
 } from "src/client/hooks/MethodInterceptor";
 
@@ -185,6 +188,8 @@ export type {
   HookHandler,
   HookName,
   HookRegistry,
+  HookMap,
+  HookPayload,
 } from "src/client/hooks/HookRegistry";
 
 export { BlockNotFoundError } from "src/client/errors";
@@ -220,6 +225,7 @@ export type {
   PartialBy,
   Replace,
   RequiredBy,
+  RequiredValueKey,
   UnionKey,
 } from "src/utils/types";
 

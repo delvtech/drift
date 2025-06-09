@@ -2,7 +2,7 @@ import { MockAdapter } from "src/adapter/MockAdapter";
 import type {
   CallParams,
   DeployParams,
-  FunctionCall,
+  FunctionCallParams,
   GetEventsParams,
   MulticallParams,
   ReadParams,
@@ -295,7 +295,7 @@ describe("MockAdapter", () => {
     it("Can stub different values for different args", async () => {
       const adapter = new MockAdapter();
       const params1: MulticallParams<
-        [FunctionCall<TestTokenAbi, "allowance">]
+        [FunctionCallParams<TestTokenAbi, "allowance">]
       > = {
         calls: [
           {
@@ -307,7 +307,7 @@ describe("MockAdapter", () => {
         ],
       };
       const params2: MulticallParams<
-        [FunctionCall<TestTokenAbi, "allowance">]
+        [FunctionCallParams<TestTokenAbi, "allowance">]
       > = {
         calls: [
           {
