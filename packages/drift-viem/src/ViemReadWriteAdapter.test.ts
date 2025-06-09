@@ -3,26 +3,29 @@ import { testToken } from "@delvtech/drift/testing";
 import { ViemReadWriteAdapter } from "src/ViemReadWriteAdapter";
 import {
   http,
+  type Address,
   createPublicClient,
   createWalletClient,
   getContract,
 } from "viem";
-import { mainnet } from "viem/chains";
+import { privateKeyToAccount } from "viem/accounts";
+import { anvil, mainnet } from "viem/chains";
 import { describe, expect, it } from "vitest";
 
-const { VITE_RPC_URL = "http://127.0.0.1:8545" } = process.env;
+const rpcUrl = process.env.VITE_RPC_URL || anvil.rpcUrls.default.http[0];
 const publicClient = createPublicClient({
-  transport: http(VITE_RPC_URL),
+  transport: http(rpcUrl),
 });
+const privateKey = process.env.VITE_PRIVATE_KEY as Address | undefined;
 const walletClient = createWalletClient({
-  transport: http(VITE_RPC_URL),
+  transport: http(rpcUrl),
   chain: mainnet,
+  account: privateKey ? privateKeyToAccount(privateKey) : undefined,
 });
+const adapter = new ViemReadWriteAdapter({ publicClient, walletClient });
 
 describe("ViemReadWriteAdapter", () => {
   it("deploys contracts", async () => {
-    const adapter = new ViemReadWriteAdapter({ publicClient, walletClient });
-
     const hash = await adapter.deploy({
       abi: testToken.abi,
       bytecode: testToken.bytecode,
@@ -35,8 +38,6 @@ describe("ViemReadWriteAdapter", () => {
   });
 
   it("sends transactions", async () => {
-    const adapter = new ViemReadWriteAdapter({ publicClient, walletClient });
-
     const hash = await adapter.sendTransaction({
       data: adapter.encodeDeployData({
         abi: testToken.abi,

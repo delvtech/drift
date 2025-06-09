@@ -2,13 +2,15 @@ import { ViemReadAdapter } from "src/ViemReadAdapter";
 import { ViemReadWriteAdapter } from "src/ViemReadWriteAdapter";
 import { viemAdapter } from "src/viemAdapter";
 import { http, createPublicClient, createWalletClient } from "viem";
+import { anvil } from "viem/chains";
 import { describe, expect, it } from "vitest";
 
+const rpcUrl = process.env.VITE_RPC_URL || anvil.rpcUrls.default.http[0];
 const publicClient = createPublicClient({
-  transport: http("https://localhost:8545"),
+  transport: http(rpcUrl),
 });
 const walletClient = createWalletClient({
-  transport: http("https://localhost:8545"),
+  transport: http(rpcUrl),
 });
 
 describe("viemAdapter", () => {

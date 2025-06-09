@@ -117,9 +117,7 @@ describe("Adapter", () => {
           {
             abi: TestToken.abi,
             // @ts-expect-error
-            address: "",
-            // @ts-expect-error
-            fn: ''
+            fn: "",
           },
         ],
       });

@@ -18,15 +18,23 @@ import {
   erc20Abi,
   zeroAddress,
 } from "viem";
-import { assert, describe, expect, it } from "vitest";
+import { anvil } from "viem/chains";
+import { assert, beforeAll, describe, expect, it } from "vitest";
+
+const rpcUrl = process.env.VITE_RPC_URL || anvil.rpcUrls.default.http[0];
+const publicClient = createPublicClient({
+  transport: http(rpcUrl),
+});
+const adapter = new ViemReadAdapter({ publicClient });
+const address = process.env.VITE_TOKEN_ADDRESS as Address;
 
 describe("ViemReadAdapter", () => {
-  const { VITE_RPC_URL = "", VITE_TOKEN_ADDRESS = "0x0" } = process.env;
-  const publicClient = createPublicClient({
-    transport: http(VITE_RPC_URL),
+  beforeAll(() => {
+    expect(
+      address,
+      "VITE_TOKEN_ADDRESS environment variable must be set to a valid token address",
+    ).toBeDefined();
   });
-  const address = VITE_TOKEN_ADDRESS as Address;
-  const adapter = new ViemReadAdapter({ publicClient });
 
   it("fetches the chain id", async () => {
     const chainId = await adapter.getChainId();

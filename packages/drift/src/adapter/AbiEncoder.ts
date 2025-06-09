@@ -18,7 +18,7 @@ import { encodeFunctionReturn } from "src/adapter/utils/encodeFunctionReturn";
  * Provides a default implementation of the encoding and decoding methods of an
  * {@linkcode Adapter}.
  */
-export abstract class AbiEncoder implements Partial<Adapter> {
+export class AbiEncoder implements Partial<Adapter> {
   encodeDeployData<TAbi extends Abi>(
     params: EncodeDeployDataParams<TAbi>,
   ): Bytes {
