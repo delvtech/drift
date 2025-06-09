@@ -5,12 +5,12 @@ import { createContract } from "src/client/contract/Contract";
 import { ALICE, BOB } from "src/utils/testing/accounts";
 import { describe, expect, it, vi } from "vitest";
 
-describe("Contract", () => {
-  const abi = TestToken.abi;
-  const address = "0xAddress";
-  const adapter = new MockAdapter();
-  adapter.onGetChainId().resolves(0);
+const abi = TestToken.abi;
+const address = "0xAddress";
+const adapter = new MockAdapter();
+adapter.onGetChainId().resolves(0);
 
+describe("Contract", () => {
   describe("getEvents", () => {
     it("Can be preloaded", async () => {
       const contract = createContract({ abi, address, adapter });

@@ -8,15 +8,11 @@ import {
   type EventArgs,
   type EventLog,
   type EventName,
-  type FunctionArgs,
-  type FunctionName,
   type GetBalanceParams,
   type GetBlockReturn,
   type GetEventsParams,
   type GetTransactionParams,
   type ReadAdapter,
-  type ReadParams,
-  type SimulateWriteParams,
   type Transaction,
   type TransactionReceipt,
   type WaitForTransactionParams,
@@ -250,60 +246,6 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
         transactionHash: ethersEvent.transactionHash,
       };
       return event;
-    });
-  }
-
-  async read<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >({ abi, address, fn, args, block }: ReadParams<TAbi, TFunctionName>) {
-    const callData = this.encodeFunctionData({
-      abi,
-      fn,
-      args: args as FunctionArgs<TAbi, TFunctionName>,
-    });
-
-    // Using call instead of readContract to ensure consistent return decoding
-    const returnData = await this.call({
-      to: address,
-      data: callData,
-      block,
-    });
-
-    return this.decodeFunctionReturn({
-      abi,
-      data: returnData,
-      fn,
-    });
-  }
-
-  async simulateWrite<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >({
-    abi,
-    address,
-    fn,
-    args,
-    ...params
-  }: SimulateWriteParams<TAbi, TFunctionName>) {
-    const callData = this.encodeFunctionData({
-      abi,
-      fn,
-      args: args as FunctionArgs<TAbi, TFunctionName>,
-    });
-
-    // Using call instead of simulateWrite to ensure consistent return decoding
-    const returnData = await this.call({
-      to: address,
-      data: callData,
-      ...params,
-    });
-
-    return this.decodeFunctionReturn({
-      abi,
-      data: returnData,
-      fn,
     });
   }
 }

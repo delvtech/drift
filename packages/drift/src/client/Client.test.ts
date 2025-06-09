@@ -8,11 +8,11 @@ import { BlockNotFoundError } from "src/client/errors";
 import { ALICE } from "src/utils/testing/accounts";
 import { describe, expect, it, vi } from "vitest";
 
-describe("Client", () => {
-  const abi = [] as Abi;
-  const adapter = new MockAdapter();
-  adapter.onGetChainId().resolves(0);
+const abi = [] as Abi;
+const adapter = new MockAdapter();
+adapter.onGetChainId().resolves(0);
 
+describe("Client", () => {
   it("Maintains the adapter prototype chain", () => {
     class CustomAdapter extends MockAdapter {}
     const client = createClient({ adapter: new CustomAdapter() });

@@ -19,14 +19,19 @@ import { TestToken } from "src/artifacts/TestToken";
 import { ZERO_ADDRESS } from "src/constants";
 import { DriftError } from "src/error/DriftError";
 import { HEX_REGEX } from "src/utils/isHexString";
-import { assert, describe, expect, it } from "vitest";
+import { assert, beforeAll, describe, expect, it } from "vitest";
+
+const rpcUrl = process.env.VITE_RPC_URL;
+const adapter = new DefaultAdapter({ rpcUrl });
+const address = process.env.VITE_TOKEN_ADDRESS as AddressType;
 
 describe("DefaultAdapter", () => {
-  const address = (
-    process.env.VITE_TOKEN_ADDRESS || ZERO_ADDRESS
-  ).toLowerCase() as AddressType;
-  const rpcUrl = process.env.VITE_RPC_URL;
-  const adapter = new DefaultAdapter({ rpcUrl });
+  beforeAll(() => {
+    expect(
+      address,
+      "VITE_TOKEN_ADDRESS environment variable must be set to a valid token address",
+    ).toBeDefined();
+  });
 
   it("fetches the chain id", async () => {
     const chainId = await adapter.getChainId();
@@ -134,7 +139,6 @@ describe("DefaultAdapter", () => {
     });
 
     it("reads from bytecodes", async () => {
-      const adapter = new DefaultAdapter({ rpcUrl });
       const data = adapter.encodeFunctionData({
         abi: MockERC20.abi,
         fn: "name",
@@ -250,7 +254,7 @@ describe("DefaultAdapter", () => {
       abi: TestToken.abi,
       address,
       event: "Transfer",
-      fromBlock: currentBlock - 1000n,
+      fromBlock: currentBlock - 100n,
     });
     expect(event).toMatchObject({
       args: expect.any(Object),

@@ -16,13 +16,20 @@ import {
 import { mockErc20, testToken } from "@delvtech/drift/testing";
 import { providers } from "ethers";
 import { EthersReadAdapter } from "src/EthersReadAdapter";
-import { assert, describe, expect, it } from "vitest";
+import { assert, beforeAll, describe, expect, it } from "vitest";
+
+const { VITE_RPC_URL = "", VITE_TOKEN_ADDRESS = "0x0" } = process.env;
+const provider = new providers.JsonRpcProvider(VITE_RPC_URL);
+const adapter = new EthersReadAdapter({ provider });
+const address = VITE_TOKEN_ADDRESS as Address;
 
 describe("EthersReadAdapter", () => {
-  const { VITE_RPC_URL = "", VITE_TOKEN_ADDRESS = "0x0" } = process.env;
-  const provider = new providers.JsonRpcProvider(VITE_RPC_URL);
-  const address = VITE_TOKEN_ADDRESS as Address;
-  const adapter = new EthersReadAdapter({ provider });
+  beforeAll(() => {
+    expect(
+      address,
+      "VITE_TOKEN_ADDRESS environment variable must be set to a valid token address",
+    ).toBeDefined();
+  });
 
   it("can be initialized with either a provider instance or RPC url", async () => {
     const fromInstance = new EthersReadAdapter({ provider });
