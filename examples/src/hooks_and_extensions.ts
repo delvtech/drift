@@ -27,6 +27,7 @@ drift.hooks.on("before:read", async ({ args: [params] }) => {
 const contract = drift
   .contract({
     abi: erc20.abi,
+    // Ethereum mainnet DAI
     address: "0xAc37729B76db6438CE62042AE1270ee574CA7571",
   })
   .extend({

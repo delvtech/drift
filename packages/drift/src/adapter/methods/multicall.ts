@@ -51,7 +51,7 @@ export async function multicall<
     const { fn } = calls[i]!;
     const abiFn = abiFns[i]!;
 
-    if (!allowFailure) {
+    if (allowFailure === false) {
       return adapter.decodeFunctionReturn({
         abi: [abiFn],
         data: returnData,

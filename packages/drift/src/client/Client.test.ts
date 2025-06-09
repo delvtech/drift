@@ -36,7 +36,6 @@ describe("Client", () => {
             { abi: TestToken.abi, address, fn: "decimals" },
           ],
         });
-      console.table([nameResult, symbolResult, supplyResult, decimalsResult]);
       expect(nameResult).toMatchObject({
         success: true,
         value: expect.any(String),
@@ -79,6 +78,31 @@ describe("Client", () => {
       });
       expect(symbol).toBe("TEST");
       expect(name).toBe("Test Token");
+    });
+
+    it("Returns cached read calls in the correct format", async () => {
+      const client = createClient({ adapter });
+      const abi = TestToken.abi;
+      client.cache.preloadRead({
+        abi,
+        address: "0x",
+        fn: "symbol",
+        value: "TEST",
+      });
+      client.cache.preloadRead({
+        abi,
+        address: "0x",
+        fn: "name",
+        value: "Test Token",
+      });
+      const [symbol, name] = await client.multicall({
+        calls: [
+          { abi, address: "0x", fn: "symbol" },
+          { abi, address: "0x", fn: "name" },
+        ],
+      });
+      expect(symbol).toStrictEqual({ success: true, value: "TEST" });
+      expect(name).toStrictEqual({ success: true, value: "Test Token" });
     });
   });
 

@@ -238,12 +238,12 @@ export function createClient<
             block: options?.block,
           });
           if (cached !== undefined) {
-            return options.allowFailure
-              ? ({
+            return options.allowFailure === false
+              ? cached
+              : ({
                   success: true,
                   value: cached,
-                } satisfies MulticallCallResult)
-              : cached;
+                } satisfies MulticallCallResult);
           }
           uncachedCallIndices.set(i, unCachedCalls.length);
           unCachedCalls.push(call);
@@ -269,10 +269,10 @@ export function createClient<
           const fetchedResult = fetched[index]!;
           let fetchedValue: unknown;
 
-          if (options.allowFailure) {
-            fetchedValue = (fetchedResult as MulticallCallResult).value;
-          } else {
+          if (options.allowFailure === false) {
             fetchedValue = fetchedResult;
+          } else {
+            fetchedValue = (fetchedResult as MulticallCallResult).value;
           }
 
           // Cache the newly fetched value.

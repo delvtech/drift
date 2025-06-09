@@ -10,6 +10,7 @@
     "watch": "yarn execute --watch src/index.ts",
     "bytecode_call": "yarn execute src/bytecode_call.ts",
     "hooks_and_extensions": "yarn execute src/hooks_and_extensions.ts",
+    "multicall": "yarn execute src/multicall.ts",
     "test": "yarn execute --test",
     "test:watch": "yarn test --watch",
     "sdk_client": "yarn execute src/sdk_client.ts"
