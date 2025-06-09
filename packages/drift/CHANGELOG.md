@@ -1,5 +1,30 @@
 # @delvtech/drift
 
+## 0.9.0
+
+### Minor Changes
+
+- ce25bb5: Renamed `prepareParamsArray` util to `prepareParams`.
+- d63b416: Renamed `convertType` util to `convert`
+- 9a50e41: Moved `erc20` export from `@delvtech/drift/testing` to `@delvtech/drift`
+- e104263: Renamed `GetBlockReturnType` to `GetBlockReturn` for consistency.
+
+### Patch Changes
+
+- 0d5ff95: Added support for deploying contracts that don't have a `constructor` entry in their ABI.
+- d63b416: Added standalone functions for provider agnostic `Adapter` methods: `deploy`, `multicall`, `read`, `simulateWrite`, and `write`.
+- e7ec38c: Modified the `simulateWrite` method in the `DefaultAdapter` to use the connected account when available.
+- e5f80a5: Added the `block` option to `simulateWrite` via new `SimulateWriteOptions` interface which combines `ReadOptions` and `TransactionOptions`.
+- ee0d664: Patched a bug in `getOrSet` which was preventing falsy values from being cached.
+- d63b416: Added abstract `BaseReadAdapter` and `BaseReadWriteAdapter` classes which can be extended to pickup default implementations of provider agnostic methods.
+- 893ec5e: Added `createStubEvent` and `createStubEvents` testing utils.
+- 48e4a2a: Broke out the `ReadAdapter` methods from the `DefaultAdapter` into a new `DefaultReadAdapter` which `DefaultAdapter` now extends.
+- e104263: Added `GetBlockOptions` and `GetBlockWithOptionsReturn` to exports.
+- e5f80a5: Added a `multicall` method for explicitly batching calls via [Multicall3](https://www.multicall3.com/). Before sending the request, the cache is checked for each individual call to reduce the size of the request when possible. Each fetched result is then cached and the cached and fetched results are merged and returned in the same order they were requested.
+- f623fff: Fixed a bug in the `StubStore` where the `create` function wasn't being called unless no key was provided or `matchPartial` was `true`.
+- e5f80a5: Added `pollingTimeout` to the `DefaultAdapter` constructor options.
+- 9a50e41: Added `erc721`, `erc1155`, and `multicall3` artifacts (abi + methodIdentifiers).
+
 ## 0.8.4
 
 ### Patch Changes
