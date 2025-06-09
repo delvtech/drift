@@ -14,7 +14,7 @@ import type {
   TransactionOptions,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
-import type { EmptyObject, NarrowTo, OneOf } from "src/utils/types";
+import type { DynamicProperty, NarrowTo, OneOf } from "src/utils/types";
 
 /**
  * An interface for interacting with a blockchain network and its contracts,
@@ -208,16 +208,6 @@ export interface ContractParams<TAbi extends Abi = Abi> {
 }
 
 /**
- * A dynamic arguments parameter that is optional if the arguments are empty.
- * @internal
- */
-export type ArgsParam<Args> = {} | Args extends EmptyObject
-  ? { args?: Args }
-  : {} extends Args
-    ? { args?: Args }
-    : { args: Args };
-
-/**
  * Base params for a function call.
  * @internal
  */
@@ -226,14 +216,14 @@ export type FunctionCall<
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 > = ContractParams<TAbi> & {
   fn: TFunctionName;
-} & ArgsParam<FunctionArgs<TAbi, TFunctionName>>;
+} & DynamicProperty<"args", FunctionArgs<TAbi, TFunctionName>>;
 
 // Encode/Decode //
 
 export type EncodeDeployDataParams<TAbi extends Abi = Abi> = {
   abi: TAbi;
   bytecode: Bytes;
-} & ArgsParam<ConstructorArgs<TAbi>>;
+} & DynamicProperty<"args", ConstructorArgs<TAbi>>;
 
 export type EncodeFunctionDataParams<
   TAbi extends Abi = Abi,
@@ -241,7 +231,7 @@ export type EncodeFunctionDataParams<
 > = {
   abi: TAbi;
   fn: TFunctionName;
-} & ArgsParam<FunctionArgs<TAbi, TFunctionName>>;
+} & DynamicProperty<"args", FunctionArgs<TAbi, TFunctionName>>;
 
 export interface EncodeFunctionReturnParams<
   TAbi extends Abi = Abi,

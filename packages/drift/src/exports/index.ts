@@ -202,6 +202,7 @@ export { isHexString, HEX_REGEX } from "src/utils/isHexString";
 export type {
   AnyFunction,
   AnyObject,
+  DynamicProperty,
   EmptyObject,
   Eval,
   Extended,

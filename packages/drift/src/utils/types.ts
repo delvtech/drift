@@ -163,6 +163,27 @@ export type OneOf<T extends AnyObject> = UnionKey<T> extends infer K extends
   : never;
 
 /**
+ * Creates a type with a single property `TKey` that's optional if `TValue` has
+ * no required properties, and required otherwise.
+ *
+ * @example
+ * ```ts
+ * type Params1 = { id: number } & DynamicProperty<'options', { optional?: boolean }>;
+ * // => { id: number } & { options?: { optional?: boolean } | undefined }
+ *
+ * type Params2 = { id: number } & DynamicProperty<'config', { required: string }>;
+ * // => { id: number } & { config: { required: string } }
+ * ```
+ */
+export type DynamicProperty<TKey extends PropertyKey, TValue> =
+  | {} // <- Ensures edge cases like `never` are handled even in generic contexts
+  | TValue extends EmptyObject
+  ? { [K in TKey]?: TValue }
+  : {} extends TValue
+    ? { [K in TKey]?: TValue }
+    : { [K in TKey]: TValue };
+
+/**
  * Extracts and transforms members of a union type `T` based on a filter type
  * `F`.
  *
@@ -194,10 +215,10 @@ export type OneOf<T extends AnyObject> = UnionKey<T> extends infer K extends
  *   | { i: 2; c: boolean },
  *   { i: number; c: true }
  * >;
- * // -> { i: 0; a: string; c: true } | { i: 2; c: true };
+ * // => { i: 0; a: string; c: true } | { i: 2; c: true };
  *
  * type FilteredPartial = ExtractFiltered<{ a: string; b: number; c: boolean }, { a: 'foo' }>;
- * // -> { a: 'foo'; b: number; c: boolean }
+ * // => { a: 'foo'; b: number; c: boolean }
  * ```
  *
  * @internal
@@ -224,10 +245,10 @@ export type ExtractFiltered<T, F = {}> = T extends T // <- Distribute union
  *   { a: string; b: true },
  *   { a: "foo"; b: boolean }
  * >;
- * // -> { a: 'foo'; b: true }
+ * // => { a: 'foo'; b: true }
  *
  * type Filtered2 = ApplyFilter<{ a: string }, { a: number }>;
- * // -> never
+ * // => never
  * ```
  *
  * @internal

@@ -1,7 +1,6 @@
 import type { Abi, Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
-  ArgsParam,
   ContractParams,
   GetEventsOptions,
   MulticallOptions,
@@ -28,6 +27,7 @@ import {
 import { ContractCache } from "src/client/contract/cache/ContractCache";
 import type { Store } from "src/store/Store";
 import type {
+  DynamicProperty,
   EmptyObject,
   Eval,
   Extended,
@@ -453,7 +453,7 @@ export type ContractMulticallParams<
     [K in keyof TCalls]: NarrowTo<
       {
         fn: TCalls[K]["fn"];
-      } & ArgsParam<FunctionArgs<TAbi, TCalls[K]["fn"]>>,
+      } & DynamicProperty<"args", FunctionArgs<TAbi, TCalls[K]["fn"]>>,
       TCalls[K]
     >;
   };
