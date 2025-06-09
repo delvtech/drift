@@ -1,7 +1,7 @@
 {
   "name": "@delvtech/drift-web3",
   "description": "Web3.js adapter for Drift",
-  "version": "1.0.0",
+  "version": "0.9.0",
   "license": "Apache-2.0",
   "type": "module",
   "main": "dist/index.cjs",
@@ -50,7 +50,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist"
-  ]
+  "files": ["dist"]
 }
