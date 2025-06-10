@@ -16,7 +16,7 @@ const adapter = new MockAdapter();
 adapter.onGetChainId().resolves(0);
 
 describe("Client", () => {
-  it("Maintains the adapter prototype chain", () => {
+  it("maintains the adapter prototype chain", () => {
     class CustomAdapter extends MockAdapter {}
     const client = createClient({ adapter: new CustomAdapter() });
     expect(client).toBeInstanceOf(CustomAdapter);
@@ -54,7 +54,7 @@ describe("Client", () => {
       } satisfies MulticallCallResult);
     });
 
-    it("Returns cached read calls", async () => {
+    it("returns cached read calls", async () => {
       const client = createClient({ adapter });
       const abi = TestToken.abi;
       client.cache.preloadRead({
@@ -80,7 +80,7 @@ describe("Client", () => {
       expect(name).toBe("Test Token");
     });
 
-    it("Returns cached read calls in the correct format", async () => {
+    it("returns cached read calls in the correct format", async () => {
       const client = createClient({ adapter });
       const abi = TestToken.abi;
       client.cache.preloadRead({
@@ -107,7 +107,7 @@ describe("Client", () => {
   });
 
   describe("getEvents", () => {
-    it("Uses the same default options as `ClientCache`", async () => {
+    it("uses the same default options as `ClientCache`", async () => {
       const client = createClient({ adapter });
       const params: GetEventsParams = {
         abi,
@@ -125,7 +125,7 @@ describe("Client", () => {
   });
 
   describe("getBlock", () => {
-    it("Throws if no block is found and `throws` is true", async () => {
+    it("throws if no block is found and `throws` is true", async () => {
       const client = createClient({ adapter });
       client.onGetBlock().resolves(undefined);
       await expect(client.getBlock("latest", { throws: true })).rejects.toThrow(
@@ -135,7 +135,7 @@ describe("Client", () => {
   });
 
   describe("hooks", () => {
-    it("Calls getChainId hooks", async () => {
+    it("calls getChainId hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
@@ -148,7 +148,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls getBlockNumber hooks", async () => {
+    it("calls getBlockNumber hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
@@ -161,7 +161,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls getBlock hooks", async () => {
+    it("calls getBlock hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
@@ -174,7 +174,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls getBalance hooks", async () => {
+    it("calls getBalance hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
@@ -187,7 +187,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls getTransaction hooks", async () => {
+    it("calls getTransaction hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
@@ -200,7 +200,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls waitForTransaction hooks", async () => {
+    it("calls waitForTransaction hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
@@ -213,7 +213,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls encodeDeployData hooks", async () => {
+    it("calls encodeDeployData hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
@@ -226,7 +226,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls encodeFunctionData hooks", async () => {
+    it("calls encodeFunctionData hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
@@ -239,7 +239,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls encodeFunctionReturn hooks", async () => {
+    it("calls encodeFunctionReturn hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
@@ -252,7 +252,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls decodeFunctionData hooks", async () => {
+    it("calls decodeFunctionData hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
@@ -265,7 +265,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls decodeFunctionReturn hooks", async () => {
+    it("calls decodeFunctionReturn hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
@@ -278,7 +278,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls call hooks", async () => {
+    it("calls call hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
@@ -291,7 +291,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls multicall hooks", async () => {
+    it("calls multicall hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
@@ -304,7 +304,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls getEvents hooks", async () => {
+    it("calls getEvents hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
@@ -317,7 +317,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls read hooks", async () => {
+    it("calls read hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
@@ -330,7 +330,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls simulateWrite hooks", async () => {
+    it("calls simulateWrite hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());
       const afterHandler = vi.fn();
@@ -343,7 +343,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls write hooks", async () => {
+    it("calls write hooks", async () => {
       const client = createClient({
         adapter: new MockAdapter(),
       });
@@ -358,7 +358,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls write hooks", async () => {
+    it("calls write hooks", async () => {
       const client = createClient({
         adapter: new MockAdapter(),
       });
@@ -373,7 +373,7 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
-    it("Calls getSignerAddress hooks", async () => {
+    it("calls getSignerAddress hooks", async () => {
       const client = createClient({
         adapter: new MockAdapter(),
       });
@@ -390,14 +390,14 @@ describe("Client", () => {
   });
 
   describe("extend", () => {
-    it("Extends client", async () => {
+    it("extends client", async () => {
       const client = createClient({ adapter }).extend({
         foo() {},
       });
       expect(client.foo).toBeDefined();
     });
 
-    it("Maintains hook proxy", async () => {
+    it("maintains hook proxy", async () => {
       const client = createClient({ adapter }).extend({
         foo() {},
       });

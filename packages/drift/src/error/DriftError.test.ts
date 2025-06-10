@@ -2,7 +2,7 @@ import { DriftError } from "src/error/DriftError";
 import { describe, expect, it } from "vitest";
 
 describe("DriftError", () => {
-  it("Uses the provided prefix and name", () => {
+  it("uses the provided prefix and name", () => {
     class FooError extends DriftError {
       constructor(error: any) {
         super(error, { prefix: "🚨 ", name: "Foo Error" });
@@ -20,7 +20,7 @@ describe("DriftError", () => {
     expect(error.message).toBe("Something went wrong");
   });
 
-  it("Displays wrapped error names if not `Error`", () => {
+  it("displays wrapped error names if not `Error`", () => {
     class CustomError extends Error {}
     const wrappedCustomError = new DriftError(new CustomError());
     const wrappedError = new DriftError(new Error());

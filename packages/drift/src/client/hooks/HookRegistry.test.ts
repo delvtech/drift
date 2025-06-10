@@ -2,7 +2,7 @@ import { HookRegistry } from "src/client/hooks/HookRegistry";
 import { describe, expect, it, vi } from "vitest";
 
 describe("HookRegistry", () => {
-  it("Calls registered handlers with a payload", async () => {
+  it("calls registered handlers with a payload", async () => {
     const hooks = new HookRegistry<{
       test(payload: { value: string }): void;
     }>();
@@ -16,7 +16,7 @@ describe("HookRegistry", () => {
     expect(handler).toHaveBeenCalledWith(payload);
   });
 
-  it("Calls all registered handlers", async () => {
+  it("calls all registered handlers", async () => {
     const hooks = new HookRegistry();
 
     const handler = vi.fn();
@@ -30,7 +30,7 @@ describe("HookRegistry", () => {
     expect(handler2).toHaveBeenCalledTimes(1);
   });
 
-  it("Calls handlers in registration order", async () => {
+  it("calls handlers in registration order", async () => {
     const hooks = new HookRegistry();
     const order: number[] = [];
 
@@ -49,7 +49,7 @@ describe("HookRegistry", () => {
     expect(order).toEqual([1, 2]);
   });
 
-  it("Does not call handlers that have been removed", async () => {
+  it("does not call handlers that have been removed", async () => {
     const hooks = new HookRegistry();
     const handler = vi.fn();
 
@@ -62,7 +62,7 @@ describe("HookRegistry", () => {
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
-  it("Only calls one-time handlers once", async () => {
+  it("only calls one-time handlers once", async () => {
     const hooks = new HookRegistry();
     const handler = vi.fn();
     const onceHandler = vi.fn();

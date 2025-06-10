@@ -22,7 +22,7 @@ type TestTokenAbi = typeof TestToken.abi;
 
 describe("MockClient", () => {
   describe("getChainId", () => {
-    it("Can be stubbed", async () => {
+    it("can be stubbed", async () => {
       const client = createMockClient();
       client.onGetChainId().resolves(123);
       expect(await client.getChainId()).toBe(123);
@@ -30,7 +30,7 @@ describe("MockClient", () => {
   });
 
   describe("getBlockNumber", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const client = createMockClient();
       let error: unknown;
       try {
@@ -41,7 +41,7 @@ describe("MockClient", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
+    it("can be stubbed", async () => {
       const client = createMockClient();
       client.onGetBlockNumber().resolves(123n);
       expect(await client.getBlockNumber()).toBe(123n);
@@ -49,7 +49,7 @@ describe("MockClient", () => {
   });
 
   describe("getBlock", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const client = createMockClient();
       let error: unknown;
       try {
@@ -60,7 +60,7 @@ describe("MockClient", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("can be stubbed with specific params", async () => {
       const client = createMockClient();
       const block0 = createStubBlock({
         number: 0n,
@@ -82,7 +82,7 @@ describe("MockClient", () => {
       expect(await client.getBlock(2n)).toBe(block2);
     });
 
-    it("Can be stubbed with no params", async () => {
+    it("can be stubbed with no params", async () => {
       const client = createMockClient();
       const block = {
         number: 123n,
@@ -92,7 +92,7 @@ describe("MockClient", () => {
       expect(await client.getBlock(123n)).toBe(block);
     });
 
-    it("Can be called with args after being stubbed with no args", async () => {
+    it("can be called with args after being stubbed with no args", async () => {
       const client = createMockClient();
       const block = {
         number: 123n,
@@ -104,7 +104,7 @@ describe("MockClient", () => {
   });
 
   describe("getBalance", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const client = createMockClient();
       let error: unknown;
       try {
@@ -115,7 +115,7 @@ describe("MockClient", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("can be stubbed with specific params", async () => {
       const client = createMockClient();
       client.onGetBalance({ address: "0xAlice" }).resolves(1n);
       client.onGetBalance({ address: "0xBob" }).resolves(2n);
@@ -123,7 +123,7 @@ describe("MockClient", () => {
       expect(await client.getBalance({ address: "0xBob" })).toBe(2n);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const client = createMockClient();
       client.onGetBalance({ address: "0xAlice" }).resolves(1n);
       expect(
@@ -134,7 +134,7 @@ describe("MockClient", () => {
       );
     });
 
-    it("Can be called with args after being stubbed with no args", async () => {
+    it("can be called with args after being stubbed with no args", async () => {
       const client = createMockClient();
       client.onGetBalance().resolves(123n);
       expect(await client.getBalance({ address: "0x" })).toBe(123n);
@@ -142,12 +142,12 @@ describe("MockClient", () => {
   });
 
   describe("getTransaction", () => {
-    it("Resolves to undefined by default", async () => {
+    it("resolves to undefined by default", async () => {
       const client = createMockClient();
       expect(await client.getTransaction({ hash: "0x" })).toBeUndefined();
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("can be stubbed with specific params", async () => {
       const client = createMockClient();
       const transaction1 = createStubTransaction({
         transactionHash: "0x1",
@@ -161,14 +161,14 @@ describe("MockClient", () => {
       expect(await client.getTransaction({ hash: "0x2" })).toBe(transaction2);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const client = createMockClient();
       const transaction = createStubTransaction();
       client.onGetTransaction({}).resolves(transaction);
       expect(await client.getTransaction({ hash: "0x" })).toBe(transaction);
     });
 
-    it("Can be called with args after being stubbed with no args", async () => {
+    it("can be called with args after being stubbed with no args", async () => {
       const client = createMockClient();
       const transaction = createStubTransaction();
       client.onGetTransaction().resolves(transaction);
@@ -177,14 +177,14 @@ describe("MockClient", () => {
   });
 
   describe("waitForTransaction", () => {
-    it("Resolves to undefined by default", async () => {
+    it("resolves to undefined by default", async () => {
       const client = createMockClient();
       await expect(
         client.waitForTransaction({ hash: "0x" }),
       ).resolves.toBeUndefined();
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("can be stubbed with specific params", async () => {
       const client = createMockClient();
       const receipt1 = createStubTransactionReceipt({
         transactionHash: "0x1",
@@ -198,7 +198,7 @@ describe("MockClient", () => {
       expect(await client.waitForTransaction({ hash: "0x2" })).toBe(receipt2);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const client = createMockClient();
       const receipt = createStubTransactionReceipt();
       client.onWaitForTransaction({ hash: "0x" }).resolves(receipt);
@@ -207,7 +207,7 @@ describe("MockClient", () => {
       ).toBe(receipt);
     });
 
-    it("Can be called with args after being stubbed with no args", async () => {
+    it("can be called with args after being stubbed with no args", async () => {
       const client = createMockClient();
       const receipt = createStubTransactionReceipt();
       client.onWaitForTransaction().resolves(receipt);
@@ -216,7 +216,7 @@ describe("MockClient", () => {
   });
 
   describe("call", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const client = createMockClient();
       let error: unknown;
       try {
@@ -229,7 +229,7 @@ describe("MockClient", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("can be stubbed with specific params", async () => {
       const client = createMockClient();
       const params1: CallParams = {
         to: "0x1",
@@ -243,7 +243,7 @@ describe("MockClient", () => {
       expect(await client.call(params2)).toBe("0xB");
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const client = createMockClient();
       client
         .onCall({
@@ -260,7 +260,7 @@ describe("MockClient", () => {
   });
 
   describe("multicall", () => {
-    it("Rejects with an error by default", async () => {
+    it("rejects with an error by default", async () => {
       const client = createMockClient();
       const [result] = await client.multicall({
         calls: [
@@ -277,7 +277,7 @@ describe("MockClient", () => {
       });
     });
 
-    it("Can be stubbed with args", async () => {
+    it("can be stubbed with args", async () => {
       const client = createMockClient();
       client
         .onMulticall({
@@ -305,7 +305,7 @@ describe("MockClient", () => {
       ).toStrictEqual([{ success: true, value: 123n }]);
     });
 
-    it("Can stub different values for different args", async () => {
+    it("can stub different values for different args", async () => {
       const client = createMockClient();
       const params1: MulticallParams<
         [FunctionCallParams<TestTokenAbi, "allowance">]
@@ -338,7 +338,7 @@ describe("MockClient", () => {
       expect(await client.multicall(params2)).toStrictEqual([2n]);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const client = createMockClient();
       client
         .onMulticall({
@@ -364,7 +364,7 @@ describe("MockClient", () => {
       ).toStrictEqual([{ success: true, value: 123n }]);
     });
 
-    it("Can be stubbed with partial args", async () => {
+    it("can be stubbed with partial args", async () => {
       const client = createMockClient();
       client
         .onMulticall({
@@ -393,7 +393,7 @@ describe("MockClient", () => {
   });
 
   describe("getEvents", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const client = createMockClient();
       let error: unknown;
       try {
@@ -408,7 +408,7 @@ describe("MockClient", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("can be stubbed with specific params", async () => {
       const client = createMockClient();
       const abi = TestToken.abi;
       const params1: GetEventsParams<TestTokenAbi, "Transfer"> = {
@@ -437,7 +437,7 @@ describe("MockClient", () => {
       expect(await client.getEvents(params2)).toBe(events2);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const client = createMockClient();
       const events = createStubEvents({
         abi: TestToken.abi,
@@ -462,7 +462,7 @@ describe("MockClient", () => {
   });
 
   describe("read", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const client = createMockClient();
       let error: unknown;
       try {
@@ -477,7 +477,7 @@ describe("MockClient", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("can be stubbed with specific params", async () => {
       const client = createMockClient();
       const params1: ReadParams<TestTokenAbi, "allowance"> = {
         abi: TestToken.abi,
@@ -495,7 +495,7 @@ describe("MockClient", () => {
       expect(await client.read(params2)).toBe(2n);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const client = createMockClient();
       client
         .onRead({
@@ -515,7 +515,7 @@ describe("MockClient", () => {
   });
 
   describe("simulateWrite", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const client = createMockClient();
       let error: unknown;
       try {
@@ -531,7 +531,7 @@ describe("MockClient", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("can be stubbed with specific params", async () => {
       const client = createMockClient();
       const params1: WriteParams<TestTokenAbi, "transfer"> = {
         abi: TestToken.abi,
@@ -549,7 +549,7 @@ describe("MockClient", () => {
       expect(await client.simulateWrite(params2)).toBe(false);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const client = createMockClient();
       client
         .onSimulateWrite({
@@ -569,7 +569,7 @@ describe("MockClient", () => {
   });
 
   describe("write", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const client = createMockClient();
       let error: unknown;
       try {
@@ -585,7 +585,7 @@ describe("MockClient", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("can be stubbed with specific params", async () => {
       const client = createMockClient();
       const params1: WriteParams<TestTokenAbi, "transfer"> = {
         abi: TestToken.abi,
@@ -603,7 +603,7 @@ describe("MockClient", () => {
       expect(await client.write(params2)).toBe("0x2");
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const client = createMockClient();
       client
         .onWrite({
@@ -621,7 +621,7 @@ describe("MockClient", () => {
       ).toBe("0x123");
     });
 
-    it("Can be called with args after being stubbed with no args", async () => {
+    it("can be called with args after being stubbed with no args", async () => {
       const client = createMockClient();
       client.onWrite().resolves("0x123");
       expect(
@@ -649,7 +649,7 @@ describe("MockClient", () => {
     ] as const satisfies Abi;
     type TestAbi = typeof testAbi;
 
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const client = createMockClient();
       let error: unknown;
       try {
@@ -668,7 +668,7 @@ describe("MockClient", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific args", async () => {
+    it("can be stubbed with specific args", async () => {
       const client = createMockClient();
       const params1: DeployParams<TestAbi> = {
         abi: testAbi,
@@ -693,7 +693,7 @@ describe("MockClient", () => {
       expect(await client.deploy(params2)).toBe("0x2");
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const client = createMockClient();
       client.onDeploy({ abi: testAbi }).resolves("0x123");
       expect(
@@ -709,7 +709,7 @@ describe("MockClient", () => {
       ).toBe("0x123");
     });
 
-    it("Can be called with args after being stubbed with no args", async () => {
+    it("can be called with args after being stubbed with no args", async () => {
       const client = createMockClient();
       client.onDeploy().resolves("0x123");
       expect(
@@ -725,7 +725,7 @@ describe("MockClient", () => {
       ).toBe("0x123");
     });
 
-    it("Calls onMined callbacks with the receipt", async () => {
+    it("calls onMined callbacks with the receipt", async () => {
       const client = createMockClient();
       const receipt = createStubTransactionReceipt();
       const onMined = vi.fn();
@@ -750,7 +750,7 @@ describe("MockClient", () => {
   });
 
   describe("getSignerAddress", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const client = createMockClient();
       let error: unknown;
       try {
@@ -761,7 +761,7 @@ describe("MockClient", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
+    it("can be stubbed", async () => {
       const client = createMockClient();
       client.onGetSignerAddress().resolves("0x123");
       expect(await client.getSignerAddress()).toBe("0x123");

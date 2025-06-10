@@ -13,7 +13,7 @@ type Erc20Abi = typeof IERC20.abi;
 
 describe("ContractCache", () => {
   describe("events", () => {
-    it("Namespaces keys", async () => {
+    it("namespaces keys", async () => {
       const store = new LruStore();
       const cache1 = new ContractCache({
         abi,
@@ -36,7 +36,7 @@ describe("ContractCache", () => {
       expect(JSON.stringify(key2)).toContain("ns2");
     });
 
-    it("Preloads values", async () => {
+    it("preloads values", async () => {
       const cache = new ContractCache({ abi, address, namespace: "test" });
       const events = createStubEvents({
         abi: IERC20.abi,
@@ -58,7 +58,7 @@ describe("ContractCache", () => {
   });
 
   describe("Reads", () => {
-    it("Namespaces keys", async () => {
+    it("namespaces keys", async () => {
       const store = new LruStore();
       const cache1 = new ContractCache({
         abi,
@@ -85,7 +85,7 @@ describe("ContractCache", () => {
       expect(JSON.stringify(key2)).toContain("ns2");
     });
 
-    it("Preloads values", async () => {
+    it("preloads values", async () => {
       const cache = new ContractCache({ abi, address, namespace: "test" });
       const readArgs: ContractReadArgs<Erc20Abi, "allowance"> = [
         "allowance",
@@ -102,7 +102,7 @@ describe("ContractCache", () => {
       expect(value).toStrictEqual(123n);
     });
 
-    it("Invalidates values", async () => {
+    it("invalidates values", async () => {
       const cache = new ContractCache({ abi, address, namespace: "test" });
       const readArgs: ContractReadArgs<Erc20Abi, "allowance"> = [
         "allowance",
@@ -124,7 +124,7 @@ describe("ContractCache", () => {
       expect(value).toBeUndefined();
     });
 
-    it("Invalidates values matching partial params", async () => {
+    it("invalidates values matching partial params", async () => {
       const cache = new ContractCache({ abi, address, namespace: "test" });
       const readArgs1: ContractReadArgs<Erc20Abi, "allowance"> = [
         "allowance",
@@ -161,7 +161,7 @@ describe("ContractCache", () => {
     });
 
     describe("clearReads", () => {
-      it("Clears all values", async () => {
+      it("clears all values", async () => {
         const cache = new ContractCache({ abi, address, namespace: "test" });
 
         await cache.preloadRead({ fn: "symbol", value: "IBN" });
@@ -185,7 +185,7 @@ describe("ContractCache", () => {
         expect(values).toStrictEqual([undefined, undefined, undefined]);
       });
 
-      it("Doesn't clear unrelated values", async () => {
+      it("doesn't clear unrelated values", async () => {
         const cache = new ContractCache({ abi, address, namespace: "test" });
 
         await cache.preloadRead({ fn: "symbol", value: "TEST" });

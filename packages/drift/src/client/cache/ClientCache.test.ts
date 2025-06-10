@@ -19,7 +19,7 @@ type Erc20Abi = typeof IERC20.abi;
 
 describe("ClientCache", () => {
   describe("balances", () => {
-    it("Namespaces keys", async () => {
+    it("namespaces keys", async () => {
       const store = new LruStore();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
@@ -32,14 +32,14 @@ describe("ClientCache", () => {
       expect(JSON.stringify(key2)).toContain("ns2");
     });
 
-    it("Preloads values", async () => {
+    it("preloads values", async () => {
       const cache = new ClientCache({ namespace: "test" });
       await cache.preloadBalance({ address: ALICE, value: 123n });
       const value = await cache.getBalance({ address: ALICE });
       expect(value).toBe(123n);
     });
 
-    it("Invalidates values", async () => {
+    it("invalidates values", async () => {
       const cache = new ClientCache({ namespace: "test" });
 
       await cache.preloadBalance({ address: ALICE, value: 123n });
@@ -52,7 +52,7 @@ describe("ClientCache", () => {
     });
 
     describe("clearBalances", () => {
-      it("Clears all values", async () => {
+      it("clears all values", async () => {
         const cache = new ClientCache({ namespace: "test" });
 
         await cache.preloadBalance({ address: ALICE, value: 123n });
@@ -76,7 +76,7 @@ describe("ClientCache", () => {
         expect(values).toStrictEqual([undefined, undefined, undefined]);
       });
 
-      it("Doesn't clear unrelated values", async () => {
+      it("doesn't clear unrelated values", async () => {
         const cache = new ClientCache({ namespace: "test" });
         const block = createStubBlock({ number: 123n });
 
@@ -101,7 +101,7 @@ describe("ClientCache", () => {
   });
 
   describe("blocks", () => {
-    it("Namespaces keys", async () => {
+    it("namespaces keys", async () => {
       const store = new LruStore();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
@@ -114,7 +114,7 @@ describe("ClientCache", () => {
       expect(JSON.stringify(key2)).toContain("ns2");
     });
 
-    it("Preloads values", async () => {
+    it("preloads values", async () => {
       const cache = new ClientCache({ namespace: "test" });
       const block = createStubBlock({ number: 123n });
       await cache.preloadBlock({ block: 123n, value: block });
@@ -122,7 +122,7 @@ describe("ClientCache", () => {
       expect(value).toBe(block);
     });
 
-    it("Invalidates values", async () => {
+    it("invalidates values", async () => {
       const cache = new ClientCache({ namespace: "test" });
       const block = createStubBlock({ number: 123n });
 
@@ -136,7 +136,7 @@ describe("ClientCache", () => {
     });
 
     describe("clearBlocks", () => {
-      it("Clears all values", async () => {
+      it("clears all values", async () => {
         const cache = new ClientCache({ namespace: "test" });
         const block1 = createStubBlock({ number: 1n });
         const block2 = createStubBlock({ number: 2n });
@@ -163,7 +163,7 @@ describe("ClientCache", () => {
         expect(values).toStrictEqual([undefined, undefined, undefined]);
       });
 
-      it("Doesn't clear unrelated values", async () => {
+      it("doesn't clear unrelated values", async () => {
         const cache = new ClientCache({ namespace: "test" });
         const block = createStubBlock({ number: 0n });
 
@@ -188,7 +188,7 @@ describe("ClientCache", () => {
   });
 
   describe("transactions", () => {
-    it("Namespaces keys", async () => {
+    it("namespaces keys", async () => {
       const store = new LruStore();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
@@ -201,7 +201,7 @@ describe("ClientCache", () => {
       expect(JSON.stringify(key2)).toContain("ns2");
     });
 
-    it("Preloads values", async () => {
+    it("preloads values", async () => {
       const cache = new ClientCache({ namespace: "test" });
       const tx = createStubTransaction();
       await cache.preloadTransaction({ hash: "0x123", value: tx });
@@ -209,7 +209,7 @@ describe("ClientCache", () => {
       expect(value).toStrictEqual(tx);
     });
 
-    it("Invalidates values", async () => {
+    it("invalidates values", async () => {
       const cache = new ClientCache({ namespace: "test" });
       const tx = createStubTransaction();
 
@@ -223,7 +223,7 @@ describe("ClientCache", () => {
     });
 
     describe("clearTransactions", () => {
-      it("Clears all values", async () => {
+      it("clears all values", async () => {
         const cache = new ClientCache({ namespace: "test" });
         const tx1 = createStubTransaction({ transactionHash: "0x1" });
         const tx2 = createStubTransaction({ transactionHash: "0x2" });
@@ -250,7 +250,7 @@ describe("ClientCache", () => {
         expect(values).toStrictEqual([undefined, undefined, undefined]);
       });
 
-      it("Doesn't clear unrelated values", async () => {
+      it("doesn't clear unrelated values", async () => {
         const cache = new ClientCache({ namespace: "test" });
         const tx = createStubTransaction({ transactionHash: "0x1" });
 
@@ -275,7 +275,7 @@ describe("ClientCache", () => {
   });
 
   describe("transaction receipts", () => {
-    it("Namespaces keys", async () => {
+    it("namespaces keys", async () => {
       const store = new LruStore();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
@@ -288,7 +288,7 @@ describe("ClientCache", () => {
       expect(JSON.stringify(key2)).toContain("ns2");
     });
 
-    it("Preloads values", async () => {
+    it("preloads values", async () => {
       const cache = new ClientCache({ namespace: "test" });
       const receipt = createStubTransactionReceipt();
       await cache.preloadTransactionReceipt({ hash: "0x123", value: receipt });
@@ -298,7 +298,7 @@ describe("ClientCache", () => {
   });
 
   describe("calls", () => {
-    it("Namespaces keys", async () => {
+    it("namespaces keys", async () => {
       const store = new LruStore();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
@@ -314,7 +314,7 @@ describe("ClientCache", () => {
       expect(JSON.stringify(key2)).toContain("ns2");
     });
 
-    it("Preloads values", async () => {
+    it("preloads values", async () => {
       const cache = new ClientCache({ namespace: "test" });
 
       const params: CallParams = {
@@ -326,7 +326,7 @@ describe("ClientCache", () => {
       expect(value).toStrictEqual("0xA");
     });
 
-    it("Invalidates values", async () => {
+    it("invalidates values", async () => {
       const cache = new ClientCache({ namespace: "test" });
 
       const params: CallParams = {
@@ -342,7 +342,7 @@ describe("ClientCache", () => {
       expect(value).toBeUndefined();
     });
 
-    it("Invalidates values matching partial params", async () => {
+    it("invalidates values matching partial params", async () => {
       const cache = new ClientCache({ namespace: "test" });
 
       const params1: CallParams = {
@@ -374,7 +374,7 @@ describe("ClientCache", () => {
     });
 
     describe("clearCalls", () => {
-      it("Clears all values", async () => {
+      it("clears all values", async () => {
         const cache = new ClientCache({ namespace: "test" });
 
         await cache.preloadCall({ to: "0x", data: "0x1", preloadValue: "0x1" });
@@ -398,7 +398,7 @@ describe("ClientCache", () => {
         expect(values).toStrictEqual([undefined, undefined, undefined]);
       });
 
-      it("Doesn't clear unrelated values", async () => {
+      it("doesn't clear unrelated values", async () => {
         const cache = new ClientCache({ namespace: "test" });
 
         await cache.preloadCall({ to: "0x", data: "0x1", preloadValue: "0x1" });
@@ -422,7 +422,7 @@ describe("ClientCache", () => {
   });
 
   describe("events", () => {
-    it("Namespaces keys", async () => {
+    it("namespaces keys", async () => {
       const store = new LruStore();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
@@ -440,7 +440,7 @@ describe("ClientCache", () => {
       expect(JSON.stringify(key2)).toContain("ns2");
     });
 
-    it("Preloads values", async () => {
+    it("preloads values", async () => {
       const cache = new ClientCache({ namespace: "test" });
 
       const params: GetEventsParams<Erc20Abi, "Approval"> = {
@@ -467,7 +467,7 @@ describe("ClientCache", () => {
   });
 
   describe("Reads", () => {
-    it("Namespaces keys", async () => {
+    it("namespaces keys", async () => {
       const store = new LruStore();
       const cache1 = new ClientCache({ store, namespace: "ns1" });
       const cache2 = new ClientCache({ store, namespace: "ns2" });
@@ -489,7 +489,7 @@ describe("ClientCache", () => {
       expect(JSON.stringify(key2)).toContain("ns2");
     });
 
-    it("Preloads values", async () => {
+    it("preloads values", async () => {
       const cache = new ClientCache({ namespace: "test" });
 
       const params: ReadParams<Erc20Abi, "allowance"> = {
@@ -507,7 +507,7 @@ describe("ClientCache", () => {
       expect(value).toStrictEqual(123n);
     });
 
-    it("Invalidates values", async () => {
+    it("invalidates values", async () => {
       const cache = new ClientCache({ namespace: "test" });
 
       const params: ReadParams<Erc20Abi, "allowance"> = {
@@ -529,7 +529,7 @@ describe("ClientCache", () => {
       expect(value).toBeUndefined();
     });
 
-    it("Invalidates values matching partial params", async () => {
+    it("invalidates values matching partial params", async () => {
       const cache = new ClientCache({ namespace: "test" });
 
       const params1: ReadParams<Erc20Abi, "allowance"> = {
@@ -573,7 +573,7 @@ describe("ClientCache", () => {
     });
 
     describe("clearReads", () => {
-      it("Clears all values", async () => {
+      it("clears all values", async () => {
         const cache = new ClientCache({ namespace: "test" });
         const abi = TestToken.abi;
 
@@ -613,7 +613,7 @@ describe("ClientCache", () => {
         expect(values).toStrictEqual([undefined, undefined, undefined]);
       });
 
-      it("Doesn't clear unrelated values", async () => {
+      it("doesn't clear unrelated values", async () => {
         const cache = new ClientCache({ namespace: "test" });
         const abi = TestToken.abi;
 

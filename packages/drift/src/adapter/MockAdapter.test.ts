@@ -21,7 +21,7 @@ type TestTokenAbi = typeof TestToken.abi;
 
 describe("MockAdapter", () => {
   describe("getChainId", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const adapter = new MockAdapter();
       let error: unknown;
       try {
@@ -32,7 +32,7 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
+    it("can be stubbed", async () => {
       const adapter = new MockAdapter();
       adapter.onGetChainId().resolves(123);
       expect(await adapter.getChainId()).toBe(123);
@@ -40,7 +40,7 @@ describe("MockAdapter", () => {
   });
 
   describe("getBlock", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const adapter = new MockAdapter();
       let error: unknown;
       try {
@@ -51,7 +51,7 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
       const block0 = createStubBlock({
         number: 0n,
@@ -70,7 +70,7 @@ describe("MockAdapter", () => {
       expect(await adapter.getBlock(2n)).toBe(block2);
     });
 
-    it("Can be stubbed with no params", async () => {
+    it("can be stubbed with no params", async () => {
       const adapter = new MockAdapter();
       const block = createStubBlock({
         number: 123n,
@@ -79,7 +79,7 @@ describe("MockAdapter", () => {
       expect(await adapter.getBlock(123n)).toBe(block);
     });
 
-    it("Can be called with args after being stubbed with no args", async () => {
+    it("can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       const block = createStubBlock({
         number: 123n,
@@ -90,7 +90,7 @@ describe("MockAdapter", () => {
   });
 
   describe("getBalance", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const adapter = new MockAdapter();
       let error: unknown;
       try {
@@ -101,7 +101,7 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
       adapter.onGetBalance({ address: "0xAlice" }).resolves(1n);
       adapter.onGetBalance({ address: "0xBob" }).resolves(2n);
@@ -109,7 +109,7 @@ describe("MockAdapter", () => {
       expect(await adapter.getBalance({ address: "0xBob" })).toBe(2n);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       adapter.onGetBalance({ address: "0xAlice" }).resolves(1n);
       expect(
@@ -120,7 +120,7 @@ describe("MockAdapter", () => {
       ).toBe(1n);
     });
 
-    it("Can be called with args after being stubbed with no args", async () => {
+    it("can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       adapter.onGetBalance().resolves(123n);
       expect(await adapter.getBalance({ address: "0x" })).toBe(123n);
@@ -128,12 +128,12 @@ describe("MockAdapter", () => {
   });
 
   describe("getTransaction", () => {
-    it("Resolves to undefined by default", async () => {
+    it("resolves to undefined by default", async () => {
       const adapter = new MockAdapter();
       expect(await adapter.getTransaction({ hash: "0x" })).toBeUndefined();
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
       const transaction1 = createStubTransaction({
         transactionHash: "0x1",
@@ -147,14 +147,14 @@ describe("MockAdapter", () => {
       expect(await adapter.getTransaction({ hash: "0x2" })).toBe(transaction2);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       const transaction = createStubTransaction();
       adapter.onGetTransaction({}).resolves(transaction);
       expect(await adapter.getTransaction({ hash: "0x" })).toBe(transaction);
     });
 
-    it("Can be called with args after being stubbed with no args", async () => {
+    it("can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       const transaction = createStubTransaction();
       adapter.onGetTransaction().resolves(transaction);
@@ -163,7 +163,7 @@ describe("MockAdapter", () => {
   });
 
   describe("waitForTransaction", () => {
-    it("Resolves to undefined by default", async () => {
+    it("resolves to undefined by default", async () => {
       const adapter = new MockAdapter();
       const result = await adapter
         .waitForTransaction({ hash: "0x" })
@@ -171,7 +171,7 @@ describe("MockAdapter", () => {
       expect(result).toBeUndefined();
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
       const receipt1 = createStubTransactionReceipt({
         transactionHash: "0x1",
@@ -185,7 +185,7 @@ describe("MockAdapter", () => {
       expect(await adapter.waitForTransaction({ hash: "0x2" })).toBe(receipt2);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       const receipt = createStubTransactionReceipt();
       adapter.onWaitForTransaction({ hash: "0x" }).resolves(receipt);
@@ -194,7 +194,7 @@ describe("MockAdapter", () => {
       ).toBe(receipt);
     });
 
-    it("Can be called with args after being stubbed with no args", async () => {
+    it("can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       const receipt = createStubTransactionReceipt();
       adapter.onWaitForTransaction().resolves(receipt);
@@ -203,7 +203,7 @@ describe("MockAdapter", () => {
   });
 
   describe("call", () => {
-    it("Rejects with an error by default", async () => {
+    it("rejects with an error by default", async () => {
       const adapter = new MockAdapter();
       let error: unknown;
       try {
@@ -216,7 +216,7 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
       const params1: CallParams = {
         to: "0x1",
@@ -230,7 +230,7 @@ describe("MockAdapter", () => {
       expect(await adapter.call(params2)).toBe("0xB");
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       adapter
         .onCall({
@@ -247,7 +247,7 @@ describe("MockAdapter", () => {
   });
 
   describe("multicall", () => {
-    it("Returns an error result by default", async () => {
+    it("returns an error result by default", async () => {
       const adapter = new MockAdapter();
       const [result] = await adapter.multicall({
         calls: [
@@ -264,7 +264,7 @@ describe("MockAdapter", () => {
       });
     });
 
-    it("Can be stubbed with args", async () => {
+    it("can be stubbed with args", async () => {
       const adapter = new MockAdapter();
       adapter
         .onMulticall({
@@ -292,7 +292,7 @@ describe("MockAdapter", () => {
       ).toStrictEqual([{ success: true, value: 123n }]);
     });
 
-    it("Can stub different values for different args", async () => {
+    it("can stub different values for different args", async () => {
       const adapter = new MockAdapter();
       const params1: MulticallParams<
         [FunctionCallParams<TestTokenAbi, "allowance">]
@@ -325,7 +325,7 @@ describe("MockAdapter", () => {
       expect(await adapter.multicall(params2)).toStrictEqual([2n]);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       adapter
         .onMulticall({
@@ -351,7 +351,7 @@ describe("MockAdapter", () => {
       ).toStrictEqual([{ success: true, value: 123n }]);
     });
 
-    it("Can be stubbed with partial args", async () => {
+    it("can be stubbed with partial args", async () => {
       const adapter = new MockAdapter();
       adapter
         .onMulticall({
@@ -378,7 +378,7 @@ describe("MockAdapter", () => {
       ).toStrictEqual([{ success: true, value: 123n }]);
     });
 
-    it("Returns stubbed read and simulateWrite values", async () => {
+    it("returns stubbed read and simulateWrite values", async () => {
       const adapter = new MockAdapter();
       const readParams: ReadParams<TestTokenAbi> = {
         abi: TestToken.abi,
@@ -412,7 +412,7 @@ describe("MockAdapter", () => {
   });
 
   describe("sendRawTransaction", () => {
-    it("Rejects with an error by default", async () => {
+    it("rejects with an error by default", async () => {
       const adapter = new MockAdapter();
       let error: unknown;
       try {
@@ -423,7 +423,7 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific params", async () => {
+    it("can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
       adapter.onSendRawTransaction("0x1").resolves("0xa");
       adapter.onSendRawTransaction("0x2").resolves("0xb");
@@ -431,7 +431,7 @@ describe("MockAdapter", () => {
       expect(await adapter.sendRawTransaction("0x2")).toBe("0xb");
     });
 
-    it("Can be called with args after being stubbed with no args", async () => {
+    it("can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       adapter.onSendRawTransaction().resolves("0xa");
       expect(await adapter.sendRawTransaction("0x1")).toBe("0xa");
@@ -439,7 +439,7 @@ describe("MockAdapter", () => {
   });
 
   describe("getEvents", () => {
-    it("Rejects with an error by default", async () => {
+    it("rejects with an error by default", async () => {
       const adapter = new MockAdapter();
       let error: unknown;
       try {
@@ -454,7 +454,7 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with args", async () => {
+    it("can be stubbed with args", async () => {
       const adapter = new MockAdapter();
       const events = createStubEvents({
         abi: TestToken.abi,
@@ -479,7 +479,7 @@ describe("MockAdapter", () => {
       ).toBe(events);
     });
 
-    it("Can stub different values for different args", async () => {
+    it("can stub different values for different args", async () => {
       const adapter = new MockAdapter();
       const params1: GetEventsParams<TestTokenAbi, "Transfer"> = {
         abi: TestToken.abi,
@@ -507,7 +507,7 @@ describe("MockAdapter", () => {
       expect(await adapter.getEvents(params2)).toBe(events2);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       const events = createStubEvents({
         abi: TestToken.abi,
@@ -532,7 +532,7 @@ describe("MockAdapter", () => {
   });
 
   describe("read", () => {
-    it("Rejects with an error by default", async () => {
+    it("rejects with an error by default", async () => {
       const adapter = new MockAdapter();
       let error: unknown;
       try {
@@ -547,7 +547,7 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with args", async () => {
+    it("can be stubbed with args", async () => {
       const adapter = new MockAdapter();
       adapter
         .onRead({
@@ -567,7 +567,7 @@ describe("MockAdapter", () => {
       ).toBe(123n);
     });
 
-    it("Can stub different values for different args", async () => {
+    it("can stub different values for different args", async () => {
       const adapter = new MockAdapter();
       const params1: ReadParams<TestTokenAbi, "allowance"> = {
         abi: TestToken.abi,
@@ -585,7 +585,7 @@ describe("MockAdapter", () => {
       expect(await adapter.read(params2)).toBe(2n);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       adapter
         .onRead({
@@ -603,7 +603,7 @@ describe("MockAdapter", () => {
       ).toBe(123n);
     });
 
-    it("Can be stubbed with partial args", async () => {
+    it("can be stubbed with partial args", async () => {
       const adapter = new MockAdapter();
       adapter
         .onRead({
@@ -624,7 +624,7 @@ describe("MockAdapter", () => {
   });
 
   describe("simulateWrite", () => {
-    it("Rejects with an error by default", async () => {
+    it("rejects with an error by default", async () => {
       const adapter = new MockAdapter();
       let error: unknown;
       try {
@@ -640,7 +640,7 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with args", async () => {
+    it("can be stubbed with args", async () => {
       const adapter = new MockAdapter();
       adapter
         .onSimulateWrite({
@@ -660,7 +660,7 @@ describe("MockAdapter", () => {
       ).toBe(true);
     });
 
-    it("Can stub different values for different args", async () => {
+    it("can stub different values for different args", async () => {
       const adapter = new MockAdapter();
       const params1: WriteParams<TestTokenAbi, "transfer"> = {
         abi: TestToken.abi,
@@ -678,7 +678,7 @@ describe("MockAdapter", () => {
       expect(await adapter.simulateWrite(params2)).toBe(false);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       adapter
         .onSimulateWrite({
@@ -696,7 +696,7 @@ describe("MockAdapter", () => {
       ).toBe(true);
     });
 
-    it("Can be stubbed with partial args", async () => {
+    it("can be stubbed with partial args", async () => {
       const adapter = new MockAdapter();
       adapter
         .onSimulateWrite({
@@ -717,7 +717,7 @@ describe("MockAdapter", () => {
   });
 
   describe("write", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const adapter = new MockAdapter();
       let error: unknown;
       try {
@@ -733,7 +733,7 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with args", async () => {
+    it("can be stubbed with args", async () => {
       const adapter = new MockAdapter();
       adapter
         .onWrite({
@@ -753,7 +753,7 @@ describe("MockAdapter", () => {
       ).toBe("0x123");
     });
 
-    it("Can stub different values for different args", async () => {
+    it("can stub different values for different args", async () => {
       const adapter = new MockAdapter();
       const params1: WriteParams<TestTokenAbi, "transfer"> = {
         abi: TestToken.abi,
@@ -771,7 +771,7 @@ describe("MockAdapter", () => {
       expect(await adapter.write(params2)).toBe("0x2");
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       adapter
         .onWrite({
@@ -789,7 +789,7 @@ describe("MockAdapter", () => {
       ).toBe("0x123");
     });
 
-    it("Can be stubbed with partial args", async () => {
+    it("can be stubbed with partial args", async () => {
       const adapter = new MockAdapter();
       adapter
         .onWrite({
@@ -808,7 +808,7 @@ describe("MockAdapter", () => {
       ).toBe("0x123");
     });
 
-    it("Can be called with args after being stubbed with no args", async () => {
+    it("can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       adapter.onWrite().resolves("0x123");
       expect(
@@ -821,7 +821,7 @@ describe("MockAdapter", () => {
       ).toBe("0x123");
     });
 
-    it("Calls onMined callbacks with the receipt", async () => {
+    it("calls onMined callbacks with the receipt", async () => {
       const adapter = new MockAdapter();
       const receipt = createStubTransactionReceipt();
       const onMined = vi.fn();
@@ -843,7 +843,7 @@ describe("MockAdapter", () => {
   });
 
   describe("deploy", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const adapter = new MockAdapter();
       let error: unknown;
       try {
@@ -861,7 +861,7 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific args", async () => {
+    it("can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
       const params1: DeployParams<TestTokenAbi> = {
         abi: TestToken.abi,
@@ -884,7 +884,7 @@ describe("MockAdapter", () => {
       expect(await adapter.deploy(params2)).toBe("0x2");
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       adapter.onDeploy({ abi: TestToken.abi }).resolves("0x123");
       expect(
@@ -899,7 +899,7 @@ describe("MockAdapter", () => {
       ).toBe("0x123");
     });
 
-    it("Can be stubbed with partial args", async () => {
+    it("can be stubbed with partial args", async () => {
       const adapter = new MockAdapter();
       adapter
         .onDeploy({ abi: TestToken.abi, args: { decimals_: 18 } })
@@ -916,7 +916,7 @@ describe("MockAdapter", () => {
       ).toBe("0x123");
     });
 
-    it("Can be called with args after being stubbed with no args", async () => {
+    it("can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       adapter.onDeploy().resolves("0x123");
       expect(
@@ -931,7 +931,7 @@ describe("MockAdapter", () => {
       ).toBe("0x123");
     });
 
-    it("Calls onMined callbacks with the receipt", async () => {
+    it("calls onMined callbacks with the receipt", async () => {
       const adapter = new MockAdapter();
       const receipt = createStubTransactionReceipt();
       const onMined = vi.fn();
@@ -955,7 +955,7 @@ describe("MockAdapter", () => {
   });
 
   describe("sendTransaction", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const adapter = new MockAdapter();
       let error: unknown;
       try {
@@ -966,7 +966,7 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific args", async () => {
+    it("can be stubbed with specific args", async () => {
       const adapter = new MockAdapter();
       adapter.onSendTransaction({ data: "0x1" }).resolves("0xa");
       adapter.onSendTransaction({ data: "0x2" }).resolves("0xb");
@@ -974,19 +974,19 @@ describe("MockAdapter", () => {
       expect(await adapter.sendTransaction({ data: "0x2" })).toBe("0xb");
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       adapter.onSendTransaction({}).resolves("0x123");
       expect(await adapter.sendTransaction({ data: "0x" })).toBe("0x123");
     });
 
-    it("Can be called with args after being stubbed with no args", async () => {
+    it("can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       adapter.onSendTransaction().resolves("0x123");
       expect(await adapter.sendTransaction({ data: "0x" })).toBe("0x123");
     });
 
-    it("Calls onMined callbacks with the receipt", async () => {
+    it("calls onMined callbacks with the receipt", async () => {
       const adapter = new MockAdapter();
       const receipt = createStubTransactionReceipt();
       const onMined = vi.fn();
@@ -1010,7 +1010,7 @@ describe("MockAdapter", () => {
   });
 
   describe("getSignerAddress", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const adapter = new MockAdapter();
       let error: unknown;
       try {
@@ -1021,7 +1021,7 @@ describe("MockAdapter", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
+    it("can be stubbed", async () => {
       const adapter = new MockAdapter();
       adapter.onGetSignerAddress().resolves("0x123");
       expect(await adapter.getSignerAddress()).toBe("0x123");

@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 describe("Drift", () => {
   describe("contract", () => {
-    it("Creates contracts that share cache values", async () => {
+    it("creates contracts that share cache values", async () => {
       const drift = createDrift({
         chainId: 0,
         rpcUrl: "__test__",
@@ -24,7 +24,7 @@ describe("Drift", () => {
       expect(await contract.read("symbol")).toBe("VAULT");
     });
 
-    it("Maintains hook proxy on contract client", async () => {
+    it("maintains hook proxy on contract client", async () => {
       const drift = createDrift({
         chainId: 0,
         rpcUrl: "__test__",

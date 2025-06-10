@@ -8,7 +8,7 @@ import { HEX_REGEX } from "src/utils/isHexString";
 import { describe, expect, it } from "vitest";
 
 describe("createStubEvent", () => {
-  it("Creates a stub event", () => {
+  it("creates a stub event", () => {
     const event = createStubEvent({
       abi: IERC20.abi,
       eventName: "Transfer",
@@ -33,7 +33,7 @@ describe("createStubEvent", () => {
 });
 
 describe("createStubEvents", () => {
-  it("Creates multiple stub events", () => {
+  it("creates multiple stub events", () => {
     const events = createStubEvents({
       abi: IERC20.abi,
       eventName: "Transfer",

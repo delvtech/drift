@@ -14,12 +14,12 @@ const walletClient = createWalletClient({
 });
 
 describe("viemAdapter", () => {
-  it("Creates a read adapter if no wallet client is provided", async () => {
+  it("creates a read adapter if no wallet client is provided", async () => {
     const adapter = viemAdapter({ publicClient });
     expect(adapter).toBeInstanceOf(ViemReadAdapter);
   });
 
-  it("Creates a read adapter if a wallet client is provided", async () => {
+  it("creates a read adapter if a wallet client is provided", async () => {
     const adapter = viemAdapter({ publicClient, walletClient });
     expect(adapter).toBeInstanceOf(ViemReadWriteAdapter);
   });

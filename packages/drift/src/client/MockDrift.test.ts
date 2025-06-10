@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 describe("MockDrift", () => {
   describe("contract", () => {
-    it("Creates mock read-write contracts", async () => {
+    it("creates mock read-write contracts", async () => {
       const mockDrift = createMockDrift();
       const mockContract = mockDrift.contract({
         abi: IERC20.abi,
@@ -26,7 +26,7 @@ describe("MockDrift", () => {
       ).toBe("0xHash");
     });
 
-    it("Creates contracts that share mock values", async () => {
+    it("creates contracts that share mock values", async () => {
       const mockDrift = createMockDrift();
       const contract = mockDrift.contract({
         abi: IERC20.abi,
@@ -54,7 +54,7 @@ describe("MockDrift", () => {
       ).toBe("Vault Token");
     });
 
-    it("Creates contracts that share cache values", async () => {
+    it("creates contracts that share cache values", async () => {
       const mockDrift = createMockDrift();
       const contract = mockDrift.contract({
         abi: IERC20.abi,

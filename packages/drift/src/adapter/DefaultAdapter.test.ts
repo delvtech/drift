@@ -1,5 +1,5 @@
 import { DefaultAdapter } from "src/adapter/DefaultAdapter";
-import type { Address as AddressType } from "src/adapter/types/Abi";
+import type { Address } from "src/adapter/types/Abi";
 import type { MulticallCallResult } from "src/adapter/types/Adapter";
 import type { Block } from "src/adapter/types/Block";
 import type { EventLog } from "src/adapter/types/Event";
@@ -23,7 +23,7 @@ import { assert, beforeAll, describe, expect, it } from "vitest";
 
 const rpcUrl = process.env.VITE_RPC_URL;
 const adapter = new DefaultAdapter({ rpcUrl });
-const address = process.env.VITE_TOKEN_ADDRESS as AddressType;
+const address = process.env.VITE_TOKEN_ADDRESS as Address;
 
 describe("DefaultAdapter", () => {
   beforeAll(() => {
@@ -135,7 +135,7 @@ describe("DefaultAdapter", () => {
         to: address,
         data,
       });
-      expect(result).toEqual(expect.stringMatching(/^0x/));
+      expect(result).toEqual(expect.stringMatching(HEX_REGEX));
     });
 
     it("reads from bytecodes", async () => {
@@ -147,7 +147,7 @@ describe("DefaultAdapter", () => {
         bytecode: MockERC20.bytecode,
         data,
       });
-      expect(result).toEqual(expect.stringMatching(/^0x/));
+      expect(result).toEqual(expect.stringMatching(HEX_REGEX));
     });
   });
 
@@ -186,7 +186,6 @@ describe("DefaultAdapter", () => {
             fn: "balanceOf",
             args: { owner: address },
           },
-
           {
             abi: TestToken.abi,
             address,

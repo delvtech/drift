@@ -14,7 +14,7 @@ type TestTokenAbi = typeof abi;
 
 describe("MockContract", () => {
   describe("multicall", () => {
-    it("Returns an error result by default", async () => {
+    it("returns an error result by default", async () => {
       const contract = new MockContract({ abi });
       const [result] = await contract.multicall({ calls: [{ fn: "symbol" }] });
       expect(result).toStrictEqual({
@@ -23,7 +23,7 @@ describe("MockContract", () => {
       });
     });
 
-    it("Can be stubbed with args", async () => {
+    it("can be stubbed with args", async () => {
       const contract = new MockContract({ abi });
       contract
         .onMulticall({ calls: [{ fn: "balanceOf", args: { owner: "0x1" } }] })
@@ -35,7 +35,7 @@ describe("MockContract", () => {
       ).toStrictEqual([{ success: true, value: 123n }]);
     });
 
-    it("Can stub different values for different args", async () => {
+    it("can stub different values for different args", async () => {
       const contract = new MockContract({ abi });
       const params1: ContractMulticallParams<
         TestTokenAbi,
@@ -60,7 +60,7 @@ describe("MockContract", () => {
       expect(await contract.multicall(params2)).toStrictEqual([2n]);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const contract = new MockContract({ abi });
       contract
         .onMulticall({
@@ -74,7 +74,7 @@ describe("MockContract", () => {
       ).toStrictEqual([{ success: true, value: 123n }]);
     });
 
-    it("Can be stubbed with partial args", async () => {
+    it("can be stubbed with partial args", async () => {
       const contract = new MockContract({ abi });
       contract
         .onMulticall({
@@ -88,7 +88,7 @@ describe("MockContract", () => {
       ).toStrictEqual([{ success: true, value: 123n }]);
     });
 
-    it("Returns stubbed read and simulateWrite values", async () => {
+    it("returns stubbed read and simulateWrite values", async () => {
       const contract = new MockContract({ abi });
       const readArgs: ContractReadArgs<TestTokenAbi> = ["symbol"];
       const simulateWriteArgs: ContractSimulateWriteArgs<TestTokenAbi> = [
@@ -116,7 +116,7 @@ describe("MockContract", () => {
   });
 
   describe("getEvents", async () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const contract = new MockContract({ abi });
       let error: unknown;
       try {
@@ -127,7 +127,7 @@ describe("MockContract", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific args", async () => {
+    it("can be stubbed with specific args", async () => {
       const contract = new MockContract({ abi });
       const events1 = createStubEvents({
         abi,
@@ -153,7 +153,7 @@ describe("MockContract", () => {
       ).toBe(events2);
     });
 
-    it("Can be stubbed with partial args", async () => {
+    it("can be stubbed with partial args", async () => {
       const contract = new MockContract({ abi });
       const events = createStubEvents({
         abi,
@@ -166,7 +166,7 @@ describe("MockContract", () => {
       ).toBe(events);
     });
 
-    it("Inherits stubbed values from the client", async () => {
+    it("inherits stubbed values from the client", async () => {
       const contract = new MockContract({ abi });
       const events = createStubEvents({
         abi,
@@ -185,7 +185,7 @@ describe("MockContract", () => {
   });
 
   describe("read", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const contract = new MockContract({ abi });
       let error: unknown;
       try {
@@ -196,7 +196,7 @@ describe("MockContract", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific args", async () => {
+    it("can be stubbed with specific args", async () => {
       const contract = new MockContract({ abi });
       contract
         .onRead("allowance", { owner: "0x1", spender: "0x1" })
@@ -212,7 +212,7 @@ describe("MockContract", () => {
       ).toBe(2n);
     });
 
-    it("Can be stubbed with partial args", async () => {
+    it("can be stubbed with partial args", async () => {
       const contract = new MockContract({ abi });
       contract.onRead("allowance", { owner: "0x" }).resolves(123n);
       expect(
@@ -220,13 +220,13 @@ describe("MockContract", () => {
       ).toBe(123n);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const contract = new MockContract({ abi });
       contract.onRead("balanceOf").resolves(123n);
       expect(await contract.read("balanceOf", { owner: "0x" })).toBe(123n);
     });
 
-    it("Inherits stubbed values from the client", async () => {
+    it("inherits stubbed values from the client", async () => {
       const contract = new MockContract({ abi });
       contract.client
         .onRead({
@@ -240,7 +240,7 @@ describe("MockContract", () => {
   });
 
   describe("simulateWrite", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const contract = new MockContract({ abi });
       let error: unknown;
       try {
@@ -251,7 +251,7 @@ describe("MockContract", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific args", async () => {
+    it("can be stubbed with specific args", async () => {
       const contract = new MockContract({ abi });
       contract
         .onSimulateWrite("transfer", { to: "0x1", amount: 123n })
@@ -267,7 +267,7 @@ describe("MockContract", () => {
       ).toBe(false);
     });
 
-    it("Can be stubbed with partial args", async () => {
+    it("can be stubbed with partial args", async () => {
       const contract = new MockContract({ abi });
       contract.onSimulateWrite("transfer", { to: "0x1" }).resolves(true);
       expect(
@@ -275,7 +275,7 @@ describe("MockContract", () => {
       ).toBe(true);
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const contract = new MockContract({ abi });
       contract.onSimulateWrite("transfer").resolves(true);
       expect(
@@ -283,7 +283,7 @@ describe("MockContract", () => {
       ).toBe(true);
     });
 
-    it("Inherits stubbed values from the client", async () => {
+    it("inherits stubbed values from the client", async () => {
       const contract = new MockContract({ abi });
       contract.client
         .onSimulateWrite({
@@ -300,7 +300,7 @@ describe("MockContract", () => {
   });
 
   describe("getSignerAddress", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const contract = new MockContract({ abi });
       let error: unknown;
       try {
@@ -311,7 +311,7 @@ describe("MockContract", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed", async () => {
+    it("can be stubbed", async () => {
       const contract = new MockContract({ abi });
       contract.onGetSignerAddress().resolves("0x123");
       expect(await contract.getSignerAddress()).toBe("0x123");
@@ -319,7 +319,7 @@ describe("MockContract", () => {
   });
 
   describe("write", () => {
-    it("Throws an error by default", async () => {
+    it("throws an error by default", async () => {
       const contract = new MockContract({ abi });
       let error: unknown;
       try {
@@ -330,7 +330,7 @@ describe("MockContract", () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    it("Can be stubbed with specific args", async () => {
+    it("can be stubbed with specific args", async () => {
       const contract = new MockContract({ abi });
       contract.onWrite("transfer", { to: "0x1", amount: 123n }).resolves("0x1");
       contract.onWrite("transfer", { to: "0x2", amount: 123n }).resolves("0x2");
@@ -342,7 +342,7 @@ describe("MockContract", () => {
       ).toBe("0x2");
     });
 
-    it("Can be stubbed with partial args", async () => {
+    it("can be stubbed with partial args", async () => {
       const contract = new MockContract({ abi });
       contract.onWrite("transfer", { to: "0x" }).resolves("0x123");
       expect(await contract.write("transfer", { to: "0x", amount: 123n })).toBe(
@@ -350,7 +350,7 @@ describe("MockContract", () => {
       );
     });
 
-    it("Can be stubbed with partial params", async () => {
+    it("can be stubbed with partial params", async () => {
       const contract = new MockContract({ abi });
       contract.onWrite("transfer").resolves("0x123");
       expect(await contract.write("transfer", { to: "0x", amount: 123n })).toBe(
@@ -358,7 +358,7 @@ describe("MockContract", () => {
       );
     });
 
-    it("Can be called with args after being stubbed with no arguments", async () => {
+    it("can be called with args after being stubbed with no arguments", async () => {
       const contract = new MockContract({ abi });
       contract.onWrite().resolves("0x123");
       expect(await contract.write("transfer", { to: "0x", amount: 123n })).toBe(

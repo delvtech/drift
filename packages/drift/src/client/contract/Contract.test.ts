@@ -12,7 +12,7 @@ adapter.onGetChainId().resolves(0);
 
 describe("Contract", () => {
   describe("getEvents", () => {
-    it("Can be preloaded", async () => {
+    it("can be preloaded", async () => {
       const contract = createContract({ abi, address, adapter });
       const events = createStubEvents({
         abi,
@@ -37,7 +37,7 @@ describe("Contract", () => {
         events: [{ args: { from: ALICE, to: BOB, value: 123n } }],
       });
 
-      it("Is used by default if defined", async () => {
+      it("is used by default if defined", async () => {
         adapter.onGetEvents({ abi, address, event }).resolves([]);
         adapter
           .onGetEvents({ abi, address, event, fromBlock: epochBlock })
@@ -49,7 +49,7 @@ describe("Contract", () => {
         expect(returnedEvents).toBe(eventsAtEpoch);
       });
 
-      it("Is used in place of 'earliest' if defined", async () => {
+      it("is used in place of 'earliest' if defined", async () => {
         adapter
           .onGetEvents({ abi, address, event, fromBlock: "earliest" })
           .resolves([]);
@@ -65,7 +65,7 @@ describe("Contract", () => {
         expect(returnedEvents).toBe(eventsAtEpoch);
       });
 
-      it("Is used in place of lower block numbers if defined", async () => {
+      it("is used in place of lower block numbers if defined", async () => {
         adapter
           .onGetEvents({ abi, address, event, fromBlock: 0n })
           .resolves([]);
@@ -84,7 +84,7 @@ describe("Contract", () => {
   });
 
   describe("read", () => {
-    it("Can be preloaded & invalidated", async () => {
+    it("can be preloaded & invalidated", async () => {
       const contract = createContract({ abi, address, adapter });
 
       contract.cache.preloadRead({ fn: "symbol", value: "DAI" });
@@ -99,7 +99,7 @@ describe("Contract", () => {
       const epochBlock = 123n;
       const nameAtEpoch = "Name at Epoch";
 
-      it("Is used in place of 'earliest' if defined", async () => {
+      it("is used in place of 'earliest' if defined", async () => {
         adapter
           .onRead({ abi, address, fn, block: "earliest" })
           .resolves("Name at Earliest");
@@ -113,7 +113,7 @@ describe("Contract", () => {
         expect(returnedName).toBe(nameAtEpoch);
       });
 
-      it("Is used in place of lower block numbers if defined", async () => {
+      it("is used in place of lower block numbers if defined", async () => {
         adapter.onRead({ abi, address, fn, block: 0n }).resolves("Name at 0");
         adapter
           .onRead({ abi, address, fn, block: epochBlock })
@@ -127,7 +127,7 @@ describe("Contract", () => {
     });
   });
 
-  it("Maintains hooks proxy when extending", async () => {
+  it("maintains hooks proxy when extending", async () => {
     const contract = createContract({ abi, address, adapter }).extend({
       foo() {},
     });
