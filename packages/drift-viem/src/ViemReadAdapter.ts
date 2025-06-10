@@ -16,35 +16,32 @@ import {
   type WaitForTransactionParams,
 } from "@delvtech/drift";
 import {
-  http,
+  type AnyClient,
+  type CoercedPublicClient,
+  coercePublicClient,
+} from "src/publicClient";
+import {
   type CallParameters,
   type GetBalanceParameters,
   type PublicClient,
-  createPublicClient,
   decodeEventLog,
   isHex,
   rpcTransactionType,
 } from "viem";
 
-export interface ViemReadAdapterParams<
-  TClient extends PublicClient = PublicClient,
-> {
+export interface ViemReadAdapterParams<TClient extends AnyClient = AnyClient> {
   publicClient: TClient;
 }
 
-export class ViemReadAdapter<TClient extends PublicClient = PublicClient>
+export class ViemReadAdapter<TClient extends AnyClient = PublicClient>
   extends BaseReadAdapter
   implements ReadAdapter
 {
-  publicClient: TClient;
+  publicClient: CoercedPublicClient<TClient>;
 
-  constructor({
-    publicClient = createPublicClient({
-      transport: http(),
-    }) as TClient,
-  }: ViemReadAdapterParams<TClient>) {
+  constructor({ publicClient }: ViemReadAdapterParams<TClient>) {
     super();
-    this.publicClient = publicClient;
+    this.publicClient = coercePublicClient(publicClient);
   }
 
   getChainId() {

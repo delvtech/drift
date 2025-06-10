@@ -1,9 +1,10 @@
 import { ViemReadAdapter } from "src/ViemReadAdapter";
 import { ViemReadWriteAdapter } from "src/ViemReadWriteAdapter";
-import type { PublicClient, WalletClient } from "viem";
+import type { AnyClient } from "src/publicClient";
+import type { WalletClient } from "viem";
 
 export interface ViemAdapterParams<
-  TPublicClient extends PublicClient = PublicClient,
+  TPublicClient extends AnyClient = AnyClient,
   TWalletClient extends WalletClient | undefined = WalletClient | undefined,
 > {
   publicClient: TPublicClient;
@@ -22,8 +23,8 @@ export function viemAdapter<const TParams extends ViemAdapterParams>({
 }
 
 export type ViemAdapter<
-  TPublicClient extends PublicClient = PublicClient,
-  TWalletClient extends WalletClient | undefined = WalletClient | undefined,
+  TPublicClient extends AnyClient = AnyClient,
+  TWalletClient extends WalletClient | undefined = undefined,
 > = TWalletClient extends WalletClient
   ? ViemReadWriteAdapter<TPublicClient, TWalletClient>
   : ViemReadAdapter<TPublicClient>;

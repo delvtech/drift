@@ -12,17 +12,18 @@ import {
   ViemReadAdapter,
   type ViemReadAdapterParams,
 } from "src/ViemReadAdapter";
+import type { AnyClient } from "src/publicClient";
 import type { PublicClient, WalletClient } from "viem";
 
 export interface ViemReadWriteAdapterParams<
-  TPublicClient extends PublicClient = PublicClient,
+  TPublicClient extends AnyClient = AnyClient,
   TWalletClient extends WalletClient = WalletClient,
 > extends ViemReadAdapterParams<TPublicClient> {
   walletClient: TWalletClient;
 }
 
 export class ViemReadWriteAdapter<
-    TPublicClient extends PublicClient = PublicClient,
+    TPublicClient extends AnyClient = PublicClient,
     TWalletClient extends WalletClient = WalletClient,
   >
   extends ViemReadAdapter<TPublicClient>
