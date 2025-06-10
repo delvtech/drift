@@ -6,11 +6,11 @@
  * false and the value is an array or object, the function will recursively
  * check each item in the array or object.
  *
- * @param value - The value to convert primitive types in.
+ * @param value - The value to recursively convert.
  * @param predicateFn - A function that returns true if the `converterFn` should
  * be run on the value.
  * @param converterFn - A function that converts the value.
- * @returns - The recursively converted value.
+ * @returns The recursively converted value.
  *
  * @example
  * // Convert all bigints to string.

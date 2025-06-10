@@ -34,7 +34,7 @@ import type {
 } from "src/adapter/types/Transaction";
 import { convert } from "src/utils/convert";
 import { stringifyKey } from "src/utils/stringifyKey";
-import { NotImplementedError, StubStore } from "src/utils/testing/StubStore";
+import { MissingStubError, StubStore } from "src/utils/testing/StubStore";
 import type {
   AnyObject,
   Extended,
@@ -71,9 +71,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   }
 
   async getChainId() {
-    return this.stubs.get<[], Promise<number>>({
-      method: "getChainId",
-    })();
+    return this.onGetChainId()();
   }
 
   // getBlockNumber //
@@ -85,9 +83,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   }
 
   async getBlockNumber() {
-    return this.stubs.get<[], Promise<bigint>>({
-      method: "getBlockNumber",
-    })();
+    return this.onGetBlockNumber()();
   }
 
   // getBlock //
@@ -110,11 +106,10 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   // getBalance //
 
   onGetBalance(params?: Partial<GetBalanceParams>) {
-    const stub = this.stubs.get<[GetBalanceParams], Promise<bigint>>({
+    return this.stubs.get<[GetBalanceParams], Promise<bigint>>({
       method: "getBalance",
       key: this.createKey(params),
     });
-    return stub;
   }
 
   async getBalance(params: GetBalanceParams) {
@@ -122,7 +117,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
       method: "getBalance",
       key: this.createKey(params),
       matchPartial: true,
-    })(params as GetBalanceParams);
+    })(params);
   }
 
   // getTransaction //
@@ -224,7 +219,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
         matchPartial: true,
       })(params);
     } catch (error) {
-      if (!(error instanceof NotImplementedError)) throw error;
+      if (!(error instanceof MissingStubError)) throw error;
 
       // If the multicall hasn't been stubbed, check the read and
       // simulateWrite stubs for each individual call.
@@ -233,30 +228,35 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
       for (const call of calls) {
         // Check for a read stub
+        const readParams: ReadParams = { ...call, block: options.block };
         if (
           this.stubs.has({
             method: "read",
-            key: this.createKey({ ...call, block: options.block }),
+            key: this.createKey(readParams),
             matchPartial: true,
           })
         ) {
-          results.push(this.read({ ...call, block: options.block }));
+          results.push(this.read(readParams));
           continue;
         }
 
         // Check for a simulateWrite stub
+        const simulateWriteParams: SimulateWriteParams = {
+          ...call,
+          ...options,
+        };
         if (
           this.stubs.has({
             method: "simulateWrite",
-            key: this.createKey({ ...call, ...options }),
+            key: this.createKey(simulateWriteParams),
             matchPartial: true,
           })
         ) {
-          results.push(this.simulateWrite({ ...call, ...options }));
+          results.push(this.simulateWrite(simulateWriteParams));
           continue;
         }
 
-        // Otherwise, handle the NotImplementedError
+        // Otherwise, handle the MissingStubError
         if (options.allowFailure === false) throw error;
         results.push(Promise.resolve(error));
       }

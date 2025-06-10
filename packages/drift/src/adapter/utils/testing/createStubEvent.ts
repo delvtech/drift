@@ -4,11 +4,11 @@ import { randomHex } from "src/utils/testing/randomHex";
 import type { Eval, PartialBy } from "src/utils/types";
 
 type CreateStubEventParams<
-  TAbi extends Abi,
-  TEventName extends EventName<TAbi>,
+  TAbi extends Abi = Abi,
+  TEventName extends EventName<TAbi> = EventName<TAbi>,
 > = Eval<
   {
-    abi: TAbi;
+    abi?: TAbi;
     eventName: TEventName;
   } & PartialBy<
     EventLog<TAbi, TEventName>,
@@ -21,7 +21,7 @@ type CreateStubEventParams<
  */
 export function createStubEvent<
   TAbi extends Abi,
-  TEventName extends EventName<TAbi>,
+  TEventName extends EventName<TAbi> = EventName<TAbi>,
 >(params: CreateStubEventParams<TAbi, TEventName>): EventLog<TAbi, TEventName> {
   const { abi, ...overrides } = params;
   return {
@@ -33,8 +33,8 @@ export function createStubEvent<
 }
 
 type CreateStubEventsParams<
-  TAbi extends Abi,
-  TEventName extends EventName<TAbi>,
+  TAbi extends Abi = Abi,
+  TEventName extends EventName<TAbi> = EventName<TAbi>,
 > = Eval<{
   abi: TAbi;
   eventName: TEventName;
@@ -54,7 +54,7 @@ type CreateStubEventsParams<
  */
 export function createStubEvents<
   TAbi extends Abi,
-  TEventName extends EventName<TAbi>,
+  TEventName extends EventName<TAbi> = EventName<TAbi>,
 >(
   params: CreateStubEventsParams<TAbi, TEventName>,
 ): EventLog<TAbi, TEventName>[] {

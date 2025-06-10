@@ -3,8 +3,8 @@ import type {
   GetEventsParams,
   ReadParams,
 } from "src/adapter/types/Adapter";
-import type { EventLog } from "src/adapter/types/Event";
 import { createStubBlock } from "src/adapter/utils/testing/createStubBlock";
+import { createStubEvents } from "src/adapter/utils/testing/createStubEvent";
 import { createStubTransaction } from "src/adapter/utils/testing/createStubTransaction";
 import { createStubTransactionReceipt } from "src/adapter/utils/testing/createStubTransactionReceipt";
 import { IERC20 } from "src/artifacts/IERC20";
@@ -451,24 +451,14 @@ describe("ClientCache", () => {
           owner: ALICE,
         },
       };
-      const events: EventLog<Erc20Abi, "Approval">[] = [
-        {
-          eventName: "Approval",
-          args: {
-            owner: ALICE,
-            spender: BOB,
-            value: 100n,
-          },
-        },
-        {
-          eventName: "Approval",
-          args: {
-            owner: ALICE,
-            spender: NANCY,
-            value: 120n,
-          },
-        },
-      ];
+      const events = createStubEvents({
+        abi: IERC20.abi,
+        eventName: "Approval",
+        events: [
+          { args: { owner: ALICE, spender: BOB, value: 100n } },
+          { args: { owner: ALICE, spender: NANCY, value: 120n } },
+        ],
+      });
 
       await cache.preloadEvents({ ...params, value: events });
       const value = await cache.getEvents(params);

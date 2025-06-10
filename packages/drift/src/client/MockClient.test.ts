@@ -9,13 +9,13 @@ import type {
   WriteParams,
 } from "src/adapter/types/Adapter";
 import type { Block } from "src/adapter/types/Block";
-import type { EventLog } from "src/adapter/types/Event";
 import { createStubBlock } from "src/adapter/utils/testing/createStubBlock";
+import { createStubEvents } from "src/adapter/utils/testing/createStubEvent";
 import { createStubTransaction } from "src/adapter/utils/testing/createStubTransaction";
 import { createStubTransactionReceipt } from "src/adapter/utils/testing/createStubTransactionReceipt";
 import { TestToken } from "src/artifacts/TestToken";
 import { createMockClient } from "src/client/MockClient";
-import { NotImplementedError } from "src/utils/testing/StubStore";
+import { MissingStubError } from "src/utils/testing/StubStore";
 import { describe, expect, it, vi } from "vitest";
 
 type TestTokenAbi = typeof TestToken.abi;
@@ -273,7 +273,7 @@ describe("MockClient", () => {
       });
       expect(result).toMatchObject({
         success: false,
-        error: expect.any(NotImplementedError),
+        error: expect.any(MissingStubError),
       });
     });
 
@@ -410,36 +410,27 @@ describe("MockClient", () => {
 
     it("Can be stubbed with specific params", async () => {
       const client = createMockClient();
+      const abi = TestToken.abi;
       const params1: GetEventsParams<TestTokenAbi, "Transfer"> = {
-        abi: TestToken.abi,
+        abi,
         address: "0x1",
         event: "Transfer",
         filter: { from: "0x1" },
       };
+      const events1 = createStubEvents({
+        abi,
+        eventName: "Transfer",
+        events: [{ args: { from: "0x1", to: "0x1", value: 123n } }],
+      });
       const params2: GetEventsParams<TestTokenAbi, "Transfer"> = {
         ...params1,
         filter: { from: "0x2" },
       };
-      const events1: EventLog<TestTokenAbi, "Transfer">[] = [
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0x1",
-            to: "0x1",
-            value: 123n,
-          },
-        },
-      ];
-      const events2: EventLog<TestTokenAbi, "Transfer">[] = [
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0x2",
-            to: "0x2",
-            value: 123n,
-          },
-        },
-      ];
+      const events2 = createStubEvents({
+        abi,
+        eventName: "Transfer",
+        events: [{ args: { from: "0x2", to: "0x2", value: 123n } }],
+      });
       client.onGetEvents(params1).resolves(events1);
       client.onGetEvents(params2).resolves(events2);
       expect(await client.getEvents(params1)).toBe(events1);
@@ -448,16 +439,11 @@ describe("MockClient", () => {
 
     it("Can be stubbed with partial params", async () => {
       const client = createMockClient();
-      const events: EventLog<TestTokenAbi, "Transfer">[] = [
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0x1",
-            to: "0x1",
-            value: 123n,
-          },
-        },
-      ];
+      const events = createStubEvents({
+        abi: TestToken.abi,
+        eventName: "Transfer",
+        events: [{ args: { from: "0x1", to: "0x1", value: 123n } }],
+      });
       client
         .onGetEvents({
           abi: TestToken.abi,

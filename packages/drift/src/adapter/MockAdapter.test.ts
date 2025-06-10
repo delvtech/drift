@@ -9,12 +9,12 @@ import type {
   SimulateWriteParams,
   WriteParams,
 } from "src/adapter/types/Adapter";
-import type { EventLog } from "src/adapter/types/Event";
 import { createStubBlock } from "src/adapter/utils/testing/createStubBlock";
+import { createStubEvents } from "src/adapter/utils/testing/createStubEvent";
 import { createStubTransaction } from "src/adapter/utils/testing/createStubTransaction";
 import { createStubTransactionReceipt } from "src/adapter/utils/testing/createStubTransactionReceipt";
 import { TestToken } from "src/artifacts/TestToken";
-import { NotImplementedError } from "src/utils/testing/StubStore";
+import { MissingStubError } from "src/utils/testing/StubStore";
 import { describe, expect, it, vi } from "vitest";
 
 type TestTokenAbi = typeof TestToken.abi;
@@ -260,7 +260,7 @@ describe("MockAdapter", () => {
       });
       expect(result).toStrictEqual({
         success: false,
-        error: expect.any(NotImplementedError),
+        error: expect.any(MissingStubError),
       });
     });
 
@@ -406,7 +406,7 @@ describe("MockAdapter", () => {
       ).toStrictEqual([
         { success: true, value: "TEST" },
         { success: true, value: true },
-        { success: false, error: expect.any(NotImplementedError) },
+        { success: false, error: expect.any(MissingStubError) },
       ]);
     });
   });
@@ -456,6 +456,11 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with args", async () => {
       const adapter = new MockAdapter();
+      const events = createStubEvents({
+        abi: TestToken.abi,
+        eventName: "Transfer",
+        events: [{ args: { from: "0x1", to: "0x1", value: 123n } }],
+      });
       adapter
         .onGetEvents({
           abi: TestToken.abi,
@@ -463,16 +468,7 @@ describe("MockAdapter", () => {
           event: "Transfer",
           filter: { from: "0x1" },
         })
-        .resolves([
-          {
-            eventName: "Transfer",
-            args: {
-              from: "0x1",
-              to: "0x1",
-              value: 123n,
-            },
-          },
-        ]);
+        .resolves(events);
       expect(
         await adapter.getEvents({
           abi: TestToken.abi,
@@ -480,16 +476,7 @@ describe("MockAdapter", () => {
           event: "Transfer",
           filter: { from: "0x1" },
         }),
-      ).toMatchObject([
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0x1",
-            to: "0x1",
-            value: 123n,
-          },
-        },
-      ]);
+      ).toBe(events);
     });
 
     it("Can stub different values for different args", async () => {
@@ -500,30 +487,20 @@ describe("MockAdapter", () => {
         event: "Transfer",
         filter: { from: "0x1" },
       };
+      const events1 = createStubEvents({
+        abi: TestToken.abi,
+        eventName: "Transfer",
+        events: [{ args: { from: "0x1", to: "0x1", value: 123n } }],
+      });
       const params2: GetEventsParams<TestTokenAbi, "Transfer"> = {
         ...params1,
         filter: { from: "0x2" },
       };
-      const events1: EventLog<TestTokenAbi, "Transfer">[] = [
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0x1",
-            to: "0x1",
-            value: 123n,
-          },
-        },
-      ];
-      const events2: EventLog<TestTokenAbi, "Transfer">[] = [
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0x2",
-            to: "0x2",
-            value: 123n,
-          },
-        },
-      ];
+      const events2 = createStubEvents({
+        abi: TestToken.abi,
+        eventName: "Transfer",
+        events: [{ args: { from: "0x2", to: "0x2", value: 123n } }],
+      });
       adapter.onGetEvents(params1).resolves(events1);
       adapter.onGetEvents(params2).resolves(events2);
       expect(await adapter.getEvents(params1)).toBe(events1);
@@ -532,16 +509,11 @@ describe("MockAdapter", () => {
 
     it("Can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
-      const events: EventLog<TestTokenAbi, "Transfer">[] = [
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0x1",
-            to: "0x1",
-            value: 123n,
-          },
-        },
-      ];
+      const events = createStubEvents({
+        abi: TestToken.abi,
+        eventName: "Transfer",
+        events: [{ args: { from: "0x1", to: "0x1", value: 123n } }],
+      });
       adapter
         .onGetEvents({
           abi: TestToken.abi,

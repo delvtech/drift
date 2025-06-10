@@ -1,4 +1,4 @@
-import type { EventLog } from "src/adapter/types/Event";
+import { createStubEvents } from "src/adapter/utils/testing/createStubEvent";
 import { TestToken } from "src/artifacts/TestToken";
 import type {
   ContractMulticallParams,
@@ -6,7 +6,7 @@ import type {
   ContractSimulateWriteArgs,
 } from "src/client/contract/Contract";
 import { MockContract } from "src/client/contract/MockContract";
-import { NotImplementedError } from "src/utils/testing/StubStore";
+import { MissingStubError } from "src/utils/testing/StubStore";
 import { describe, expect, it } from "vitest";
 
 const abi = TestToken.abi;
@@ -19,7 +19,7 @@ describe("MockContract", () => {
       const [result] = await contract.multicall({ calls: [{ fn: "symbol" }] });
       expect(result).toStrictEqual({
         success: false,
-        error: expect.any(NotImplementedError),
+        error: expect.any(MissingStubError),
       });
     });
 
@@ -110,7 +110,7 @@ describe("MockContract", () => {
       ).toStrictEqual([
         { success: true, value: "TEST" },
         { success: true, value: true },
-        { success: false, error: expect.any(NotImplementedError) },
+        { success: false, error: expect.any(MissingStubError) },
       ]);
     });
   });
@@ -129,26 +129,16 @@ describe("MockContract", () => {
 
     it("Can be stubbed with specific args", async () => {
       const contract = new MockContract({ abi });
-      const events1: EventLog<TestTokenAbi, "Transfer">[] = [
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0x1",
-            to: "0x1",
-            value: 123n,
-          },
-        },
-      ];
-      const events2: EventLog<TestTokenAbi, "Transfer">[] = [
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0x2",
-            to: "0x2",
-            value: 123n,
-          },
-        },
-      ];
+      const events1 = createStubEvents({
+        abi,
+        eventName: "Transfer",
+        events: [{ args: { from: "0x1", to: "0x1", value: 123n } }],
+      });
+      const events2 = createStubEvents({
+        abi,
+        eventName: "Transfer",
+        events: [{ args: { from: "0x2", to: "0x2", value: 123n } }],
+      });
       contract
         .onGetEvents("Transfer", { filter: { from: "0x1" } })
         .resolves(events1);
@@ -165,16 +155,11 @@ describe("MockContract", () => {
 
     it("Can be stubbed with partial args", async () => {
       const contract = new MockContract({ abi });
-      const events: EventLog<TestTokenAbi, "Transfer">[] = [
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0x1",
-            to: "0x1",
-            value: 123n,
-          },
-        },
-      ];
+      const events = createStubEvents({
+        abi,
+        eventName: "Transfer",
+        events: [{ args: { from: "0x1", to: "0x1", value: 123n } }],
+      });
       contract.onGetEvents("Transfer").resolves(events);
       expect(
         await contract.getEvents("Transfer", { filter: { from: "0x1" } }),
@@ -183,16 +168,11 @@ describe("MockContract", () => {
 
     it("Inherits stubbed values from the client", async () => {
       const contract = new MockContract({ abi });
-      const events: EventLog<TestTokenAbi, "Transfer">[] = [
-        {
-          eventName: "Transfer",
-          args: {
-            from: "0x",
-            to: "0x",
-            value: 123n,
-          },
-        },
-      ];
+      const events = createStubEvents({
+        abi,
+        eventName: "Transfer",
+        events: [{ args: { from: "0x", to: "0x", value: 123n } }],
+      });
       contract.client
         .onGetEvents({
           abi: contract.abi,

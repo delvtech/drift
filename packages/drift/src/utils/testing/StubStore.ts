@@ -36,17 +36,20 @@ export class StubStore<T> {
   has(params: HasStubParams<T>): boolean {
     const { method, key, matchPartial } = params;
     const methodStore = this.#methodStores.get(method);
+
     if (!methodStore) return false;
-    if (!key) return true;
+    if (!key) return !!methodStore.defaultStub;
     if (methodStore.keyedStubs.has(key)) return true;
     if (!matchPartial) return false;
+    if (methodStore.defaultStub) return true;
+    if (!methodStore.keyedStubs.size) return false;
+
     const parsedKey = JSON.parse(key);
     for (const storedKey of methodStore.keyedStubs.keys()) {
-      if (isMatch(parsedKey, JSON.parse(storedKey))) {
-        return true;
-      }
+      if (isMatch(parsedKey, JSON.parse(storedKey))) return true;
     }
-    return !!methodStore.defaultStub;
+
+    return false;
   }
 
   /**
@@ -61,7 +64,7 @@ export class StubStore<T> {
    * });
    *
    * const balance = await aliceBalanceStub();
-   * // ✖ NotImplementedError
+   * // ✖ MissingStubError
    *
    * aliceBalanceStub.resolves(100n);
    * const balance = await aliceBalanceStub();
@@ -120,8 +123,8 @@ export class StubStore<T> {
         let closestMatchKey = "";
         for (const [storedKey, stub] of methodStore.keyedStubs.entries()) {
           if (
-            isMatch(parsedKey, JSON.parse(storedKey)) &&
-            storedKey.length > closestMatchKey.length
+            storedKey.length > closestMatchKey.length &&
+            isMatch(parsedKey, JSON.parse(storedKey))
           ) {
             closestMatch = stub;
             closestMatchKey = storedKey;
@@ -142,13 +145,9 @@ export class StubStore<T> {
   }
 }
 
-export interface GetStubParams<
-  T,
-  TArgs extends any[] = any[],
-  TReturnType = any,
-> {
+export interface HasStubParams<T> {
   /**
-   * The method to get a stub for.
+   * The method on `T` the stub is for.
    */
   method: FunctionKey<T>;
 
@@ -157,12 +156,12 @@ export interface GetStubParams<
    *
    * @example
    * ```ts
-   * const aliceBalanceStub = mock.stubs.get<[GetBalanceParams], Promise<bigint>>({
+   * const hasAliceStub = mock.stubs.has({
    *   method: "getBalance",
    *   key: "alice",
    * });
    *
-   * const bobBalanceStub = mock.stubs.get<[GetBalanceParams], Promise<bigint>>({
+   * const hasBobStub = mock.stubs.has({
    *   method: "getBalance",
    *   key: "bob",
    * });
@@ -171,15 +170,22 @@ export interface GetStubParams<
   key?: string;
 
   /**
-   * Whether to allow partial matching of the key. If `true`, the stub with the
-   * closest matching key will be returned. This has no effect if `key` is not
-   * provided.
+   * Whether to allow partial matching of the key. If `true`, the store will be
+   * searched for the stub with the closest matching key.
+   *
+   * **Note**: This has no effect if `key` is not provided.
    */
   matchPartial?: boolean;
+}
 
+export interface GetStubParams<
+  T,
+  TArgs extends any[] = any[],
+  TReturnType = any,
+> extends HasStubParams<T> {
   /**
    * A function to create the stub if it doesn't exist. A new stub which throws
-   * a {@linkcode NotImplementedError} by default will be passed to this
+   * a {@linkcode MissingStubError} by default will be passed to this
    * function. The function should return the actual stub to be used.
    *
    * @example
@@ -196,12 +202,10 @@ export interface GetStubParams<
   create?: (stub: SinonStub<TArgs, TReturnType>) => SinonStub;
 }
 
-export type HasStubParams<T> = Omit<GetStubParams<T>, "create">;
-
-export class NotImplementedError extends DriftError {
+export class MissingStubError extends DriftError {
   constructor({ method, args }: { method: string; args?: any[] }) {
     super(createMissingStubMessage(method, args), {
-      name: "NotImplementedError",
+      name: "MissingStubError",
     });
   }
 }
@@ -212,7 +216,7 @@ function createDefaultStub<TArgs extends any[], TReturnType = any>(
   method: string,
 ) {
   return sinonStub().callsFake((...args) => {
-    throw new NotImplementedError({ method, args });
+    throw new MissingStubError({ method, args });
   }) as SinonStub<TArgs, TReturnType>;
 }
 

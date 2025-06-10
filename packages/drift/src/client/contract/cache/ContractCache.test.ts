@@ -1,4 +1,4 @@
-import type { EventLog } from "src/adapter/types/Event";
+import { createStubEvents } from "src/adapter/utils/testing/createStubEvent";
 import { IERC20 } from "src/artifacts/IERC20";
 import type { ContractReadArgs } from "src/client/contract/Contract";
 import { ContractCache } from "src/client/contract/cache/ContractCache";
@@ -38,24 +38,14 @@ describe("ContractCache", () => {
 
     it("Preloads values", async () => {
       const cache = new ContractCache({ abi, address, namespace: "test" });
-      const events: EventLog<Erc20Abi, "Approval">[] = [
-        {
-          eventName: "Approval",
-          args: {
-            owner: ALICE,
-            spender: BOB,
-            value: 100n,
-          },
-        },
-        {
-          eventName: "Approval",
-          args: {
-            owner: ALICE,
-            spender: NANCY,
-            value: 120n,
-          },
-        },
-      ];
+      const events = createStubEvents({
+        abi: IERC20.abi,
+        eventName: "Approval",
+        events: [
+          { args: { owner: ALICE, spender: BOB, value: 100n } },
+          { args: { owner: ALICE, spender: NANCY, value: 120n } },
+        ],
+      });
 
       await cache.preloadEvents({
         event: "Approval",
