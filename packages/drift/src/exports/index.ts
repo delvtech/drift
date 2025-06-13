@@ -209,8 +209,8 @@ export { DriftError, type DriftErrorOptions } from "src/error/DriftError";
 // Utils //
 
 export { type Converted, convert } from "src/utils/convert";
+export { isHexString, HEX_REGEX, toHexString } from "src/utils/hex";
 export { stringifyKey } from "src/utils/stringifyKey";
-export { isHexString, HEX_REGEX } from "src/utils/isHexString";
 export type {
   AnyFunction,
   AnyObject,

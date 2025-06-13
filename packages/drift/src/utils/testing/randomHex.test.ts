@@ -1,4 +1,4 @@
-import { HEX_REGEX } from "src/utils/isHexString";
+import { HEX_REGEX } from "src/utils/hex";
 import { randomHex } from "src/utils/testing/randomHex";
 import { randomInt } from "src/utils/testing/randomInt";
 import { describe, expect, it } from "vitest";

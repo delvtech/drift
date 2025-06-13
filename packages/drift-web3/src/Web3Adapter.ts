@@ -24,6 +24,7 @@ import {
   type WriteParams,
   encodeBytecodeCallData,
   prepareParams,
+  toHexString,
 } from "@delvtech/drift";
 import { type AbiFragment, type AccessList, default as Web3 } from "web3";
 
@@ -95,11 +96,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
             typeof tx.transactionIndex !== "undefined"
               ? BigInt(tx.transactionIndex)
               : undefined,
-          type:
-            typeof tx.type === "string"
-              ? tx.type
-              : // The types lie, it will sometimes be a bigint
-                (tx.type as unknown as bigint).toString(16),
+          type: typeof tx.type === "string" ? tx.type : toHexString(tx.type),
           value: BigInt(tx.value),
         } satisfies Transaction)
       : undefined;

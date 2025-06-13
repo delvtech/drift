@@ -4,7 +4,7 @@ import {
   createStubEvents,
 } from "src/adapter/utils/testing/createStubEvent";
 import { IERC20 } from "src/artifacts/IERC20";
-import { HEX_REGEX } from "src/utils/isHexString";
+import { HEX_REGEX } from "src/utils/hex";
 import { describe, expect, it } from "vitest";
 
 describe("createStubEvent", () => {

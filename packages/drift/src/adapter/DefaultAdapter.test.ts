@@ -18,7 +18,7 @@ import { Overloaded2 } from "src/artifacts/Overloaded2";
 import { TestToken } from "src/artifacts/TestToken";
 import { ZERO_ADDRESS } from "src/constants";
 import { DriftError } from "src/error/DriftError";
-import { HEX_REGEX } from "src/utils/isHexString";
+import { HEX_REGEX } from "src/utils/hex";
 import { assert, beforeAll, describe, expect, it } from "vitest";
 
 const rpcUrl = process.env.VITE_RPC_URL;

@@ -1,6 +1,6 @@
 import type { Block } from "src/adapter/types/Block";
 import { createStubBlock } from "src/adapter/utils/testing/createStubBlock";
-import { HEX_REGEX } from "src/utils/isHexString";
+import { HEX_REGEX } from "src/utils/hex";
 import { describe, expect, it } from "vitest";
 
 describe("createStubBlock", () => {

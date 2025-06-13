@@ -21,6 +21,7 @@ import {
   arrayToObject,
   encodeBytecodeCallData,
   prepareParams,
+  toHexString,
 } from "@delvtech/drift";
 import type { AccessList } from "ethers";
 import {
@@ -127,7 +128,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
           nonce: BigInt(ethersTx.nonce),
           to: ethersTx.to ?? undefined,
           transactionIndex: BigInt(ethersTx.index),
-          type: ethersTx.type.toString(16),
+          type: toHexString(ethersTx.type),
           value: ethersTx.value,
         }
       : undefined;

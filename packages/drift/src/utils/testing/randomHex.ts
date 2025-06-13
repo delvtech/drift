@@ -1,4 +1,5 @@
 import type { HexString } from "src/adapter/types/Abi";
+import { toHexString } from "src/utils/hex";
 
 /**
  * Get a random hex string of a given byte length.
@@ -20,6 +21,6 @@ export function randomHex(bytes = 32, prefix = ""): HexString {
   }
   const ints = new Uint8Array(bytes - paddedPrefix.length / 2);
   crypto.getRandomValues(ints);
-  const hex = Array.from(ints, (b) => b.toString(16).padStart(2, "0")).join("");
+  const hex = toHexString(ints, { prefix: false });
   return `0x${paddedPrefix}${hex}`;
 }

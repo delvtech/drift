@@ -19,6 +19,7 @@ import {
   arrayToObject,
   encodeBytecodeCallData,
   prepareParams,
+  toHexString,
 } from "@delvtech/drift";
 import {
   BigNumber,
@@ -124,7 +125,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
           nonce: BigInt(ethersTx.nonce),
           to: ethersTx.to ?? undefined,
           transactionIndex: undefined,
-          type: ethersTx.type ? ethersTx.type.toString(16) : undefined,
+          type: ethersTx.type ? toHexString(ethersTx.type) : undefined,
           value: ethersTx.value.toBigInt(),
         }
       : undefined;
@@ -251,11 +252,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
 }
 
 function blockParam(block?: bigint | string): string {
-  if (block === undefined) {
-    return "latest";
-  }
-  if (typeof block === "bigint") {
-    return `0x${block.toString(16)}`;
-  }
+  if (block === undefined) return "latest";
+  if (typeof block === "bigint") return toHexString(block);
   return block;
 }

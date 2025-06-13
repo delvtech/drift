@@ -48,7 +48,7 @@ import { handleError } from "src/adapter/utils/internal/handleError";
 import { prepareParams } from "src/adapter/utils/prepareParams";
 import { DriftError } from "src/error/DriftError";
 import { convert } from "src/utils/convert";
-import { isHexString } from "src/utils/isHexString";
+import { isHexString, toHexString } from "src/utils/hex";
 
 export interface DefaultAdapterOptions extends BaseAdapterOptions {
   rpcUrl?: string;
@@ -305,7 +305,7 @@ export class DefaultAdapter
 
 function prepareBlockParam(block?: BlockIdentifier): HexString | BlockTag {
   if (block === undefined) return "latest";
-  if (typeof block === "bigint") return `0x${block.toString(16)}`;
+  if (typeof block === "bigint") return `0x${toHexString(block)}`;
   return block;
 }
 
@@ -315,7 +315,7 @@ function prepareTransactionOptions(
   return convert(
     options,
     (value) => typeof value === "bigint",
-    (value): HexString => `0x${value.toString(16)}`,
+    (value): HexString => `0x${toHexString(value)}`,
   );
 }
 
