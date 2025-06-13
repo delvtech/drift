@@ -58,24 +58,24 @@
   "dependencies": {
     "lodash.ismatch": "^4.4.0",
     "lru-cache": "^11.1.0",
-    "ox": "^0.7.0",
+    "ox": "^0.8.1",
     "safe-stable-stringify": "^2.5.0"
   },
   "devDependencies": {
     "@open-rpc/typings": "^1.12.4",
     "@types/lodash.ismatch": "^4.4.9",
-    "@types/node": "^22.14.0",
+    "@types/node": "^24.0.1",
     "@types/sinon": "^17.0.4",
-    "@vitest/coverage-v8": "3.1.1",
+    "@vitest/coverage-v8": "3.2.3",
     "abitype": "^1.0.8",
     "fast-json-stable-stringify": "^2.1.0",
     "sinon": "^20.0.0",
     "tsconfig-paths": "^4.2.0",
-    "tsup": "^8.4.0",
-    "tsx": "^4.19.3",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.2",
     "typescript": "^5.8.3",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.1.1"
+    "vitest": "^3.2.3"
   },
   "author": {
     "name": "DELV",

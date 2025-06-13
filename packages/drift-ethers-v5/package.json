@@ -35,10 +35,10 @@
     "@delvtech/drift": "^0.10.0",
     "ethers": "^5.7.2",
     "tsconfig-paths": "^4.2.0",
-    "tsup": "^8.4.0",
+    "tsup": "^8.5.0",
     "typescript": "^5.8.3",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.1.1"
+    "vitest": "^3.2.3"
   },
   "author": {
     "name": "DELV",
