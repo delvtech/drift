@@ -28,6 +28,22 @@ export interface Adapter extends ReadAdapter, Partial<WriteAdapter> {}
  */
 export interface ReadAdapter extends Network {
   /**
+   * Submits a raw signed transaction. For
+   * [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844) transactions, the raw
+   * form must be the network form. This means it includes the blobs, KZG
+   * commitments, and KZG proofs.
+   * @returns The transaction hash of the submitted transaction.
+   */
+  sendRawTransaction(transaction: Bytes): Promise<Hash>;
+
+  /**
+   * Get a list of logs for a contract event.
+   */
+  getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
+    params: GetEventsParams<TAbi, TEventName>,
+  ): Promise<EventLog<TAbi, TEventName>[]>;
+
+  /**
    * Executes a new message call immediately without creating a transaction on
    * the block chain.
    * @returns The return value of the executed function.
@@ -74,22 +90,6 @@ export interface ReadAdapter extends Network {
   >(
     params: MulticallParams<TCalls, TAllowFailure>,
   ): Promise<MulticallReturn<TCalls, TAllowFailure>>;
-
-  /**
-   * Submits a raw signed transaction. For
-   * [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844) transactions, the raw
-   * form must be the network form. This means it includes the blobs, KZG
-   * commitments, and KZG proofs.
-   * @returns The transaction hash of the submitted transaction.
-   */
-  sendRawTransaction(transaction: Bytes): Promise<Hash>;
-
-  /**
-   * Get a list of logs for a contract event.
-   */
-  getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
-    params: GetEventsParams<TAbi, TEventName>,
-  ): Promise<EventLog<TAbi, TEventName>[]>;
 
   /**
    * Calls a `pure` or `view` function on a contract.
