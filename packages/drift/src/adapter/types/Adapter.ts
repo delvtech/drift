@@ -1,4 +1,10 @@
-import type { Abi, Address, Bytes, Hash } from "src/adapter/types/Abi";
+import type {
+  Abi,
+  Address,
+  Bytes,
+  Hash,
+  HexString,
+} from "src/adapter/types/Abi";
 import type { BlockIdentifier, BlockTag } from "src/adapter/types/Block";
 import type { EventFilter, EventLog, EventName } from "src/adapter/types/Event";
 import type {
@@ -84,13 +90,6 @@ export interface ReadAdapter extends Network {
    */
   call(params: CallParams): Promise<Bytes>;
 
-  multicall<
-    TCalls extends { abi: Abi }[],
-    TAllowFailure extends boolean = true,
-  >(
-    params: MulticallParams<TCalls, TAllowFailure>,
-  ): Promise<MulticallReturn<TCalls, TAllowFailure>>;
-
   /**
    * Calls a `pure` or `view` function on a contract.
    * @returns The decoded return value of the function.
@@ -101,6 +100,13 @@ export interface ReadAdapter extends Network {
   >(
     params: ReadParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>>;
+
+  multicall<
+    TCalls extends { abi: Abi }[],
+    TAllowFailure extends boolean = true,
+  >(
+    params: MulticallParams<TCalls, TAllowFailure>,
+  ): Promise<MulticallReturn<TCalls, TAllowFailure>>;
 
   /**
    * Call a state-mutating function on a contract without sending a transaction.
@@ -167,11 +173,19 @@ export interface WriteAdapter {
    */
   getSignerAddress(): Promise<Address>;
 
+  getWalletCapabilities<const TChainIds extends bigint[] = []>(
+    params: GetWalletCapabilitiesParams<TChainIds>,
+  ): Promise<GetWalletCapabilitiesReturn<TChainIds>>;
+
   /**
    * Signs and submits a transaction.
    * @returns The transaction hash of the submitted transaction.
    */
   sendTransaction(params: SendTransactionParams): Promise<Hash>;
+
+  sendCalls<const TCalls extends unknown[] = unknown[]>(
+    params: SendCallsParams<TCalls>,
+  ): Promise<SendCallsReturn>;
 
   /**
    * Creates, signs, and submits a contract creation transaction using the
@@ -297,6 +311,39 @@ export interface GetEventsParams<
   event: TEventName;
 }
 
+// Call //
+
+// https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/eth/execute.yaml#L1
+export interface CallOptions<
+  T extends BlockIdentifier | undefined = BlockIdentifier,
+> extends TransactionOptions,
+    Eip4844Options {
+  block?: T;
+}
+
+type EncodedCallParams = {
+  /**
+   * The address to send the call to.
+   */
+  to: Address;
+  /**
+   * The hash of the invoked method signature and encoded parameters.
+   */
+  data?: Bytes;
+};
+
+// TODO: Why did I intersect with `{}` here?
+export type CallParams = {} & OneOf<
+  | EncodedCallParams
+  | {
+      /**
+       * A contract bytecode to temporarily deploy and call.
+       */
+      bytecode: Bytes;
+    }
+> &
+  CallOptions;
+
 // Read //
 
 /**
@@ -305,9 +352,7 @@ export interface GetEventsParams<
 // https://github.com/ethereum/execution-apis/blob/main/src/eth/execute.yaml#L1
 export interface ReadOptions<
   T extends BlockIdentifier | undefined = BlockIdentifier,
-> {
-  block?: T;
-}
+> extends Pick<CallOptions<T>, "block"> {}
 
 /**
  * Params for calling a contract function.
@@ -319,64 +364,6 @@ export type ReadParams<
     "pure" | "view"
   >,
 > = FunctionCallParams<TAbi, TFunctionName> & ReadOptions;
-
-// Write //
-
-/**
- * Options for simulating a transaction.
- */
-export interface SimulateWriteOptions extends ReadOptions, TransactionOptions {}
-
-export type SimulateWriteParams<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<
-    TAbi,
-    "nonpayable" | "payable"
-  > = FunctionName<TAbi, "nonpayable" | "payable">,
-> = FunctionCallParams<TAbi, TFunctionName> & SimulateWriteOptions;
-
-/**
- * Options for writing state by calling a contract function.
- */
-export interface WriteOptions extends TransactionOptions {
-  onMined?: (receipt: TransactionReceipt | undefined) => void;
-}
-
-export type WriteParams<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<
-    TAbi,
-    "nonpayable" | "payable"
-  > = FunctionName<TAbi, "nonpayable" | "payable">,
-> = FunctionCallParams<TAbi, TFunctionName> & WriteOptions;
-
-// Deploy //
-
-export type DeployParams<TAbi extends Abi = Abi> =
-  EncodeDeployDataParams<TAbi> & WriteOptions;
-
-// Call //
-
-// https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/eth/execute.yaml#L1
-export interface CallOptions extends SimulateWriteOptions, Eip4844Options {}
-
-export type CallParams = {
-  data?: Bytes;
-} & OneOf<
-  | {
-      /**
-       * The address to call.
-       */
-      to: Address;
-    }
-  | {
-      /**
-       * A contract bytecode to temporarily deploy and call.
-       */
-      bytecode: Bytes;
-    }
-> &
-  CallOptions;
 
 // Multicall //
 
@@ -446,6 +433,227 @@ export type MulticallReturn<
           : FunctionReturn<T[K]["abi"], FunctionName<T[K]["abi"]>>;
     }
   : never;
+
+// EIP-5792 - Wallet Call API //
+// https://www.eip5792.xyz
+// https://github.com/ethereum/EIPs/blob/828e5493db76aa0e61660e4a0d38e582c0f4c0a5/EIPS/eip-5792.md
+
+/**
+ * The capabilities of a wallet, as defined by EIP-5792.
+ */
+export type WalletCapability = {
+  [capability: string]: unknown;
+  atomic?: {
+    status: "supported" | "ready" | "unsupported";
+  };
+};
+
+/**
+ * Params for querying a wallet's capabilities.
+ */
+export interface GetWalletCapabilitiesParams<TChainIds extends bigint[] = []> {
+  /**
+   * The wallet address to query capabilities for. Defaults to the connected
+   * signer address.
+   */
+  address?: Address;
+  /**
+   * The chain IDs to query capabilities for. If not provided, the wallet
+   * should return capabilities for all chains it supports.
+   */
+  chainIds?: TChainIds;
+}
+
+/**
+ * The type returned from querying a wallet's capabilities.
+ */
+export type GetWalletCapabilitiesReturn<TChainIds extends bigint[] = []> =
+  [] extends TChainIds
+    ? {
+        [chainId: number | `${number}`]: WalletCapability;
+      }
+    : {
+        [K in keyof TChainIds as TChainIds[K] extends infer TChainId extends
+          bigint
+          ? bigint extends TChainId
+            ? number | `${number}` // <- Avoid confusing [x: `${bigint}`] signature.
+            : `${TChainId}`
+          : never]: WalletCapability;
+      };
+
+export type WalletCapabilityOptions<
+  T extends Record<string, unknown> = Record<string, unknown>,
+> = {
+  [key: string]: unknown;
+  optional?: boolean;
+} & T;
+
+export type Eip5792CallCapabilities = {
+  [capability: string]: WalletCapabilityOptions;
+} & {
+  paymasterService?: WalletCapabilityOptions<{
+    url: `https://${string}` | `http://${string}`;
+    context?: Record<string, any>;
+  }>;
+};
+
+export interface Eip5792CallOptions {
+  /**
+   * Value in wei to send with this call.
+   * @default 0n
+   */
+  value?: bigint;
+  /**
+   * Call-specific capability parameters.
+   */
+  capabilities?: Eip5792CallCapabilities;
+}
+
+export type Eip5792CallParams<TCall = unknown> =
+  // Encoded function call
+  | (EncodedCallParams & {
+      [K in
+        | keyof FunctionCallParams
+        | keyof EncodeDeployDataParams]?: undefined;
+    })
+  // Function call with ABI
+  | (TCall extends { abi: infer TAbi extends Abi; bytecode?: never }
+      ? FunctionCallParams<
+          TAbi,
+          NarrowTo<{ fn: FunctionName<TAbi> }, TCall>["fn"]
+        > & {
+          [K in keyof EncodedCallParams]?: undefined;
+        }
+      : never)
+  // Deploy call
+  | (TCall extends { abi: infer TAbi extends Abi }
+      ? EncodeDeployDataParams<TAbi> & {
+          [K in keyof EncodedCallParams | "fn"]?: undefined;
+        }
+      : never);
+
+// export type Eip5792CallParams<TCall = any> =
+//   // Encoded function call
+//   | (EncodedCallParams & {
+//       [K in
+//         | keyof FunctionCallParams
+//         | keyof EncodeDeployDataParams]?: undefined;
+//     })
+//   // Function call with ABI
+//   | (TCall extends { abi: infer TAbi extends Abi; bytecode?: never }
+//       ? FunctionCallParams<
+//           TAbi,
+//           NarrowTo<{ fn: FunctionName<TAbi> }, TCall>["fn"]
+//         > & {
+//           [K in keyof EncodedCallParams]?: undefined;
+//         }
+//       : never)
+//   // Deploy call
+//   | (TCall extends { abi: infer TAbi extends Abi }
+//       ? EncodeDeployDataParams<TAbi> & {
+//           [K in keyof EncodedCallParams | "fn"]?: undefined;
+//         }
+//       : never);
+
+export interface SendCallsParams<TCalls extends unknown[] = unknown[]> {
+  /**
+   * The version of the sendCalls API to use. Currently, '1.0' is the only
+   * version.
+   * @default "1.0"
+   */
+  version?: "1.0" | (string & {});
+  /**
+   * A unique identifier for this batch of calls. If provided, must be a unique
+   * string up to 4096 bytes (8194 characters including leading 0x). Must be
+   * unique per sender per app. If not provided, the wallet will generate a
+   * random ID.
+   */
+  id?: HexString;
+  /**
+   * The chain ID to send the calls on. Defaults to the chain ID of the network
+   * the wallet is connected to.
+   */
+  chainId?: bigint;
+  /**
+   * The address to send the calls from. Defaults to the connected signer if
+   * available. If not provided, the wallet should allow the user to select the
+   * address during confirmation.
+   */
+  from?: Address;
+  /**
+   * Specifies whether the wallet must execute all calls atomically (in a single
+   * transaction) or not. If set to `true`, the wallet MUST execute all calls
+   * atomically and contiguously. If set to `false`, the wallet MUST execute
+   * calls sequentially (one after another), but they need not be contiguous
+   * (other transactions may be interleaved) and some calls may fail
+   * independently.
+   *
+   * @default true
+   */
+  atomic?: boolean;
+  /**
+   * The calls to send. Each call must be a valid function call for the
+   * specified ABI.
+   */
+  calls: {
+    [K in keyof TCalls]: Eip5792CallOptions &
+      NarrowTo<Eip5792CallParams<TCalls[K]>, TCalls[K]>;
+  };
+  /**
+   * An object where the keys are capability names and the values are
+   * capability-specific parameters. The wallet MUST support all non-optional
+   * capabilities requested or reject the request.
+   */
+  capabilities?: Eip5792CallCapabilities;
+}
+
+export type SendCallsReturn = {
+  /**
+   * A call bundle identifier that can be used to track the status of the calls.
+   */
+  id: HexString;
+  /**
+   * Capability-specific response data.
+   */
+  capabilities?: {
+    [capability: string]: unknown;
+  };
+};
+
+// Write //
+
+/**
+ * Options for simulating a transaction.
+ */
+export interface SimulateWriteOptions extends ReadOptions, TransactionOptions {}
+
+export type SimulateWriteParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<
+    TAbi,
+    "nonpayable" | "payable"
+  > = FunctionName<TAbi, "nonpayable" | "payable">,
+> = FunctionCallParams<TAbi, TFunctionName> & SimulateWriteOptions;
+
+/**
+ * Options for writing state by calling a contract function.
+ */
+export interface WriteOptions extends TransactionOptions {
+  onMined?: (receipt: TransactionReceipt | undefined) => void;
+}
+
+export type WriteParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<
+    TAbi,
+    "nonpayable" | "payable"
+  > = FunctionName<TAbi, "nonpayable" | "payable">,
+> = FunctionCallParams<TAbi, TFunctionName> & WriteOptions;
+
+// Deploy //
+
+export type DeployParams<TAbi extends Abi = Abi> =
+  EncodeDeployDataParams<TAbi> & WriteOptions;
 
 // Send transaction //
 
