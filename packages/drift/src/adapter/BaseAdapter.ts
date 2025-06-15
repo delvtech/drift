@@ -7,18 +7,29 @@ import {
 import { read } from "src/adapter/methods/read";
 import { simulateWrite } from "src/adapter/methods/simulateWrite";
 import { write } from "src/adapter/methods/write";
-import type { Abi, Address, Bytes, Hash } from "src/adapter/types/Abi";
+import type {
+  Abi,
+  Address,
+  Bytes,
+  Hash,
+  HexString,
+} from "src/adapter/types/Abi";
 import type {
   CallParams,
   DeployParams,
   GetEventsParams,
+  GetWalletCapabilitiesParams,
   MulticallParams,
   MulticallReturn,
   ReadAdapter,
   ReadParams,
   ReadWriteAdapter,
+  SendCallsParams,
+  SendCallsReturn,
   SendTransactionParams,
   SimulateWriteParams,
+  WalletCallsStatus,
+  WalletCapabilities,
   WriteParams,
 } from "src/adapter/types/Adapter";
 import type { Adapter } from "src/adapter/types/Adapter";
@@ -141,7 +152,17 @@ export abstract class BaseReadWriteAdapter
   // Abstract methods //
 
   abstract getSignerAddress(): Promise<Address>;
+  abstract getWalletCapabilities<const TChainIds extends bigint[] = []>(
+    params: GetWalletCapabilitiesParams<TChainIds>,
+  ): Promise<WalletCapabilities<TChainIds>>;
+  abstract getCallsStatus<TId extends HexString>(
+    batchId: TId,
+  ): Promise<WalletCallsStatus<TId>>;
+  abstract showCallsStatus(batchId: HexString): Promise<void>;
   abstract sendTransaction(params: SendTransactionParams): Promise<Hash>;
+  abstract sendCalls<const TCalls extends unknown[] = any[]>(
+    params: SendCallsParams<TCalls>,
+  ): Promise<SendCallsReturn>;
 
   // Default method implementations //
 

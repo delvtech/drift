@@ -61,6 +61,28 @@ export interface TransactionReceipt extends Required<TransactionInfo> {
   contractAddress?: Address;
 }
 
+export interface WalletCallsReceipt {
+  // TODO:
+  // logs: Log[]
+  status: TransactionReceipt["status"];
+  /**
+   * Hash of the block containing the calls.
+   */
+  blockHash: Hash;
+  /**
+   * Block number containing the calls
+   */
+  blockNumber: bigint;
+  /**
+   * The amount of gas used by the calls.
+   */
+  gasUsed: bigint;
+  /**
+   * Hash of the transaction containing the calls.
+   */
+  transactionHash: Hash;
+}
+
 /**
  * Options for constructing a transaction.
  */

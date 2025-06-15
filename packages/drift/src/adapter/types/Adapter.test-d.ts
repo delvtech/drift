@@ -156,13 +156,13 @@ describe("Adapter", () => {
       });
     });
 
-    it("Throws on mixed call type", async () => {
+    it("Throws on mixed call type props", async () => {
       adapter.sendCalls({
         calls: [
           {
             to: "0x",
             data: "0x",
-            // @ts-expect-error: The absence of `abi` implies an encoded call
+            // @ts-expect-error: The absence of `abi` implies an encoded call.
             address: "0x",
           },
           {
@@ -173,7 +173,8 @@ describe("Adapter", () => {
               spender: "0x",
               amount: 100n,
             },
-            // @ts-expect-error
+            // @ts-expect-error: The presence of `abi` implies a function call
+            // or deploy call.
             to: "0x",
           },
           {
@@ -183,7 +184,8 @@ describe("Adapter", () => {
               decimals_: 18,
               initialSupply: 1000n,
             },
-            // @ts-expect-error: the presence of `bytecode` implies a deploy call
+            // @ts-expect-error: the presence of `bytecode` implies a deploy
+            // call.
             fn: "constructor",
           },
         ],
