@@ -335,8 +335,7 @@ type EncodedCallParams = {
   data?: Bytes;
 };
 
-// TODO: Why did I intersect with `{}` here?
-export type CallParams = {} & OneOf<
+export type CallParams = OneOf<
   | EncodedCallParams
   | {
       /**
@@ -491,7 +490,10 @@ export type WalletCapabilityOptions<
   optional?: boolean;
 } & T;
 
-export type Eip5792CallCapabilities = {
+/**
+ * Capability-specific options for EIP-5792 calls.
+ */
+export type WalletCapabilitiesOptions = {
   [capability: string]: WalletCapabilityOptions;
 } & {
   paymasterService?: WalletCapabilityOptions<{
@@ -500,6 +502,9 @@ export type Eip5792CallCapabilities = {
   }>;
 };
 
+/**
+ * Options for an EIP-5792 call.
+ */
 export interface Eip5792CallOptions {
   /**
    * Value in wei to send with this call.
@@ -509,54 +514,42 @@ export interface Eip5792CallOptions {
   /**
    * Call-specific capability parameters.
    */
-  capabilities?: Eip5792CallCapabilities;
+  capabilities?: WalletCapabilitiesOptions;
 }
 
-export type Eip5792CallParams<TCall = unknown> =
+export type Eip5792CallParams<TCall = any> =
   // Encoded function call
-  | (EncodedCallParams & {
-      [K in
-        | keyof FunctionCallParams
-        | keyof EncodeDeployDataParams]?: undefined;
-    })
-  // Function call with ABI
-  | (TCall extends { abi: infer TAbi extends Abi; bytecode?: never }
-      ? FunctionCallParams<
-          TAbi,
-          NarrowTo<{ fn: FunctionName<TAbi> }, TCall>["fn"]
-        > & {
-          [K in keyof EncodedCallParams]?: undefined;
-        }
-      : never)
-  // Deploy call
-  | (TCall extends { abi: infer TAbi extends Abi }
-      ? EncodeDeployDataParams<TAbi> & {
-          [K in keyof EncodedCallParams | "fn"]?: undefined;
-        }
-      : never);
+  (
+    | (EncodedCallParams & {
+        [K in
+          | keyof FunctionCallParams
+          | keyof EncodeDeployDataParams]?: undefined;
+      })
+    // Function call with ABI
+    | (TCall extends { abi: infer TAbi extends Abi; bytecode?: never }
+        ? FunctionCallParams<
+            TAbi,
+            NarrowTo<{ fn: FunctionName<TAbi> }, TCall>["fn"]
+          > & {
+            [K in keyof EncodedCallParams | "bytecode"]?: undefined;
+          }
+        : never)
+    // Deploy call
+    | (TCall extends { abi: infer TAbi extends Abi }
+        ? EncodeDeployDataParams<TAbi> & {
+            [K in keyof EncodedCallParams | "fn"]?: undefined;
+          }
+        : never)
+  ) &
+    Eip5792CallOptions;
 
-// export type Eip5792CallParams<TCall = any> =
-//   // Encoded function call
-//   | (EncodedCallParams & {
-//       [K in
-//         | keyof FunctionCallParams
-//         | keyof EncodeDeployDataParams]?: undefined;
-//     })
-//   // Function call with ABI
-//   | (TCall extends { abi: infer TAbi extends Abi; bytecode?: never }
-//       ? FunctionCallParams<
-//           TAbi,
-//           NarrowTo<{ fn: FunctionName<TAbi> }, TCall>["fn"]
-//         > & {
-//           [K in keyof EncodedCallParams]?: undefined;
-//         }
-//       : never)
-//   // Deploy call
-//   | (TCall extends { abi: infer TAbi extends Abi }
-//       ? EncodeDeployDataParams<TAbi> & {
-//           [K in keyof EncodedCallParams | "fn"]?: undefined;
-//         }
-//       : never);
+/**
+ * @internal
+ */
+export type Eip5792Calls<TCalls extends unknown[] = any[]> = {
+  [K in keyof TCalls]: NarrowTo<Eip5792CallParams<TCalls[K]>, TCalls[K]> &
+    Eip5792CallOptions;
+};
 
 export interface SendCallsParams<TCalls extends unknown[] = unknown[]> {
   /**
@@ -598,16 +591,13 @@ export interface SendCallsParams<TCalls extends unknown[] = unknown[]> {
    * The calls to send. Each call must be a valid function call for the
    * specified ABI.
    */
-  calls: {
-    [K in keyof TCalls]: Eip5792CallOptions &
-      NarrowTo<Eip5792CallParams<TCalls[K]>, TCalls[K]>;
-  };
+  calls: Eip5792Calls<TCalls>;
   /**
    * An object where the keys are capability names and the values are
    * capability-specific parameters. The wallet MUST support all non-optional
    * capabilities requested or reject the request.
    */
-  capabilities?: Eip5792CallCapabilities;
+  capabilities?: WalletCapabilitiesOptions;
 }
 
 export type SendCallsReturn = {
