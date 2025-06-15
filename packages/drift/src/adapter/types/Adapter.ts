@@ -20,7 +20,7 @@ import type {
   TransactionOptions,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
-import type { DynamicProperty, NarrowTo, OneOf } from "src/utils/types";
+import type { DynamicProperty, Eval, NarrowTo, OneOf } from "src/utils/types";
 
 /**
  * An interface for interacting with a blockchain network and its contracts,
@@ -227,9 +227,12 @@ export interface ContractParams<TAbi extends Abi = Abi> {
 export type FunctionCallParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = ContractParams<TAbi> & {
-  fn: TFunctionName;
-} & DynamicProperty<"args", FunctionArgs<TAbi, TFunctionName>>;
+> = Eval<
+  ContractParams<TAbi> & {
+    fn: TFunctionName;
+  }
+> &
+  DynamicProperty<"args", FunctionArgs<TAbi, TFunctionName>>;
 
 // Encode/Decode //
 
