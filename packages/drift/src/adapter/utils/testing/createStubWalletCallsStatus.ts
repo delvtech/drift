@@ -1,5 +1,5 @@
 import type { WalletCallsStatus } from "src/adapter/types/Adapter";
-import { getWalletCallsStatusLabel } from "src/adapter/utils/getWalletCallsStatusFromCode";
+import { getWalletCallsStatusLabel } from "src/adapter/utils/getWalletCallsStatusLabel";
 import { randomHex } from "src/utils/testing/randomHex";
 import { randomInt } from "src/utils/testing/randomInt";
 import { randomSelection } from "src/utils/testing/randomSelection";

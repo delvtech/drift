@@ -226,7 +226,7 @@ export interface WriteAdapter {
   /**
    * Requests that a wallet submits a batch of calls.
    */
-  sendCalls<const TCalls extends unknown[] = any[]>(
+  sendCalls<const TCalls extends readonly unknown[] = any[]>(
     params: SendCallsParams<TCalls>,
   ): Promise<SendCallsReturn>;
 }
@@ -497,6 +497,10 @@ export interface GetWalletCapabilitiesParams<
   chainIds?: TChainIds;
 }
 
+declare const a: ReadWriteAdapter;
+const calls: readonly WalletCallParams[] = [];
+a.sendCalls({ calls });
+
 /**
  * The capabilities of a wallet, as defined by EIP-5792.
  */
@@ -512,7 +516,7 @@ export type WalletCapabilities<TChainIds extends number[] = number[]> =
 type WalletCallsVersion = "1.0" | (string & {});
 
 /**
- * The status of a batch of calls sent via {@linkcode sendCalls}.
+ * The status of a wallet call batch, as defined by EIP-5792.
  */
 export interface WalletCallsStatus<TId extends HexString = HexString> {
   /**
@@ -679,7 +683,7 @@ export interface SendCallsOptions {
 /**
  * Parameters for sending a batch of calls to a wallet.
  */
-export interface SendCallsParams<TCalls extends unknown[] = any[]>
+export interface SendCallsParams<TCalls extends readonly unknown[] = any[]>
   extends SendCallsOptions {
   /**
    * The calls to send. Each call must be a valid function call for the

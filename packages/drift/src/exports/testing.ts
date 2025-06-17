@@ -1,6 +1,14 @@
 // Adapter
 
-export { MockAdapter } from "src/adapter/MockAdapter";
+export {
+  MockAdapter,
+  type OnDeployParams,
+  type OnMulticallParams,
+  type OnReadParams,
+  type OnSendCallsParams,
+  type OnSimulateWriteParams,
+  type OnWriteParams,
+} from "src/adapter/MockAdapter";
 
 export { createStubBlock } from "src/adapter/utils/testing/createStubBlock";
 export {
@@ -26,8 +34,9 @@ export {
 
 export {
   MockContract,
-  type MockContractOptions,
+  type ContractOnMulticallParams,
   type MockContractClientOptions,
+  type MockContractOptions,
 } from "src/client/contract/MockContract";
 
 // Artifacts

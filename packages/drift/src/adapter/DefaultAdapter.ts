@@ -51,7 +51,7 @@ import type {
   WalletCallsReceipt,
 } from "src/adapter/types/Transaction";
 import { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
-import { getWalletCallsStatusLabel } from "src/adapter/utils/getWalletCallsStatusFromCode";
+import { getWalletCallsStatusLabel } from "src/adapter/utils/getWalletCallsStatusLabel";
 import { handleError } from "src/adapter/utils/internal/handleError";
 import { prepareParams } from "src/adapter/utils/prepareParams";
 import { DriftError } from "src/error/DriftError";
@@ -285,7 +285,7 @@ export class DefaultAdapter
       .then((capabilities) => {
         return Object.fromEntries(
           Object.entries(capabilities).map(([key, value]) => [
-            toHexString(key),
+            Number(key),
             value,
           ]),
         ) as WalletCapabilities<TChainIds>;
@@ -365,7 +365,7 @@ export class DefaultAdapter
     return write(this, params);
   }
 
-  async sendCalls<const TCalls extends unknown[] = any[]>(
+  async sendCalls<const TCalls extends readonly unknown[] = any[]>(
     params: SendCallsParams<TCalls>,
   ): Promise<SendCallsReturn> {
     return this.provider
@@ -390,12 +390,12 @@ export class DefaultAdapter
                 to = address,
                 value,
               }) => {
-                if (abi) {
-                  if (fn) {
-                    data = this.encodeFunctionData({ abi, fn, args });
-                  } else if (bytecode) {
-                    data = this.encodeDeployData({ abi, bytecode, args });
-                  }
+                // TODO: Create util for this after refactoring multicall to
+                // accept the same calls format
+                if (abi && fn) {
+                  data = this.encodeFunctionData({ abi, fn, args });
+                } else if (abi && bytecode) {
+                  data = this.encodeDeployData({ abi, bytecode, args });
                 } else if (bytecode && data) {
                   data = encodeBytecodeCallData(bytecode, data);
                 }

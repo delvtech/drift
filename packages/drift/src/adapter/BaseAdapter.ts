@@ -160,7 +160,7 @@ export abstract class BaseReadWriteAdapter
   ): Promise<WalletCallsStatus<TId>>;
   abstract showCallsStatus(batchId: HexString): Promise<void>;
   abstract sendTransaction(params: SendTransactionParams): Promise<Hash>;
-  abstract sendCalls<const TCalls extends unknown[] = any[]>(
+  abstract sendCalls<const TCalls extends readonly unknown[] = any[]>(
     params: SendCallsParams<TCalls>,
   ): Promise<SendCallsReturn>;
 

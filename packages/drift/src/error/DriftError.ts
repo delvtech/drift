@@ -1,11 +1,11 @@
 export interface DriftErrorOptions extends ErrorOptions {
   /**
-   * A custom prefix to use in place of {@linkcode DriftError.prefix}.
+   * A custom prefix to use in place of the default.
    */
   prefix?: string;
 
   /**
-   * A custom name to use in place of {@linkcode DriftError.name}.
+   * A custom name to use in place of the default.
    */
   name?: string;
 }
@@ -48,7 +48,7 @@ export class DriftError extends Error {
     }
 
     super(message);
-    this.name = options?.name ?? DriftError.name;
+    this.name = options?.name ?? this.constructor.name;
 
     // Minification can mangle the stack traces of custom errors by obfuscating
     // the class name and including large chunks of minified code in the output.
@@ -67,9 +67,12 @@ export class DriftError extends Error {
     const targetStack = stackTarget.stack;
 
     let wrappedName: string | undefined;
-    if (error?.name && error.name !== "Error") {
+    if (error?.name && !["Error", this.name].includes(error.name)) {
       wrappedName = error.name;
-    } else if (isError && error.constructor.name !== "Error") {
+    } else if (
+      isError &&
+      !["Error", this.name].includes(error.constructor.name)
+    ) {
       wrappedName = error.constructor.name;
     }
 

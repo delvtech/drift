@@ -3,17 +3,26 @@ import {
   type DeployParams,
   DriftError,
   type FunctionName,
+  type GetWalletCapabilitiesParams,
+  type HexString,
   type ReadWriteAdapter,
+  type SendCallsParams,
+  type SendCallsReturn,
   type SendTransactionParams,
+  type WalletCallsStatus,
+  type WalletCapabilities,
   type WriteParams,
+  encodeBytecodeCallData,
+  getWalletCallsStatusLabel,
   prepareParams,
+  toHexString,
 } from "@delvtech/drift";
 import {
   ViemReadAdapter,
   type ViemReadAdapterParams,
 } from "src/ViemReadAdapter";
 import type { AnyClient } from "src/publicClient";
-import type { PublicClient, WalletClient } from "viem";
+import type { Call, PublicClient, WalletClient } from "viem";
 
 export interface ViemReadWriteAdapterParams<
   TPublicClient extends AnyClient = AnyClient,
@@ -43,6 +52,44 @@ export class ViemReadWriteAdapter<
     const [address] = await this.walletClient.getAddresses();
     if (!address) throw new DriftError("No signer address found");
     return address;
+  }
+
+  getWalletCapabilities<TChainIds extends number[]>(
+    params?: GetWalletCapabilitiesParams<TChainIds>,
+  ): Promise<WalletCapabilities<TChainIds>> {
+    const chainId =
+      params?.chainId ?? params?.chainIds?.[0] ?? this.walletClient.chain?.id;
+    return this.walletClient
+      .getCapabilities({
+        account: params?.address,
+        chainId: params?.chainIds?.[0],
+      })
+      .then(
+        (capabilities) =>
+          ({
+            // FIXME:
+            [chainId || 0]: capabilities,
+          }) as WalletCapabilities<TChainIds>,
+      );
+  }
+
+  getCallsStatus<TId extends HexString>(
+    batchId: TId,
+  ): Promise<WalletCallsStatus<TId>> {
+    return this.walletClient
+      .getCallsStatus({ id: batchId })
+      .then(({ id, status, statusCode, ...rest }) => {
+        return {
+          id: id as TId,
+          statusCode: statusCode,
+          status: getWalletCallsStatusLabel(statusCode),
+          ...rest,
+        };
+      });
+  }
+
+  showCallsStatus(batchId: HexString): Promise<void> {
+    return this.walletClient.showCallsStatus({ id: batchId });
   }
 
   async sendTransaction(params: SendTransactionParams) {
@@ -163,9 +210,50 @@ export class ViemReadWriteAdapter<
     return hash;
   }
 
+  async sendCalls<const TCalls extends readonly unknown[] = any[]>(
+    params: SendCallsParams<TCalls>,
+  ): Promise<SendCallsReturn> {
+    const { calls, from, ...options } = params;
+    return this.walletClient
+      .sendCalls({
+        calls: calls.map(
+          ({ abi, address, args, bytecode, data, fn, to = address, value }) => {
+            if (abi && fn) {
+              data = this.encodeFunctionData({ abi, fn, args });
+            } else if (abi && bytecode) {
+              data = this.encodeDeployData({ abi, bytecode, args });
+            } else if (bytecode && data) {
+              data = encodeBytecodeCallData(bytecode, data);
+            }
+
+            return { to, data, value } as Call;
+          },
+        ),
+        account: from ?? (await this._getAccount()),
+        ...options,
+      })
+      .then(({ id, capabilities }) => {
+        return {
+          id: toHexString(id),
+          capabilities,
+        } satisfies SendCallsReturn;
+      });
+  }
+
   private async _getAccount() {
     return (
       this.walletClient.account ?? this.getSignerAddress().catch(() => null)
     );
+  }
+}
+
+declare module "@delvtech/drift" {
+  interface GetWalletCapabilitiesParams<TChainIds extends number[] = number[]> {
+    /**
+     *
+     * **Important**: Only the first chain ID is used in Viem.
+     */
+    chainIds?: TChainIds;
+    chainId?: number;
   }
 }

@@ -3,6 +3,15 @@ import { DriftError } from "src/error/DriftError";
 
 /**
  * Returns the status label for a given wallet calls status code.
+ *
+ * @example
+ * ```ts
+ * getWalletCallsStatusLabel(100); // "pending"
+ * getWalletCallsStatusLabel(200); // "confirmed"
+ * getWalletCallsStatusLabel(400); // "failed"
+ * getWalletCallsStatusLabel(500); // "reverted"
+ * getWalletCallsStatusLabel(600); // "partially-reverted"
+ * ```
  */
 export function getWalletCallsStatusLabel(
   statusCode: number,

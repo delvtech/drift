@@ -100,6 +100,7 @@ export type {
   TransactionInfo,
   TransactionOptions,
   TransactionReceipt,
+  WalletCallsReceipt,
 } from "src/adapter/types/Transaction";
 
 export { AbiEncoder } from "src/adapter/AbiEncoder";
@@ -133,8 +134,13 @@ export {
   encodeFunctionReturn,
   prepareFunctionReturn,
 } from "src/adapter/utils/encodeFunctionReturn";
-export { getWalletCallsStatusLabel } from "src/adapter/utils/getWalletCallsStatusFromCode";
+export { getWalletCallsStatusLabel } from "src/adapter/utils/getWalletCallsStatusLabel";
 export { prepareParams } from "src/adapter/utils/prepareParams";
+
+export {
+  NotImplementedError,
+  type NotImplementedErrorParams,
+} from "src/adapter/errors";
 
 // Store //
 
@@ -221,7 +227,13 @@ export { DriftError, type DriftErrorOptions } from "src/error/DriftError";
 // Utils //
 
 export { type Converted, convert } from "src/utils/convert";
-export { isHexString, HEX_REGEX, toHexString } from "src/utils/hex";
+export {
+  HEX_REGEX,
+  isHexString,
+  toHexString,
+  type IsHexStringOptions,
+  type ToHexStringOptions,
+} from "src/utils/hex";
 export { stringifyKey } from "src/utils/stringifyKey";
 export type {
   AnyFunction,

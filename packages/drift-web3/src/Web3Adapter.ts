@@ -15,14 +15,23 @@ import {
   type GetBlockReturn,
   type GetEventsParams,
   type GetTransactionParams,
+  type GetWalletCapabilitiesParams,
   type Hash,
+  type HexString,
+  NotImplementedError,
   type ReadWriteAdapter,
+  type SendCallsParams,
+  type SendCallsReturn,
   type SendTransactionParams,
   type Transaction,
   type TransactionReceipt,
   type WaitForTransactionParams,
+  type WalletCallsReceipt,
+  type WalletCallsStatus,
+  type WalletCapabilities,
   type WriteParams,
   encodeBytecodeCallData,
+  getWalletCallsStatusLabel,
   prepareParams,
   toHexString,
 } from "@delvtech/drift";
@@ -218,6 +227,177 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     return address;
   }
 
+  /**
+   * @throws A {@linkcode NotImplementedError} if no provider is set.
+   */
+  async getWalletCapabilities<TChainIds extends number[]>(
+    params?: GetWalletCapabilitiesParams<TChainIds>,
+  ): Promise<WalletCapabilities<TChainIds>> {
+    if (!this.web3.provider) {
+      throw new NotImplementedError({
+        method: "getWalletCapabilities",
+        message: "No provider set.",
+      });
+    }
+
+    return this.web3.provider
+      .request<"wallet_getCapabilities", Record<HexString, WalletCapabilities>>(
+        {
+          method: "wallet_getCapabilities",
+          params: [
+            params?.address || (await this.getSignerAddress()),
+            (params?.chainIds?.map((id) => toHexString(id)) || [
+              toHexString(await this.getChainId()),
+            ]) as HexString[] | undefined,
+          ],
+        },
+      )
+      .then(({ result }) => {
+        return Object.fromEntries(
+          Object.entries(result).map(([key, value]) => [Number(key), value]),
+        ) as WalletCapabilities<TChainIds>;
+      })
+      .catch((e) => {
+        throw new DriftError({
+          message: "Failed to get wallet capabilities",
+          cause: e,
+        });
+      });
+  }
+
+  /**
+   * @throws A {@linkcode NotImplementedError} if no provider is set.
+   */
+  async getCallsStatus<TId extends HexString>(
+    batchId: TId,
+  ): Promise<WalletCallsStatus<TId>> {
+    if (!this.web3.provider) {
+      throw new NotImplementedError({
+        method: "getWalletCapabilities",
+        message: "No provider set.",
+      });
+    }
+
+    return this.web3.provider
+      .request<"wallet_getCallsStatus", WalletGetCallsStatusReturn>({
+        method: "wallet_getCallsStatus",
+        params: [batchId],
+      })
+      .then(({ result: { chainId, id, receipts, status, ...rest } }) => {
+        return {
+          chainId: Number(chainId),
+          id: id as TId,
+          statusCode: status,
+          status: getWalletCallsStatusLabel(status),
+          receipts: receipts?.map(
+            ({ blockNumber, gasUsed, status, ...rest }) => {
+              return {
+                blockNumber: BigInt(blockNumber),
+                gasUsed: BigInt(gasUsed),
+                status: status === "0x1" ? "success" : "reverted",
+                ...rest,
+              } satisfies WalletCallsReceipt;
+            },
+          ),
+          ...rest,
+        };
+      })
+      .catch((e) => {
+        throw new DriftError({
+          message: "Failed to get wallet calls status",
+          cause: e,
+        });
+      });
+  }
+
+  /**
+   * @throws A {@linkcode NotImplementedError} if no provider is set.
+   */
+  async showCallsStatus(batchId: HexString): Promise<void> {
+    if (!this.web3.provider) {
+      throw new NotImplementedError({
+        method: "getWalletCapabilities",
+        message: "No provider set.",
+      });
+    }
+
+    await this.web3.provider
+      .request({
+        method: "wallet_showCallsStatus",
+        params: [batchId],
+      })
+      .catch((e) => {
+        throw new DriftError({
+          message: "Failed to show wallet calls status",
+          cause: e,
+        });
+      });
+  }
+
+  /**
+   * @throws A {@linkcode NotImplementedError} if no provider is set.
+   */
+  async sendCalls<const TCalls extends readonly unknown[] = any[]>(
+    params: SendCallsParams<TCalls>,
+  ): Promise<SendCallsReturn> {
+    if (!this.web3.provider) {
+      throw new NotImplementedError({
+        method: "getWalletCapabilities",
+        message: "No provider set.",
+      });
+    }
+
+    return this.web3.provider
+      .request<"wallet_sendCalls", SendCallsReturn>({
+        method: "wallet_sendCalls",
+        params: [
+          {
+            version: params.version || "1.0",
+            id: params.id,
+            chainId: toHexString(params.chainId ?? (await this.getChainId())),
+            from: params.from ?? (await this.getSignerAddress()),
+            atomicRequired: params.atomic ?? true,
+            calls: params.calls.map(
+              ({
+                abi,
+                address,
+                args,
+                bytecode,
+                capabilities,
+                data,
+                fn,
+                to = address,
+                value,
+              }) => {
+                if (abi && fn) {
+                  data = this.encodeFunctionData({ abi, fn, args });
+                } else if (abi && bytecode) {
+                  data = this.encodeDeployData({ abi, bytecode, args });
+                } else if (bytecode && data) {
+                  data = encodeBytecodeCallData(bytecode, data);
+                }
+
+                return {
+                  to,
+                  data,
+                  capabilities,
+                  value: value ? toHexString(value) : undefined,
+                };
+              },
+            ),
+            capabilities: params.capabilities,
+          },
+        ],
+      })
+      .then(({ result }) => result)
+      .catch((e) => {
+        throw new DriftError({
+          message: "Failed to show wallet calls status",
+          cause: e,
+        });
+      });
+  }
+
   async sendTransaction({
     data,
     to,
@@ -393,6 +573,22 @@ function normalizePossibleByteArray(value: string | Uint8Array) {
   return typeof value === "string"
     ? value
     : `0x${Buffer.from(value).toString("hex")}`;
+}
+
+interface WalletGetCallsStatusReturn {
+  atomic: boolean;
+  capabilities?: WalletCapabilities | undefined;
+  chainId: HexString;
+  id: string;
+  receipts?: {
+    status: HexString;
+    blockHash: HexString;
+    blockNumber: HexString;
+    gasUsed: HexString;
+    transactionHash: HexString;
+  }[];
+  status: number;
+  version: string;
 }
 
 declare module "@delvtech/drift" {

@@ -1,9 +1,24 @@
-import { toHexString } from "src/utils/hex";
+import { isHexString, toHexString } from "src/utils/hex";
 import { describe, expect, it } from "vitest";
 
-const helloHex = "68656c6c6f";
+describe("isHexString", () => {
+  it("returns true for valid prefixed hex strings", () => {
+    expect(isHexString("0x")).toBe(true);
+    expect(isHexString("0x123abc")).toBe(true);
+    expect(isHexString("123abc", { prefix: false })).toBe(true);
+  });
+  it("returns false for invalid hex strings", () => {
+    expect(isHexString("0xxyz")).toBe(false);
+    expect(isHexString("123abc")).toBe(false);
+    expect(isHexString("0x123abc", { prefix: false })).toBe(false);
+    expect(isHexString("0x123 456")).toBe(false);
+    expect(isHexString("0x123_456")).toBe(false);
+  });
+});
 
 describe("toHexString", () => {
+  const helloHex = "68656c6c6f";
+
   it("converts numbers", () => {
     expect(toHexString(255)).toBe("0xff");
   });
@@ -21,8 +36,9 @@ describe("toHexString", () => {
     expect(toHexString("hello")).toBe(`0x${helloHex}`);
   });
 
-  it("returns valid prefixed hex strings as is", () => {
+  it("returns valid hex strings as is", () => {
     expect(toHexString("0xff")).toBe("0xff");
+    expect(toHexString("ff", { prefix: false })).toBe("ff");
   });
 
   it("converts without a prefix when specified", () => {

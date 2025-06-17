@@ -23,7 +23,7 @@ export function formatArgsForDisplay(args: any, truncateAbi = true) {
     );
   }
 
-  const result = stringify(args, bigintReplacer, 2)
+  const argsString = stringify(args, bigintReplacer, 2)
     // Unescape quotes.
     ?.replaceAll('\\"', '"')
     // Remove quotes around object keys and stringified bigints.
@@ -32,7 +32,12 @@ export function formatArgsForDisplay(args: any, truncateAbi = true) {
     // Remove quotes around stringified arrays.
     // https://regex101.com/r/2Itck2/1
     ?.replace(/"(\[.*?\])"/g, "$1");
-  return result;
+
+  if (argsString?.length && argsString.length < 40) {
+    return argsString.replaceAll(/\n\s*/g, " ");
+  }
+
+  return argsString;
 }
 
 function bigintReplacer(_key: string, value: unknown) {

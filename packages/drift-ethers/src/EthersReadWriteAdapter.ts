@@ -3,15 +3,25 @@ import {
   type DeployParams,
   DriftError,
   type FunctionName,
+  type GetWalletCapabilitiesParams,
+  type HexString,
+  NotImplementedError,
   type ReadWriteAdapter,
+  type SendCallsParams,
+  type SendCallsReturn,
   type SendTransactionParams,
-  type SimulateWriteParams,
+  type WalletCallsReceipt,
+  type WalletCallsStatus,
+  type WalletCapabilities,
   type WriteParams,
+  encodeBytecodeCallData,
+  getWalletCallsStatusLabel,
   prepareParams,
+  toHexString,
 } from "@delvtech/drift";
 import type { AccessList } from "ethers";
 import type { Provider, Signer } from "ethers";
-import { ContractFactory } from "ethers";
+import { ContractFactory, JsonRpcProvider } from "ethers";
 import { Contract } from "ethers";
 import type { InterfaceAbi } from "ethers";
 import {
@@ -47,14 +57,114 @@ export class EthersReadWriteAdapter<
     return this.signer.getAddress();
   }
 
-  async simulateWrite<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: SimulateWriteParams<TAbi, TFunctionName>) {
-    return super.simulateWrite({
-      ...params,
-      from: params.from ?? (await this.signer.getAddress()),
-    });
+  /**
+   * @throws A {@linkcode NotImplementedError} if the provider is not a
+   * {@linkcode JsonRpcProvider}.
+   */
+  async getWalletCapabilities<TChainIds extends number[]>(
+    params?: GetWalletCapabilitiesParams<TChainIds>,
+  ): Promise<WalletCapabilities<TChainIds>> {
+    if (!(this.signer.provider instanceof JsonRpcProvider)) {
+      throw new NotImplementedError({
+        method: "getWalletCapabilities",
+        message: "This method is only available for the JsonRpcProvider.",
+      });
+    }
+
+    return this.signer.provider
+      .send("wallet_getCapabilities", [
+        params?.address || (await this.getSignerAddress()),
+        params?.chainIds?.map((id) => toHexString(id)) || [
+          toHexString(await this.getChainId()),
+        ],
+      ])
+      .then((capabilities) => {
+        return Object.fromEntries(
+          Object.entries(capabilities).map(([key, value]) => [
+            Number(key),
+            value,
+          ]),
+        ) as WalletCapabilities<TChainIds>;
+      })
+      .catch((e) => {
+        throw new DriftError({
+          message: "Failed to get wallet capabilities",
+          cause: e,
+        });
+      });
+  }
+
+  /**
+   * @throws A {@linkcode NotImplementedError} if the provider is not a
+   * {@linkcode JsonRpcProvider}.
+   */
+  async getCallsStatus<TId extends HexString>(
+    batchId: TId,
+  ): Promise<WalletCallsStatus<TId>> {
+    if (!(this.signer.provider instanceof JsonRpcProvider)) {
+      throw new NotImplementedError({
+        method: "getCallsStatus",
+        message: "This method is only available for the JsonRpcProvider.",
+      });
+    }
+
+    return this.signer.provider
+      .send("wallet_getCallsStatus", [batchId])
+      .then(
+        ({
+          chainId,
+          id,
+          receipts,
+          status,
+          ...rest
+        }: WalletGetCallsStatusReturn) => {
+          return {
+            chainId: Number(chainId),
+            id: id as TId,
+            statusCode: status,
+            status: getWalletCallsStatusLabel(status),
+            receipts: receipts?.map(
+              ({ blockNumber, gasUsed, status, ...rest }) => {
+                return {
+                  blockNumber: BigInt(blockNumber),
+                  gasUsed: BigInt(gasUsed),
+                  status: status === "0x1" ? "success" : "reverted",
+                  ...rest,
+                } satisfies WalletCallsReceipt;
+              },
+            ),
+            ...rest,
+          };
+        },
+      )
+      .catch((e) => {
+        throw new DriftError({
+          message: "Failed to get wallet calls status",
+          cause: e,
+        });
+      });
+  }
+
+  /**
+   * @throws A {@linkcode NotImplementedError} if the provider is not a
+   * {@linkcode JsonRpcProvider}.
+   */
+  showCallsStatus(batchId: HexString): Promise<void> {
+    if (!(this.signer.provider instanceof JsonRpcProvider)) {
+      throw new NotImplementedError({
+        method: "showCallsStatus",
+        message: "This method is only available for the JsonRpcProvider.",
+      });
+    }
+
+    return this.signer.provider
+      .send("wallet_showCallsStatus", [batchId])
+      .catch((e) => {
+        throw new DriftError({
+          message: "Failed to show wallet calls status",
+          cause: e,
+        });
+      });
   }
 
   async sendTransaction({
@@ -178,4 +288,81 @@ export class EthersReadWriteAdapter<
 
     return hash;
   }
+
+  /**
+   * @throws A {@linkcode NotImplementedError} if the provider is not a
+   * {@linkcode JsonRpcProvider}.
+   */
+  async sendCalls<const TCalls extends readonly unknown[] = any[]>(
+    params: SendCallsParams<TCalls>,
+  ): Promise<SendCallsReturn> {
+    if (!(this.signer.provider instanceof JsonRpcProvider)) {
+      throw new NotImplementedError({
+        method: "sendCalls",
+        message: "This method is only available for the JsonRpcProvider.",
+      });
+    }
+
+    return this.signer.provider
+      .send("wallet_sendCalls", [
+        {
+          version: params.version || "1.0",
+          id: params.id,
+          chainId: toHexString(params.chainId ?? (await this.getChainId())),
+          from: params.from ?? (await this.getSignerAddress()),
+          atomicRequired: params.atomic ?? true,
+          calls: params.calls.map(
+            ({
+              abi,
+              address,
+              args,
+              bytecode,
+              capabilities,
+              data,
+              fn,
+              to = address,
+              value,
+            }) => {
+              if (abi && fn) {
+                data = this.encodeFunctionData({ abi, fn, args });
+              } else if (abi && bytecode) {
+                data = this.encodeDeployData({ abi, bytecode, args });
+              } else if (bytecode && data) {
+                data = encodeBytecodeCallData(bytecode, data);
+              }
+
+              return {
+                to,
+                data,
+                capabilities,
+                value: value ? toHexString(value) : undefined,
+              };
+            },
+          ),
+          capabilities: params.capabilities,
+        },
+      ])
+      .catch((e) => {
+        throw new DriftError({
+          message: "Failed to send wallet calls",
+          cause: e,
+        });
+      });
+  }
+}
+
+interface WalletGetCallsStatusReturn {
+  atomic: boolean;
+  capabilities?: WalletCapabilities | undefined;
+  chainId: HexString;
+  id: string;
+  receipts?: {
+    status: HexString;
+    blockHash: HexString;
+    blockNumber: HexString;
+    gasUsed: HexString;
+    transactionHash: HexString;
+  }[];
+  status: number;
+  version: string;
 }

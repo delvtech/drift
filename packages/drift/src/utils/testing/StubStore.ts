@@ -1,6 +1,6 @@
 import isMatch from "lodash.ismatch";
 import { type SinonStub, stub as sinonStub } from "sinon";
-import { DriftError } from "src/error/DriftError";
+import { DriftError, type DriftErrorOptions } from "src/error/DriftError";
 import { formatArgsForDisplay } from "src/utils/formatArgsForDisplay";
 import type { FunctionKey, Replace } from "src/utils/types";
 
@@ -202,11 +202,20 @@ export interface GetStubParams<
   create?: (stub: SinonStub<TArgs, TReturnType>) => SinonStub;
 }
 
-export class MissingStubError extends DriftError {
-  constructor({ method, args }: { method: string; args?: any[] }) {
-    super(createMissingStubMessage(method, args), {
-      name: "MissingStubError",
-    });
+interface MissingStubErrorParams<T> extends DriftErrorOptions {
+  /**
+   * The method that has not been stubbed.
+   */
+  method: FunctionKey<T> | (string & {});
+  /**
+   * The arguments that were passed to the method.
+   */
+  args: any[] | undefined;
+}
+
+export class MissingStubError<T> extends DriftError {
+  constructor({ method, args, ...options }: MissingStubErrorParams<T>) {
+    super(createMissingStubMessage(String(method), args), options);
   }
 }
 
@@ -221,24 +230,22 @@ function createDefaultStub<TArgs extends any[], TReturnType = any>(
 }
 
 function createMissingStubMessage(method: string, args?: any[]) {
-  let message = `Missing stub for mock method call.
-  method: "${method}"`;
+  let message = `Missing stub for mock method call.\n\n  method: "${method}"`;
 
   if (args) {
-    message += `
-  args: ${formatArgsForDisplay(args)
-    // Indent new lines.
-    ?.replaceAll("\n", "\n  ")}`;
+    message += `\n  args: ${formatArgsForDisplay(args)
+      // Indent new lines.
+      ?.replaceAll("\n", "\n  ")}`;
   }
 
   const capitalizedMethod = method.replace(/^./, (c) => c.toUpperCase());
   return `${message}
 
-The value must be stubbed first. For example:
-  mock.on${capitalizedMethod}(...args).resolves(value);
-  mock.on${capitalizedMethod}(...args).callsFake(async (...args) => {
-    // Do something with args
-    return value;
-  });
+  The value must be stubbed first. For example:
+    mock.on${capitalizedMethod}(...args).resolves(value);
+    mock.on${capitalizedMethod}(...args).callsFake(async (...args) => {
+      // Do something with args
+      return value;
+    });
 `;
 }

@@ -548,7 +548,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   // sendCalls //
 
-  onSendCalls<const TCalls extends unknown[] = any[]>(
+  onSendCalls<const TCalls extends readonly unknown[] = any[]>(
     params?: OnSendCallsParams<TCalls>,
   ) {
     return this.stubs.get<[SendCallsParams<TCalls>], Promise<SendCallsReturn>>({
@@ -557,7 +557,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     });
   }
 
-  async sendCalls<const TCalls extends unknown[] = any[]>(
+  async sendCalls<const TCalls extends readonly unknown[] = any[]>(
     params: SendCallsParams<TCalls>,
   ) {
     return this.stubs.get<[SendCallsParams<TCalls>], Promise<SendCallsReturn>>({
@@ -672,8 +672,9 @@ export type StubWalletCallParams<
 > &
   WalletCallOptions;
 
-export interface OnSendCallsParams<TCalls extends unknown[] = unknown[]>
-  extends SendCallsOptions {
+export interface OnSendCallsParams<
+  TCalls extends readonly unknown[] = unknown[],
+> extends SendCallsOptions {
   calls: {
     [K in keyof TCalls]: NarrowTo<
       { abi: Abi },

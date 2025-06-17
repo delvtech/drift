@@ -137,7 +137,7 @@ export type RequiredValueKey<T> = keyof {
  * Get a union of all keys on `T` that are functions
  */
 export type FunctionKey<T> = keyof {
-  [K in keyof T as T[K] extends Function ? K : never]: never;
+  [K in keyof T as Required<T>[K] extends Function ? K : never]: never;
 };
 
 /**

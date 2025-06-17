@@ -1,10 +1,47 @@
 export const HEX_REGEX = /^0x[0-9a-fA-F]*$/;
 
-export function isHexString(s: unknown): s is `0x${string}` {
-  return typeof s === "string" && HEX_REGEX.test(s);
+export interface IsHexStringOptions {
+  /**
+   * Whether the string is expected to have the '0x' prefix.
+   * @default true
+   */
+  prefix?: boolean;
+}
+
+/**
+ * Checks if a value is a valid hexadecimal string, optionally checking for
+ * the '0x' prefix.
+ *
+ * @param value - The value to check.
+ * @param options - Options to control the check.
+ *
+ * @example
+ * ```ts
+ * // Returns true
+ * isHexString("0x123abc");
+ * isHexString("123abc", { prefix: false });
+ *
+ * // Returns false
+ * isHexString("123abc");
+ * isHexString("0x123xyz");
+ * isHexString("0x123abc", { prefix: false });
+ * ```
+ */
+export function isHexString<TOptions extends IsHexStringOptions>(
+  value: unknown,
+  { prefix = true } = {} as TOptions & IsHexStringOptions,
+): value is TOptions["prefix"] extends false ? string : `0x${string}` {
+  return (
+    typeof value === "string" &&
+    HEX_REGEX.test(prefix === false ? `0x${value}` : value)
+  );
 }
 
 export interface ToHexStringOptions {
+  /**
+   * Whether to include the '0x' prefix in the returned string.
+   * @default true
+   */
   prefix?: boolean;
 }
 
@@ -12,18 +49,32 @@ type ToHexStringReturn<TOptions extends ToHexStringOptions> =
   TOptions["prefix"] extends false ? string : `0x${string}`;
 
 /**
- * Converts a value to a hexadecimal string prefixed with '0x'.
+ * Converts a value to a hexadecimal string, optionally prefixed with '0x'.
  *
  * @param value - The value to convert. If a string is provided, and it's not
- * already a prefixed hexadecimal string, it will be encoded to bytes before
- * conversion.
- * @returns A hexadecimal string prefixed with '0x'.
+ * already a valid hex string, it will be encoded to bytes then converted.
+ * @param options - Options to control the output format.
+ *
+ * @example
+ * ```ts
+ * toHexString(255); // '0xff'
+ * toHexString(255n); // '0xff'
+ * toHexString("hello"); // '0x68656c6c6f'
+ * toHexString(new Uint8Array([104, 101, 108, 108, 111])); // '0x68656c6c6f'
+ *
+ * toHexString(255, { prefix: false }); // 'ff'
+ *
+ * // Valid hex strings are returned as-is:
+ * toHexString("0xff"); // '0xff'
+ * toHexString("ff", { prefix: false }); // 'ff'
+ * ```
  */
 export function toHexString<TOptions extends ToHexStringOptions>(
   value: string | number | bigint | Uint8Array,
-  { prefix = true }: TOptions = {} as TOptions,
+  { prefix = true } = {} as TOptions & ToHexStringOptions,
 ): ToHexStringReturn<TOptions> {
-  const _prefix = prefix ? "0x" : "";
+  const _prefix = prefix === false ? "" : "0x";
+
   if (typeof value === "number" || typeof value === "bigint") {
     return `${_prefix}${value.toString(16)}` as ToHexStringReturn<TOptions>;
   }
@@ -32,7 +83,7 @@ export function toHexString<TOptions extends ToHexStringOptions>(
   let bytes: Uint8Array;
 
   if (typeof value === "string") {
-    if (isHexString(value)) return value;
+    if (isHexString(value, { prefix })) return value;
     bytes = encoder.encode(value);
   } else {
     bytes = value;
