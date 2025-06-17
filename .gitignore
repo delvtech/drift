@@ -1,37 +1,39 @@
-# Dependencies
-node_modules
-.pnp
-.pnp.js
+# Local
+*.env
+*.pem
+*.local
 
-# Local env files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Logs
+logs
+_.log
+
+# Artifacts
+build
+cache
+dist
+generated
+out
 
 # Testing
 coverage
 
-# Turbo
-.turbo
-
-# Vercel
-.vercel
-
-# Build Outputs
-.next/
-out/
-build/
-dist/
-generated/
-
-# Debug
-npm-debug.log*
+# Package Manager
+*.tgz
+node_modules
 yarn-debug.log*
 yarn-error.log*
 
-# Misc
+# Language
+*.tsbuildinfo
+
+# Lib cache
+.turbo
+.vercel
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# OS
 .DS_Store
-*.pem
-*.local
