@@ -114,18 +114,6 @@ export abstract class BaseReadAdapter
 
   // Default implementations //
 
-  multicall<
-    TCalls extends { abi: Abi }[],
-    TAllowFailure extends boolean = true,
-  >({
-    multicallAddress = this.multicallAddress,
-    ...restParams
-  }: MulticallParams<TCalls, TAllowFailure>): Promise<
-    MulticallReturn<TCalls, TAllowFailure>
-  > {
-    return multicall(this, { multicallAddress, ...restParams });
-  }
-
   read<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "pure" | "view">,
@@ -143,6 +131,18 @@ export abstract class BaseReadAdapter
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
     return simulateWrite(this, params);
   }
+
+  multicall<
+    TCalls extends { abi: Abi }[],
+    TAllowFailure extends boolean = true,
+  >({
+    multicallAddress = this.multicallAddress,
+    ...restParams
+  }: MulticallParams<TCalls, TAllowFailure>): Promise<
+    MulticallReturn<TCalls, TAllowFailure>
+  > {
+    return multicall(this, { multicallAddress, ...restParams });
+  }
 }
 
 export abstract class BaseReadWriteAdapter
@@ -152,7 +152,7 @@ export abstract class BaseReadWriteAdapter
   // Abstract methods //
 
   abstract getSignerAddress(): Promise<Address>;
-  abstract getWalletCapabilities<const TChainIds extends bigint[] = []>(
+  abstract getWalletCapabilities<const TChainIds extends number[] = []>(
     params: GetWalletCapabilitiesParams<TChainIds>,
   ): Promise<WalletCapabilities<TChainIds>>;
   abstract getCallsStatus<TId extends HexString>(

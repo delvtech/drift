@@ -29,12 +29,14 @@ export type {
   DecodeFunctionDataParams,
   DecodeFunctionReturnParams,
   DeployParams,
+  EncodedCallParams,
   EncodeDeployDataParams,
   EncodeFunctionDataParams,
   EncodeFunctionReturnParams,
   FunctionCallParams,
   GetEventsOptions,
   GetEventsParams,
+  GetWalletCapabilitiesParams,
   MinedRangeBlock,
   MulticallCallResult,
   MulticallOptions,
@@ -45,9 +47,18 @@ export type {
   ReadOptions,
   ReadParams,
   ReadWriteAdapter,
+  SendCallsOptions,
+  SendCallsParams,
+  SendCallsReturn,
   SendTransactionParams,
   SimulateWriteOptions,
   SimulateWriteParams,
+  WalletCallOptions,
+  WalletCallParams,
+  WalletCallsStatus,
+  WalletCapabilities,
+  WalletCapabilitiesOptions,
+  WalletCapability,
   WriteAdapter,
   WriteOptions,
   WriteParams,
@@ -105,9 +116,8 @@ export {
   type DefaultAdapterOptions,
 } from "src/adapter/DefaultAdapter";
 
-export { arrayToSimplified } from "src/adapter/utils/arrayToSimplified";
 export { arrayToObject } from "src/adapter/utils/arrayToObject";
-export { prepareParams } from "src/adapter/utils/prepareParams";
+export { arrayToSimplified } from "src/adapter/utils/arrayToSimplified";
 export { decodeFunctionData } from "src/adapter/utils/decodeFunctionData";
 export { decodeFunctionReturn } from "src/adapter/utils/decodeFunctionReturn";
 export { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
@@ -123,6 +133,8 @@ export {
   encodeFunctionReturn,
   prepareFunctionReturn,
 } from "src/adapter/utils/encodeFunctionReturn";
+export { getWalletCallsStatusLabel } from "src/adapter/utils/getWalletCallsStatusFromCode";
+export { prepareParams } from "src/adapter/utils/prepareParams";
 
 // Store //
 

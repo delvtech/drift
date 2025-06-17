@@ -21,7 +21,13 @@ import type {
   TransactionReceipt,
   WalletCallsReceipt,
 } from "src/adapter/types/Transaction";
-import type { DynamicProperty, Eval, NarrowTo, OneOf } from "src/utils/types";
+import type {
+  DynamicProperty,
+  Eval,
+  NarrowTo,
+  OneOf,
+  Replace,
+} from "src/utils/types";
 
 /**
  * An interface for interacting with a blockchain network and its contracts,
@@ -145,13 +151,6 @@ export interface ReadAdapter extends Network {
     params: ReadParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>>;
 
-  multicall<
-    TCalls extends { abi: Abi }[],
-    TAllowFailure extends boolean = true,
-  >(
-    params: MulticallParams<TCalls, TAllowFailure>,
-  ): Promise<MulticallReturn<TCalls, TAllowFailure>>;
-
   /**
    * Call a state-mutating function on a contract without sending a transaction.
    * @returns The decoded return value of the function.
@@ -162,6 +161,13 @@ export interface ReadAdapter extends Network {
   >(
     params: SimulateWriteParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>>;
+
+  multicall<
+    TCalls extends { abi: Abi }[],
+    TAllowFailure extends boolean = true,
+  >(
+    params: MulticallParams<TCalls, TAllowFailure>,
+  ): Promise<MulticallReturn<TCalls, TAllowFailure>>;
 }
 
 /**
@@ -177,8 +183,8 @@ export interface WriteAdapter {
   /**
    * Queries what capabilities a wallet supports.
    */
-  getWalletCapabilities<const TChainIds extends bigint[] = []>(
-    params: GetWalletCapabilitiesParams<TChainIds>,
+  getWalletCapabilities<const TChainIds extends number[] = []>(
+    params?: GetWalletCapabilitiesParams<TChainIds>,
   ): Promise<WalletCapabilities<TChainIds>>;
 
   /**
@@ -201,13 +207,6 @@ export interface WriteAdapter {
   sendTransaction(params: SendTransactionParams): Promise<Hash>;
 
   /**
-   * Requests that a wallet submits a batch of calls.
-   */
-  sendCalls<const TCalls extends unknown[] = any[]>(
-    params: SendCallsParams<TCalls>,
-  ): Promise<SendCallsReturn>;
-
-  /**
    * Creates, signs, and submits a contract creation transaction using the
    * specified bytecode and constructor arguments.
    * @returns The transaction hash of the submitted transaction.
@@ -223,6 +222,13 @@ export interface WriteAdapter {
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(params: WriteParams<TAbi, TFunctionName>): Promise<Hash>;
+
+  /**
+   * Requests that a wallet submits a batch of calls.
+   */
+  sendCalls<const TCalls extends unknown[] = any[]>(
+    params: SendCallsParams<TCalls>,
+  ): Promise<SendCallsReturn>;
 }
 
 /**
@@ -336,6 +342,26 @@ export interface GetEventsParams<
 
 // Call //
 
+export type EncodedCallParams = OneOf<
+  | {
+      /**
+       * The address to send the call to.
+       */
+      to: Address;
+    }
+  | {
+      /**
+       * A contract bytecode to temporarily deploy and call.
+       */
+      bytecode: Bytes;
+    }
+> & {
+  /**
+   * The hash of the invoked method signature and encoded parameters.
+   */
+  data?: Bytes;
+};
+
 // https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/eth/execute.yaml#L1
 export interface CallOptions<
   T extends BlockIdentifier | undefined = BlockIdentifier,
@@ -344,27 +370,7 @@ export interface CallOptions<
   block?: T;
 }
 
-type EncodedCallParams = {
-  /**
-   * The address to send the call to.
-   */
-  to: Address;
-  /**
-   * The hash of the invoked method signature and encoded parameters.
-   */
-  data?: Bytes;
-};
-
-export type CallParams = OneOf<
-  | EncodedCallParams
-  | {
-      /**
-       * A contract bytecode to temporarily deploy and call.
-       */
-      bytecode: Bytes;
-    }
-> &
-  CallOptions;
+export type CallParams = EncodedCallParams & CallOptions;
 
 // Read //
 
@@ -415,12 +421,15 @@ export interface MulticallOptions<TAllowFailure extends boolean = boolean>
   allowFailure?: TAllowFailure;
 }
 
-export type MulticallParams<
+/**
+ * Params for multicall operations.
+ */
+export interface MulticallParams<
   TCalls extends { abi: Abi }[] = { abi: Abi }[],
   TAllowFailure extends boolean = boolean,
-> = {
+> extends MulticallOptions<TAllowFailure> {
   calls: MulticallCalls<TCalls>;
-} & MulticallOptions<TAllowFailure>;
+}
 
 /**
  * The result object for single multicall call.
@@ -473,7 +482,9 @@ export type WalletCapability = {
 /**
  * Params for querying a wallet's capabilities.
  */
-export interface GetWalletCapabilitiesParams<TChainIds extends bigint[] = []> {
+export interface GetWalletCapabilitiesParams<
+  TChainIds extends number[] = number[],
+> {
   /**
    * The wallet address to query capabilities for. Defaults to the connected
    * signer address.
@@ -489,18 +500,13 @@ export interface GetWalletCapabilitiesParams<TChainIds extends bigint[] = []> {
 /**
  * The capabilities of a wallet, as defined by EIP-5792.
  */
-export type WalletCapabilities<TChainIds extends bigint[] = []> =
-  [] extends TChainIds
+export type WalletCapabilities<TChainIds extends number[] = number[]> =
+  TChainIds extends []
     ? {
-        [chainId: number | `${number}`]: WalletCapability;
+        [chainId: number]: WalletCapability;
       }
     : {
-        [K in keyof TChainIds as TChainIds[K] extends infer TChainId extends
-          bigint
-          ? bigint extends TChainId
-            ? number | `${number}` // <- Avoid confusing [x: `${bigint}`] signature.
-            : `${TChainId}`
-          : never]: WalletCapability;
+        [K in TChainIds[number]]: WalletCapability;
       };
 
 type WalletCallsVersion = "1.0" | (string & {});
@@ -513,15 +519,23 @@ export interface WalletCallsStatus<TId extends HexString = HexString> {
    * The version of the API being used.
    */
   version: WalletCallsVersion;
-  chainId: bigint;
+  chainId: number;
+
   /**
    * The call batch identifier.
    */
   id: TId;
+
   /**
    * Current state of the batch.
    */
-  status: "pending" | "confirmed" | "failed" | "partial-failure";
+  status:
+    | "pending"
+    | "confirmed"
+    | "failed"
+    | "reverted"
+    | "partially-reverted";
+
   /**
    * The actual status code of the batch.
    * - `1xx`: Pending states
@@ -536,12 +550,14 @@ export interface WalletCallsStatus<TId extends HexString = HexString> {
    *   - `600`: Batch reverted partially and some changes related to batch calls may have been included onchain
    */
   statusCode: number;
+
   /**
    * Whether the wallet executed the calls atomically or not. If `true`, the
    * wallet executed all calls in a single transaction. If `false`, the wallet
    * executed the calls in multiple transactions.
    */
   atomic: boolean;
+
   /**
    * The receipts associated with the call batch, if available. The structure
    * depends on the atomic field:
@@ -551,6 +567,7 @@ export interface WalletCallsStatus<TId extends HexString = HexString> {
    *   transactions containing batch calls that were included onchain.
    */
   receipts?: WalletCallsReceipt[];
+
   /**
    * Capability-specific metadata.
    */
@@ -559,6 +576,9 @@ export interface WalletCallsStatus<TId extends HexString = HexString> {
   };
 }
 
+/**
+ * @internal
+ */
 export type WalletCapabilityOptions<
   T extends Record<string, unknown> = Record<string, unknown>,
 > = {
@@ -593,46 +613,27 @@ export interface WalletCallOptions {
   capabilities?: WalletCapabilitiesOptions;
 }
 
-export type WalletCallParams<TCall = any> =
-  // Encoded function call
-  (
-    | (EncodedCallParams & {
-        [K in
-          | keyof FunctionCallParams
-          | keyof EncodeDeployDataParams]?: undefined;
-      })
-    // Function call with ABI
-    | (TCall extends { abi: infer TAbi extends Abi; bytecode?: never }
-        ? FunctionCallParams<
-            TAbi,
-            NarrowTo<{ fn: FunctionName<TAbi> }, TCall>["fn"]
-          > & {
-            [K in keyof EncodedCallParams | "bytecode"]?: undefined;
-          }
-        : never)
-    // Deploy call
-    | (TCall extends { abi: infer TAbi extends Abi }
-        ? EncodeDeployDataParams<TAbi> & {
-            [K in keyof EncodedCallParams | "fn"]?: undefined;
-          }
-        : never)
-  ) &
-    WalletCallOptions;
-
 /**
- * @internal
+ * Parameters for a wallet call, which can be a function call, deploy call, or
+ * an encoded call.
  */
-export type WalletCalls<TCalls extends unknown[] = any[]> = {
-  [K in keyof TCalls]: NarrowTo<WalletCallParams<TCalls[K]>, TCalls[K]> &
-    WalletCallOptions;
-};
+export type WalletCallParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+> = OneOf<
+  | FunctionCallParams<TAbi, TFunctionName>
+  | EncodeDeployDataParams<TAbi>
+  | EncodedCallParams
+> &
+  WalletCallOptions;
 
-export interface SendCallsParams<TCalls extends unknown[] = any[]> {
+export interface SendCallsOptions {
   /**
    * The version of the sendCalls API to use.
    * @default "1.0"
    */
   version?: WalletCallsVersion;
+
   /**
    * A unique identifier for this batch of calls. If provided, must be a unique
    * string up to 4096 bytes (8194 characters including leading 0x). Must be
@@ -640,17 +641,20 @@ export interface SendCallsParams<TCalls extends unknown[] = any[]> {
    * random ID.
    */
   id?: HexString;
+
   /**
    * The chain ID to send the calls on. Defaults to the chain ID of the network
    * the wallet is connected to.
    */
-  chainId?: bigint;
+  chainId?: number;
+
   /**
    * The address to send the calls from. Defaults to the connected signer if
    * available. If not provided, the wallet should allow the user to select the
    * address during confirmation.
    */
   from?: Address;
+
   /**
    * Specifies whether the wallet must execute all calls atomically (in a single
    * transaction) or not. If set to `true`, the wallet MUST execute all calls
@@ -662,17 +666,38 @@ export interface SendCallsParams<TCalls extends unknown[] = any[]> {
    * @default true
    */
   atomic?: boolean;
-  /**
-   * The calls to send. Each call must be a valid function call for the
-   * specified ABI.
-   */
-  calls: WalletCalls<TCalls>;
+
   /**
    * An object where the keys are capability names and the values are
    * capability-specific parameters. The wallet MUST support all non-optional
    * capabilities requested or reject the request.
    */
   capabilities?: WalletCapabilitiesOptions;
+}
+
+// TODO: onMined
+/**
+ * Parameters for sending a batch of calls to a wallet.
+ */
+export interface SendCallsParams<TCalls extends unknown[] = any[]>
+  extends SendCallsOptions {
+  /**
+   * The calls to send. Each call must be a valid function call for the
+   * specified ABI.
+   */
+  calls: {
+    [K in keyof TCalls]: NarrowTo<
+      { abi: Abi },
+      TCalls[K]
+    >["abi"] extends infer TAbi extends Abi
+      ? WalletCallParams<
+          TAbi,
+          NarrowTo<{ fn: FunctionName<TAbi> }, TCalls[K]>["fn"]
+        > extends infer TParams
+        ? NarrowTo<TParams, Replace<TParams, TCalls[K]>>
+        : never
+      : never;
+  };
 }
 
 export interface SendCallsReturn {

@@ -131,10 +131,17 @@ describe("Adapter", () => {
     it("allows a mix of encoded calls, abi function calls, and deploy calls", async () => {
       adapter.sendCalls({
         calls: [
+          // Encoded call
           {
             to: "0x",
             data: "0x",
           },
+          // Bytecode call
+          {
+            bytecode: "0x",
+            data: "0x",
+          },
+          // Function call
           {
             abi: TestToken.abi,
             address: "0x",
@@ -144,6 +151,7 @@ describe("Adapter", () => {
               amount: 100n,
             },
           },
+          // Deploy call
           {
             abi: TestToken.abi,
             bytecode: "0x",
@@ -166,6 +174,12 @@ describe("Adapter", () => {
             address: "0x",
           },
           {
+            data: "0x",
+            bytecode: "0x",
+            // @ts-expect-error: The absence of `abi` implies an encoded call.
+            address: "0x",
+          },
+          {
             abi: TestToken.abi,
             address: "0x",
             fn: "approve",
@@ -173,9 +187,11 @@ describe("Adapter", () => {
               spender: "0x",
               amount: 100n,
             },
-            // @ts-expect-error: The presence of `abi` implies a function call
-            // or deploy call.
+            // @ts-expect-error: The presence of `abi` implies a function or
+            // deploy call.
             to: "0x",
+            // @ts-expect-error: The presence of `fn` implies a function call.
+            bytecode: "0x",
           },
           {
             abi: TestToken.abi,
@@ -184,9 +200,9 @@ describe("Adapter", () => {
               decimals_: 18,
               initialSupply: 1000n,
             },
-            // @ts-expect-error: the presence of `bytecode` implies a deploy
-            // call.
-            fn: "constructor",
+            // @ts-expect-error: the presence of `abi` and `bytecode` implies a
+            // deploy call.
+            fn: "approve",
           },
         ],
       });
@@ -199,7 +215,7 @@ describe("Adapter", () => {
             abi: TestToken.abi,
             address: "0x",
             // @ts-expect-error
-            fn: "nonExistentFn",
+            fn: "",
           },
         ],
       });
@@ -239,10 +255,10 @@ describe("Adapter", () => {
             // @ts-expect-error
             args: {},
           },
+          // @ts-expect-error
           {
             abi: TestToken.abi,
             bytecode: "0x",
-            // @ts-expect-error
             args: {},
           },
         ],
