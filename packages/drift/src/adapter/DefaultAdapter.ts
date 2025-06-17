@@ -418,7 +418,7 @@ export class DefaultAdapter
 
 function prepareBlockParam(block?: BlockIdentifier): HexString | BlockTag {
   if (block === undefined) return "latest";
-  if (typeof block === "bigint") return `0x${toHexString(block)}`;
+  if (typeof block === "bigint") return toHexString(block);
   return block;
 }
 
@@ -428,7 +428,7 @@ function prepareTransactionOptions(
   return convert(
     options,
     (value) => typeof value === "bigint",
-    (value): HexString => `0x${toHexString(value)}`,
+    (value): HexString => toHexString(value),
   );
 }
 
