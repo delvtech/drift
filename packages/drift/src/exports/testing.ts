@@ -9,6 +9,7 @@ export {
 } from "src/adapter/utils/testing/createStubEvent";
 export { createStubTransaction } from "src/adapter/utils/testing/createStubTransaction";
 export { createStubTransactionReceipt } from "src/adapter/utils/testing/createStubTransactionReceipt";
+export { createStubWalletCallsStatus } from "src/adapter/utils/testing/createStubWalletCallsStatus";
 
 // Client
 
@@ -41,3 +42,4 @@ export { ALICE, BOB, NANCY } from "src/utils/testing/accounts";
 export { randomAddress } from "src/utils/testing/randomAddress";
 export { randomHex } from "src/utils/testing/randomHex";
 export { randomInt } from "src/utils/testing/randomInt";
+export { randomSelection } from "src/utils/testing/randomSelection";

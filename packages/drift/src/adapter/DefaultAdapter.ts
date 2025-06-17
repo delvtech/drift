@@ -24,8 +24,14 @@ import type {
   CallParams,
   DeployParams,
   GetEventsParams,
+  GetWalletCapabilitiesParams,
+  ReadAdapter,
   ReadWriteAdapter,
+  SendCallsParams,
+  SendCallsReturn,
   SendTransactionParams,
+  WalletCallsStatus,
+  WalletCapabilities,
   WriteParams,
 } from "src/adapter/types/Adapter";
 import type { BlockIdentifier, BlockTag } from "src/adapter/types/Block";
@@ -42,8 +48,10 @@ import type {
   TransactionOptions,
   TransactionReceipt as TransactionReceiptType,
   Transaction as TransactionType,
+  WalletCallsReceipt,
 } from "src/adapter/types/Transaction";
 import { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
+import { getWalletCallsStatusLabel } from "src/adapter/utils/getWalletCallsStatusFromCode";
 import { handleError } from "src/adapter/utils/internal/handleError";
 import { prepareParams } from "src/adapter/utils/prepareParams";
 import { DriftError } from "src/error/DriftError";
@@ -54,7 +62,7 @@ export interface DefaultAdapterOptions extends BaseAdapterOptions {
   rpcUrl?: string;
 }
 
-export class DefaultReadAdapter extends BaseReadAdapter {
+export class DefaultReadAdapter extends BaseReadAdapter implements ReadAdapter {
   provider: Provider.Provider;
 
   constructor({ rpcUrl, ...baseOptions }: DefaultAdapterOptions = {}) {
@@ -76,18 +84,14 @@ export class DefaultReadAdapter extends BaseReadAdapter {
 
   getChainId() {
     return this.provider
-      .request({
-        method: "eth_chainId",
-      })
+      .request({ method: "eth_chainId" })
       .then(Number)
       .catch(handleError);
   }
 
   getBlockNumber() {
     return this.provider
-      .request({
-        method: "eth_blockNumber",
-      })
+      .request({ method: "eth_blockNumber" })
       .then(BigInt)
       .catch(handleError);
   }
@@ -140,12 +144,12 @@ export class DefaultReadAdapter extends BaseReadAdapter {
       })
       .then((tx) => {
         if (!tx) return undefined;
-        const { to, transactionIndex, ...parsed } = Transaction.fromRpc(tx);
+        const { to, transactionIndex, hash, ...rest } = Transaction.fromRpc(tx);
         return {
-          ...parsed,
           to: to || undefined,
           transactionIndex: BigInt(transactionIndex),
-          transactionHash: parsed.hash,
+          transactionHash: hash,
+          ...rest,
         };
       })
       .catch(handleError);
@@ -165,17 +169,13 @@ export class DefaultReadAdapter extends BaseReadAdapter {
             })
             .then((receipt) => {
               if (receipt) {
-                const {
-                  to,
-                  transactionIndex,
-                  contractAddress,
-                  ...parsedReceipt
-                } = TransactionReceipt.fromRpc(receipt);
+                const { to, transactionIndex, contractAddress, ...rest } =
+                  TransactionReceipt.fromRpc(receipt);
                 resolve({
-                  ...parsedReceipt,
                   to: to || undefined,
                   transactionIndex: BigInt(transactionIndex),
                   contractAddress: contractAddress || undefined,
+                  ...rest,
                 });
               } else {
                 setTimeout(getReceipt, this.pollingInterval);
@@ -269,6 +269,69 @@ export class DefaultAdapter
       .catch(handleError);
   }
 
+  async getWalletCapabilities<TChainIds extends number[]>(
+    params?: GetWalletCapabilitiesParams<TChainIds>,
+  ) {
+    return this.provider
+      .request({
+        method: "wallet_getCapabilities",
+        params: [
+          params?.address || (await this.getSignerAddress()),
+          (params?.chainIds?.map((id) => toHexString(id)) || [
+            toHexString(await this.getChainId()),
+          ]) as HexString[] | undefined,
+        ],
+      })
+      .then((capabilities) => {
+        return Object.fromEntries(
+          Object.entries(capabilities).map(([key, value]) => [
+            toHexString(key),
+            value,
+          ]),
+        ) as WalletCapabilities<TChainIds>;
+      })
+      .catch(handleError);
+  }
+
+  getCallsStatus<TId extends HexString>(
+    batchId: TId,
+  ): Promise<WalletCallsStatus<TId>> {
+    return this.provider
+      .request({
+        method: "wallet_getCallsStatus",
+        params: [batchId],
+      })
+      .then(({ chainId, id, receipts, status, ...rest }) => {
+        return {
+          chainId: Number(chainId),
+          id: id as TId,
+          statusCode: status,
+          status: getWalletCallsStatusLabel(status),
+          receipts: receipts?.map(
+            ({ blockNumber, gasUsed, status, ...rest }) => {
+              return {
+                blockNumber: BigInt(blockNumber),
+                gasUsed: BigInt(gasUsed),
+                status: status === "0x1" ? "success" : "reverted",
+                ...rest,
+              } satisfies WalletCallsReceipt;
+            },
+          ),
+          ...rest,
+        };
+      })
+      .catch(handleError);
+  }
+
+  showCallsStatus(batchId: HexString): Promise<void> {
+    return this.provider
+      .request({
+        method: "wallet_showCallsStatus",
+        params: [batchId],
+      })
+      .catch(handleError);
+  }
+
   async sendTransaction({
     data,
     to,
@@ -300,6 +363,56 @@ export class DefaultAdapter
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(params: WriteParams<TAbi, TFunctionName>): Promise<Hash> {
     return write(this, params);
+  }
+
+  async sendCalls<const TCalls extends unknown[] = any[]>(
+    params: SendCallsParams<TCalls>,
+  ): Promise<SendCallsReturn> {
+    return this.provider
+      .request({
+        method: "wallet_sendCalls",
+        params: [
+          {
+            version: params.version || "1.0",
+            id: params.id,
+            chainId: toHexString(params.chainId ?? (await this.getChainId())),
+            from: params.from ?? (await this.getSignerAddress()),
+            atomicRequired: params.atomic ?? true,
+            calls: params.calls.map(
+              ({
+                abi,
+                address,
+                args,
+                bytecode,
+                capabilities,
+                data,
+                fn,
+                to = address,
+                value,
+              }) => {
+                if (abi) {
+                  if (fn) {
+                    data = this.encodeFunctionData({ abi, fn, args });
+                  } else if (bytecode) {
+                    data = this.encodeDeployData({ abi, bytecode, args });
+                  }
+                } else if (bytecode && data) {
+                  data = encodeBytecodeCallData(bytecode, data);
+                }
+
+                return {
+                  to,
+                  data,
+                  capabilities,
+                  value: value ? toHexString(value) : undefined,
+                };
+              },
+            ),
+            capabilities: params.capabilities,
+          },
+        ],
+      })
+      .catch(handleError) as Promise<SendCallsReturn>;
   }
 }
 

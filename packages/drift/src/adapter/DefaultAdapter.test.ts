@@ -151,6 +151,44 @@ describe("DefaultAdapter", () => {
     });
   });
 
+  it("fetches events", async () => {
+    const currentBlock = await adapter.getBlockNumber();
+    const [event] = await adapter.getEvents({
+      abi: TestToken.abi,
+      address,
+      event: "Transfer",
+      fromBlock: currentBlock - 100n,
+    });
+    expect(event).toMatchObject({
+      args: expect.any(Object),
+      blockNumber: expect.any(BigInt),
+      data: expect.stringMatching(HEX_REGEX),
+      eventName: "Transfer",
+      transactionHash: expect.stringMatching(HEX_REGEX),
+    } satisfies EventLog<typeof TestToken.abi, "Transfer">);
+  });
+
+  describe("read", () => {
+    it("reads from contracts", async () => {
+      const symbol = await adapter.read({
+        abi: TestToken.abi,
+        address,
+        fn: "symbol",
+      });
+      expect(symbol).toBeTypeOf("string");
+    });
+
+    it("reads from contracts with args", async () => {
+      const balance = await adapter.read({
+        abi: TestToken.abi,
+        address,
+        fn: "balanceOf",
+        args: { owner: address },
+      });
+      expect(balance).toBeTypeOf("bigint");
+    });
+  });
+
   describe("multicall", () => {
     it("reads multiple functions from contracts", async () => {
       const [symbolResult, decimalsResult] = await adapter.multicall({
@@ -247,42 +285,17 @@ describe("DefaultAdapter", () => {
     });
   });
 
-  it("fetches events", async () => {
-    const currentBlock = await adapter.getBlockNumber();
-    const [event] = await adapter.getEvents({
+  it("simulates writes to a contracts", async () => {
+    const balance = await adapter.simulateWrite({
       abi: TestToken.abi,
       address,
-      event: "Transfer",
-      fromBlock: currentBlock - 100n,
+      fn: "approve",
+      args: {
+        amount: 0n,
+        spender: address,
+      },
     });
-    expect(event).toMatchObject({
-      args: expect.any(Object),
-      blockNumber: expect.any(BigInt),
-      data: expect.stringMatching(HEX_REGEX),
-      eventName: "Transfer",
-      transactionHash: expect.stringMatching(HEX_REGEX),
-    } satisfies EventLog<typeof TestToken.abi, "Transfer">);
-  });
-
-  describe("read", () => {
-    it("reads from contracts", async () => {
-      const symbol = await adapter.read({
-        abi: TestToken.abi,
-        address,
-        fn: "symbol",
-      });
-      expect(symbol).toBeTypeOf("string");
-    });
-
-    it("reads from contracts with args", async () => {
-      const balance = await adapter.read({
-        abi: TestToken.abi,
-        address,
-        fn: "balanceOf",
-        args: { owner: address },
-      });
-      expect(balance).toBeTypeOf("bigint");
-    });
+    expect(balance).toBeTypeOf("boolean");
   });
 
   it("deploys contracts", async () => {
@@ -295,19 +308,6 @@ describe("DefaultAdapter", () => {
 
     expect(hash).toMatch(HEX_REGEX);
     expect(receipt?.contractAddress).toMatch(HEX_REGEX);
-  });
-
-  it("simulates writes to a contracts", async () => {
-    const balance = await adapter.simulateWrite({
-      abi: TestToken.abi,
-      address,
-      fn: "approve",
-      args: {
-        amount: 0n,
-        spender: address,
-      },
-    });
-    expect(balance).toBeTypeOf("boolean");
   });
 
   it("sends transactions", async () => {

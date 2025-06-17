@@ -79,8 +79,17 @@ export type PartialBy<T, K extends keyof T | (string & {})> = Omit<T, K> &
 
 /**
  * The opposite of {@linkcode Readonly<T>}. Make all properties in `T` mutable.
+ *
+ * @typeParam T - The type to make writable.
+ * @typeParam TDeep - If `true`, recursively make all properties writable.
  */
-export type Writable<T> = { -readonly [P in keyof T]: T[P] };
+export type Writable<T, TDeep extends boolean = false> = {
+  -readonly [P in keyof T]: TDeep extends true
+    ? NonNullable<T[P]> extends AnyObject | any[]
+      ? Eval<Writable<T[P], TDeep>>
+      : T[P]
+    : T[P];
+};
 
 /**
  * Get a superset of `T` that allows additional arbitrary properties.
@@ -168,16 +177,16 @@ export type OneOf<T extends AnyObject> = UnionKey<T> extends infer K extends
  *
  * @example
  * ```ts
- * type Params1 = { id: number } & DynamicProperty<'options', { optional?: boolean }>;
- * // => { id: number } & { options?: { optional?: boolean } | undefined }
+ * type Params1 = DynamicProperty<'options', { optional?: boolean }>;
+ * // => { options?: { optional?: boolean } | undefined }
  *
- * type Params2 = { id: number } & DynamicProperty<'config', { required: string }>;
- * // => { id: number } & { config: { required: string } }
+ * type Params2 = DynamicProperty<'config', { required: string }>;
+ * // => { config: { required: string } }
  * ```
  */
 export type DynamicProperty<TKey extends PropertyKey, TValue> =
   | {} // <- Ensures edge cases like `never` are handled even in generic contexts
-  | TValue extends EmptyObject
+  | TValue extends EmptyObject | undefined | null
   ? { [K in TKey]?: TValue }
   : {} extends TValue
     ? { [K in TKey]?: TValue }

@@ -27,7 +27,7 @@ export function createStubEvent<
   return {
     blockNumber: 1n,
     data: randomHex(),
-    transactionHash: randomHex(),
+    transactionHash: randomHex(32),
     ...overrides,
   };
 }

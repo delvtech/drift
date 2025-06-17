@@ -7,27 +7,27 @@ import type { Eval, Replace, Writable } from "src/utils/types";
  * Creates a stub block for testing.
  * @param override - Override default values
  */
-export function createStubBlock<
-  const T extends Partial<Block> = Partial<Block>,
->(overrides: T = {} as T): Eval<Replace<Block, Writable<T>>> {
+export function createStubBlock<const T extends Partial<Block> = Block>(
+  overrides: T = {} as T,
+): Eval<Replace<Block, Writable<T>>> {
   return {
     extraData: "0x",
-    gasLimit: 30000000n,
+    gasLimit: 30_000_000n,
     gasUsed: 108_000_000n,
-    hash: randomHex(),
+    hash: randomHex(32),
     logsBloom: "0x0",
     miner: randomAddress(),
-    mixHash: randomHex(),
+    mixHash: randomHex(32),
     nonce: 1n,
     number: 1n,
-    parentHash: randomHex(),
-    receiptsRoot: randomHex(),
-    sha3Uncles: randomHex(),
+    parentHash: randomHex(32),
+    receiptsRoot: randomHex(32),
+    sha3Uncles: randomHex(32),
     size: 100_000n,
-    stateRoot: randomHex(),
+    stateRoot: randomHex(32),
     timestamp: BigInt(Date.now()) / 1000n,
     transactions: [],
-    transactionsRoot: randomHex(),
+    transactionsRoot: randomHex(32),
     ...overrides,
   };
 }

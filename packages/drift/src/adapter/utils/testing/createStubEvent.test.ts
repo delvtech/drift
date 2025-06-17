@@ -18,7 +18,7 @@ describe("createStubEvent", () => {
         value: 100n,
       },
     });
-    expect(event).toMatchObject({
+    expect(event).toStrictEqual({
       eventName: "Transfer",
       args: {
         from: "0xBob",
@@ -54,7 +54,7 @@ describe("createStubEvents", () => {
         },
       ],
     });
-    expect(events).toMatchObject([
+    expect(events).toStrictEqual([
       {
         eventName: "Transfer",
         args: {

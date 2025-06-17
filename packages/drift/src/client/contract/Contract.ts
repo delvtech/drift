@@ -3,6 +3,7 @@ import type {
   Adapter,
   ContractParams,
   GetEventsOptions,
+  MulticallCalls,
   MulticallOptions,
   MulticallReturn,
   ReadAdapter,
@@ -236,29 +237,6 @@ export class ReadContract<
   }
 
   /**
-   * Uses Multicall3 to read multiple functions from the contract in a
-   * single request.
-   */
-  async multicall<
-    TCalls extends { fn: FunctionName<TAbi> }[],
-    TAllowFailure extends boolean = true,
-  >({
-    calls,
-    ...options
-  }: ContractMulticallParams<TAbi, TCalls, TAllowFailure>): Promise<
-    ContractMulticallReturn<TAbi, TCalls, TAllowFailure>
-  > {
-    return this.client.multicall({
-      calls: calls.map((call) => ({
-        abi: this.abi,
-        address: this.address,
-        ...call,
-      })),
-      ...options,
-    }) as Promise<ContractMulticallReturn<TAbi, TCalls, TAllowFailure>>;
-  }
-
-  /**
    * Reads a specified function from the contract.
    */
   read<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
@@ -297,6 +275,32 @@ export class ReadContract<
       args: args as FunctionArgs<TAbi, TFunctionName>,
       ...options,
     });
+  }
+
+  /**
+   * Uses Multicall3 to read multiple functions from the contract in a
+   * single request.
+   */
+  async multicall<
+    TCalls extends { fn: FunctionName<TAbi> }[],
+    TAllowFailure extends boolean = true,
+  >({
+    calls,
+    ...options
+  }: ContractMulticallParams<TAbi, TCalls, TAllowFailure>): Promise<
+    ContractMulticallReturn<TAbi, TCalls, TAllowFailure>
+  > {
+    return this.client.multicall({
+      calls: calls.map(
+        (call) =>
+          ({
+            abi: this.abi,
+            address: this.address,
+            ...call,
+          }) as MulticallCalls[number],
+      ),
+      ...options,
+    }) as Promise<ContractMulticallReturn<TAbi, TCalls, TAllowFailure>>;
   }
 }
 

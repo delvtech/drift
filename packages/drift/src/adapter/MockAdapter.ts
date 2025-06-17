@@ -1,17 +1,32 @@
 import { AbiEncoder } from "src/adapter/AbiEncoder";
-import type { Abi, Address, Bytes, Hash } from "src/adapter/types/Abi";
+import type {
+  Abi,
+  Address,
+  Bytes,
+  Hash,
+  HexString,
+} from "src/adapter/types/Abi";
 import type {
   CallParams,
   DeployParams,
+  EncodeDeployDataParams,
+  EncodedCallParams,
   FunctionCallParams,
   GetEventsParams,
+  GetWalletCapabilitiesParams,
   MulticallOptions,
   MulticallParams,
   MulticallReturn,
   ReadParams,
   ReadWriteAdapter,
+  SendCallsOptions,
+  SendCallsParams,
+  SendCallsReturn,
   SendTransactionParams,
   SimulateWriteParams,
+  WalletCallOptions,
+  WalletCallsStatus,
+  WalletCapabilities,
   WriteParams,
 } from "src/adapter/types/Adapter";
 import type { BlockIdentifier } from "src/adapter/types/Block";
@@ -36,9 +51,10 @@ import { convert } from "src/utils/convert";
 import { stringifyKey } from "src/utils/stringifyKey";
 import { MissingStubError, StubStore } from "src/utils/testing/StubStore";
 import type {
-  AnyObject,
   Extended,
   FunctionKey,
+  NarrowTo,
+  OneOf,
   Replace,
 } from "src/utils/types";
 
@@ -49,17 +65,17 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     return this.stubs.reset(method);
   }
 
-  protected createKey(params?: AnyObject) {
+  protected createKey(params?: unknown) {
     if (!params) return undefined;
-    // Remove ABIs
-    const keyParams = convert(
-      params,
-      (v): v is Extended<{ abi: Abi }> =>
-        v && typeof v === "object" && "abi" in v,
-      ({ abi, ...rest }) => rest,
+    return stringifyKey(
+      // Remove ABIs
+      convert(
+        params,
+        (v): v is Extended<{ abi: Abi }> =>
+          v && typeof v === "object" && "abi" in v,
+        ({ abi, ...rest }) => rest,
+      ),
     );
-    const key = stringifyKey(keyParams);
-    return key;
   }
 
   // getChainId //
@@ -91,14 +107,14 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   onGetBlock<T extends BlockIdentifier | undefined = undefined>(block?: T) {
     return this.stubs.get<[block?: T], Promise<GetBlockReturn<T>>>({
       method: "getBlock",
-      key: block === undefined ? undefined : this.createKey({ block }),
+      key: this.createKey(block),
     });
   }
 
   async getBlock<T extends BlockIdentifier | undefined = undefined>(block?: T) {
     return this.stubs.get<[block?: T], Promise<GetBlockReturn<T>>>({
       method: "getBlock",
-      key: block === undefined ? undefined : this.createKey({ block }),
+      key: this.createKey(block),
       matchPartial: true,
     })(block);
   }
@@ -170,6 +186,50 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     })(params);
   }
 
+  // sendRawTransaction //
+
+  onSendRawTransaction(transaction?: Bytes) {
+    return this.stubs.get<[Bytes], Promise<Hash>>({
+      method: "sendRawTransaction",
+      key: this.createKey(transaction),
+    });
+  }
+
+  async sendRawTransaction(transaction: Bytes) {
+    return this.stubs.get<[Bytes], Promise<Hash>>({
+      method: "sendRawTransaction",
+      key: this.createKey(transaction),
+      matchPartial: true,
+    })(transaction);
+  }
+
+  // getEvents //
+
+  onGetEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
+    params?: Partial<GetEventsParams<TAbi, TEventName>>,
+  ) {
+    return this.stubs.get<
+      [GetEventsParams<TAbi, TEventName>],
+      Promise<EventLog<TAbi, TEventName>[]>
+    >({
+      method: "getEvents",
+      key: this.createKey(params),
+    });
+  }
+
+  async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
+    params: GetEventsParams<TAbi, TEventName>,
+  ) {
+    return this.stubs.get<
+      [GetEventsParams<TAbi, TEventName>],
+      Promise<EventLog<TAbi, TEventName>[]>
+    >({
+      method: "getEvents",
+      key: this.createKey(params),
+      matchPartial: true,
+    })(params);
+  }
+
   // call //
 
   onCall(params?: Partial<CallParams>) {
@@ -182,6 +242,64 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   async call(params: CallParams) {
     return this.stubs.get<[CallParams], Promise<Bytes>>({
       method: "call",
+      key: this.createKey(params),
+      matchPartial: true,
+    })(params);
+  }
+
+  // read //
+
+  onRead<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
+  >(params?: OnReadParams<TAbi, TFunctionName>) {
+    return this.stubs.get<
+      [ReadParams<TAbi, TFunctionName>],
+      Promise<FunctionReturn<TAbi, TFunctionName>>
+    >({
+      method: "read",
+      key: this.createKey(params),
+    });
+  }
+
+  async read<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
+  >(params: ReadParams<TAbi, TFunctionName>) {
+    return this.stubs.get<
+      [ReadParams<TAbi, TFunctionName>],
+      Promise<FunctionReturn<TAbi, TFunctionName>>
+    >({
+      method: "read",
+      key: this.createKey(params),
+      matchPartial: true,
+    })(params);
+  }
+
+  // simulateWrite //
+
+  onSimulateWrite<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(params?: OnSimulateWriteParams<TAbi, TFunctionName>) {
+    return this.stubs.get<
+      [SimulateWriteParams<TAbi, TFunctionName>],
+      Promise<FunctionReturn<TAbi, TFunctionName>>
+    >({
+      method: "simulateWrite",
+      key: this.createKey(params),
+    });
+  }
+
+  async simulateWrite<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(params: SimulateWriteParams<TAbi, TFunctionName>) {
+    return this.stubs.get<
+      [SimulateWriteParams<TAbi, TFunctionName>],
+      Promise<FunctionReturn<TAbi, TFunctionName>>
+    >({
+      method: "simulateWrite",
       key: this.createKey(params),
       matchPartial: true,
     })(params);
@@ -272,108 +390,128 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     }
   }
 
-  // sendRawTransaction //
+  // getSignerAddress //
 
-  onSendRawTransaction(transaction?: Bytes) {
-    return this.stubs.get<[Bytes], Promise<Hash>>({
-      method: "sendRawTransaction",
-      key:
-        transaction === undefined ? undefined : this.createKey({ transaction }),
+  onGetSignerAddress() {
+    return this.stubs.get<[], Promise<Address>>({
+      method: "getSignerAddress",
     });
   }
 
-  async sendRawTransaction(transaction: Bytes) {
-    return this.stubs.get<[Bytes], Promise<Hash>>({
-      method: "sendRawTransaction",
-      key:
-        transaction === undefined ? undefined : this.createKey({ transaction }),
-      matchPartial: true,
-    })(transaction);
+  async getSignerAddress() {
+    return this.stubs.get<[], Promise<Address>>({
+      method: "getSignerAddress",
+    })();
   }
 
-  // getEvents //
+  // getWalletCapabilities //
 
-  onGetEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
-    params?: Partial<GetEventsParams<TAbi, TEventName>>,
+  onGetWalletCapabilities<const TChainIds extends number[] = []>(
+    params?: GetWalletCapabilitiesParams<TChainIds>,
   ) {
     return this.stubs.get<
-      [GetEventsParams<TAbi, TEventName>],
-      Promise<EventLog<TAbi, TEventName>[]>
+      [GetWalletCapabilitiesParams<TChainIds>?],
+      Promise<WalletCapabilities<TChainIds>>
     >({
-      method: "getEvents",
+      method: "getWalletCapabilities",
       key: this.createKey(params),
     });
   }
 
-  async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>(
-    params: GetEventsParams<TAbi, TEventName>,
+  async getWalletCapabilities<const TChainIds extends number[] = []>(
+    params?: GetWalletCapabilitiesParams<TChainIds>,
   ) {
     return this.stubs.get<
-      [GetEventsParams<TAbi, TEventName>],
-      Promise<EventLog<TAbi, TEventName>[]>
+      [GetWalletCapabilitiesParams<TChainIds>?],
+      Promise<WalletCapabilities<TChainIds>>
     >({
-      method: "getEvents",
+      method: "getWalletCapabilities",
       key: this.createKey(params),
       matchPartial: true,
     })(params);
   }
 
-  // read //
+  // getCallsStatus //
 
-  onRead<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(params?: OnReadParams<TAbi, TFunctionName>) {
-    return this.stubs.get<
-      [ReadParams<TAbi, TFunctionName>],
-      Promise<FunctionReturn<TAbi, TFunctionName>>
-    >({
-      method: "read",
+  onGetCallsStatus<TId extends HexString>(batchId?: TId) {
+    return this.stubs.get<[batchId: TId], Promise<WalletCallsStatus<TId>>>({
+      method: "getCallsStatus",
+      key: this.createKey(batchId),
+    });
+  }
+
+  async getCallsStatus<TId extends HexString>(batchId: TId) {
+    return this.stubs.get<[batchId: TId], Promise<WalletCallsStatus<TId>>>({
+      method: "getCallsStatus",
+      key: this.createKey(batchId),
+      matchPartial: true,
+    })(batchId);
+  }
+
+  // showCallsStatus //
+
+  onShowCallsStatus(batchId?: HexString) {
+    return this.stubs.get<[batchId: HexString], Promise<void>>({
+      method: "showCallsStatus",
+      key: this.createKey(batchId),
+    });
+  }
+
+  async showCallsStatus(batchId: HexString) {
+    return this.stubs.get<[batchId: HexString], Promise<void>>({
+      method: "showCallsStatus",
+      key: this.createKey(batchId),
+      matchPartial: true,
+      create: (stub) => stub.resolves(),
+    })(batchId);
+  }
+
+  // sendTransaction //
+
+  onSendTransaction(params?: Partial<SendTransactionParams>) {
+    return this.stubs.get<[SendTransactionParams], Promise<Hash>>({
+      method: "sendTransaction",
       key: this.createKey(params),
     });
   }
 
-  async read<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(params: ReadParams<TAbi, TFunctionName>) {
-    return this.stubs.get<
-      [ReadParams<TAbi, TFunctionName>],
-      Promise<FunctionReturn<TAbi, TFunctionName>>
-    >({
-      method: "read",
+  async sendTransaction(params: SendTransactionParams) {
+    const hash = await this.stubs.get<[SendTransactionParams], Promise<Hash>>({
+      method: "sendTransaction",
       key: this.createKey(params),
       matchPartial: true,
     })(params);
+
+    if (params.onMined) {
+      this.waitForTransaction({ hash }).then(params.onMined);
+    }
+
+    return hash;
   }
 
-  // simulateWrite //
+  // deploy //
 
-  onSimulateWrite<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params?: OnSimulateWriteParams<TAbi, TFunctionName>) {
-    return this.stubs.get<
-      [SimulateWriteParams<TAbi, TFunctionName>],
-      Promise<FunctionReturn<TAbi, TFunctionName>>
-    >({
-      method: "simulateWrite",
+  onDeploy<TAbi extends Abi>(params?: OnDeployParams<TAbi>) {
+    return this.stubs.get<[DeployParams<TAbi>], Promise<Hash>>({
+      method: "deploy",
       key: this.createKey(params),
     });
   }
 
-  async simulateWrite<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: SimulateWriteParams<TAbi, TFunctionName>) {
-    return this.stubs.get<
-      [SimulateWriteParams<TAbi, TFunctionName>],
-      Promise<FunctionReturn<TAbi, TFunctionName>>
-    >({
-      method: "simulateWrite",
-      key: this.createKey(params),
-      matchPartial: true,
-    })(params);
+  async deploy<TAbi extends Abi>(params: DeployParams<TAbi>) {
+    const hash = await Promise.resolve(
+      this.stubs.get<[DeployParams<TAbi>], Promise<Hash>>({
+        method: "deploy",
+        key: this.createKey(params),
+        matchPartial: true,
+      })(params),
+    );
+
+    if (params.onMined) {
+      this.waitForTransaction({ hash }).then(params.onMined);
+    }
+
+    return hash;
   }
 
   // write //
@@ -408,68 +546,40 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     return hash;
   }
 
-  // getSignerAddress //
+  // sendCalls //
 
-  onGetSignerAddress() {
-    return this.stubs.get<[], Address>({
-      method: "getSignerAddress",
-    });
-  }
-
-  async getSignerAddress() {
-    return this.stubs.get<[], Address>({
-      method: "getSignerAddress",
-    })();
-  }
-
-  // deploy //
-
-  onDeploy<TAbi extends Abi>(params?: OnDeployParams<TAbi>) {
-    return this.stubs.get<[DeployParams<TAbi>], Promise<Hash>>({
-      method: "deploy",
+  onSendCalls<const TCalls extends unknown[] = any[]>(
+    params?: OnSendCallsParams<TCalls>,
+  ) {
+    return this.stubs.get<[SendCallsParams<TCalls>], Promise<SendCallsReturn>>({
+      method: "sendCalls",
       key: this.createKey(params),
     });
   }
 
-  async deploy<TAbi extends Abi>(params: DeployParams<TAbi>) {
-    const hash = await Promise.resolve(
-      this.stubs.get<[DeployParams<TAbi>], Promise<Hash>>({
-        method: "deploy",
-        key: this.createKey(params),
-        matchPartial: true,
-      })(params),
-    );
-
-    if (params.onMined) {
-      this.waitForTransaction({ hash }).then(params.onMined);
-    }
-
-    return hash;
-  }
-
-  // sendTransaction //
-
-  onSendTransaction(params?: Partial<SendTransactionParams>) {
-    return this.stubs.get<[SendTransactionParams], Promise<Hash>>({
-      method: "sendTransaction",
-      key: this.createKey(params),
-    });
-  }
-
-  async sendTransaction(params: SendTransactionParams) {
-    const hash = await this.stubs.get<[SendTransactionParams], Promise<Hash>>({
-      method: "sendTransaction",
+  async sendCalls<const TCalls extends unknown[] = any[]>(
+    params: SendCallsParams<TCalls>,
+  ) {
+    return this.stubs.get<[SendCallsParams<TCalls>], Promise<SendCallsReturn>>({
+      method: "sendCalls",
       key: this.createKey(params),
       matchPartial: true,
     })(params);
-
-    if (params.onMined) {
-      this.waitForTransaction({ hash }).then(params.onMined);
-    }
-
-    return hash;
   }
 }
+
+export type OnReadParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi, "pure" | "view"> = FunctionName<
+    TAbi,
+    "pure" | "view"
+  >,
+> = Replace<
+  Partial<ReadParams<TAbi, TFunctionName>>,
+  {
+    args?: Partial<FunctionArgs<TAbi, TFunctionName>>;
+  }
+>;
 
 export type OnMulticallCalls<
   TAbis extends { abi: Abi }[] = { abi: Abi }[],
@@ -497,7 +607,7 @@ export type OnMulticallCalls<
     : TAbis[K] & TFns[K];
 };
 
-export type OnMulticallParams<
+export interface OnMulticallParams<
   TAbis extends { abi: Abi }[] = { abi: Abi }[],
   TFns extends {
     [K in keyof TAbis]: { fn: FunctionName<TAbis[K]["abi"]> };
@@ -505,22 +615,9 @@ export type OnMulticallParams<
     [K in keyof TAbis]: { fn: FunctionName<TAbis[K]["abi"]> };
   },
   TAllowFailure extends boolean = boolean,
-> = {
+> extends MulticallOptions<TAllowFailure> {
   calls?: OnMulticallCalls<TAbis, TFns>;
-} & MulticallOptions<TAllowFailure>;
-
-export type OnReadParams<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi, "pure" | "view"> = FunctionName<
-    TAbi,
-    "pure" | "view"
-  >,
-> = Replace<
-  Partial<ReadParams<TAbi, TFunctionName>>,
-  {
-    args?: Partial<FunctionArgs<TAbi, TFunctionName>>;
-  }
->;
+}
 
 export type OnSimulateWriteParams<
   TAbi extends Abi = Abi,
@@ -554,3 +651,40 @@ export type OnDeployParams<TAbi extends Abi = Abi> = Replace<
     args?: Partial<ConstructorArgs<TAbi>>;
   }
 >;
+
+export type StubWalletCallParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+> = OneOf<
+  | Replace<
+      Partial<FunctionCallParams<TAbi, TFunctionName>>,
+      {
+        args?: Partial<FunctionArgs<TAbi, TFunctionName>>;
+      }
+    >
+  | Replace<
+      Partial<EncodeDeployDataParams<TAbi>>,
+      {
+        args?: Partial<ConstructorArgs<TAbi>>;
+      }
+    >
+  | Partial<EncodedCallParams>
+> &
+  WalletCallOptions;
+
+export interface OnSendCallsParams<TCalls extends unknown[] = unknown[]>
+  extends SendCallsOptions {
+  calls: {
+    [K in keyof TCalls]: NarrowTo<
+      { abi: Abi },
+      TCalls[K]
+    >["abi"] extends infer TAbi extends Abi
+      ? StubWalletCallParams<
+          TAbi,
+          NarrowTo<{ fn: FunctionName<TAbi> }, TCalls[K]>["fn"]
+        > extends infer TParams
+        ? NarrowTo<TParams, Replace<TParams, TCalls[K]>>
+        : never
+      : never;
+  };
+}

@@ -8,7 +8,8 @@ describe("createStubBlock", () => {
     const block = createStubBlock({
       number: 123n, // <--
     });
-    expect(block).toMatchObject({
+    expect(block).toStrictEqual({
+      number: 123n, // <--
       extraData: expect.stringMatching(HEX_REGEX),
       gasLimit: expect.any(BigInt),
       gasUsed: expect.any(BigInt),
@@ -17,7 +18,6 @@ describe("createStubBlock", () => {
       miner: expect.stringMatching(HEX_REGEX),
       mixHash: expect.stringMatching(HEX_REGEX),
       nonce: expect.any(BigInt),
-      number: 123n, // <--
       parentHash: expect.stringMatching(HEX_REGEX),
       receiptsRoot: expect.stringMatching(HEX_REGEX),
       sha3Uncles: expect.stringMatching(HEX_REGEX),
