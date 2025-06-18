@@ -59,7 +59,7 @@ export class ViemReadWriteAdapter<
     const hash = await this.walletClient.sendTransaction({
       data: params.data,
       to: params.to,
-      account: params.from ?? (await this.#getAccount()),
+      account: params.from ?? (await this._getAccount()),
       gas: params.gas,
       nonce: params.nonce !== undefined ? Number(params.nonce) : undefined,
       value: params.value,
@@ -103,7 +103,7 @@ export class ViemReadWriteAdapter<
       abi: params.abi as Abi,
       bytecode: params.bytecode,
       args: prepared.params,
-      account: params.from ?? (await this.#getAccount()),
+      account: params.from ?? (await this._getAccount()),
       gas: params.gas,
       nonce: params.nonce !== undefined ? Number(params.nonce) : undefined,
       value: params.value,
@@ -147,7 +147,7 @@ export class ViemReadWriteAdapter<
       functionName: params.fn,
       args: prepared.params,
       accessList: params.accessList,
-      account: params.from ?? (await this.#getAccount()),
+      account: params.from ?? (await this._getAccount()),
       gas: params.gas,
       nonce: params.nonce !== undefined ? Number(params.nonce) : undefined,
       value: params.value,
@@ -163,7 +163,7 @@ export class ViemReadWriteAdapter<
     return hash;
   }
 
-  async #getAccount() {
+  private async _getAccount() {
     return (
       this.walletClient.account ?? this.getSignerAddress().catch(() => null)
     );
