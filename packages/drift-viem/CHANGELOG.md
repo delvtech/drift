@@ -1,5 +1,19 @@
 # @delvtech/drift-viem
 
+## 1.0.0
+
+### Patch Changes
+
+- cf8eaf1: Added support for accepting any viem client type as the `publicClient`. If the client is missing the minimum required actions, it will be extended with `publicActions`.
+- Updated dependencies [1feff53]
+- Updated dependencies [319c2aa]
+- Updated dependencies [9f63615]
+- Updated dependencies [b99ea80]
+- Updated dependencies [fcab0a8]
+- Updated dependencies [e669f49]
+- Updated dependencies [0364ef3]
+  - @delvtech/drift@1.0.0
+
 ## 0.9.1
 
 ## 0.9.0
