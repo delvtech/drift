@@ -29,16 +29,16 @@
   },
   "peerDependencies": {
     "@delvtech/drift": "^0.10.0",
-    "viem": "^2.31.1"
+    "viem": "^2.31.3"
   },
   "devDependencies": {
     "@delvtech/drift": "^0.10.0",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3",
-    "viem": "^2.31.1",
+    "viem": "^2.31.3",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.3"
+    "vitest": "^3.2.4"
   },
   "author": {
     "name": "DELV",

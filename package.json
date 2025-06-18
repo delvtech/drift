@@ -2,7 +2,7 @@
   "name": "drift",
   "version": "0.0.0",
   "license": "Apache-2.0",
-  "workspaces": ["contracts", "examples", "packages/*"],
+  "workspaces": ["contracts", "examples/*", "packages/*"],
   "type": "module",
   "private": true,
   "scripts": {
@@ -20,7 +20,7 @@
     "reset-node-modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && yarn cache clean && yarn"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "^2.0.0",
     "@changesets/cli": "^2.29.4",
     "turbo": "^2.5.4",
     "typescript": "^5.8.3"

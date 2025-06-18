@@ -1,4 +1,3 @@
-// https://biomejs.dev/reference/configuration/
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": {
@@ -7,7 +6,7 @@
     "useIgnoreFile": true,
     "defaultBranch": "main"
   },
-  "organizeImports": {
+  "assist": {
     "enabled": true
   },
   "formatter": {
@@ -44,12 +43,14 @@
   "javascript": {
     "formatter": {
       "quoteStyle": "double",
-      "trailingCommas": "all"
+      "trailingCommas": "all",
+      "indentStyle": "space",
+      "indentWidth": 2
     }
   },
   "overrides": [
     {
-      "include": [
+      "includes": [
         "contracts/lib/**",
         "packages/drift/src/artifacts/**",
         "packages/drift/src/ethereum/ethereum.ts",
