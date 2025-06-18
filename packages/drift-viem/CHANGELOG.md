@@ -1,5 +1,20 @@
 # @delvtech/drift-viem
 
+## 0.10.0
+
+### Patch Changes
+
+- cf8eaf1: Added support for accepting any viem client type as the `publicClient`. If the client is missing the minimum required actions, it will be extended with `publicActions`.
+- fcab0a8: Patched a bug in the `ViemReadWriteAdapter` related to private method access when trying to use write methods.
+- Updated dependencies [1feff53]
+- Updated dependencies [319c2aa]
+- Updated dependencies [9f63615]
+- Updated dependencies [b99ea80]
+- Updated dependencies [fcab0a8]
+- Updated dependencies [e669f49]
+- Updated dependencies [0364ef3]
+  - @delvtech/drift@0.10.0
+
 ## 0.9.1
 
 ## 0.9.0

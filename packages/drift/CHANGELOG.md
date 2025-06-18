@@ -1,5 +1,26 @@
 # @delvtech/drift
 
+## 0.10.0
+
+### Minor Changes
+
+- 319c2aa: Renamed `NotImplementedError` for missing stubs on mock clients to `MissingStubError` for clarity and to avoid confusion with more general use cases that may not be related to stubs.
+
+### Patch Changes
+
+- 1feff53: Added `DynamicProperty` property type to exports.
+- 9f63615: Added `erc4626` artifact to exports (abi + method identifiers).
+- b99ea80: Added the following types to exports:
+  - `FunctionCallParams`
+  - `AfterMethodHook`
+  - `BeforeMethodHook`
+  - `HookMap`
+  - `HookPayload`
+  - `RequiredValueKey`
+- fcab0a8: Patched a bug in the `ViemReadWriteAdapter` related to private method access when trying to use write methods.
+- e669f49: Added `encodeDeployData`, `prepareDeployData`, and `prepareFunctionReturn` to exports.
+- 0364ef3: Made the `data` property on `EventLog` required.
+
 ## 0.9.1
 
 ### Patch Changes
