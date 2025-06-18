@@ -2,26 +2,26 @@ import {
   type Abi,
   type DeployParams,
   DriftError,
+  encodeBytecodeCallData,
   type FunctionName,
   type GetWalletCapabilitiesParams,
+  getWalletCallsStatusLabel,
   type HexString,
+  prepareParams,
   type ReadWriteAdapter,
   type SendCallsParams,
   type SendCallsReturn,
   type SendTransactionParams,
+  toHexString,
   type WalletCallsStatus,
   type WalletCapabilities,
   type WriteParams,
-  encodeBytecodeCallData,
-  getWalletCallsStatusLabel,
-  prepareParams,
-  toHexString,
 } from "@delvtech/drift";
+import type { AnyClient } from "src/publicClient";
 import {
   ViemReadAdapter,
   type ViemReadAdapterParams,
 } from "src/ViemReadAdapter";
-import type { AnyClient } from "src/publicClient";
 import type { Call, PublicClient, WalletClient } from "viem";
 
 export interface ViemReadWriteAdapterParams<
@@ -62,15 +62,14 @@ export class ViemReadWriteAdapter<
     return this.walletClient
       .getCapabilities({
         account: params?.address,
-        chainId: params?.chainIds?.[0],
+        chainId,
       })
-      .then(
-        (capabilities) =>
-          ({
-            // FIXME:
-            [chainId || 0]: capabilities,
-          }) as WalletCapabilities<TChainIds>,
-      );
+      .then((capabilities) => {
+        return {
+          // FIXME:
+          [chainId || 0]: capabilities,
+        } as WalletCapabilities<TChainIds>;
+      });
   }
 
   getCallsStatus<TId extends HexString>(

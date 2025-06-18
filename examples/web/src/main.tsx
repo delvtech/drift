@@ -11,13 +11,13 @@ import { wagmiConfig } from "src/lib/wagmi";
 import { WagmiProvider } from "wagmi";
 
 createRoot(document.getElementById("root")!).render(
-	<StrictMode>
-		<WagmiProvider config={wagmiConfig}>
-			<QueryClientProvider client={queryClient}>
-				<RainbowKitProvider>
-					<App />
-				</RainbowKitProvider>
-			</QueryClientProvider>
-		</WagmiProvider>
-	</StrictMode>,
+  <StrictMode>
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider>
+          <App />
+        </RainbowKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  </StrictMode>,
 );

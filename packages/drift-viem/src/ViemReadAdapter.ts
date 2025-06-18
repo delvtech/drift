@@ -22,10 +22,10 @@ import {
 } from "src/publicClient";
 import {
   type CallParameters,
-  type GetBalanceParameters,
-  type PublicClient,
   decodeEventLog,
+  type GetBalanceParameters,
   isHex,
+  type PublicClient,
   rpcTransactionType,
 } from "viem";
 

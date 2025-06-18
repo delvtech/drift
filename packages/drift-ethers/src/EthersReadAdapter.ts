@@ -1,6 +1,7 @@
 import {
   type Abi,
   type AbiArrayType,
+  arrayToObject,
   BaseReadAdapter,
   type Block,
   type BlockIdentifier,
@@ -9,19 +10,18 @@ import {
   type EventArgs,
   type EventLog,
   type EventName,
+  encodeBytecodeCallData,
   type GetBalanceParams,
   type GetBlockReturn,
   type GetEventsParams,
   type GetTransactionParams,
   type Hash,
+  prepareParams,
   type ReadAdapter,
   type Transaction,
   type TransactionReceipt,
-  type WaitForTransactionParams,
-  arrayToObject,
-  encodeBytecodeCallData,
-  prepareParams,
   toHexString,
+  type WaitForTransactionParams,
 } from "@delvtech/drift";
 import type { AccessList } from "ethers";
 import {
@@ -29,10 +29,10 @@ import {
   Contract,
   type DeferredTopicFilter,
   type EventLog as EthersEventLog,
+  getDefaultProvider,
   type InterfaceAbi,
   JsonRpcProvider,
   type Provider,
-  getDefaultProvider,
 } from "ethers";
 
 export interface EthersReadAdapterParams<

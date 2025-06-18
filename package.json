@@ -2,7 +2,11 @@
   "name": "drift",
   "version": "0.0.0",
   "license": "Apache-2.0",
-  "workspaces": ["contracts", "examples/*", "packages/*"],
+  "workspaces": [
+    "contracts",
+    "examples/*",
+    "packages/*"
+  ],
   "type": "module",
   "private": true,
   "scripts": {

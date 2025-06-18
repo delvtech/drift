@@ -3,84 +3,84 @@
 @tailwind utilities;
 
 @layer base {
-	:root {
-		/* Custom Colors */
-		--aquamarine: 158 100% 54%;
-		--sky-blue: 191 95% 53%;
+  :root {
+    /* Custom Colors */
+    --aquamarine: 158 100% 54%;
+    --sky-blue: 191 95% 53%;
 
-		--background: 230 38% 3%;
-		--foreground: 0 0% 100%;
+    --background: 230 38% 3%;
+    --foreground: 0 0% 100%;
 
-		/* Surface Styles */
-		--primary: 191 95% 53%;
-		--primary-foreground: 225 21% 7%;
+    /* Surface Styles */
+    --primary: 191 95% 53%;
+    --primary-foreground: 225 21% 7%;
 
-		--secondary: 225 21% 7%;
-		--secondary-foreground: 221 12% 59%;
+    --secondary: 225 21% 7%;
+    --secondary-foreground: 221 12% 59%;
 
-		--popover: 224 17% 13%;
-		--popover-foreground: 0 0% 100%;
-		--muted: 222 12% 21%;
-		--muted-foreground: 0 0% 100%;
-		--accent: 224 17% 13%;
-		--accent-foreground: 221 12% 59%;
-		--destructive: 0 100% 67%;
-		--destructive-foreground: 225 21% 7%;
-		--border: 224 17% 13%;
-		--border-secondary: 222 12% 21%;
-		--input: 224 17% 13%;
-		--ring: 240 5.9% 10%;
+    --popover: 224 17% 13%;
+    --popover-foreground: 0 0% 100%;
+    --muted: 222 12% 21%;
+    --muted-foreground: 0 0% 100%;
+    --accent: 224 17% 13%;
+    --accent-foreground: 221 12% 59%;
+    --destructive: 0 100% 67%;
+    --destructive-foreground: 225 21% 7%;
+    --border: 224 17% 13%;
+    --border-secondary: 222 12% 21%;
+    --input: 224 17% 13%;
+    --ring: 240 5.9% 10%;
 
-		/** Ice color */
-		--ice: 191 100% 84%;
+    /** Ice color */
+    --ice: 191 100% 84%;
 
-		--text-secondary: 220.8 11.96% 59.02%;
+    --text-secondary: 220.8 11.96% 59.02%;
 
-		--surface-warning: 43 96% 56%;
+    --surface-warning: 43 96% 56%;
 
-		/* Card Styles*/
-		--card: 225 21% 7%;
-		--card-foreground: 0 0% 100%;
-		--card-border-width: 1px;
+    /* Card Styles*/
+    --card: 225 21% 7%;
+    --card-foreground: 0 0% 100%;
+    --card-border-width: 1px;
 
-		--radius: 1rem;
-	}
+    --radius: 1rem;
+  }
 }
 
 @layer base {
-	* {
-		@apply border-border;
-	}
-	body {
-		@apply bg-background text-foreground;
-	}
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 
-	h1 {
-		@apply font-sans text-h1;
-	}
+  h1 {
+    @apply font-sans text-h1;
+  }
 
-	h2 {
-		@apply font-sans text-h2;
-	}
+  h2 {
+    @apply font-sans text-h2;
+  }
 
-	h3 {
-		@apply font-sans text-h3;
-	}
+  h3 {
+    @apply font-sans text-h3;
+  }
 
-	h4 {
-		@apply font-sans text-h4;
-	}
+  h4 {
+    @apply font-sans text-h4;
+  }
 
-	h5 {
-		@apply font-sans text-h5;
-	}
+  h5 {
+    @apply font-sans text-h5;
+  }
 }
 
 @layer components {
-	.gradient-text {
-		@apply bg-gradient-to-r from-[hsl(var(--aquamarine))] to-primary bg-clip-text text-transparent;
-	}
-	.gradient-background {
-		@apply bg-gradient-to-r from-[hsl(var(--aquamarine))] to-primary;
-	}
+  .gradient-text {
+    @apply bg-gradient-to-r from-[hsl(var(--aquamarine))] to-primary bg-clip-text text-transparent;
+  }
+  .gradient-background {
+    @apply bg-gradient-to-r from-[hsl(var(--aquamarine))] to-primary;
+  }
 }
