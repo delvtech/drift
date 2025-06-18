@@ -5,7 +5,7 @@
 ### Patch Changes
 
 - cf8eaf1: Added support for accepting any viem client type as the `publicClient`. If the client is missing the minimum required actions, it will be extended with `publicActions`.
-- fcab0a8: Patched a bug in the ViemReadWriteAdapter related to private method access when trying to use write methods.
+- fcab0a8: Patched a bug in the `ViemReadWriteAdapter` related to private method access when trying to use write methods.
 - Updated dependencies [1feff53]
 - Updated dependencies [319c2aa]
 - Updated dependencies [9f63615]

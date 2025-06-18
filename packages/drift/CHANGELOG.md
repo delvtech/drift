@@ -17,7 +17,7 @@
   - `HookMap`
   - `HookPayload`
   - `RequiredValueKey`
-- fcab0a8: Patched a bug in the ViemReadWriteAdapter related to private method access when trying to use write methods.
+- fcab0a8: Patched a bug in the `ViemReadWriteAdapter` related to private method access when trying to use write methods.
 - e669f49: Added `encodeDeployData`, `prepareDeployData`, and `prepareFunctionReturn` to exports.
 - 0364ef3: Made the `data` property on `EventLog` required.
 
