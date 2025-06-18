@@ -1,0 +1,32 @@
+# local
+*.env
+*.pem
+*.local
+
+# logs
+logs
+_.log
+
+# artifacts
+dist
+out
+build
+js
+
+# testing
+coverage
+
+# package manager
+node_modules
+*.tgz
+
+# language
+*.tsbuildinfo
+
+# os
+.DS_Store
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
