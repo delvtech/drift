@@ -4,17 +4,17 @@
   "version": "0.10.0",
   "license": "Apache-2.0",
   "type": "module",
-  "main": "dist/index.cjs",
-  "types": "dist/index.d.cts",
+  "main": "dist/Web3Adapter.cjs",
+  "types": "dist/Web3Adapter.d.cts",
   "exports": {
     ".": {
       "types": {
-        "import": "./dist/index.d.ts",
-        "require": "./dist/index.d.cts"
+        "import": "./dist/Web3Adapter.d.ts",
+        "require": "./dist/Web3Adapter.d.cts"
       },
       "default": {
-        "import": "./dist/index.js",
-        "require": "./dist/index.cjs"
+        "import": "./dist/Web3Adapter.js",
+        "require": "./dist/Web3Adapter.cjs"
       }
     },
     "./package.json": "./package.json"
