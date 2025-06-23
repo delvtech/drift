@@ -42,6 +42,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   implements ReadWriteAdapter
 {
   web3: TWeb3;
+  injectedWeb3?: TWeb3;
 
   constructor(
     web3OrProvider:
@@ -53,6 +54,9 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
       web3OrProvider instanceof Web3
         ? web3OrProvider
         : (new Web3(web3OrProvider as any) as TWeb3);
+    if (globalThis.ethereum) {
+      this.injectedWeb3 = new Web3(globalThis.ethereum as any) as TWeb3;
+    }
   }
 
   getChainId() {
@@ -222,25 +226,26 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   }
 
   async getSignerAddress() {
-    const [address] = await this.web3.eth.getAccounts();
+    const web3 = this.injectedWeb3 || this.web3;
+    const [address] = await web3.eth.getAccounts();
     if (!address) throw new DriftError("No signer address found");
     return address;
   }
 
   /**
-   * @throws A {@linkcode NotImplementedError} if no provider is set.
+   * @throws A {@linkcode NotImplementedError} if no wallet provider is set.
    */
   async getWalletCapabilities<TChainIds extends number[]>(
     params?: GetWalletCapabilitiesParams<TChainIds>,
   ): Promise<WalletCapabilities<TChainIds>> {
-    if (!this.web3.provider) {
+    if (!this.injectedWeb3?.provider) {
       throw new NotImplementedError({
         method: "getWalletCapabilities",
-        message: "No provider set.",
+        message: "No injected provider found.",
       });
     }
 
-    return this.web3.provider
+    return this.injectedWeb3.provider
       .request<"wallet_getCapabilities", Record<HexString, WalletCapabilities>>(
         {
           method: "wallet_getCapabilities",
@@ -252,9 +257,11 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
           ],
         },
       )
-      .then(({ result }) => {
+      .then((res) => {
         return Object.fromEntries(
-          Object.entries(result).map(([key, value]) => [Number(key), value]),
+          Object.entries(
+            res as unknown as Record<HexString, WalletCapabilities>,
+          ).map(([key, value]) => [Number(key), value]),
         ) as WalletCapabilities<TChainIds>;
       })
       .catch((e) => {
@@ -266,24 +273,26 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   }
 
   /**
-   * @throws A {@linkcode NotImplementedError} if no provider is set.
+   * @throws A {@linkcode NotImplementedError} if no wallet provider is set.
    */
   async getCallsStatus<TId extends HexString>(
     batchId: TId,
   ): Promise<WalletCallsStatus<TId>> {
-    if (!this.web3.provider) {
+    if (!this.injectedWeb3?.provider) {
       throw new NotImplementedError({
-        method: "getWalletCapabilities",
-        message: "No provider set.",
+        method: "getCallsStatus",
+        message: "No injected provider found.",
       });
     }
 
-    return this.web3.provider
+    return this.injectedWeb3.provider
       .request<"wallet_getCallsStatus", WalletGetCallsStatusReturn>({
         method: "wallet_getCallsStatus",
         params: [batchId],
       })
-      .then(({ result: { chainId, id, receipts, status, ...rest } }) => {
+      .then((res) => {
+        const { chainId, id, receipts, status, ...rest } =
+          res as unknown as WalletGetCallsStatusReturn;
         return {
           chainId: Number(chainId),
           id: id as TId,
@@ -311,17 +320,17 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   }
 
   /**
-   * @throws A {@linkcode NotImplementedError} if no provider is set.
+   * @throws A {@linkcode NotImplementedError} if no wallet provider is set.
    */
   async showCallsStatus(batchId: HexString): Promise<void> {
-    if (!this.web3.provider) {
+    if (!this.injectedWeb3?.provider) {
       throw new NotImplementedError({
-        method: "getWalletCapabilities",
-        message: "No provider set.",
+        method: "showCallsStatus",
+        message: "No injected provider found.",
       });
     }
 
-    await this.web3.provider
+    await this.injectedWeb3?.provider
       .request({
         method: "wallet_showCallsStatus",
         params: [batchId],
@@ -335,19 +344,19 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   }
 
   /**
-   * @throws A {@linkcode NotImplementedError} if no provider is set.
+   * @throws A {@linkcode NotImplementedError} if no wallet provider is set.
    */
   async sendCalls<const TCalls extends readonly unknown[] = any[]>(
     params: SendCallsParams<TCalls>,
   ): Promise<SendCallsReturn> {
-    if (!this.web3.provider) {
+    if (!this.injectedWeb3?.provider) {
       throw new NotImplementedError({
-        method: "getWalletCapabilities",
-        message: "No provider set.",
+        method: "sendCalls",
+        message: "No injected provider found.",
       });
     }
 
-    return this.web3.provider
+    return this.injectedWeb3.provider
       .request<"wallet_sendCalls", SendCallsReturn>({
         method: "wallet_sendCalls",
         params: [
@@ -389,10 +398,10 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
           },
         ],
       })
-      .then(({ result }) => result)
+      .then((res) => res as SendCallsReturn)
       .catch((e) => {
         throw new DriftError({
-          message: "Failed to show wallet calls status",
+          message: "Failed to send wallet calls",
           cause: e,
         });
       });
@@ -406,10 +415,11 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     accessList,
     ...rest
   }: SendTransactionParams) {
+    const web3 = this.injectedWeb3 || this.web3;
     from ??= await this.getSignerAddress();
 
     return new Promise<Hash>((resolve, reject) => {
-      const req = this.web3.eth
+      const req = web3.eth
         .sendTransaction({
           ...rest,
           accessList: accessList as AccessList,
@@ -446,7 +456,8 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     value,
     onMined,
   }: DeployParams<TAbi>) {
-    const contract = new this.web3.eth.Contract(abi as readonly AbiFragment[]);
+    const web3 = this.injectedWeb3 || this.web3;
+    const contract = new web3.eth.Contract(abi as readonly AbiFragment[]);
     const { params } = prepareParams({
       abi,
       type: "constructor",
@@ -510,6 +521,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     onMined,
     ...rest
   }: WriteParams<TAbi, TFunctionName>) {
+    const web3 = this.injectedWeb3 || this.web3;
     const { params } = prepareParams({
       abi,
       type: "function",
@@ -521,7 +533,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     from ??= await this.getSignerAddress();
 
     return new Promise<Hash>((resolve, reject) => {
-      const req = this.web3.eth
+      const req = web3.eth
         .sendTransaction({
           ...rest,
           data: method(...params).encodeABI(),
