@@ -16,7 +16,7 @@ export function formatArgsForDisplay(args: any, truncateAbi = true) {
       },
       ({ abi, ...rest }) => {
         return {
-          abi: stringify(abi)?.replace(/(?<=.{100}).+/, "...]"),
+          abi: stringify(abi)?.replace(/(?<=.{100}).+/, "…]"),
           ...rest,
         };
       },

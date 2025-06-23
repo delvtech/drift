@@ -19,8 +19,16 @@ import {
   type WalletCapabilities,
   type WriteParams,
 } from "@delvtech/drift";
-import type { AccessList, InterfaceAbi, Provider, Signer } from "ethers";
-import { Contract, ContractFactory, JsonRpcProvider } from "ethers";
+import {
+  type AccessList,
+  BrowserProvider,
+  Contract,
+  ContractFactory,
+  type InterfaceAbi,
+  JsonRpcProvider,
+  type Provider,
+  type Signer,
+} from "ethers";
 import {
   EthersReadAdapter,
   type EthersReadAdapterParams,
@@ -56,15 +64,21 @@ export class EthersReadWriteAdapter<
 
   /**
    * @throws A {@linkcode NotImplementedError} if the provider is not a
-   * {@linkcode JsonRpcProvider}.
+   * {@linkcode JsonRpcProvider} or {@linkcode BrowserProvider}.
    */
   async getWalletCapabilities<TChainIds extends number[]>(
     params?: GetWalletCapabilitiesParams<TChainIds>,
   ): Promise<WalletCapabilities<TChainIds>> {
-    if (!(this.signer.provider instanceof JsonRpcProvider)) {
+    if (
+      !(
+        this.signer.provider instanceof JsonRpcProvider ||
+        this.signer.provider instanceof BrowserProvider
+      )
+    ) {
       throw new NotImplementedError({
         method: "getWalletCapabilities",
-        message: "This method is only available for the JsonRpcProvider.",
+        message:
+          "This method is only available for the JsonRpcProvider and BrowserProvider.",
       });
     }
 
@@ -93,15 +107,21 @@ export class EthersReadWriteAdapter<
 
   /**
    * @throws A {@linkcode NotImplementedError} if the provider is not a
-   * {@linkcode JsonRpcProvider}.
+   * {@linkcode JsonRpcProvider} or {@linkcode BrowserProvider}.
    */
   async getCallsStatus<TId extends HexString>(
     batchId: TId,
   ): Promise<WalletCallsStatus<TId>> {
-    if (!(this.signer.provider instanceof JsonRpcProvider)) {
+    if (
+      !(
+        this.signer.provider instanceof JsonRpcProvider ||
+        this.signer.provider instanceof BrowserProvider
+      )
+    ) {
       throw new NotImplementedError({
         method: "getCallsStatus",
-        message: "This method is only available for the JsonRpcProvider.",
+        message:
+          "This method is only available for the JsonRpcProvider and BrowserProvider.",
       });
     }
 
@@ -144,13 +164,19 @@ export class EthersReadWriteAdapter<
 
   /**
    * @throws A {@linkcode NotImplementedError} if the provider is not a
-   * {@linkcode JsonRpcProvider}.
+   * {@linkcode JsonRpcProvider} or {@linkcode BrowserProvider}.
    */
   showCallsStatus(batchId: HexString): Promise<void> {
-    if (!(this.signer.provider instanceof JsonRpcProvider)) {
+    if (
+      !(
+        this.signer.provider instanceof JsonRpcProvider ||
+        this.signer.provider instanceof BrowserProvider
+      )
+    ) {
       throw new NotImplementedError({
         method: "showCallsStatus",
-        message: "This method is only available for the JsonRpcProvider.",
+        message:
+          "This method is only available for the JsonRpcProvider and BrowserProvider.",
       });
     }
 
@@ -288,15 +314,21 @@ export class EthersReadWriteAdapter<
 
   /**
    * @throws A {@linkcode NotImplementedError} if the provider is not a
-   * {@linkcode JsonRpcProvider}.
+   * {@linkcode JsonRpcProvider} or {@linkcode BrowserProvider}.
    */
   async sendCalls<const TCalls extends readonly unknown[] = any[]>(
     params: SendCallsParams<TCalls>,
   ): Promise<SendCallsReturn> {
-    if (!(this.signer.provider instanceof JsonRpcProvider)) {
+    if (
+      !(
+        this.signer.provider instanceof JsonRpcProvider ||
+        this.signer.provider instanceof BrowserProvider
+      )
+    ) {
       throw new NotImplementedError({
         method: "sendCalls",
-        message: "This method is only available for the JsonRpcProvider.",
+        message:
+          "This method is only available for the JsonRpcProvider and BrowserProvider.",
       });
     }
 
