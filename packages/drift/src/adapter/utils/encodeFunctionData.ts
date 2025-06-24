@@ -1,7 +1,7 @@
 import { AbiFunction } from "ox";
 import type { Abi, Bytes } from "src/adapter/types/Abi";
 import type { EncodeFunctionDataParams } from "src/adapter/types/Adapter";
-import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
+import type { FunctionName } from "src/adapter/types/Function";
 import { handleError } from "src/adapter/utils/internal/handleError";
 import { prepareParams } from "src/adapter/utils/prepareParams";
 
@@ -28,7 +28,7 @@ export function prepareFunctionData<
       type: "function",
       name: fn,
       kind: "inputs",
-      value: args as FunctionArgs<TAbi, TFunctionName>,
+      value: args,
     });
     return {
       abiFn: abiEntry,

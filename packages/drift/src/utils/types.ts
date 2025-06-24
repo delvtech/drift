@@ -64,8 +64,8 @@ export type WidenTo<Specific, Base> = Specific extends Base ? Base : Specific;
 export type Replace<T, U> = Omit<T, keyof U> & U;
 
 /**
- * Make all properties in `T` whose keys are in the union `K` required and
- * non-nullable. Similar to `Required` but only applies to a subset of keys.
+ * Make all properties in `T` whose keys are in the union `K` required. Similar
+ * to `Required` but only applies to a subset of keys.
  */
 export type RequiredBy<T, K extends keyof T | (string & {})> = Omit<T, K> &
   Required<Pick<T, K & keyof T>>;
@@ -172,8 +172,9 @@ export type OneOf<T extends AnyObject> = UnionKey<T> extends infer K extends
   : never;
 
 /**
- * Creates a type with a single property `TKey` that's optional if `TValue` has
- * no required properties, and required otherwise.
+ * Creates an object type with a single property `TKey`, which is made optional
+ * if `TValue` is an "emptiable" type (e.g., `undefined`, `never`, `{}`, or an
+ * object with only optional properties), Otherwise, the property is required.
  *
  * @example
  * ```ts
@@ -184,13 +185,11 @@ export type OneOf<T extends AnyObject> = UnionKey<T> extends infer K extends
  * // => { config: { required: string } }
  * ```
  */
-export type DynamicProperty<TKey extends PropertyKey, TValue> =
-  | {} // <- Ensures edge cases like `never` are handled even in generic contexts
-  | TValue extends EmptyObject | undefined | null
+export type DynamicProperty<TKey extends PropertyKey, TValue> = {} extends
+  | TValue
+  | Pick<{ [K in TKey]: TValue }, RequiredValueKey<{ [K in TKey]: TValue }>>
   ? { [K in TKey]?: TValue }
-  : {} extends TValue
-    ? { [K in TKey]?: TValue }
-    : { [K in TKey]: TValue };
+  : { [K in TKey]: TValue };
 
 /**
  * Extracts and transforms members of a union type `T` based on a filter type
