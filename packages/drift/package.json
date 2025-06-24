@@ -62,7 +62,7 @@
   "dependencies": {
     "lodash.ismatch": "^4.4.0",
     "lru-cache": "^11.1.0",
-    "ox": "^0.8.2",
+    "ox": "^0.8.3",
     "safe-stable-stringify": "^2.5.0"
   },
   "devDependencies": {
@@ -70,7 +70,7 @@
     "@types/lodash.ismatch": "^4.4.9",
     "@types/node": "^24.0.3",
     "@types/sinon": "^17.0.4",
-    "@vitest/coverage-v8": "3.2.3",
+    "@vitest/coverage-v8": "3.2.4",
     "abitype": "^1.0.8",
     "fast-json-stable-stringify": "^2.1.0",
     "sinon": "^21.0.0",

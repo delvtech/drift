@@ -24,8 +24,8 @@
     "reset-node-modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && yarn cache clean && yarn"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.0.0",
-    "@changesets/cli": "^2.29.4",
+    "@biomejs/biome": "^2.0.5",
+    "@changesets/cli": "^2.29.5",
     "turbo": "^2.5.4",
     "typescript": "^5.8.3"
   },
