@@ -1,4 +1,4 @@
-import { http, createConfig } from "wagmi";
+import { createConfig, http } from "wagmi";
 import { mainnet } from "wagmi/chains";
 
 export const wagmiConfig = createConfig({
@@ -7,3 +7,5 @@ export const wagmiConfig = createConfig({
     [mainnet.id]: http(import.meta.env.VITE_RPC_URL),
   },
 });
+
+export type WagmiConfig = typeof wagmiConfig;

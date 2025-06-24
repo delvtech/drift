@@ -368,6 +368,49 @@ export class DefaultAdapter
   async sendCalls<const TCalls extends readonly unknown[] = any[]>(
     params: SendCallsParams<TCalls>,
   ): Promise<SendCallsReturn> {
+    console.log("request:", {
+      method: "wallet_sendCalls",
+      params: [
+        {
+          version: params.version || "1.0",
+          id: params.id,
+          chainId: toHexString(params.chainId ?? (await this.getChainId())),
+          from: params.from ?? (await this.getSignerAddress()),
+          atomicRequired: params.atomic ?? true,
+          calls: params.calls.map(
+            ({
+              abi,
+              address,
+              args,
+              bytecode,
+              capabilities,
+              data,
+              fn,
+              to = address,
+              value,
+            }) => {
+              // TODO: Create util for this after refactoring multicall to
+              // accept the same calls format
+              if (abi && fn) {
+                data = this.encodeFunctionData({ abi, fn, args });
+              } else if (abi && bytecode) {
+                data = this.encodeDeployData({ abi, bytecode, args });
+              } else if (bytecode && data) {
+                data = encodeBytecodeCallData(bytecode, data);
+              }
+
+              return {
+                to,
+                data,
+                capabilities,
+                value: value ? toHexString(value) : undefined,
+              };
+            },
+          ),
+          capabilities: params.capabilities,
+        },
+      ],
+    });
     return this.provider
       .request({
         method: "wallet_sendCalls",

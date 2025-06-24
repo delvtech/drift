@@ -20,6 +20,9 @@
     "enabled": true,
 
     "rules": {
+      "a11y": {
+        "noSvgWithoutTitle": "off"
+      },
       "complexity": {
         "noBannedTypes": "off"
       },
