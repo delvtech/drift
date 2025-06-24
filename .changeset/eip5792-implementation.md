@@ -1,5 +1,5 @@
 ---
-"@delvtech/drift": minor
+"@delvtech/drift": patch
 ---
  
 EIP-5792 Wallet Call API Implementation
