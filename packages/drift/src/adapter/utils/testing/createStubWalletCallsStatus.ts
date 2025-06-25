@@ -27,7 +27,7 @@ export function createStubWalletCallsStatus<
   const transactionHash =
     overrides.receipts?.[0]?.transactionHash ?? randomHex(32);
   return {
-    version: "1.0",
+    version: "2.0.0",
     chainId: 1,
     id: randomHex(randomInt(32, 128)),
     status,

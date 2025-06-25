@@ -1,7 +1,8 @@
 import {
   type Abi,
   type DeployParams,
-  DriftError, type FunctionName,
+  DriftError,
+  type FunctionName,
   type GetWalletCapabilitiesParams,
   getWalletCallsStatusLabel,
   type HexString,
@@ -16,7 +17,7 @@ import {
   type WalletCallsReceipt,
   type WalletCallsStatus,
   type WalletCapabilities,
-  type WriteParams
+  type WriteParams,
 } from "@delvtech/drift";
 import {
   type AccessList,
@@ -334,7 +335,7 @@ export class EthersReadWriteAdapter<
     return this.signer.provider
       .send("wallet_sendCalls", [
         {
-          version: params.version || "1.0",
+          version: params.version || "2.0.0",
           id: params.id,
           chainId: toHexString(params.chainId ?? (await this.getChainId())),
           from: params.from ?? (await this.getSignerAddress()),

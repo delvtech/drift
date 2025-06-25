@@ -75,12 +75,12 @@ export abstract class BaseReadAdapter
   extends AbiEncoder
   implements ReadAdapter
 {
+  static DEFAULT_POLLING_INTERVAL = 4_000 as const;
+  static DEFAULT_TIMEOUT = 60_000 as const; // 1 minute
+
   pollingInterval: number;
   pollingTimeout: number;
   multicallAddress: Address;
-
-  static DEFAULT_POLLING_INTERVAL = 4_000 as const;
-  static DEFAULT_TIMEOUT = 60_000 as const; // 1 minute
 
   constructor({
     pollingInterval = BaseReadAdapter.DEFAULT_POLLING_INTERVAL,

@@ -514,7 +514,7 @@ export type WalletCapabilities<TChainIds extends readonly number[] = number[]> =
         [K in TChainIds[number]]: WalletCapability;
       };
 
-type WalletCallsVersion = "1.0" | (string & {});
+type WalletCallsVersion = "2.0.0" | (string & {});
 
 /**
  * The status of a wallet call batch, as defined by EIP-5792.
@@ -636,7 +636,10 @@ export type WalletCallParams<
 export interface SendCallsOptions {
   /**
    * The version of the sendCalls API to use.
-   * @default "1.0"
+   *
+   * **Note:** MetaMask currently only supports version "2.0.0".
+   *
+   * @default "2.0.0"
    */
   version?: WalletCallsVersion;
 

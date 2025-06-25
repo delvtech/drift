@@ -362,7 +362,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
         method: "wallet_sendCalls",
         params: [
           {
-            version: params.version || "1.0",
+            version: params.version || "2.0.0",
             id: params.id,
             chainId: toHexString(params.chainId ?? (await this.getChainId())),
             from: params.from ?? (await this.getSignerAddress()),
