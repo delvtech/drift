@@ -21,6 +21,7 @@ import {
   type Hash,
   type HexString,
   NotImplementedError,
+  prepareCall,
   prepareParams,
   type ReadWriteAdapter,
   type SendCallsParams,
@@ -235,7 +236,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   /**
    * @throws A {@linkcode NotImplementedError} if no wallet provider is set.
    */
-  async getWalletCapabilities<TChainIds extends number[]>(
+  async getWalletCapabilities<TChainIds extends readonly number[]>(
     params?: GetWalletCapabilitiesParams<TChainIds>,
   ): Promise<WalletCapabilities<TChainIds>> {
     if (!this.injectedWeb3?.provider) {
@@ -366,34 +367,15 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
             chainId: toHexString(params.chainId ?? (await this.getChainId())),
             from: params.from ?? (await this.getSignerAddress()),
             atomicRequired: params.atomic ?? true,
-            calls: params.calls.map(
-              ({
-                abi,
-                address,
-                args,
-                bytecode,
-                capabilities,
+            calls: params.calls.map(({ value, capabilities, ...call }) => {
+              const { to, data } = prepareCall(call);
+              return {
+                to,
                 data,
-                fn,
-                to = address,
-                value,
-              }) => {
-                if (abi && fn) {
-                  data = this.encodeFunctionData({ abi, fn, args });
-                } else if (abi && bytecode) {
-                  data = this.encodeDeployData({ abi, bytecode, args });
-                } else if (bytecode && data) {
-                  data = encodeBytecodeCallData(bytecode, data);
-                }
-
-                return {
-                  to,
-                  data,
-                  capabilities,
-                  value: value ? toHexString(value) : undefined,
-                };
-              },
-            ),
+                capabilities,
+                value: value ? toHexString(value) : undefined,
+              };
+            }),
             capabilities: params.capabilities,
           },
         ],

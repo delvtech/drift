@@ -136,6 +136,11 @@ export {
   prepareFunctionReturn,
 } from "src/adapter/utils/encodeFunctionReturn";
 export { getWalletCallsStatusLabel } from "src/adapter/utils/getWalletCallsStatusLabel";
+export {
+  type PrepareCallParams,
+  type PreparedCall,
+  prepareCall,
+} from "src/adapter/utils/prepareCall";
 export { prepareParams } from "src/adapter/utils/prepareParams";
 
 // Store //

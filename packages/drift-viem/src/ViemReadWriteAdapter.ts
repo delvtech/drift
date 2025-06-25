@@ -2,11 +2,11 @@ import {
   type Abi,
   type DeployParams,
   DriftError,
-  encodeBytecodeCallData,
   type FunctionName,
   type GetWalletCapabilitiesParams,
   getWalletCallsStatusLabel,
   type HexString,
+  prepareCall,
   prepareParams,
   type ReadWriteAdapter,
   type SendCallsParams,
@@ -54,7 +54,7 @@ export class ViemReadWriteAdapter<
     return address;
   }
 
-  getWalletCapabilities<TChainIds extends number[]>(
+  getWalletCapabilities<TChainIds extends readonly number[]>(
     params?: GetWalletCapabilitiesParams<TChainIds>,
   ): Promise<WalletCapabilities<TChainIds>> {
     const chainId =
@@ -215,19 +215,10 @@ export class ViemReadWriteAdapter<
     const { calls, from, ...options } = params;
     return this.walletClient
       .sendCalls({
-        calls: calls.map(
-          ({ abi, address, args, bytecode, data, fn, to = address, value }) => {
-            if (abi && fn) {
-              data = this.encodeFunctionData({ abi, fn, args });
-            } else if (abi && bytecode) {
-              data = this.encodeDeployData({ abi, bytecode, args });
-            } else if (bytecode && data) {
-              data = encodeBytecodeCallData(bytecode, data);
-            }
-
-            return { to, data, value } as Call;
-          },
-        ),
+        calls: calls.map(({ value, capabilities, ...call }) => {
+          const { to, data } = prepareCall(call);
+          return { to, data, value } as Call;
+        }),
         account: from ?? (await this._getAccount()),
         ...options,
       })
@@ -247,7 +238,9 @@ export class ViemReadWriteAdapter<
 }
 
 declare module "@delvtech/drift" {
-  interface GetWalletCapabilitiesParams<TChainIds extends number[] = number[]> {
+  interface GetWalletCapabilitiesParams<
+    TChainIds extends readonly number[] = number[],
+  > {
     /**
      *
      * **Important**: Only the first chain ID is used in Viem.

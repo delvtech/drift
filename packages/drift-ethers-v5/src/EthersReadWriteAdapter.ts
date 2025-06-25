@@ -2,12 +2,12 @@ import {
   type Abi,
   type DeployParams,
   DriftError,
-  encodeBytecodeCallData,
   type FunctionName,
   type GetWalletCapabilitiesParams,
   getWalletCallsStatusLabel,
   type HexString,
   NotImplementedError,
+  prepareCall,
   prepareParams,
   type ReadWriteAdapter,
   type SendCallsParams,
@@ -62,7 +62,7 @@ export class EthersReadWriteAdapter<
    * @throws A {@linkcode NotImplementedError} if the provider is not a
    * {@linkcode providers.JsonRpcProvider JsonRpcProvider}.
    */
-  async getWalletCapabilities<TChainIds extends number[]>(
+  async getWalletCapabilities<TChainIds extends readonly number[]>(
     params?: GetWalletCapabilitiesParams<TChainIds>,
   ): Promise<WalletCapabilities<TChainIds>> {
     if (!(this.signer.provider instanceof providers.JsonRpcProvider)) {
@@ -356,34 +356,15 @@ export class EthersReadWriteAdapter<
           chainId: toHexString(params.chainId ?? (await this.getChainId())),
           from: params.from ?? (await this.getSignerAddress()),
           atomicRequired: params.atomic ?? true,
-          calls: params.calls.map(
-            ({
-              abi,
-              address,
-              args,
-              bytecode,
-              capabilities,
+          calls: params.calls.map(({ value, capabilities, ...call }) => {
+            const { to, data } = prepareCall(call);
+            return {
+              to,
               data,
-              fn,
-              to = address,
-              value,
-            }) => {
-              if (abi && fn) {
-                data = this.encodeFunctionData({ abi, fn, args });
-              } else if (abi && bytecode) {
-                data = this.encodeDeployData({ abi, bytecode, args });
-              } else if (bytecode && data) {
-                data = encodeBytecodeCallData(bytecode, data);
-              }
-
-              return {
-                to,
-                data,
-                capabilities,
-                value: value ? toHexString(value) : undefined,
-              };
-            },
-          ),
+              capabilities,
+              value: value ? toHexString(value) : undefined,
+            };
+          }),
           capabilities: params.capabilities,
         },
       ])
