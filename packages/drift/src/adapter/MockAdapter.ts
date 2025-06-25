@@ -7,6 +7,7 @@ import type {
   HexString,
 } from "src/adapter/types/Abi";
 import type {
+  BytecodeCallParams,
   CallParams,
   DeployParams,
   EncodeDeployDataParams,
@@ -308,12 +309,9 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   // multicall //
 
   onMulticall<
-    TAbis extends { abi: Abi }[],
-    TFns extends {
-      [K in keyof TAbis]: { fn: FunctionName<TAbis[K]["abi"]> };
-    },
+    TAbis extends readonly unknown[] = any[],
     TAllowFailure extends boolean = true,
-  >(params?: OnMulticallParams<TAbis, TFns, TAllowFailure>) {
+  >(params?: OnMulticallParams<TAbis, TAllowFailure>) {
     return this.stubs.get<
       [MulticallParams<TAbis, TAllowFailure>],
       Promise<MulticallReturn<TAbis, TAllowFailure>>
@@ -324,7 +322,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   }
 
   async multicall<
-    TCalls extends { abi: Abi }[],
+    TCalls extends readonly unknown[] = any[],
     TAllowFailure extends boolean = true,
   >(params: MulticallParams<TCalls, TAllowFailure>) {
     try {
@@ -339,39 +337,54 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     } catch (error) {
       if (!(error instanceof MissingStubError)) throw error;
 
-      // If the multicall hasn't been stubbed, check the read and
+      // If the multicall hasn't been stubbed, check the call, read, and
       // simulateWrite stubs for each individual call.
       const { calls, ...options } = params;
       const results: Promise<unknown>[] = [];
 
       for (const call of calls) {
-        // Check for a read stub
-        const readParams: ReadParams = { ...call, block: options.block };
-        if (
-          this.stubs.has({
-            method: "read",
-            key: this.createKey(readParams),
-            matchPartial: true,
-          })
-        ) {
-          results.push(this.read(readParams));
-          continue;
-        }
+        // Check for a call stub
+        if (call.to) {
+          const callParams: CallParams = { ...call, ...options };
+          if (
+            this.stubs.has({
+              method: "call",
+              key: this.createKey(callParams),
+              matchPartial: true,
+            })
+          ) {
+            results.push(this.call(callParams));
+            continue;
+          }
+        } else {
+          // Check for a read stub
+          const readParams: ReadParams = { ...call, block: options.block };
+          if (
+            this.stubs.has({
+              method: "read",
+              key: this.createKey(readParams),
+              matchPartial: true,
+            })
+          ) {
+            results.push(this.read(readParams));
+            continue;
+          }
 
-        // Check for a simulateWrite stub
-        const simulateWriteParams: SimulateWriteParams = {
-          ...call,
-          ...options,
-        };
-        if (
-          this.stubs.has({
-            method: "simulateWrite",
-            key: this.createKey(simulateWriteParams),
-            matchPartial: true,
-          })
-        ) {
-          results.push(this.simulateWrite(simulateWriteParams));
-          continue;
+          // Check for a simulateWrite stub
+          const simulateWriteParams: SimulateWriteParams = {
+            ...call,
+            ...options,
+          };
+          if (
+            this.stubs.has({
+              method: "simulateWrite",
+              key: this.createKey(simulateWriteParams),
+              matchPartial: true,
+            })
+          ) {
+            results.push(this.simulateWrite(simulateWriteParams));
+            continue;
+          }
         }
 
         // Otherwise, handle the MissingStubError
@@ -406,7 +419,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   // getWalletCapabilities //
 
-  onGetWalletCapabilities<const TChainIds extends number[] = []>(
+  onGetWalletCapabilities<const TChainIds extends readonly number[] = []>(
     params?: GetWalletCapabilitiesParams<TChainIds>,
   ) {
     return this.stubs.get<
@@ -418,7 +431,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     });
   }
 
-  async getWalletCapabilities<const TChainIds extends number[] = []>(
+  async getWalletCapabilities<const TChainIds extends readonly number[] = []>(
     params?: GetWalletCapabilitiesParams<TChainIds>,
   ) {
     return this.stubs.get<
@@ -568,6 +581,8 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   }
 }
 
+// Read //
+
 export type OnReadParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi, "pure" | "view"> = FunctionName<
@@ -581,43 +596,7 @@ export type OnReadParams<
   }
 >;
 
-export type OnMulticallCalls<
-  TAbis extends { abi: Abi }[] = { abi: Abi }[],
-  TFns extends {
-    [K in keyof TAbis]: { fn: FunctionName<TAbis[K]["abi"]> };
-  } = {
-    [K in keyof TAbis]: { fn: FunctionName<TAbis[K]["abi"]> };
-  },
-> = {
-  [K in keyof TAbis]: TAbis[K] & TFns[K] extends {
-    abi?: infer TAbi extends TAbis[K]["abi"];
-    fn?: infer TFunctionName extends TFns[K]["fn"];
-  }
-    ? Replace<
-        Partial<FunctionCallParams<TAbi, TFunctionName>>,
-        {
-          args?: Partial<FunctionArgs<TAbi, TFunctionName>>;
-          fn?: TFns[K] extends { fn: infer TFunctionName }
-            ? string extends TFunctionName
-              ? never // <- Avoid widening to `string`
-              : TFunctionName
-            : never;
-        }
-      >
-    : TAbis[K] & TFns[K];
-};
-
-export interface OnMulticallParams<
-  TAbis extends { abi: Abi }[] = { abi: Abi }[],
-  TFns extends {
-    [K in keyof TAbis]: { fn: FunctionName<TAbis[K]["abi"]> };
-  } = {
-    [K in keyof TAbis]: { fn: FunctionName<TAbis[K]["abi"]> };
-  },
-  TAllowFailure extends boolean = boolean,
-> extends MulticallOptions<TAllowFailure> {
-  calls?: OnMulticallCalls<TAbis, TFns>;
-}
+// Simulate Write //
 
 export type OnSimulateWriteParams<
   TAbi extends Abi = Abi,
@@ -632,6 +611,42 @@ export type OnSimulateWriteParams<
   }
 >;
 
+// Multicall //
+
+export type StubMulticallCallParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+> = OneOf<
+  | Replace<
+      Partial<FunctionCallParams<TAbi, TFunctionName>>,
+      {
+        args?: Partial<FunctionArgs<TAbi, TFunctionName>>;
+      }
+    >
+  | Partial<EncodedCallParams>
+>;
+
+export interface OnMulticallParams<
+  TCalls extends readonly unknown[] = unknown[],
+  TAllowFailure extends boolean = boolean,
+> extends MulticallOptions<TAllowFailure> {
+  calls: {
+    [K in keyof TCalls]: NarrowTo<
+      { abi: Abi },
+      TCalls[K]
+    >["abi"] extends infer TAbi extends Abi
+      ? StubMulticallCallParams<
+          TAbi,
+          NarrowTo<{ fn: FunctionName<TAbi> }, TCalls[K]>["fn"]
+        > extends infer TParams
+        ? NarrowTo<TParams, Replace<TParams, TCalls[K]>>
+        : never
+      : never;
+  };
+}
+
+// Write //
+
 export type OnWriteParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<
@@ -645,12 +660,16 @@ export type OnWriteParams<
   }
 >;
 
+// Deploy //
+
 export type OnDeployParams<TAbi extends Abi = Abi> = Replace<
   Partial<DeployParams<TAbi>>,
   {
     args?: Partial<ConstructorArgs<TAbi>>;
   }
 >;
+
+// Send Calls //
 
 export type StubWalletCallParams<
   TAbi extends Abi = Abi,
@@ -668,7 +687,7 @@ export type StubWalletCallParams<
         args?: Partial<ConstructorArgs<TAbi>>;
       }
     >
-  | Partial<EncodedCallParams>
+  | Partial<OneOf<EncodedCallParams | BytecodeCallParams>>
 > &
   WalletCallOptions;
 

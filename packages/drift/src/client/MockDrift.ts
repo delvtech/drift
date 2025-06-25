@@ -1,12 +1,12 @@
 import type { MockAdapter } from "src/adapter/MockAdapter";
 import type { Abi } from "src/adapter/types/Abi";
 import type { Client } from "src/client/Client";
-import {
-  type MockClientOptions,
-  createMockClient,
-} from "src/client/MockClient";
 import type { ContractBaseOptions } from "src/client/contract/Contract";
 import { MockContract } from "src/client/contract/MockContract";
+import {
+  createMockClient,
+  type MockClientOptions,
+} from "src/client/MockClient";
 import type { LruStore } from "src/store/LruStore";
 import type { Store } from "src/store/Store";
 

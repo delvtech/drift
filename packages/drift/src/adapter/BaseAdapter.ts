@@ -15,6 +15,8 @@ import type {
   HexString,
 } from "src/adapter/types/Abi";
 import type {
+  // biome-ignore lint/correctness/noUnusedImports: Used for JSDoc links
+  Adapter,
   CallParams,
   DeployParams,
   GetEventsParams,
@@ -32,7 +34,6 @@ import type {
   WalletCapabilities,
   WriteParams,
 } from "src/adapter/types/Adapter";
-import type { Adapter } from "src/adapter/types/Adapter";
 import type { BlockIdentifier } from "src/adapter/types/Block";
 import type { EventLog, EventName } from "src/adapter/types/Event";
 import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
@@ -133,7 +134,7 @@ export abstract class BaseReadAdapter
   }
 
   multicall<
-    TCalls extends { abi: Abi }[],
+    TCalls extends readonly unknown[],
     TAllowFailure extends boolean = true,
   >({
     multicallAddress = this.multicallAddress,
@@ -152,7 +153,9 @@ export abstract class BaseReadWriteAdapter
   // Abstract methods //
 
   abstract getSignerAddress(): Promise<Address>;
-  abstract getWalletCapabilities<const TChainIds extends number[] = []>(
+  abstract getWalletCapabilities<
+    const TChainIds extends readonly number[] = [],
+  >(
     params: GetWalletCapabilitiesParams<TChainIds>,
   ): Promise<WalletCapabilities<TChainIds>>;
   abstract getCallsStatus<TId extends HexString>(

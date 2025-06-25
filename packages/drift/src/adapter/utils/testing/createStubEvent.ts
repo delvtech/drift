@@ -38,7 +38,7 @@ type CreateStubEventsParams<
 > = Eval<{
   abi: TAbi;
   eventName: TEventName;
-  events: Eval<
+  events: readonly Eval<
     Omit<
       PartialBy<
         EventLog<TAbi, TEventName>,

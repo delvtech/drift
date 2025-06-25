@@ -16,11 +16,11 @@ import type {
 import { DriftError } from "src/error/DriftError";
 import type { AnyObject } from "src/utils/types";
 
-const DEFAULT_CONSTRUCTOR: AbiConstructor = {
+export const DEFAULT_CONSTRUCTOR = {
   type: "constructor",
   inputs: [],
   stateMutability: "nonpayable",
-};
+} satisfies AbiConstructor;
 
 /**
  * Converts input or output values into an array, ensuring the correct number

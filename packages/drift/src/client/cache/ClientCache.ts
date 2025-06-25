@@ -19,6 +19,7 @@ import type {
   Transaction,
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
+// biome-ignore lint/correctness/noUnusedImports: Used for JSDoc links
 import type { Client } from "src/client/Client";
 import { LruStore } from "src/store/LruStore";
 import type { Store } from "src/store/Store";

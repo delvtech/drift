@@ -18,6 +18,12 @@
   "[jsonc]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
-  "cSpell.words": ["delvtech", "multicall", "viem"],
+  "cSpell.words": [
+    "delvtech",
+    "emptiable",
+    "multicall",
+    "typescale",
+    "viem"
+  ],
   "typescript.preferences.autoImportFileExcludePatterns": ["**/exports/**"]
 }

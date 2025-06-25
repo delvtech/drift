@@ -1,9 +1,10 @@
-import type { Abi } from "src/adapter/types/Abi";
+import type { Abi, Bytes } from "src/adapter/types/Abi";
 import type {
+  EncodedCallParams,
+  FunctionCallParams,
   MulticallCallResult,
   ReadWriteAdapter,
 } from "src/adapter/types/Adapter";
-import { IERC20 } from "src/artifacts/IERC20";
 import { MockERC20 } from "src/artifacts/MockERC20";
 import { TestToken } from "src/artifacts/TestToken";
 import { describe, expectTypeOf, it } from "vitest";
@@ -13,33 +14,51 @@ declare const adapter: ReadWriteAdapter;
 describe("Adapter", () => {
   describe("multicall", () => {
     it("returns the correct type for each read", async () => {
-      const [symbolResult, decimalsResult] = await adapter.multicall({
-        calls: [
-          {
-            abi: IERC20.abi,
-            address: "0x",
-            fn: "symbol",
-          },
-          {
-            abi: MockERC20.abi,
-            address: "0x",
-            fn: "balanceOf",
-            args: { owner: "0x" },
-          },
-        ],
-      });
-      expectTypeOf(symbolResult).toExtend<
-        MulticallCallResult<typeof TestToken.abi, "symbol">
+      const [encodedCallResult, symbolResult, balanceResult] =
+        await adapter.multicall({
+          calls: [
+            // Encoded call
+            {
+              to: "0x",
+              data: "0x",
+            },
+            // Function calls
+            {
+              abi: TestToken.abi,
+              address: "0x",
+              fn: "symbol",
+            },
+            {
+              abi: MockERC20.abi,
+              address: "0x",
+              fn: "balanceOf",
+              args: { owner: "0x" },
+            },
+          ],
+        });
+      expectTypeOf(encodedCallResult).toExtend<
+        MulticallCallResult<EncodedCallParams>
       >();
-      expectTypeOf(decimalsResult).toExtend<
-        MulticallCallResult<typeof MockERC20.abi, "balanceOf">
+      expectTypeOf(symbolResult).toExtend<
+        MulticallCallResult<FunctionCallParams<typeof TestToken.abi, "symbol">>
+      >();
+      expectTypeOf(balanceResult).toExtend<
+        MulticallCallResult<
+          FunctionCallParams<typeof MockERC20.abi, "balanceOf">
+        >
       >();
     });
 
     it("returns the values directly when allowFailure is false", async () => {
-      const [symbol, balance] = await adapter.multicall({
+      const [encodedCallReturnData, symbol, balance] = await adapter.multicall({
         allowFailure: false,
         calls: [
+          // Encoded call
+          {
+            to: "0x",
+            data: "0x",
+          },
+          // Function calls
           {
             abi: TestToken.abi,
             address: "0x",
@@ -53,6 +72,7 @@ describe("Adapter", () => {
           },
         ],
       });
+      expectTypeOf(encodedCallReturnData).toEqualTypeOf<Bytes>();
       expectTypeOf(symbol).toEqualTypeOf<string>();
       expectTypeOf(balance).toEqualTypeOf<bigint>();
     });
@@ -69,6 +89,37 @@ describe("Adapter", () => {
       });
       expectTypeOf(result).toExtend<MulticallCallResult>();
       expectTypeOf(result.value).toEqualTypeOf<unknown>();
+    });
+
+    it("Throws on mixed call type props", async () => {
+      adapter.multicall({
+        calls: [
+          {
+            to: "0x",
+            data: "0x",
+            // @ts-expect-error: The absence of `abi` implies an encoded call.
+            address: "0x",
+          },
+          {
+            abi: TestToken.abi,
+            address: "0x",
+            fn: "decimals",
+            // @ts-expect-error: The presence of `abi` implies a function call.
+            to: "0x",
+          },
+        ],
+      });
+    });
+
+    it("throws on missing to", async () => {
+      adapter.multicall({
+        calls: [
+          // @ts-expect-error
+          {
+            data: "0x",
+          },
+        ],
+      });
     });
 
     it("throws on invalid fn", async () => {
@@ -128,7 +179,7 @@ describe("Adapter", () => {
   });
 
   describe("sendCalls", () => {
-    it("allows a mix of encoded calls, abi function calls, and deploy calls", async () => {
+    it("allows a mix of abi function calls, abi deploy calls, and encoded calls", async () => {
       adapter.sendCalls({
         calls: [
           // Encoded call
@@ -170,6 +221,18 @@ describe("Adapter", () => {
           {
             to: "0x",
             data: "0x",
+            // @ts-expect-error: Can't have both `to` and `bytecode`.
+            bytecode: "0x",
+          },
+          {
+            data: "0x",
+            bytecode: "0x",
+            // @ts-expect-error: Can't have both `bytecode` and `to`.
+            to: "0x",
+          },
+          {
+            to: "0x",
+            data: "0x",
             // @ts-expect-error: The absence of `abi` implies an encoded call.
             address: "0x",
           },
@@ -182,11 +245,7 @@ describe("Adapter", () => {
           {
             abi: TestToken.abi,
             address: "0x",
-            fn: "approve",
-            args: {
-              spender: "0x",
-              amount: 100n,
-            },
+            fn: "decimals",
             // @ts-expect-error: The presence of `abi` implies a function or
             // deploy call.
             to: "0x",

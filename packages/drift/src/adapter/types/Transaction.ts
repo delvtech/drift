@@ -112,7 +112,7 @@ export interface TransactionOptions {
   /**
    * EIP-2930 access list
    */
-  accessList?: {
+  accessList?: readonly {
     address: Address;
     storageKeys: readonly HexString[];
   }[];

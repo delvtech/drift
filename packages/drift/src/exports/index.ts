@@ -1,5 +1,20 @@
 // Adapter //
 
+export { AbiEncoder } from "src/adapter/AbiEncoder";
+export {
+  type BaseAdapterOptions,
+  BaseReadAdapter,
+  BaseReadWriteAdapter,
+} from "src/adapter/BaseAdapter";
+export {
+  DefaultAdapter,
+  type DefaultAdapterOptions,
+  DefaultReadAdapter,
+} from "src/adapter/DefaultAdapter";
+export {
+  NotImplementedError,
+  type NotImplementedErrorParams,
+} from "src/adapter/errors";
 export { deploy } from "src/adapter/methods/deploy";
 export { multicall } from "src/adapter/methods/multicall";
 export { read } from "src/adapter/methods/read";
@@ -10,10 +25,10 @@ export type {
   AbiArrayType,
   AbiEntry,
   AbiEntryName,
-  AbiSimplifiedType,
   AbiObjectType,
   AbiParameters,
   AbiParametersToObject,
+  AbiSimplifiedType,
   Address,
   BaseTypeOverrides,
   Bytes,
@@ -23,14 +38,15 @@ export type {
 } from "src/adapter/types/Abi";
 export type {
   Adapter,
+  BytecodeCallParams,
   CallOptions,
   CallParams,
   ContractParams,
   DecodeFunctionDataParams,
   DecodeFunctionReturnParams,
   DeployParams,
-  EncodedCallParams,
   EncodeDeployDataParams,
+  EncodedCallParams,
   EncodeFunctionDataParams,
   EncodeFunctionReturnParams,
   FunctionCallParams,
@@ -74,9 +90,9 @@ export type {
   MinedBlockProps,
 } from "src/adapter/types/Block";
 export type {
-  EventLog,
   EventArgs,
   EventFilter,
+  EventLog,
   EventName,
 } from "src/adapter/types/Event";
 export type {
@@ -102,21 +118,6 @@ export type {
   TransactionReceipt,
   WalletCallsReceipt,
 } from "src/adapter/types/Transaction";
-
-export { AbiEncoder } from "src/adapter/AbiEncoder";
-
-export {
-  BaseReadAdapter,
-  BaseReadWriteAdapter,
-  type BaseAdapterOptions,
-} from "src/adapter/BaseAdapter";
-
-export {
-  DefaultAdapter,
-  DefaultReadAdapter,
-  type DefaultAdapterOptions,
-} from "src/adapter/DefaultAdapter";
-
 export { arrayToObject } from "src/adapter/utils/arrayToObject";
 export { arrayToSimplified } from "src/adapter/utils/arrayToSimplified";
 export { decodeFunctionData } from "src/adapter/utils/decodeFunctionData";
@@ -137,11 +138,6 @@ export {
 export { getWalletCallsStatusLabel } from "src/adapter/utils/getWalletCallsStatusLabel";
 export { prepareParams } from "src/adapter/utils/prepareParams";
 
-export {
-  NotImplementedError,
-  type NotImplementedErrorParams,
-} from "src/adapter/errors";
-
 // Store //
 
 export {
@@ -149,16 +145,15 @@ export {
   type LruStoreOptions,
 } from "src/store/LruStore";
 export type { Store } from "src/store/Store";
-
-export { getOrSet } from "src/store/utils/getOrSet";
 export { deleteMatches } from "src/store/utils/deleteMatches";
+export { getOrSet } from "src/store/utils/getOrSet";
 
 // Client //
 
 export {
-  createClient,
   type Client,
   type ClientOptions,
+  createClient,
   type GetBlockOptions,
   type GetBlockWithOptionsReturn,
 } from "src/client/Client";
@@ -167,17 +162,7 @@ export {
   ClientCache,
   type ClientCacheOptions,
 } from "src/client/cache/ClientCache";
-
 export {
-  createDrift,
-  type Drift,
-  type DriftOptions,
-} from "src/client/Drift";
-
-export {
-  createContract,
-  ReadContract,
-  ReadWriteContract,
   type Contract,
   type ContractBaseOptions,
   type ContractEncodeDeployDataArgs,
@@ -188,29 +173,34 @@ export {
   type ContractReadArgs,
   type ContractSimulateWriteArgs,
   type ContractWriteArgs,
+  createContract,
+  ReadContract,
+  ReadWriteContract,
 } from "src/client/contract/Contract";
-
 export {
   ContractCache,
   type ContractCacheOptions,
 } from "src/client/contract/cache/ContractCache";
-
 export {
-  MethodInterceptor,
-  type AfterMethodHook,
-  type BeforeMethodHook,
-  type MethodHooks,
-} from "src/client/hooks/MethodInterceptor";
+  createDrift,
+  type Drift,
+  type DriftOptions,
+} from "src/client/Drift";
+export { BlockNotFoundError } from "src/client/errors";
 
 export type {
   HookHandler,
-  HookName,
-  HookRegistry,
   HookMap,
+  HookName,
   HookPayload,
+  HookRegistry,
 } from "src/client/hooks/HookRegistry";
-
-export { BlockNotFoundError } from "src/client/errors";
+export {
+  type AfterMethodHook,
+  type BeforeMethodHook,
+  type MethodHooks,
+  MethodInterceptor,
+} from "src/client/hooks/MethodInterceptor";
 
 // Artifacts //
 
@@ -229,10 +219,10 @@ export { DriftError, type DriftErrorOptions } from "src/error/DriftError";
 export { type Converted, convert } from "src/utils/convert";
 export {
   HEX_REGEX,
-  isHexString,
-  toHexString,
   type IsHexStringOptions,
+  isHexString,
   type ToHexStringOptions,
+  toHexString,
 } from "src/utils/hex";
 export { stringifyKey } from "src/utils/stringifyKey";
 export type {

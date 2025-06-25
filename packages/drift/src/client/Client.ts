@@ -231,12 +231,24 @@ export function createClient<
       const unCachedCalls: MulticallCalls = [];
 
       // Check the cache for each call to ensure we only fetch uncached calls.
-      const finalResults: unknown[] = await Promise.all(
+      const cachedResults: unknown[] = await Promise.all(
         calls.map(async (call, i) => {
-          const cached = await this.cache.getRead({
-            ...call,
-            block: options?.block,
-          });
+          let cached: unknown | undefined;
+
+          if (call.to) {
+            // Check call cache
+            cached = await this.cache.getCall({
+              ...call,
+              ...options,
+            });
+          } else {
+            // Check read cache
+            cached = await this.cache.getRead({
+              ...call,
+              block: options?.block,
+            });
+          }
+
           if (cached !== undefined) {
             return options.allowFailure === false
               ? cached
@@ -245,13 +257,14 @@ export function createClient<
                   value: cached,
                 } satisfies MulticallCallResult);
           }
+
           uncachedCallIndices.set(i, unCachedCalls.length);
           unCachedCalls.push(call);
           return undefined;
         }),
       );
 
-      if (!unCachedCalls.length) return finalResults;
+      if (!unCachedCalls.length) return cachedResults;
 
       const fetched = await this.adapter.multicall({
         calls: unCachedCalls,
@@ -260,7 +273,7 @@ export function createClient<
 
       // Merge cached results with fetched results and return in the same order.
       return Promise.all(
-        finalResults.map(async (cachedResult, i) => {
+        cachedResults.map(async (cachedResult, i) => {
           // If the value was cached, return it directly.
           if (cachedResult !== undefined) return cachedResult;
 

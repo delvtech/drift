@@ -163,7 +163,7 @@ export interface ReadAdapter extends Network {
   ): Promise<FunctionReturn<TAbi, TFunctionName>>;
 
   multicall<
-    TCalls extends { abi: Abi }[],
+    TCalls extends readonly unknown[] = any[],
     TAllowFailure extends boolean = true,
   >(
     params: MulticallParams<TCalls, TAllowFailure>,
@@ -183,7 +183,7 @@ export interface WriteAdapter {
   /**
    * Queries what capabilities a wallet supports.
    */
-  getWalletCapabilities<const TChainIds extends number[] = []>(
+  getWalletCapabilities<const TChainIds extends readonly number[] = []>(
     params?: GetWalletCapabilitiesParams<TChainIds>,
   ): Promise<WalletCapabilities<TChainIds>>;
 
@@ -342,25 +342,43 @@ export interface GetEventsParams<
 
 // Call //
 
-export type EncodedCallParams = OneOf<
-  | {
-      /**
-       * The address to send the call to.
-       */
-      to: Address;
-    }
-  | {
-      /**
-       * A contract bytecode to temporarily deploy and call.
-       */
-      bytecode: Bytes;
-    }
-> & {
+export interface EncodedCallParams {
+  /**
+   * The address to send the call to.
+   */
+  to: Address;
   /**
    * The hash of the invoked method signature and encoded parameters.
    */
   data?: Bytes;
-};
+}
+
+export interface BytecodeCallParams extends Pick<EncodedCallParams, "data"> {
+  /**
+   * A contract bytecode to temporarily deploy and call.
+   */
+  bytecode: Bytes;
+}
+
+// export type EncodedCallParams = OneOf<
+//   | {
+//       /**
+//        * The address to send the call to.
+//        */
+//       to: Address;
+//     }
+//   | {
+//       /**
+//        * A contract bytecode to temporarily deploy and call.
+//        */
+//       bytecode: Bytes;
+//     }
+// > & {
+//   /**
+//    * The hash of the invoked method signature and encoded parameters.
+//    */
+//   data?: Bytes;
+// };
 
 // https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/eth/execute.yaml#L1
 export interface CallOptions<
@@ -370,7 +388,8 @@ export interface CallOptions<
   block?: T;
 }
 
-export type CallParams = EncodedCallParams & CallOptions;
+export type CallParams = OneOf<EncodedCallParams | BytecodeCallParams> &
+  CallOptions;
 
 // Read //
 
@@ -396,19 +415,42 @@ export type ReadParams<
 // Multicall //
 
 /**
+ * Parameters for a multicall call, which can be a function call or an encoded
+ * call.
+ */
+// export type MulticallCallParams<
+//   TAbi extends Abi = Abi,
+//   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+// > = OneOf<FunctionCallParams<TAbi, TFunctionName> | EncodedCallParams>;
+export type MulticallCallParams<
+  TAbi extends Abi | undefined = Abi | undefined,
+  TFunctionName extends FunctionName<NarrowTo<Abi, TAbi>> | undefined =
+    | FunctionName<NarrowTo<Abi, TAbi>>
+    | undefined,
+> = TAbi extends Abi
+  ? FunctionCallParams<
+      TAbi,
+      TFunctionName extends FunctionName<TAbi>
+        ? TFunctionName
+        : FunctionName<TAbi>
+    > &
+      Partial<Record<keyof EncodedCallParams, undefined>>
+  : EncodedCallParams & Partial<Record<keyof FunctionCallParams, undefined>>;
+
+declare const p: MulticallCallParams;
+
+/**
  * @internal
  */
-export type MulticallCalls<TCalls extends { abi: Abi }[] = { abi: Abi }[]> = {
-  [K in keyof TCalls]: NarrowTo<
-    FunctionCallParams<
-      TCalls[K]["abi"],
-      NarrowTo<
-        FunctionName<TCalls[K]["abi"]>,
-        NarrowTo<FunctionCallParams, TCalls[K]>["fn"]
-      >
-    >,
-    TCalls[K]
-  >;
+export type MulticallCalls<TCalls extends readonly unknown[] = unknown[]> = {
+  [K in keyof TCalls]: TCalls[K] extends { abi: infer TAbi extends Abi }
+    ? MulticallCallParams<
+        TAbi,
+        NarrowTo<{ fn: FunctionName<TAbi> }, TCalls[K]>["fn"]
+      > extends infer TParams
+      ? NarrowTo<TParams, Replace<TParams, TCalls[K]>>
+      : never
+    : MulticallCallParams;
 };
 
 /**
@@ -425,7 +467,7 @@ export interface MulticallOptions<TAllowFailure extends boolean = boolean>
  * Params for multicall operations.
  */
 export interface MulticallParams<
-  TCalls extends { abi: Abi }[] = { abi: Abi }[],
+  TCalls extends readonly unknown[] = unknown[],
   TAllowFailure extends boolean = boolean,
 > extends MulticallOptions<TAllowFailure> {
   calls: MulticallCalls<TCalls>;
@@ -434,13 +476,15 @@ export interface MulticallParams<
 /**
  * The result object for single multicall call.
  */
-export type MulticallCallResult<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = OneOf<
+export type MulticallCallResult<TCall = any> = OneOf<
   | {
       success: true;
-      value: FunctionReturn<TAbi, TFunctionName>;
+      value: TCall extends {
+        abi: infer TAbi extends Abi;
+        fn: infer TFunctionName extends string;
+      }
+        ? FunctionReturn<TAbi, NarrowTo<FunctionName<TAbi>, TFunctionName>>
+        : Bytes;
     }
   | {
       success: false;
@@ -449,21 +493,13 @@ export type MulticallCallResult<
 >;
 
 export type MulticallReturn<
-  TCalls extends { abi: Abi }[] = { abi: Abi }[],
+  TCalls extends readonly unknown[] = unknown[],
   TAllowFailure extends boolean = boolean,
-> = MulticallCalls<TCalls> extends infer T extends { abi: Abi; fn: string }[]
-  ? {
-      [K in keyof T]: T[K] extends {
-        fn: infer TFunctionName extends FunctionName<T[K]["abi"]>;
-      }
-        ? TAllowFailure extends true
-          ? MulticallCallResult<T[K]["abi"], TFunctionName>
-          : FunctionReturn<T[K]["abi"], TFunctionName>
-        : TAllowFailure extends true
-          ? MulticallCallResult<T[K]["abi"], FunctionName<T[K]["abi"]>>
-          : FunctionReturn<T[K]["abi"], FunctionName<T[K]["abi"]>>;
-    }
-  : never;
+> = {
+  [K in keyof TCalls]: TAllowFailure extends true
+    ? MulticallCallResult<TCalls[K]>
+    : Extract<MulticallCallResult<TCalls[K]>, { value: unknown }>["value"];
+};
 
 // EIP-5792 - Wallet Call API //
 // https://www.eip5792.xyz
@@ -483,7 +519,7 @@ export type WalletCapability = {
  * Params for querying a wallet's capabilities.
  */
 export interface GetWalletCapabilitiesParams<
-  TChainIds extends number[] = number[],
+  TChainIds extends readonly number[] = number[],
 > {
   /**
    * The wallet address to query capabilities for. Defaults to the connected
@@ -504,8 +540,8 @@ a.sendCalls({ calls });
 /**
  * The capabilities of a wallet, as defined by EIP-5792.
  */
-export type WalletCapabilities<TChainIds extends number[] = number[]> =
-  TChainIds extends []
+export type WalletCapabilities<TChainIds extends readonly number[] = number[]> =
+  TChainIds extends readonly []
     ? {
         [chainId: number]: WalletCapability;
       }
@@ -628,6 +664,7 @@ export type WalletCallParams<
   | FunctionCallParams<TAbi, TFunctionName>
   | EncodeDeployDataParams<TAbi>
   | EncodedCallParams
+  | BytecodeCallParams
 > &
   WalletCallOptions;
 

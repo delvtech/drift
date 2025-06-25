@@ -63,6 +63,7 @@ export interface MinedBlockProps<
  * merge into this interface to customize block properties.
  */
 // @ts-expect-error: Unused type param is a placeholder for adapter libraries.
+// biome-ignore lint/correctness/noUnusedVariables: ^
 export interface BlockOverrides<T extends BlockIdentifier | undefined> {}
 
 /**

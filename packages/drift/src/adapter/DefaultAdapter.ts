@@ -53,6 +53,7 @@ import type {
 import { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
 import { getWalletCallsStatusLabel } from "src/adapter/utils/getWalletCallsStatusLabel";
 import { handleError } from "src/adapter/utils/internal/handleError";
+import { prepareCall } from "src/adapter/utils/prepareCall";
 import { prepareParams } from "src/adapter/utils/prepareParams";
 import { DriftError } from "src/error/DriftError";
 import { convert } from "src/utils/convert";
@@ -269,7 +270,7 @@ export class DefaultAdapter
       .catch(handleError);
   }
 
-  async getWalletCapabilities<TChainIds extends number[]>(
+  async getWalletCapabilities<TChainIds extends readonly number[]>(
     params?: GetWalletCapabilitiesParams<TChainIds>,
   ) {
     return this.provider
@@ -378,36 +379,15 @@ export class DefaultAdapter
             chainId: toHexString(params.chainId ?? (await this.getChainId())),
             from: params.from ?? (await this.getSignerAddress()),
             atomicRequired: params.atomic ?? true,
-            calls: params.calls.map(
-              ({
-                abi,
-                address,
-                args,
-                bytecode,
-                capabilities,
+            calls: params.calls.map(({ capabilities, value, ...call }) => {
+              const { to, data } = prepareCall(call);
+              return {
+                to,
                 data,
-                fn,
-                to = address,
-                value,
-              }) => {
-                // TODO: Create util for this after refactoring multicall to
-                // accept the same calls format
-                if (abi && fn) {
-                  data = this.encodeFunctionData({ abi, fn, args });
-                } else if (abi && bytecode) {
-                  data = this.encodeDeployData({ abi, bytecode, args });
-                } else if (bytecode && data) {
-                  data = encodeBytecodeCallData(bytecode, data);
-                }
-
-                return {
-                  to,
-                  data,
-                  capabilities,
-                  value: value ? toHexString(value) : undefined,
-                };
-              },
-            ),
+                capabilities,
+                value: value ? toHexString(value) : undefined,
+              };
+            }),
             capabilities: params.capabilities,
           },
         ],

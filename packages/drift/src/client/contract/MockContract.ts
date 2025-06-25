@@ -16,14 +16,14 @@ import type { EventName } from "src/adapter/types/Event";
 import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
 import type { TransactionOptions } from "src/adapter/types/Transaction";
 import {
-  type MockClient,
-  type MockClientOptions,
-  createMockClient,
-} from "src/client/MockClient";
-import {
   type ContractBaseOptions,
   ReadWriteContract,
 } from "src/client/contract/Contract";
+import {
+  createMockClient,
+  type MockClient,
+  type MockClientOptions,
+} from "src/client/MockClient";
 import { ZERO_ADDRESS } from "src/constants";
 import type { Store } from "src/store/Store";
 import type { Eval, FunctionKey, OneOf } from "src/utils/types";
@@ -81,7 +81,6 @@ export class MockContract<
   }: ContractOnMulticallParams<TAbi, TCalls, TAllowFailure>) {
     return this.adapter.onMulticall<
       { [K in keyof TCalls]: { abi: TAbi; fn: NonNullable<TCalls[K]["fn"]> } },
-      { [K in keyof TCalls]: { fn: NonNullable<TCalls[K]["fn"]> } },
       TAllowFailure
     >({
       calls: calls?.map((call) => ({

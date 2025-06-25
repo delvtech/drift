@@ -122,7 +122,7 @@ export type Extended<T extends AnyObject> = T &
   Record<Exclude<PropertyKey, keyof T>, any>;
 
 /**
- * Get a union of all keys in {@linkcode T} that are required, not `never`, and
+ * Get a union of all keys in `T` that are required, not `never`, and
  * not assignable to undefined.
  */
 export type RequiredValueKey<T> = keyof {
@@ -132,6 +132,19 @@ export type RequiredValueKey<T> = keyof {
       ? never
       : K]: any;
 };
+
+/**
+ * Get a union of all keys in `T` that are options, `never`, or assignable to
+ * undefined. (The opposite of {@linkcode RequiredValueKey<T>}).
+ */
+export type OptionalValueKey<T> = keyof {
+  [K in Exclude<keyof T, RequiredValueKey<T>>]: any;
+};
+
+/**
+ * Convert all properties in `T` that have optional values into optional properties.
+ */
+export type PartialByOptional<T> = PartialBy<T, OptionalValueKey<T>>;
 
 /**
  * Get a union of all keys on `T` that are functions

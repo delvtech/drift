@@ -4,7 +4,7 @@ import type {
   MulticallParams,
   MulticallReturn,
 } from "src/adapter/types/Adapter";
-import { prepareFunctionData } from "src/adapter/utils/encodeFunctionData";
+import { prepareCall } from "src/adapter/utils/prepareCall";
 import { IMulticall3 } from "src/artifacts/IMulticall3";
 import { DriftError } from "src/error/DriftError";
 
@@ -12,7 +12,7 @@ export const DEFAULT_MULTICALL_ADDRESS =
   "0xcA11bde05977b3631167028862bE2a173976CA11";
 
 export async function multicall<
-  TCalls extends { abi: Abi }[],
+  TCalls extends readonly unknown[],
   TAllowFailure extends boolean = true,
 >(
   adapter: Adapter,
@@ -23,23 +23,19 @@ export async function multicall<
     ...options
   }: MulticallParams<TCalls, TAllowFailure>,
 ): Promise<MulticallReturn<TCalls, TAllowFailure>> {
-  const abiFns: AbiEntry<Abi, "function">[] = [];
+  const abiFnMap = new Map<number, AbiEntry<Abi, "function">>();
 
   const results = await adapter.simulateWrite({
     abi: IMulticall3.abi,
     address: multicallAddress,
     fn: "aggregate3",
     args: {
-      calls: calls.map((read) => {
-        const { abiFn, data } = prepareFunctionData({
-          abi: read.abi,
-          fn: read.fn,
-          args: read.args,
-        });
-        abiFns.push(abiFn);
+      calls: calls.map((call, i) => {
+        const { to, data, abiEntry } = prepareCall(call);
+        if (abiEntry) abiFnMap.set(i, abiEntry);
         return {
-          target: read.address,
-          callData: data,
+          target: to,
+          callData: data || "0x",
           allowFailure,
         };
       }),
@@ -48,18 +44,9 @@ export async function multicall<
   });
 
   return results.map(({ returnData, success }, i) => {
-    const { fn } = calls[i]!;
-    const abiFn = abiFns[i]!;
-
-    if (allowFailure === false) {
-      return adapter.decodeFunctionReturn({
-        abi: [abiFn],
-        data: returnData,
-        fn,
-      });
-    }
-
     if (!success) {
+      // If success is false, allowFailure must be true, otherwise the request
+      // would have thrown an error.
       return {
         success,
         error: new DriftError(
@@ -70,13 +57,16 @@ export async function multicall<
       };
     }
 
-    return {
-      success,
-      value: adapter.decodeFunctionReturn({
+    let value: unknown = returnData;
+
+    const abiFn = abiFnMap.get(i);
+    if (abiFn)
+      value = adapter.decodeFunctionReturn({
         abi: [abiFn],
         data: returnData,
-        fn,
-      }),
-    };
+        fn: abiFn.name,
+      });
+
+    return allowFailure === false ? value : { success, value };
   }) as MulticallReturn<TCalls, TAllowFailure>;
 }
