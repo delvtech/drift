@@ -54,6 +54,7 @@ export type {
   GetEventsParams,
   GetWalletCapabilitiesParams,
   MinedRangeBlock,
+  MulticallCallParams,
   MulticallCallResult,
   MulticallOptions,
   MulticallParams,
