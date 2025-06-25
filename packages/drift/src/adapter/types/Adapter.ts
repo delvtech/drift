@@ -509,7 +509,7 @@ export interface GetWalletCapabilitiesParams<
 }
 
 /**
- * The capabilities of a wallet, as defined by EIP-5792.
+ * The capabilities of a wallet by chain id, as defined by EIP-5792.
  */
 export type WalletCapabilities<TChainIds extends readonly number[] = number[]> =
   TChainIds extends readonly []

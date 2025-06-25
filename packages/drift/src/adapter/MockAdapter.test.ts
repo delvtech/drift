@@ -687,8 +687,12 @@ describe("MockAdapter", () => {
       ).toStrictEqual([{ success: true, value: 123n }]);
     });
 
-    it("returns stubbed read and simulateWrite values", async () => {
+    it("returns stubbed call, read, and simulateWrite values", async () => {
       const adapter = new MockAdapter();
+      const callParams: CallParams = {
+        to: "0x1",
+        data: "0x123",
+      };
       const readParams: ReadParams<TestTokenAbi> = {
         abi: TestToken.abi,
         address: "0x1",
@@ -701,18 +705,21 @@ describe("MockAdapter", () => {
         args: { spender: "0x1", amount: 123n },
       };
 
+      adapter.onCall(callParams).resolves("0xabc");
       adapter.onRead(readParams).resolves("TEST");
       adapter.onSimulateWrite(simulateWriteParams).resolves(true);
 
       expect(
         await adapter.multicall({
           calls: [
+            callParams,
             readParams,
             simulateWriteParams,
             { abi: TestToken.abi, address: "0x1", fn: "name" },
           ],
         }),
       ).toStrictEqual([
+        { success: true, value: "0xabc" },
         { success: true, value: "TEST" },
         { success: true, value: true },
         { success: false, error: expect.any(MissingStubError) },

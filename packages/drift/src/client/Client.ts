@@ -2,6 +2,7 @@ import {
   DefaultAdapter,
   type DefaultAdapterOptions,
 } from "src/adapter/DefaultAdapter";
+import type { Bytes } from "src/adapter/types/Abi";
 import type {
   Adapter,
   MulticallCallResult,
@@ -278,7 +279,7 @@ export function createClient<
           if (cachedResult !== undefined) return cachedResult;
 
           const index = uncachedCallIndices.get(i)!;
-          const { abi, address, fn, args } = unCachedCalls[index]!;
+          const { abi, address, fn, args, to, data } = unCachedCalls[index]!;
           const fetchedResult = fetched[index]!;
           let fetchedValue: unknown;
 
@@ -290,16 +291,25 @@ export function createClient<
 
           // Cache the newly fetched value.
           if (fetchedValue !== undefined) {
-            await this.cache.preloadRead({
-              abi,
-              address,
-              fn,
-              args,
-              block: options?.block,
-              value: fetchedValue,
-            } as ReadParams & {
-              value: unknown;
-            });
+            if (to) {
+              await this.cache.preloadCall({
+                to,
+                data,
+                preloadValue: fetchedValue as Bytes,
+                ...options,
+              });
+            } else {
+              await this.cache.preloadRead({
+                abi,
+                address,
+                fn,
+                args,
+                block: options?.block,
+                value: fetchedValue,
+              } as ReadParams & {
+                value: unknown;
+              });
+            }
           }
 
           return fetchedResult;

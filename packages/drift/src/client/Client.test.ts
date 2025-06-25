@@ -54,14 +54,13 @@ describe("Client", () => {
       } satisfies MulticallCallResult);
     });
 
-    it("returns cached read calls", async () => {
+    it("returns cached call and read calls", async () => {
       const client = createClient({ adapter });
       const abi = TestToken.abi;
-      client.cache.preloadRead({
-        abi,
-        address: "0x",
-        fn: "symbol",
-        value: "TEST",
+      client.cache.preloadCall({
+        to: "0x",
+        data: "0x123",
+        preloadValue: "0xabc",
       });
       client.cache.preloadRead({
         abi,
@@ -69,25 +68,24 @@ describe("Client", () => {
         fn: "name",
         value: "Test Token",
       });
-      const [symbol, name] = await client.multicall({
+      const [data, name] = await client.multicall({
         calls: [
-          { abi, address: "0x", fn: "symbol" },
+          { to: "0x", data: "0x123" },
           { abi, address: "0x", fn: "name" },
         ],
         allowFailure: false,
       });
-      expect(symbol).toBe("TEST");
+      expect(data).toBe("0xabc");
       expect(name).toBe("Test Token");
     });
 
-    it("returns cached read calls in the correct format", async () => {
+    it("returns cached call and read calls in the correct format", async () => {
       const client = createClient({ adapter });
       const abi = TestToken.abi;
-      client.cache.preloadRead({
-        abi,
-        address: "0x",
-        fn: "symbol",
-        value: "TEST",
+      client.cache.preloadCall({
+        to: "0x",
+        data: "0x123",
+        preloadValue: "0xabc",
       });
       client.cache.preloadRead({
         abi,
@@ -95,13 +93,13 @@ describe("Client", () => {
         fn: "name",
         value: "Test Token",
       });
-      const [symbol, name] = await client.multicall({
+      const [data, name] = await client.multicall({
         calls: [
-          { abi, address: "0x", fn: "symbol" },
+          { to: "0x", data: "0x123" },
           { abi, address: "0x", fn: "name" },
         ],
       });
-      expect(symbol).toStrictEqual({ success: true, value: "TEST" });
+      expect(data).toStrictEqual({ success: true, value: "0xabc" });
       expect(name).toStrictEqual({ success: true, value: "Test Token" });
     });
   });
