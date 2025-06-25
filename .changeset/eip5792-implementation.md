@@ -33,17 +33,34 @@ EIP-5792 Wallet Call API Implementation
   - `OnMulticallParams`
   - `OnDeployParams`
   - `OnWriteParams`
-  - `OnSendCallsParams`.
+  - `OnSendCallsParams`
+  - `StubMulticallCallParams`
+  - `StubWalletCallParams`.
+
+**Call Preparation and Processing**
+- Added `prepareCall` utility function for unified call preparation across different call types (function calls, deploy calls, encoded calls, bytecode calls).
+- Enhanced multicall functionality to support mixed call types including encoded calls alongside ABI function calls.
+- Improved call processing in all adapters by centralizing call preparation logic.
+
+**Type System Enhancements**
+- Added `BytecodeCallParams` type for bytecode-based calls without contract addresses.
+- Improved type inference for multicall operations with mixed call types.
+- Added `PartialByOptional` utility type for better optional property handling.
+
+**Adapter Improvements**
+- Better fallback handling for individual wallet call stub matching in `MockAdapter`.
+- Refactored Web3 adapter to use injected provider for `getSignerAddress` and EIP-5792 calls.
+- Improved internal adapter utilities and type safety.
+- Added `NotImplementedError` as a generalized replacement for stub-specific errors.
+
+**Client and Caching Enhancements**
+- Enhanced multicall caching to support both function calls and encoded calls.
+- Improved cache key generation for mixed call types.
 
 **Utility Functions**
 - Added `toHexString` utility for flexible hex string conversion
 - Enhanced `isHexString` with configurable `prefix` option to control `0x` prefix enforcement.
 - Improved `DriftError` to automatically use constructor name for subclasses.
-
-**Adapter Enhancements**
-- Refactored Web3 adapter to use injected provider for `getSignerAddress` and EIP-5792 calls.
-- Improved internal adapter utilities and type safety.
-- Added `NotImplementedError` as a generalized replacement for stub-specific errors.
 
 ## 🐛 Bug Fixes
 
@@ -55,6 +72,8 @@ EIP-5792 Wallet Call API Implementation
 - Enhanced `FunctionCallParams` to infer function names even when `address` is missing.
 - Improved adapter type definitions and method signatures.
 - Better error handling and type checking throughout the codebase.
+- Enhanced multicall type inference to support mixed call types (function calls, encoded calls, etc.).
+- Improved readonly array handling for better immutability support.
 
 ## 📦 Dependencies
 
@@ -65,6 +84,7 @@ EIP-5792 Wallet Call API Implementation
 
 - Restructured examples directory with dedicated Node.js and web folders.
 - Updated biome configuration (renamed from `.jsonc` to `.json`).
+- Improved internal type utilities for better developer experience.
 
 **Breaking Changes:** None
 
