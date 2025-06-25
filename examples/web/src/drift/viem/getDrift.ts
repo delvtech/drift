@@ -1,4 +1,4 @@
-import { createDrift } from "@delvtech/drift";
+import { createDrift, type Store } from "@delvtech/drift";
 import { viemAdapter } from "@delvtech/drift-viem";
 import {
   type GetPublicClientParameters,
@@ -11,7 +11,7 @@ import { type WagmiConfig, wagmiConfig } from "src/config/wagmi";
 
 export type GetDriftViemOptions = GetPublicClientParameters<WagmiConfig> &
   GetWalletClientParameters<WagmiConfig> & {
-    store?: typeof driftStore;
+    store?: Store;
   };
 
 export async function getDrift(options?: GetDriftViemOptions) {
