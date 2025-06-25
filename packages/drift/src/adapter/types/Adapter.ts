@@ -360,26 +360,6 @@ export interface BytecodeCallParams extends Pick<EncodedCallParams, "data"> {
   bytecode: Bytes;
 }
 
-// export type EncodedCallParams = OneOf<
-//   | {
-//       /**
-//        * The address to send the call to.
-//        */
-//       to: Address;
-//     }
-//   | {
-//       /**
-//        * A contract bytecode to temporarily deploy and call.
-//        */
-//       bytecode: Bytes;
-//     }
-// > & {
-//   /**
-//    * The hash of the invoked method signature and encoded parameters.
-//    */
-//   data?: Bytes;
-// };
-
 // https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/eth/execute.yaml#L1
 export interface CallOptions<
   T extends BlockIdentifier | undefined = BlockIdentifier,
