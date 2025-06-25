@@ -393,10 +393,6 @@ export type ReadParams<
  * Parameters for a multicall call, which can be a function call or an encoded
  * call.
  */
-// export type MulticallCallParams<
-//   TAbi extends Abi = Abi,
-//   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-// > = OneOf<FunctionCallParams<TAbi, TFunctionName> | EncodedCallParams>;
 export type MulticallCallParams<
   TAbi extends Abi | undefined = Abi | undefined,
   TFunctionName extends FunctionName<NarrowTo<Abi, TAbi>> | undefined =
@@ -411,8 +407,6 @@ export type MulticallCallParams<
     > &
       Partial<Record<keyof EncodedCallParams, undefined>>
   : EncodedCallParams & Partial<Record<keyof FunctionCallParams, undefined>>;
-
-declare const p: MulticallCallParams;
 
 /**
  * @internal
@@ -507,10 +501,6 @@ export interface GetWalletCapabilitiesParams<
    */
   chainIds?: TChainIds;
 }
-
-declare const a: ReadWriteAdapter;
-const calls: readonly WalletCallParams[] = [];
-a.sendCalls({ calls });
 
 /**
  * The capabilities of a wallet, as defined by EIP-5792.
