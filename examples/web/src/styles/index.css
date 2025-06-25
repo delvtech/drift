@@ -2,15 +2,8 @@
 @import "./typescale.css";
 
 :root {
-  --bg-color: var(--color-gray-50);
-  --text-color: var(--color-gray-900);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-color: var(--color-gray-900);
-    --text-color: var(--color-white);
-  }
+  --bg-color: var(--color-gray-900);
+  --text-color: var(--color-white);
 }
 
 body {
