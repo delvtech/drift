@@ -28,7 +28,7 @@
     "typecheck:watch": "tsc --noEmit --watch"
   },
   "peerDependencies": {
-    "@delvtech/drift": "^0.10.0",
+    "@delvtech/drift": "^0.10.1",
     "ethers": "^5.7.2"
   },
   "devDependencies": {
