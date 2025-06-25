@@ -9,7 +9,6 @@ _.log
 
 # Artifacts
 build
-cache
 dist
 generated
 out

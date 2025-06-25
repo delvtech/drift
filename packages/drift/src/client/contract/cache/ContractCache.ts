@@ -16,6 +16,7 @@ import {
   ClientCache,
   type ClientCacheOptions,
 } from "src/client/cache/ClientCache";
+// biome-ignore lint/correctness/noUnusedImports: Used for JSDoc links
 import type { Contract, ContractReadArgs } from "src/client/contract/Contract";
 import type { Store } from "src/store/Store";
 import type { Eval, OneOf } from "src/utils/types";

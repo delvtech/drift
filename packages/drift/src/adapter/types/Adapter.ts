@@ -361,11 +361,8 @@ export interface BytecodeCallParams extends Pick<EncodedCallParams, "data"> {
 }
 
 // https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/eth/execute.yaml#L1
-export interface CallOptions<
-  T extends BlockIdentifier | undefined = BlockIdentifier,
-> extends TransactionOptions,
-    Eip4844Options {
-  block?: T;
+export interface CallOptions extends TransactionOptions, Eip4844Options {
+  block?: BlockIdentifier;
 }
 
 export type CallParams = OneOf<EncodedCallParams | BytecodeCallParams> &
@@ -377,9 +374,7 @@ export type CallParams = OneOf<EncodedCallParams | BytecodeCallParams> &
  * Options for reading contract state.
  */
 // https://github.com/ethereum/execution-apis/blob/main/src/eth/execute.yaml#L1
-export interface ReadOptions<
-  T extends BlockIdentifier | undefined = BlockIdentifier,
-> extends Pick<CallOptions<T>, "block"> {}
+export interface ReadOptions extends Pick<CallOptions, "block"> {}
 
 /**
  * Params for calling a contract function.
