@@ -482,6 +482,12 @@ export type WalletCapability = {
   atomic?: {
     status: "supported" | "ready" | "unsupported";
   };
+  atomicBatch?: {
+    supported: boolean;
+  };
+  paymasterService?: {
+    status: "supported" | "ready" | "unsupported";
+  };
 };
 
 /**
@@ -635,9 +641,7 @@ export type WalletCallParams<
 
 export interface SendCallsOptions {
   /**
-   * The version of the sendCalls API to use.
-   *
-   * **Note:** MetaMask currently only supports version "2.0.0".
+   * The version of the wallet calls API to use.
    *
    * @default "2.0.0"
    */
