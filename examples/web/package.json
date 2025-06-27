@@ -7,6 +7,7 @@
     "dev": "vite",
     "generate:typescale": "typescale --tailwind -o src/styles/typescale.css",
     "build": "npm run generate:typescale && tsc -b && vite build",
+    "format": "prettier --write src",
     "lint": "eslint .",
     "preview": "vite preview"
   },

@@ -1,43 +1,70 @@
+// import { erc20, erc4626 } from "@delvtech/drift";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useQuery } from "@tanstack/react-query";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { nightOwl } from "react-syntax-highlighter/dist/esm/styles/hljs";
+// import { useAccount } from "wagmi";
 import { useDrift } from "src/drift/viem/useDrift";
 import { useCopy } from "src/hooks/useCopy";
 
 // const daiAddress = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
+// const yearnVault = "0x028eC7330ff87667b6dfb0D94b954c820195336c";
 
 function App() {
+  // const { address: account } = useAccount();
+  const { copy, copied } = useCopy();
   const drift = useDrift();
+
   const {
     data,
     dataUpdatedAt,
     error,
     fetchStatus,
     isFetched,
+    isFetching,
     status,
     refetch,
   } = useQuery({
     queryKey: ["home-data", typeof drift?.getWalletCapabilities],
     queryFn: drift
-      ? async () =>
-          Promise.all([
+      ? async () => {
+          return Promise.all([
             drift.getChainId(),
             drift.getBlockNumber(),
             drift.getWalletCapabilities?.(),
-            // drift.sendCalls?.({
-            //   calls: [
-            //     { abi: erc20.abi, address: daiAddress, fn: "name" },
-            //     { abi: erc20.abi, address: daiAddress, fn: "symbol" },
-            //   ],
-            // }),
-          ])
+
+            // Send a batch of calls via EIP-5792
+            // account
+            //   ? drift.sendCalls?.({
+            //       calls: [
+            //         {
+            //           abi: erc20.abi,
+            //           address: daiAddress,
+            //           fn: "approve",
+            //           args: {
+            //             amount: 1n,
+            //             spender: yearnVault,
+            //           },
+            //         },
+            //         {
+            //           abi: erc4626.abi,
+            //           address: yearnVault,
+            //           fn: "deposit",
+            //           args: {
+            //             assets: 1n,
+            //             receiver: account,
+            //           },
+            //         },
+            //       ],
+            //     })
+            //   : undefined,
+          ]);
+        }
       : undefined,
     enabled: false,
     retry: false,
     refetchOnWindowFocus: false,
   });
-  const { copy, copied } = useCopy();
 
   if (data) console.log("Data:", data);
   if (error) console.error(error);
@@ -53,7 +80,7 @@ function App() {
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-4 py-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <h1 className="text-h3 font-bold">Sandbox</h1>
         <div>
           <ConnectButton />
@@ -61,7 +88,7 @@ function App() {
       </div>
 
       <div>
-        <p className="flex gap-3 items-baseline">
+        <p className="flex items-baseline gap-3">
           <span className="text-slate-400">Status: </span>
           <code
             className={
@@ -76,7 +103,7 @@ function App() {
           </code>
         </p>
 
-        <p className="flex gap-3 items-baseline">
+        <p className="flex items-baseline gap-3">
           <span className="text-slate-400">Last fetch: </span>
           <code>
             {dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleString() : "-"}
@@ -85,8 +112,9 @@ function App() {
       </div>
 
       <button
-        className="h-10 rounded-lg px-4 font-bold text-slate-900 cursor-pointer bg-gradient-to-b from-teal-300 to-teal-500 active:scale-[.99] transition-all hover:shadow hover:shadow-slate-800 active:shadow-none duration-75 border border-teal-600 border-b-teal-700"
+        className="h-10 cursor-pointer rounded-lg border border-teal-600 border-b-teal-700 bg-teal-950 bg-gradient-to-b from-teal-300/80 to-teal-500/80 px-4 font-bold text-slate-900 transition-all duration-100 not-disabled:hover:bg-teal-400 not-disabled:hover:shadow not-disabled:hover:shadow-slate-800 not-disabled:active:scale-[.99] not-disabled:active:shadow-none not-disabled:active:duration-75 disabled:cursor-not-allowed disabled:opacity-50"
         onClick={() => refetch()}
+        disabled={isFetching}
         type="button"
       >
         {isFetched ? "Refetch" : "Fetch"}
@@ -98,11 +126,11 @@ function App() {
           {responseText && (
             <button
               type="button"
-              className="absolute group right-3 top-3 opacity-40 border rounded border-current/60 hover:opacity-100 transition-opacity duration-150 p-1 cursor-pointer active:scale-[.97] active:opacity-75 active:duration-75 flex items-center"
+              className="group absolute top-3 right-3 flex cursor-pointer items-center rounded border border-current/60 p-1 opacity-40 transition-opacity duration-150 hover:opacity-100 active:scale-[.97] active:opacity-75 active:duration-75"
               title="Copy to clipboard"
               onClick={() => copy(responseText)}
             >
-              <span className="group-hover:px-1 group-hover:w-auto text-caption opacity-0 text-current group-hover:opacity-100 w-0 m-0 transition-all duration-150 leading-none overflow-hidden">
+              <span className="text-caption m-0 w-0 overflow-hidden leading-none text-current opacity-0 transition-all duration-150 group-hover:w-auto group-hover:px-1 group-hover:opacity-100">
                 {copied ? "copied!" : "copy"}
               </span>
               <svg
@@ -116,7 +144,7 @@ function App() {
             </button>
           )}
           <SyntaxHighlighter
-            className="shadow-2xl shadow-slate-950 text-caption leading-normal rounded-lg border-slate-800 border"
+            className="text-caption rounded-lg border border-slate-800 leading-normal shadow-2xl shadow-slate-950"
             showLineNumbers={true}
             language={"json"}
             style={nightOwl}
