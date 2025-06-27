@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "generate:typescale": "typescale --tailwind -o src/styles/typescale.css",
-    "build": "tsc -b && vite build",
+    "build": "npm run generate:typescale && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
