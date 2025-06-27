@@ -1,0 +1,65 @@
+---
+title: Extending Drift
+---
+
+# Extending Drift
+
+Drift is designed to be extensible, allowing you to add support for new web3 libraries, create custom cache stores, and use hooks to add middleware to your client.
+
+## Implementing Custom Adapters
+
+If you want to use Drift with a web3 library that isn't already supported, you can create a custom adapter. An adapter is an object that implements the `Adapter` interface, which normalizes the behavior of the underlying web3 provider.
+
+Creating a full adapter is an advanced topic. If you are interested in contributing a new adapter, please open an issue on the Drift GitHub repository to discuss the implementation.
+
+## Building Custom Stores
+
+Drift's default cache store is an in-memory cache. For more persistent caching, you can create your own store that implements the `Store` interface. This allows you to use `localStorage`, `IndexedDB`, or any other storage mechanism.
+
+Here is a simplified example of a `localStorage` store:
+
+```typescript
+import { type Store } from "@delvtech/drift";
+
+const localStorageStore: Store = {
+  get(key) {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : undefined;
+  },
+  set(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+  },
+  delete(key) {
+    localStorage.removeItem(key);
+  },
+  clear() {
+    localStorage.clear();
+  },
+  // ... other methods
+};
+
+const drift = createDrift({
+  rpcUrl: "[YOUR_RPC_URL]",
+  store: localStorageStore,
+});
+```
+
+## Using Hooks for Middleware
+
+Hooks allow you to intercept and modify actions before they are executed. You can use hooks to add logging, modify parameters, or implement other custom logic.
+
+Here is an example of a hook that logs all `read` calls:
+
+```typescript
+const drift = createDrift({
+  rpcUrl: "[YOUR_RPC_URL]",
+  hooks: {
+    before: {
+      read: (params) => {
+        console.log("Reading from contract:", params);
+        return params; // Must return the params
+      },
+    },
+  },
+});
+```

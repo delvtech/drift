@@ -1,0 +1,91 @@
+---
+title: Caching
+---
+
+# Caching Deep Dive
+
+Drift's smart caching is a core feature designed to minimize RPC calls and improve your application's performance. This guide explores the caching mechanism in more detail.
+
+## How Caching Works
+
+When you make a `read` call or `getEvents` call, Drift automatically caches the result. Subsequent calls with the exact same parameters will return the cached data without making another network request.
+
+```typescript
+// First call goes to the network and the result is cached.
+const balance = await token.read("balanceOf", { account: userAddress });
+
+// This call returns the cached value instantly.
+const cachedBalance = await token.read("balanceOf", { account: userAddress });
+
+// A call with different parameters triggers a new network request.
+const otherBalance = await token.read("balanceOf", { account: otherAddress });
+```
+
+## Cache Invalidation
+
+When a write transaction changes the state of a contract, you need to invalidate the relevant cache entries to avoid stale data.
+
+You can do this manually using the `invalidateRead` method on the cache object, which is accessible from the Drift client or a contract instance.
+
+```typescript
+// Invalidate a specific cache entry
+await token.cache.invalidateRead("balanceOf", { account: userAddress });
+```
+
+A common pattern is to invalidate the cache in the `onMined` callback of a write transaction.
+
+```typescript
+await token.write(
+  "transfer",
+  { to: recipientAddress, amount },
+  {
+    onMined: (receipt) => {
+      if (receipt.status === "success") {
+        // Invalidate sender and receiver balances
+        token.cache.invalidateRead("balanceOf", { account: userAddress });
+        token.cache.invalidateRead("balanceOf", { account: recipientAddress });
+      }
+    },
+  },
+);
+```
+
+## Clearing the Cache
+
+To clear the entire cache, you can use the `clear` method.
+
+```typescript
+drift.cache.clear();
+```
+
+## Preloading Data
+
+You can preload the cache with data, which can be useful for server-side rendering or initializing your app with known values.
+
+```typescript
+// Preload the token symbol
+drift.cache.setRead(
+  { abi: erc20Abi, address: tokenAddress, fn: "symbol" },
+  "TKN",
+);
+
+// The next call will be served from the cache
+const symbol = await token.read("symbol"); // returns "TKN"
+```
+
+## Direct Cache Access
+
+For advanced use cases, you can directly access the cache to get or set data.
+
+```typescript
+// Get a value directly from the cache
+const cachedSymbol = drift.cache.getRead({
+  abi: erc20Abi,
+  address: tokenAddress,
+  fn: "symbol",
+});
+
+if (cachedSymbol) {
+  console.log("Symbol from cache:", cachedSymbol);
+}
+```

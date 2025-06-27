@@ -1,0 +1,61 @@
+---
+title: Testing Strategies
+---
+
+# Testing Strategies
+
+Drift includes built-in mocking utilities to make testing your smart contract interactions easy and efficient. This allows you to test your application logic without making actual network calls.
+
+> [!IMPORTANT]
+> Drift's testing mocks have a peer dependency on [Sinon.JS](https://sinonjs.org/). Make sure to install it before using the mocks.
+> 
+> ```sh
+> npm install --save-dev sinon
+> ```
+
+## Mocking with `createMockDrift`
+
+The `createMockDrift` function from `@delvtech/drift/testing` creates a mocked Drift instance that you can use in your tests.
+
+Here's how you can test a function that makes multiple contract calls:
+
+```typescript
+import assert from "node:assert";
+import test from "node:test";
+import { createMockDrift, randomAddress } from "@delvtech/drift/testing";
+import { vaultAbi } from "./abis/vaultAbi";
+import { ReadVault } from "./VaultClient"; // Example from README
+
+test("getAssetValue returns account balances converted to assets", async () => {
+  // Set up mocks
+  const address = randomAddress();
+  const account = randomAddress();
+  const mockDrift = createMockDrift();
+  const mockContract = mockDrift.contract({ abi: vaultAbi, address });
+
+  // Stub the vault's return values using `on*` methods
+  mockContract.onRead("balanceOf", { account }).resolves(
+    // Return 100 shares for the account
+    BigInt(100e18),
+  );
+  mockContract.onRead("convertToAssets").callsFake(
+    // Simulate the conversion of shares to assets
+    async (params) => (params.args.shares * BigInt(1.5e18)) / BigInt(1e18),
+  );
+
+  // Create your client with the mocked Drift instance
+  const readVault = new ReadVault(address, mockDrift);
+
+  // Call the method you want to test
+  const accountAssetValue = await readVault.getAssetValue(account);
+
+  // Assert the expected result
+  assert.strictEqual(accountAssetValue, BigInt(150e18));
+});
+```
+
+### Benefits of Mocking
+
+-   **No Network Calls:** Tests run faster and more reliably.
+-   **Focus on Logic:** Concentrate on testing your application's business logic, not the blockchain.
+-   **Easy Setup:** Minimal configuration is required to get started. You can build and test your clients even before your contracts are deployed.

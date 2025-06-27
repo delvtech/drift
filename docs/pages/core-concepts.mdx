@@ -1,0 +1,55 @@
+---
+title: Core Concepts
+---
+
+# Core Concepts
+
+This section explains the fundamental concepts and architecture of Drift.
+
+## What Makes Drift Different?
+
+Drift is not just another web3 library. It's a meta-library that provides a consistent, high-level API on top of existing libraries like ethers, viem, and web3.js. This approach offers several advantages over using these libraries directly:
+
+- **Abstraction:** You can switch between underlying web3 libraries without changing your application code.
+- **Simplicity:** Drift simplifies common tasks like state management, caching, and multicall.
+- **Type Safety:** Drift leverages TypeScript to provide strong type safety for your contract interactions.
+
+## Architecture Overview
+
+Drift's architecture is designed to be modular and extensible. The core components are:
+
+- **Client:** The main entry point for interacting with Drift, created with `createDrift`.
+- **Adapter:** A wrapper around a web3 provider (e.g., from ethers or viem) that normalizes its behavior.
+- **Store:** A cache for storing and retrieving contract data.
+- **Contract:** A type-safe representation of a smart contract, created with `drift.contract()`.
+- **Hooks:** Middleware for intercepting and modifying actions.
+
+Here is a high-level diagram of the architecture:
+
+```
+Contract -> Client -> Hooks -> Store -> Adapter
+```
+
+### The Drift Client
+
+The Drift Client is the central piece of the library. It orchestrates the interactions between the other components.
+
+### Contracts & Type Safety
+
+Drift generates type-safe contract instances from your ABIs. This means you get autocompletion and type checking for your contract functions, arguments, and return values.
+
+### Adapters & Provider Abstraction
+
+Adapters are the bridge between Drift and the underlying web3 libraries. They allow you to use Drift with your favorite library without worrying about the implementation details.
+
+### Smart Caching with Stores
+
+Drift includes a built-in caching mechanism to reduce RPC calls and improve performance. You can also implement custom cache stores to fit your needs.
+
+### Hooks & Middleware
+
+Hooks allow you to extend Drift's functionality by adding middleware to the client. You can use hooks to implement custom logic before or after actions are executed.
+
+## When to Use Drift vs. Direct Web3 Libraries
+
+Drift is a great choice for building complex dApps that need to interact with multiple contracts, manage state, and optimize performance. However, if you are building a simple script or a small dApp, using a web3 library directly might be sufficient.

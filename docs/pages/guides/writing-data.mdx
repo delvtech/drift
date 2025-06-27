@@ -1,0 +1,85 @@
+---
+title: Writing Data
+---
+
+# Writing Data
+
+This guide covers how to send transactions to your smart contracts using Drift.
+
+## Basic Writes
+
+To send a transaction, use the `write` method of the Drift client or a contract instance. This will return a transaction hash.
+
+```typescript
+// Using the client directly
+const txHash = await drift.write({
+  abi: erc20Abi,
+  address: tokenAddress,
+  fn: "transfer",
+  args: {
+    to,
+    amount,
+  },
+});
+
+// Using a contract instance
+const token = drift.contract({ abi: erc20Abi, address: tokenAddress });
+const txHash2 = await token.write("transfer", { to, amount });
+```
+
+## Simulating Writes
+
+Before sending a transaction, you can simulate it to ensure it will execute successfully. This is useful for estimating gas costs and catching potential errors.
+
+```typescript
+const { result, gas } = await token.simulate.transfer([to, amount]);
+
+console.log('Simulation successful, result:', result);
+console.log('Estimated gas:', gas);
+```
+
+## Managing Transactions
+
+To wait for a transaction to be mined, use the `waitForTransaction` method.
+
+```typescript
+const receipt = await drift.waitForTransaction({ hash: txHash });
+```
+
+You can also provide an `onMined` callback to the `write` method.
+
+```typescript
+token.write(
+  "transfer",
+  { to, amount },
+  {
+    onMined: (receipt) => {
+      console.log("Transaction mined!", receipt);
+      // You can invalidate the cache here
+      token.cache.invalidateRead("balanceOf", { account: to });
+    },
+  },
+);
+```
+
+## Deployments
+
+You can deploy new contracts using the `deploy` method on the Drift client.
+
+```typescript
+const txHash = await drift.deploy({
+  abi: ERC20.abi,
+  bytecode: ERC20.bytecode,
+  args: {
+    decimals_: 18,
+    initialSupply: 100_000_000n * 10n ** 18n, // 100M
+  },
+});
+
+// Wait for the receipt to get the contract address
+const receipt = await drift.waitForTransaction({ hash: txHash });
+
+if (receipt?.status === "success" && receipt.contractAddress) {
+  console.log("Token deployed at:", receipt.contractAddress);
+}
+```

@@ -1,0 +1,97 @@
+---
+title: Building Reusable SDK Layers
+---
+
+# Building Reusable SDK Layers
+
+One of the powerful patterns that Drift enables is the creation of reusable, library-agnostic SDK layers for your smart contracts. This allows you to encapsulate your contract logic into a clean, reusable client.
+
+## Example: A Vault Client
+
+Let's walk through building a simple SDK for an ERC-4626 vault, with both read-only and read-write clients.
+
+### 1. Define the Clients
+
+First, we define `ReadVault` and `ReadWriteVault` classes that wrap Drift's `ReadContract` and `ReadWriteContract` abstractions.
+
+```typescript
+// src/VaultClient.ts
+import {
+  type Address,
+  type Drift,
+  type ReadContract,
+  type ReadWriteAdapter,
+  type ReadWriteContract,
+  createDrift,
+} from "@delvtech/drift";
+import { vaultAbi } from "./abis/vaultAbi";
+
+type VaultAbi = typeof vaultAbi;
+
+/** A read-only Vault client */
+export class ReadVault {
+  contract: ReadContract<VaultAbi>;
+
+  constructor(address: Address, drift: Drift = createDrift()) {
+    this.contract = drift.contract({
+      abi: vaultAbi,
+      address,
+    });
+  }
+
+  getBalance(account: Address) {
+    return this.contract.read("balanceOf", { account });
+  }
+
+  async getAssetValue(account: Address) {
+    const shares = await this.getBalance(account);
+    return this.contract.read("convertToAssets", { shares });
+  }
+}
+
+/** A read-write Vault client that can sign transactions */
+export class ReadWriteVault extends ReadVault {
+  declare contract: ReadWriteContract<VaultAbi>;
+
+  constructor(address: Address, drift: Drift<ReadWriteAdapter> = createDrift()) {
+    super(address, drift);
+  }
+
+  deposit(amount: bigint, account: Address) {
+    return this.contract.write(
+      "deposit",
+      { assets: amount, receiver: account },
+      {
+        onMined: (receipt) => {
+          if (receipt?.status === "success") {
+            this.contract.cache.invalidateRead("balanceOf", { account });
+          }
+        },
+      },
+    );
+  }
+}
+```
+
+### 2. Use the Client in Your Application
+
+You can now use this `VaultClient` in your application with any web3 library supported by Drift.
+
+```typescript
+import { createDrift } from "@delvtech/drift";
+import { viemAdapter } from "@delvtech/drift-viem";
+import { createPublicClient, http } from "viem";
+import { ReadVault } from "./VaultClient";
+
+const publicClient = createPublicClient({ transport: http() });
+const drift = createDrift({ adapter: viemAdapter({ publicClient }) });
+
+const vault = new ReadVault("0xYourVaultAddress", drift);
+const balance = await vault.getBalance("0xUserAddress");
+```
+
+### Benefits of This Architecture
+
+-   **Reusability:** Write your business logic once and reuse it across different applications and environments.
+-   **Simplicity:** Your application code becomes cleaner and more focused on business logic.
+-   **Testability:** This pattern is easy to test using Drift's mocking utilities.

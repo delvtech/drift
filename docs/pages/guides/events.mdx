@@ -1,0 +1,27 @@
+---
+title: Events
+---
+
+# Fetching Events
+
+Drift simplifies fetching and filtering smart contract events. Event logs are also cached to improve performance.
+
+## Fetching Events
+
+You can fetch events using the `getEvents` method on a contract instance. You can specify the event name and optionally provide filters.
+
+```typescript
+const token = drift.contract({ abi: erc20Abi, address: tokenAddress });
+
+// Get all Transfer events
+const transferEvents = await token.getEvents("Transfer");
+
+// Get Transfer events from a specific address
+const sentEvents = await token.getEvents("Transfer", {
+  filter: {
+    from: userAddress,
+  },
+});
+```
+
+Drift will automatically handle fetching logs from the blockchain and decoding them for you. The results are cached, so subsequent calls for the same events and filters will be returned from the cache.

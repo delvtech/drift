@@ -1,0 +1,42 @@
+---
+title: Multi-Chain Deployments
+---
+
+# Patterns for Multi-Chain Deployments
+
+Drift is well-suited for applications that interact with contracts on multiple blockchain networks. Here are some patterns for managing multi-chain deployments.
+
+## One Client per Chain
+
+The most straightforward approach is to create a separate Drift client for each chain you support.
+
+```typescript
+import { createDrift } from "@delvtech/drift";
+
+const mainnetDrift = createDrift({ rpcUrl: "[MAINNET_RPC_URL]" });
+const polygonDrift = createDrift({ rpcUrl: "[POLYGON_RPC_URL]" });
+
+const mainnetToken = mainnetDrift.contract({ ... });
+const polygonToken = polygonDrift.contract({ ... });
+```
+
+## Chain-Aware SDKs
+
+If you are building a reusable SDK layer, you can make it chain-aware by accepting a chain ID or a Drift client instance in the constructor.
+
+```typescript
+class MySdk {
+  private drift: Drift;
+
+  constructor(chainId: number) {
+    this.drift = createDrift({ rpcUrl: getRpcUrlForChain(chainId) });
+  }
+
+  // ... sdk methods
+}
+
+const mainnetSdk = new MySdk(1);
+const polygonSdk = new MySdk(137);
+```
+
+This pattern allows you to easily switch between chains while keeping your application logic clean and organized.

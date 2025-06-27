@@ -1,0 +1,56 @@
+---
+title: Using Drift with React Query
+---
+
+# Using Drift with React Query
+
+Drift's internal caching significantly simplifies data fetching in React applications, especially when using libraries like [React Query](https://tanstack.com/query/latest).
+
+## The Problem Without Drift
+
+When using React Query directly with a web3 library, you often need to create a separate hook and a unique query key for each contract call to enable caching and prevent redundant network requests. This can lead to a lot of boilerplate code.
+
+```typescript
+// Example without Drift
+function useBalance(address) {
+  return useQuery(['balance', address], () => fetchBalance(address));
+}
+function useSymbol() {
+  return useQuery(['symbol'], () => fetchSymbol());
+}
+
+function MyComponent() {
+  const { data: balance } = useBalance(userAddress);
+  const { data: symbol } = useSymbol();
+  // ...
+}
+```
+
+## How Drift Helps
+
+With Drift, you don't need to wrap every contract call in a separate hook. Drift's caching is automatic, so you can make multiple calls within a single `useQuery` hook without worrying about redundant network requests.
+
+### Example
+
+Here is an example of how you can fetch multiple pieces of data from a vault contract within a single React Query hook.
+
+```typescript
+import { useQuery } from "@tanstack/react-query";
+import { ReadVault } from "sdk-core"; // Assuming a reusable SDK layer
+
+function useVaultData(readVault: ReadVault, userAddress: string) {
+  return useQuery(["vaultData", userAddress], async () => {
+    // Perform multiple reads without separate query keys.
+    // Drift handles caching internally.
+    const [balance, symbol, deposits] = await Promise.all([
+      readVault.getBalance(userAddress),
+      readVault.contract.read("symbol"),
+      readVault.getDeposits(userAddress),
+    ]);
+
+    return { balance, symbol, deposits };
+  });
+}
+```
+
+This approach simplifies your component code and makes it easier to manage your data fetching logic.

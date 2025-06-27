@@ -1,0 +1,69 @@
+---
+title: Reading Data
+---
+
+# Reading Data
+
+Drift provides several ways to read data from your smart contracts, from simple reads to more advanced techniques like multicall and bytecode calls.
+
+## Basic Reads
+
+As shown in the Getting Started guide, you can perform basic reads using the `read` method of the Drift client or a contract instance.
+
+```typescript
+// Using the client directly
+const name = await drift.read({
+  abi: erc20Abi,
+  address: tokenAddress,
+  fn: "name",
+});
+
+// Using a contract instance
+const token = drift.contract({ abi: erc20Abi, address: tokenAddress });
+const balance = await token.read("balanceOf", { account: userAddress });
+```
+
+These calls are automatically cached by Drift to reduce redundant RPC calls.
+
+## Multicall
+
+Drift has built-in support for multicall, which allows you to batch multiple read calls into a single RPC request. This can significantly improve performance and reduce your RPC costs.
+
+To use multicall, simply wrap your calls with `drift.multicall()`:
+
+```typescript
+const token = drift.contract({ abi: erc20Abi, address: tokenAddress });
+
+const [name, symbol, decimals] = await drift.multicall([
+  token.read.name(),
+  token.read.symbol(),
+  token.read.decimals(),
+]);
+```
+
+## Encoded Calls
+
+For more advanced use cases, you can get the encoded call data for a function without actually sending a transaction. This is useful for integrating with other libraries or services that need the raw call data.
+
+```typescript
+const data = await token.encodeCall.transfer([to, amount]);
+
+// data is a hex string
+```
+
+## Bytecode (Deployless) Calls
+
+Drift supports deployless calls, which allow you to execute code against a contract that has not yet been deployed. This is useful for testing and simulation.
+
+To make a deployless call, you need the bytecode of the contract:
+
+```typescript
+import { bytecode } from './MyContract.json';
+
+const result = await drift.bytecodeCall({
+  bytecode,
+  abi: myContractAbi,
+  fn: 'myFunction',
+  args: [arg1, arg2],
+});
+```

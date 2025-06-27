@@ -3,3 +3,139 @@ title: Getting Started
 ---
 
 # Getting Started
+
+This guide will walk you through the basics of using Drift to interact with your smart contracts.
+
+## Installation
+
+First, install the core Drift library.
+
+```bash
+# npm
+npm install @delvtech/drift
+
+# yarn
+yarn add @delvtech/drift
+
+# pnpm
+pnpm add @delvtech/drift
+
+# bun
+bun add @delvtech/drift
+```
+
+To use Drift with a specific web3 library, install the corresponding adapter:
+
+```sh
+# Install one (optional)
+npm install @delvtech/drift-viem
+npm install @delvtech/drift-web3
+npm install @delvtech/drift-ethers
+npm install @delvtech/drift-ethers-v5
+```
+
+## Creating a Drift Client
+
+The Drift client is the entry point for all interactions with your smart contracts. You can create a client with just an RPC URL, or by using an adapter to connect to an existing web3 provider.
+
+**With an RPC URL:**
+```typescript
+import { createDrift } from "@delvtech/drift";
+
+const drift = createDrift({
+  rpcUrl: "[YOUR_RPC_URL]",
+});
+```
+
+**With a viem adapter:**
+```typescript
+import { createDrift } from "@delvtech/drift";
+import { viemAdapter } from "@delvtech/drift-viem";
+import { createPublicClient, createWalletClient, http } from "viem";
+
+const publicClient = createPublicClient({
+  transport: http(),
+});
+
+// optionally create a wallet client
+const walletClient = createWalletClient({
+  transport: http(),
+});
+
+const drift = createDrift({
+  adapter: viemAdapter({ publicClient, walletClient }),
+});
+```
+
+## Read Operations
+
+Once you have a Drift client, you can interact with your contracts. First, define your contract ABI:
+
+```typescript
+const erc20Abi = [
+  // ... ABI definitions for name, symbol, decimals, totalSupply, balanceOf
+] as const;
+```
+
+Then, you can call read functions on the contract:
+
+```typescript
+const name = await drift.read({
+  abi: erc20Abi,
+  address: "0x...", // address of the token contract
+  fn: "name",
+});
+
+const balance = await drift.read({
+  abi: erc20Abi,
+  address: "0x...",
+  fn: "balanceOf",
+  args: {
+    account: "0xUserAddress",
+  },
+});
+
+console.log({ name, balance });
+```
+
+## Write Operations
+
+To execute a write operation, use the `write` method of the Drift client.
+
+```typescript
+const to = "0x...";
+const amount = 100n;
+
+const txHash = await drift.write({
+  abi: erc20Abi,
+  address: "0x...",
+  fn: "transfer",
+  args: {
+    to,
+    amount,
+  },
+});
+
+console.log("Transaction hash:", txHash);
+
+// Wait for the transaction to be mined
+const receipt = await drift.waitForTransaction({ hash: txHash });
+
+console.log("Transaction receipt:", receipt);
+```
+
+## Contract Instances
+
+You can create contract instances to write your options once and get a streamlined, type-safe API to re-use across your application.
+
+```typescript
+const token = drift.contract({
+  abi: erc20Abi,
+  address: "0x...", // address of the token contract
+});
+
+const name = await token.read("name");
+const balance = await token.read("balanceOf", { account: "0xUserAddress" });
+
+const txHash = await token.write("transfer", { to: "0x...", amount: 100n });
+```
