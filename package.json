@@ -5,7 +5,8 @@
   "workspaces": [
     "contracts",
     "examples/*",
-    "packages/*"
+    "packages/*",
+    "docs"
   ],
   "type": "module",
   "private": true,
