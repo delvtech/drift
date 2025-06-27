@@ -34,5 +34,9 @@ yarn-error.log*
 !.vscode/extensions.json
 !.vscode/settings.json
 
+# AI
+.github/copilot-instructions.md
+.github/instructions
+
 # OS
 .DS_Store
