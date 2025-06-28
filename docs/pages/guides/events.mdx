@@ -4,24 +4,284 @@ title: Events
 
 # Fetching Events
 
-Drift simplifies fetching and filtering smart contract events. Event logs are also cached to improve performance.
+Drift provides a powerful and intuitive way to query smart contract events with
+automatic caching, type safety, and flexible filtering options.
 
-## Fetching Events
+## Basic Event Queries
 
-You can fetch events using the `getEvents` method on a contract instance. You can specify the event name and optionally provide filters.
+Query events using the `getEvents` method on contract instances:
 
-```typescript
-const token = drift.contract({ abi: erc20Abi, address: tokenAddress });
+```ts
+const token = drift.contract({ abi: erc20.abi, address: tokenAddress });
 
 // Get all Transfer events
-const transferEvents = await token.getEvents("Transfer");
+const allTransfers = await token.getEvents("Transfer");
 
-// Get Transfer events from a specific address
-const sentEvents = await token.getEvents("Transfer", {
+// Get events from specific block range
+const recentTransfers = await token.getEvents("Transfer", {
+  fromBlock: 100n,
+  toBlock: "latest",
+});
+
+// Using the client directly
+const approvals = await drift.getEvents({
+  abi: erc20.abi,
+  address: tokenAddress,
+  event: "Approval",
+  fromBlock: 0n,
+});
+```
+
+## Event Filtering
+
+Apply filters to narrow down event results:
+
+```ts
+// Filter by indexed parameters
+const userTransfers = await token.getEvents("Transfer", {
   filter: {
-    from: userAddress,
+    from: userAddress, // Transfers from specific address
+    to: vaultAddress,  // Transfers to specific address
   },
 });
 ```
 
-Drift will automatically handle fetching logs from the blockchain and decoding them for you. The results are cached, so subsequent calls for the same events and filters will be returned from the cache.
+## Block Range Queries
+
+Control the block range for event queries:
+
+```ts
+// Query specific block range
+const events = await token.getEvents("Transfer", {
+  fromBlock: 100n,
+  toBlock: 200n,
+});
+
+// Using block tags
+const recentEvents = await token.getEvents("Transfer", {
+  fromBlock: "earliest",
+  toBlock: "latest",
+});
+```
+
+## Event Data Structure
+
+Events returned by Drift have a consistent structure:
+
+```ts
+const transfers = await token.getEvents("Transfer");
+
+transfers.forEach((event) => {
+  console.log({
+    eventName: event.eventName,             // "Transfer"
+    blockNumber: event.blockNumber,         // bigint
+    transactionHash: event.transactionHash, // hex string
+    args: event.args,                       // Decoded event arguments
+    data: event.data,                       // Raw hex data
+  });
+});
+```
+
+## Working with Event Arguments
+
+Access decoded event arguments through the `args` property:
+
+```ts
+// ERC20 Transfer event: Transfer(address indexed from, address indexed to, uint256 value)
+const transfers = await token.getEvents("Transfer");
+
+transfers.forEach((transfer) => {
+  const { from, to, value } = transfer.args;
+
+  console.log(`${from} sent ${value} tokens to ${to}`);
+  console.log(`Block: ${transfer.blockNumber}`);
+  console.log(`Transaction: ${transfer.transactionHash}`);
+});
+```
+
+## Caching Behavior
+
+Drift automatically caches event queries to improve performance:
+
+```ts
+// First call fetches from blockchain
+const events1 = await token.getEvents("Transfer", {
+  fromBlock: 0n,
+  toBlock: 100n,
+});
+
+// Second call returns cached results (no network request)
+const events2 = await token.getEvents("Transfer", {
+  fromBlock: 0n,
+  toBlock: 100n,
+});
+
+// Different parameters trigger new network request
+const events3 = await token.getEvents("Transfer", {
+  // Different range
+  fromBlock: 100n,
+  toBlock: 300n,
+});
+```
+
+### Cache Management
+
+```ts
+// Invalidate cached events
+token.cache.invalidateEvents("Transfer", {
+  fromBlock: 0n,
+  toBlock: 100n,
+});
+
+// Clear all cached events for this contract
+token.cache.clearEvents();
+
+// Preload events to avoid network requests
+token.cache.preloadEvents({
+  event: "Transfer",
+  value: [], // Empty array or actual events
+  fromBlock: 0n,
+  toBlock: 100n,
+});
+```
+
+## Common Patterns
+
+### Transaction Receipt Events
+
+Get events from a specific transaction:
+
+```ts
+import type { Hash } from "@delvtech/drift";
+
+async function getTransactionEvents(txHash: Hash) {
+  const receipt = await drift.waitForTransaction({ hash: txHash });
+
+  if (receipt?.status === "success") {
+    // Get events from the specific block and filter by transaction
+    const blockEvents = await token.getEvents("Transfer", {
+      fromBlock: receipt.blockNumber,
+      toBlock: receipt.blockNumber,
+    });
+
+    // Filter to only events from our transaction
+    const txEvents = blockEvents.filter(
+      (event) => event.transactionHash === txHash,
+    );
+
+    return txEvents;
+  }
+
+  return [];
+}
+```
+
+### Event-Based State Reconstruction
+
+```ts
+import type { Address } from "@delvtech/drift";
+
+async function getUserTokenHistory(userAddress: Address) {
+  // Get all transfers involving the user
+  const [sent, received] = await Promise.all([
+    token.getEvents("Transfer", {
+      filter: { from: userAddress },
+      fromBlock: 0n,
+    }),
+    token.getEvents("Transfer", {
+      filter: { to: userAddress },
+      fromBlock: 0n,
+    }),
+  ]);
+
+  // Calculate balance changes over time
+  const transactions = [...sent, ...received]
+    .sort((a, b) => {
+      // Pending events may not have a block number
+      if (b.blockNumber === undefined) return 1;
+      if (a.blockNumber === undefined) return -1;
+
+      return Number(a.blockNumber - b.blockNumber);
+    })
+    .map((event) => ({
+      block: event.blockNumber,
+      type: event.args.from === userAddress ? "sent" : "received",
+      amount: event.args.value,
+      counterparty:
+        event.args.from === userAddress ? event.args.to : event.args.from,
+      txHash: event.transactionHash,
+    }));
+
+  return transactions;
+}
+```
+
+### Multi-Contract Event Aggregation
+
+```ts
+import type { Address } from "@delvtech/drift";
+
+async function getProtocolActivity(contracts: Address[]) {
+  const allEvents = await Promise.all(
+    contracts.map((address) =>
+      drift.getEvents({
+        abi: erc20.abi,
+        address,
+        event: "Transfer",
+        fromBlock: 100n,
+      }),
+    ),
+  );
+
+  // Flatten and sort all events
+  return allEvents.flat().sort((a, b) => {
+    // Pending events may not have a block number
+    if (b.blockNumber === undefined) return 1;
+    if (a.blockNumber === undefined) return -1;
+
+    return Number(a.blockNumber - b.blockNumber);
+  });
+}
+```
+
+## Performance Tips
+
+### 1. Use Appropriate Block Ranges
+
+Depending on your RPC provider, querying too large a block range can be slow or
+even fail. Use reasonable ranges and consider pagination:
+
+```ts
+// ⚠️ Querying too large a range can be slow or fail
+const events = await token.getEvents("Transfer", {
+  fromBlock: 0n,
+  toBlock: "latest",
+});
+
+// ✅ Use reasonable ranges and pagination
+const BLOCKS_PER_QUERY = 10_000n;
+const events = await token.getEvents("Transfer", {
+  fromBlock: startBlock,
+  toBlock: startBlock + BLOCKS_PER_QUERY,
+});
+```
+
+### 2. Filter at the Source
+
+```ts
+// ❌ Fetch all then filter in JavaScript
+const allEvents = await token.getEvents("Transfer");
+const userEvents = allEvents.filter((e) => e.args.from === userAddress);
+
+// ✅ Filter directly in the query
+const userEvents = await token.getEvents("Transfer", {
+  filter: { from: userAddress },
+});
+```
+
+## Next Steps
+
+- [**Testing Events**](/guides/testing-strategies) - Mock event queries in tests
+- [**Caching**](/advanced/caching) - Deep dive into event caching
+- [**React Integration**](/integrations/react-query) - Use events with React Query
+- [**Multi-chain**](/integrations/multi-chain-deployments) - Query events across chains

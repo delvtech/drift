@@ -10,7 +10,7 @@ Drift is well-suited for applications that interact with contracts on multiple b
 
 The most straightforward approach is to create a separate Drift client for each chain you support.
 
-```typescript
+```ts
 import { createDrift } from "@delvtech/drift";
 
 const mainnetDrift = createDrift({ rpcUrl: "[MAINNET_RPC_URL]" });
@@ -24,7 +24,7 @@ const polygonToken = polygonDrift.contract({ ... });
 
 If you are building a reusable SDK layer, you can make it chain-aware by accepting a chain ID or a Drift client instance in the constructor.
 
-```typescript
+```ts
 class MySdk {
   private drift: Drift;
 

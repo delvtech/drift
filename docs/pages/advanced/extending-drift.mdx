@@ -18,7 +18,7 @@ Drift's default cache store is an in-memory cache. For more persistent caching, 
 
 Here is a simplified example of a `localStorage` store:
 
-```typescript
+```ts
 import { type Store } from "@delvtech/drift";
 
 const localStorageStore: Store = {
@@ -39,7 +39,7 @@ const localStorageStore: Store = {
 };
 
 const drift = createDrift({
-  rpcUrl: "[YOUR_RPC_URL]",
+  rpcUrl: "YOUR_RPC_URL",
   store: localStorageStore,
 });
 ```
@@ -50,16 +50,22 @@ Hooks allow you to intercept and modify actions before they are executed. You ca
 
 Here is an example of a hook that logs all `read` calls:
 
-```typescript
-const drift = createDrift({
-  rpcUrl: "[YOUR_RPC_URL]",
-  hooks: {
-    before: {
-      read: (params) => {
-        console.log("Reading from contract:", params);
-        return params; // Must return the params
-      },
-    },
-  },
+```ts
+// Simulate writes before sending transactions
+drift.hooks.on("before:write", async ({ args: [params] }) => {
+  await drift.simulateWrite(params);
+});
+
+// Run middleware on reads
+drift.hooks.on("before:read", async ({ args: [params], resolve }) => {
+  const cachedValue = await drift.cache.getRead(params);
+  const result = await readMiddleware({ params, cachedValue });
+  resolve(result);
+});
+
+// Run middleware to transform the result of calls
+drift.hooks.on("after:call", ({ args: [params], result, setResult }) => {
+  const transformedResult = callResultMiddleware({ params, result });
+  setResult(transformedResult);
 });
 ```

@@ -6,7 +6,7 @@
 
 **Effortless Ethereum Development Across Web3 Libraries**
 
-Write cached Ethereum smart contract interactions once with Drift and run them
+Write cached Ethereum protocol interactions once with Drift and run them
 anywhere. Seamlessly support multiple web3 libraries like
 [viem](https://viem.sh), [web3.js](https://web3js.org), and
 [ethers](https://ethers.org)—without getting locked into a single provider or
@@ -111,7 +111,7 @@ npm install @delvtech/drift-ethers-v5
 
 ### 1. Create a Drift client
 
-```typescript
+```ts
 import { createDrift } from "@delvtech/drift";
 
 const drift = createDrift({
@@ -121,7 +121,7 @@ const drift = createDrift({
 
 **Viem adapter example:**
 
-```typescript
+```ts
 import { createDrift } from "@delvtech/drift";
 import { viemAdapter } from "@delvtech/drift-viem";
 import { createPublicClient, createWalletClient, http } from "viem";
@@ -144,7 +144,7 @@ const drift = createDrift({
 
 #### Read Operations with Caching
 
-```typescript
+```ts
 import { VaultAbi } from "./abis/VaultAbi";
 
 // No need to wrap in separate hooks; Drift handles caching internally
@@ -164,7 +164,7 @@ const balance = await drift.read({
 
 If Drift was initialized with a signer, you can perform write operations:
 
-```typescript
+```ts
 const txHash = await drift.write({
   abi: VaultAbi,
   address: "0xYourVaultAddress",
@@ -190,7 +190,7 @@ const txHash = await drift.write({
 
 #### Deployments
 
-```typescript
+```ts
 const txHash = await drift.deploy({
   abi: ERC20.abi,
   bytecode: ERC20.bytecode,
@@ -218,7 +218,7 @@ if (receipt?.status === "success" && receipt.contractAddress) {
 Create contract instances to write your options once and get a streamlined,
 type-safe API to re-use across your application.
 
-```typescript
+```ts
 const vault = drift.contract({
   abi: VaultAbi,
   address: "0xYourVaultAddress",
@@ -251,7 +251,7 @@ clients using Drift.
 Define read and read-write clients that wrap Drift's `ReadContract` and
 `ReadWriteContract` abstractions.
 
-```typescript
+```ts
 // foobar-sdk/src/VaultClient.ts
 import {
   type Address,
@@ -337,7 +337,7 @@ export class ReadWriteVault extends ReadVault {
 Using an adapter, you can integrate Drift with your chosen web3 library. Here's
 an example using `viem`:
 
-```typescript
+```ts
 import { createDrift } from "@delvtech/drift";
 import { viemAdapter } from "@delvtech/drift-viem";
 import { createPublicClient, http } from "viem";
@@ -395,7 +395,7 @@ Under the hood, this method makes multiple RPC requests.
 Here's how you can use Drift's mocks to stub contract calls and test your
 method:
 
-```typescript
+```ts
 import assert from "node:assert";
 import test from "node:test";
 import { createMockDrift, randomAddress } from "@delvtech/drift/testing";
@@ -461,7 +461,7 @@ queries.
 
 #### Example Using React Query
 
-```typescript
+```ts
 import { useQuery } from "@tanstack/react-query";
 import { ReadVault } from "sdk-core";
 
@@ -488,7 +488,7 @@ Drift's caching mechanism ensures that repeated calls with the same parameters
 don't result in unnecessary network requests, even when composed within the same
 function.
 
-```typescript
+```ts
 // Return values are cached after the first call.
 const balance = await contract.read("balanceOf", { account });
 
@@ -505,7 +505,7 @@ const otherBalance = await contract.read("balanceOf", { account: "0xOtherAccount
 Delete cached data to ensure it's re-fetched using `invalidate*` and `clear*`
 methods.
 
-```typescript
+```ts
 // Invalidate the cache for a specific read
 contract.cache.invalidateRead("balanceOf", { account });
 
@@ -547,7 +547,7 @@ contract.cache.preloadEvents({
 Drift clients will automatically check the cache before fetching new data, but
 direct access to the cached data is available via `get*` methods.
 
-```typescript
+```ts
 // Get a cached read return
 const cachedBalance = await contract.cache.getRead("balanceOf", { account });
 
@@ -581,7 +581,7 @@ inheriting all of it's properties and methods, extending some, and adding some
 of their own. See the [`DefaultAdapter`][DefaultAdapter] for an example
 implementation.
 
-```typescript
+```ts
 import { DefaultAdapter, createDrift } from "@delvtech/drift";
 
 class CustomAdapter extends DefaultAdapter {
@@ -605,7 +605,7 @@ custom store that uses TTL, localStorage, IndexedDB,
 [QueryClient](https://tanstack.com/query/latest/docs/reference/QueryClient), or
 any other storage mechanism, sync or async.
 
-```typescript
+```ts
 import { createDrift } from "@delvtech/drift";
 
 class CustomStore extends Map {
@@ -626,7 +626,7 @@ client method (including custom adapter methods) has type-safe `before:<method>`
 and `after:<method>` hooks that can be used to inspect and modify the arguments
 or results.
 
-```typescript
+```ts
 // Simulate writes before sending transactions
 drift.hooks.on("before:write", async ({ args: [params] }) => {
   await drift.simulateWrite(params);

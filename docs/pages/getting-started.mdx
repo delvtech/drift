@@ -4,61 +4,86 @@ title: Getting Started
 
 # Getting Started
 
-This guide will walk you through the basics of using Drift to interact with your smart contracts.
+This guide will walk you through the basics of using Drift to interact with your
+smart contracts.
 
 ## Installation
 
 First, install the core Drift library.
 
-```bash
-# npm
+:::code-group
+
+```sh [npm]
 npm install @delvtech/drift
+```
 
-# yarn
+```sh [yarn]
 yarn add @delvtech/drift
+```
 
-# pnpm
+```sh [pnpm]
 pnpm add @delvtech/drift
+```
 
-# bun
+```sh [bun]
 bun add @delvtech/drift
 ```
 
+:::
+
 To use Drift with a specific web3 library, install the corresponding adapter:
 
-```sh
-# Install one (optional)
+:::code-group
+
+```sh [viem]
 npm install @delvtech/drift-viem
-npm install @delvtech/drift-web3
+```
+
+```sh [ethers]
 npm install @delvtech/drift-ethers
+```
+
+```sh [ethers-v5]
 npm install @delvtech/drift-ethers-v5
 ```
 
+```sh [web3]
+npm install @delvtech/drift-web3
+```
+
+:::
+
 ## Creating a Drift Client
 
-The Drift client is the entry point for all interactions with your smart contracts. You can create a client with just an RPC URL, or by using an adapter to connect to an existing web3 provider.
+The Drift client is the entry point for all interactions with your smart
+contracts. You can create a client with just an RPC URL, or by using an adapter
+to connect to an existing web3 provider.
 
 **With an RPC URL:**
-```typescript
+
+```ts
 import { createDrift } from "@delvtech/drift";
 
 const drift = createDrift({
-  rpcUrl: "[YOUR_RPC_URL]",
+  rpcUrl: "YOUR_RPC_URL",
 });
 ```
 
 **With a viem adapter:**
-```typescript
+
+```ts
 import { createDrift } from "@delvtech/drift";
 import { viemAdapter } from "@delvtech/drift-viem";
 import { createPublicClient, createWalletClient, http } from "viem";
 
 const publicClient = createPublicClient({
+  chain: mainnet, // your chain
   transport: http(),
 });
 
-// optionally create a wallet client
+// Optional wallet client for write operations
 const walletClient = createWalletClient({
+  chain: mainnet,
   transport: http(),
 });
 
@@ -69,73 +94,206 @@ const drift = createDrift({
 
 ## Read Operations
 
-Once you have a Drift client, you can interact with your contracts. First, define your contract ABI:
+Once you have a Drift client, you can interact with your contracts.
 
-```typescript
-const erc20Abi = [
-  // ... ABI definitions for name, symbol, decimals, totalSupply, balanceOf
-] as const;
-```
+:::code-group
 
-Then, you can call read functions on the contract:
+```ts [example.ts]
+import { erc20 } from "@delvtech/drift";
+import { drift } from "./drift";
 
-```typescript
 const name = await drift.read({
-  abi: erc20Abi,
-  address: "0x...", // address of the token contract
+  abi: erc20.abi,
+  address: "0x...", // token contract address
   fn: "name",
 });
 
 const balance = await drift.read({
-  abi: erc20Abi,
+  abi: erc20.abi,
   address: "0x...",
   fn: "balanceOf",
   args: {
-    account: "0xUserAddress",
+    account: "0x...", // user address
   },
 });
 
 console.log({ name, balance });
 ```
 
+```ts [drift.ts]
+import { createDrift } from "@delvtech/drift";
+
+export const drift = createDrift({
+  rpcUrl: "YOUR_RPC_URL",
+});
+```
+
+:::
+
+:::tip
+
+Drift includes ABIs for common interfaces: `erc20`, `erc721`, `erc1155`,
+`erc4626`, and `multicall3`. Import them from `@delvtech/drift` to get started
+quickly!
+
+:::
+
 ## Write Operations
 
 To execute a write operation, use the `write` method of the Drift client.
 
-```typescript
-const to = "0x...";
-const amount = 100n;
-
+```ts
 const txHash = await drift.write({
-  abi: erc20Abi,
+  abi: erc20.abi,
   address: "0x...",
   fn: "transfer",
   args: {
-    to,
-    amount,
+    to: "0x...",
+    amount: 100n,
+  },
+  // Optional: callback when transaction is mined
+  onMined: (receipt) => {
+    console.log("Transaction mined:", receipt);
   },
 });
 
 console.log("Transaction hash:", txHash);
-
-// Wait for the transaction to be mined
-const receipt = await drift.waitForTransaction({ hash: txHash });
-
-console.log("Transaction receipt:", receipt);
 ```
 
 ## Contract Instances
 
-You can create contract instances to write your options once and get a streamlined, type-safe API to re-use across your application.
+You can create contract instances to write your options once and get a
+streamlined, type-safe API to re-use across your application.
 
-```typescript
+```ts
 const token = drift.contract({
-  abi: erc20Abi,
-  address: "0x...", // address of the token contract
+  abi: erc20.abi,
+  address: "0x...", // Token contract address
 });
 
 const name = await token.read("name");
-const balance = await token.read("balanceOf", { account: "0xUserAddress" });
+const balance = await token.read("balanceOf", { account: "0x..." });
 
 const txHash = await token.write("transfer", { to: "0x...", amount: 100n });
 ```
+
+## Fetching Events
+
+Drift provides a simple way to fetch contract events with built-in caching:
+
+```ts
+const events = await drift.getEvents({
+  abi: erc20.abi,
+  address: "0x...",
+  event: "Transfer",
+  filter: {
+    from: "0x...", // Optional filter
+  },
+});
+
+// Using a contract instance
+const transferEvents = await token.getEvents("Transfer", {
+  filter: { from: "0x..." },
+});
+```
+
+## Deployments
+
+You can deploy new contracts using Drift:
+
+```ts
+const txHash = await drift.deploy({
+  abi: erc20.abi,
+  bytecode: "0x608060405234801561001057600080fd5b50...", // Your contract bytecode
+  args: {
+    name: "My Token",
+    symbol: "MTK",
+    decimals: 18,
+  },
+});
+
+// Wait for deployment
+const receipt = await drift.waitForTransaction({ hash: txHash });
+
+if (receipt?.status === "success" && receipt.contractAddress) {
+  console.log("Contract deployed at:", receipt.contractAddress);
+
+  // Now you can interact with the deployed contract
+  const totalSupply = await drift.read({
+    abi: erc20.abi,
+    address: receipt.contractAddress,
+    fn: "totalSupply",
+  });
+}
+```
+
+## Understanding Caching
+
+One of Drift's key features is automatic caching. Once you make a call,
+subsequent calls with the same parameters return cached data:
+
+```ts
+// This makes a network request
+const balance1 = await drift.read({
+  abi: erc20.abi,
+  address: "0x...",
+  fn: "balanceOf",
+  args: { account: "0x..." },
+});
+
+// This returns the cached value (no network request)
+const balance2 = await drift.read({
+  abi: erc20.abi,
+  address: "0x...",
+  fn: "balanceOf",
+  args: { account: "0x..." },
+});
+
+// Different parameters trigger a new network request
+const otherBalance = await drift.read({
+  abi: erc20.abi,
+  address: "0x...",
+  fn: "balanceOf",
+  args: { account: "0xOtherUserAddress" }, // Different account
+});
+```
+
+## Using Multicall
+
+Drift has built-in support for multicall, allowing you to batch multiple calls
+into a single RPC request:
+
+```ts
+const results = await drift.multicall({
+  calls: [
+    { abi: erc20.abi, address: "0x...", fn: "name" },
+    { abi: erc20.abi, address: "0x...", fn: "symbol" },
+    { abi: erc20.abi, address: "0x...", fn: "decimals" },
+    { abi: erc20.abi, address: "0x...", fn: "totalSupply" },
+  ],
+});
+
+// With allowFailure: false, get values directly
+const [name, symbol, decimals, totalSupply] = await drift.multicall({
+  allowFailure: false,
+  calls: [
+    { abi: erc20.abi, address: "0x...", fn: "name" },
+    { abi: erc20.abi, address: "0x...", fn: "symbol" },
+    { abi: erc20.abi, address: "0x...", fn: "decimals" },
+    { abi: erc20.abi, address: "0x...", fn: "totalSupply" },
+  ],
+});
+```
+
+## What's Next?
+
+Now that you understand the basics, explore these topics:
+
+- [**Core Concepts**](/core-concepts) - Learn about Drift's architecture and
+  design
+- [**Reading Data**](/guides/reading-data) - Advanced reading patterns and
+  techniques
+- [**Writing Data**](/guides/writing-data) - Transaction management and batching
+- [**Testing Strategies**](/guides/testing-strategies) - Mock your contracts for
+  testing
+- [**Caching**](/advanced/caching) - Deep dive into Drift's caching system

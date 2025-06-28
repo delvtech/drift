@@ -4,7 +4,8 @@ title: API Reference
 
 # API Reference
 
-This section provides a high-level overview of the core Drift API. For detailed information, please refer to the source files.
+This section provides a high-level overview of the core Drift API. For detailed
+information, please refer to the source files.
 
 ## Core
 
@@ -12,30 +13,37 @@ This section provides a high-level overview of the core Drift API. For detailed 
 
 The main entry point for creating a Drift client.
 
--   **Source:** [`packages/drift/src/createDrift.ts`](https://github.com/delvtech/drift/blob/main/packages/drift/src/createDrift.ts)
+- **Source:**
+  [`packages/drift/src/client/Drift.ts`](https://github.com/delvtech/drift/blob/main/packages/drift/src/client/Drift.ts)
 
 ### `Drift`
 
 The Drift client instance.
 
--   **Source:** [`packages/drift/src/Drift.ts`](https://github.com/delvtech/drift/blob/main/packages/drift/src/Drift.ts)
+- **Source:**
+  [`packages/drift/src/client/Drift.ts`](https://github.com/delvtech/drift/blob/main/packages/drift/src/client/Drift.ts)
 
 ### `contract`
 
 A method on the Drift client to create a type-safe contract instance.
 
--   **Source:** [`packages/drift/src/Drift.ts`](https://github.com/delvtech/drift/blob/main/packages/drift/src/Drift.ts)
+- **Source:**
+  [`packages/drift/src/client/contract/Contract.ts`](https://github.com/delvtech/drift/blob/main/packages/drift/src/client/contract/Contract.ts)
 
 ## Adapters
 
 Adapters connect Drift to underlying web3 libraries.
 
--   **`viemAdapter`**: [`packages/drift-viem/src/viemAdapter.ts`](https://github.com/delvtech/drift/blob/main/packages/drift-viem/src/viemAdapter.ts)
--   **`ethersAdapter`**: [`packages/drift-ethers/src/ethersAdapter.ts`](https://github.com/delvtech/drift/blob/main/packages/drift-ethers/src/ethersAdapter.ts)
--   **`web3Adapter`**: [`packages/drift-web3/src/web3Adapter.ts`](https://github.com/delvtech/drift/blob/main/packages/drift-web3/src/web3Adapter.ts)
+- **`viemAdapter`**:
+  [`packages/drift-viem/src/viemAdapter.ts`](https://github.com/delvtech/drift/blob/main/packages/drift-viem/src/viemAdapter.ts)
+- **`ethersAdapter`**:
+  [`packages/drift-ethers/src/ethersAdapter.ts`](https://github.com/delvtech/drift/blob/main/packages/drift-ethers/src/ethersAdapter.ts)
+- **`web3Adapter`**:
+  [`packages/drift-web3/src/web3Adapter.ts`](https://github.com/delvtech/drift/blob/main/packages/drift-web3/src/web3Adapter.ts)
 
 ## Store
 
 The `Store` interface defines the caching mechanism.
 
--   **Source:** [`packages/drift/src/store/Store.ts`](https://github.com/delvtech/drift/blob/main/packages/drift/src/store/Store.ts)
+- **Source:**
+  [`packages/drift/src/store/Store.ts`](https://github.com/delvtech/drift/blob/main/packages/drift/src/store/Store.ts)

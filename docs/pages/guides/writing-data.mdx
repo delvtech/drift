@@ -4,82 +4,482 @@ title: Writing Data
 
 # Writing Data
 
-This guide covers how to send transactions to your smart contracts using Drift.
+This guide covers how to send transactions and manage state changes using Drift's write operations.
 
 ## Basic Writes
 
-To send a transaction, use the `write` method of the Drift client or a contract instance. This will return a transaction hash.
+Use the `write` method to send transactions to your contracts:
 
-```typescript
+```ts
 // Using the client directly
 const txHash = await drift.write({
-  abi: erc20Abi,
+  abi: erc20.abi,
   address: tokenAddress,
   fn: "transfer",
-  args: {
-    to,
-    amount,
+  args: { 
+    to: "0x...", 
+    amount: BigInt(100e18) 
   },
 });
 
-// Using a contract instance
-const token = drift.contract({ abi: erc20Abi, address: tokenAddress });
-const txHash2 = await token.write("transfer", { to, amount });
+// Using a contract instance (recommended)
+const token = drift.contract({ 
+  abi: erc20.abi, 
+  address: tokenAddress 
+});
+
+const txHash2 = await token.write("transfer", {
+  to: "0x...",
+  amount: BigInt(100e18),
+});
+```
+
+### Transaction Options
+
+Customize transaction behavior with additional options:
+
+```ts
+const txHash = await token.write("transfer",
+  { to: "0x...", amount: BigInt(100e18) },
+  {
+    value: BigInt(1e18),    // Send ETH with the transaction
+    gasLimit: 100_000n,     // Set gas limit
+    gasPrice: BigInt(20e9), // Set gas price
+    nonce: 42,              // Set specific nonce
+  }
+);
 ```
 
 ## Simulating Writes
 
-Before sending a transaction, you can simulate it to ensure it will execute successfully. This is useful for estimating gas costs and catching potential errors.
+Always simulate transactions before sending to catch errors early and estimate gas:
 
-```typescript
-const { result, gas } = await token.simulate.transfer([to, amount]);
+```ts
+// Basic simulation
+const result = await token.simulateWrite("transfer", {
+  to: "0x...",
+  amount: BigInt(100e18),
+});
 
-console.log('Simulation successful, result:', result);
-console.log('Estimated gas:', gas);
+console.log("Transfer simulation result:", result);
+
+// Simulation with options
+const vaultDeposit = await vault.simulateWrite("deposit",
+  { assets: BigInt(1000e18), receiver: userAddress },
+  { 
+    block: "latest",
+    value: BigInt(0.1e18), // If the function is payable
+  }
+);
+
+console.log("Expected shares:", vaultDeposit);
 ```
 
-## Managing Transactions
+### Error Handling with Simulation
 
-To wait for a transaction to be mined, use the `waitForTransaction` method.
+```ts
+try {
+  // Simulate first to catch reverts
+  await token.simulateWrite("transfer", {
+    to: "0x...",
+    amount: BigInt(1000000e18), // Very large amount
+  });
+  
+  // If simulation passes, send the transaction
+  const txHash = await token.write("transfer", {
+    to: "0x...",
+    amount: BigInt(1000000e18),
+  });
+  
+} catch (error) {
+  console.error("Transaction would fail:", error.message);
+  // Handle the error appropriately
+}
+```
 
-```typescript
+## Transaction Management
+
+### Waiting for Transactions
+
+```ts
+// Basic wait
 const receipt = await drift.waitForTransaction({ hash: txHash });
+
+if (receipt?.status === "success") {
+  console.log("Transaction successful!");
+} else {
+  console.error("Transaction failed");
+}
+
+// Wait with timeout
+const receipt = await drift.waitForTransaction({ 
+  hash: txHash,
+  timeout: 30_000, // 30 seconds
+});
 ```
 
-You can also provide an `onMined` callback to the `write` method.
+### Using `onMined` Callbacks
 
-```typescript
-token.write(
-  "transfer",
-  { to, amount },
+Handle post-transaction logic with `onMined` callbacks:
+
+```ts
+const txHash = await token.write("transfer",
+  { to: recipientAddress, amount: BigInt(100e18) },
   {
     onMined: (receipt) => {
-      console.log("Transaction mined!", receipt);
-      // You can invalidate the cache here
-      token.cache.invalidateRead("balanceOf", { account: to });
+      if (receipt?.status === "success") {
+        console.log("Transfer completed!");
+        
+        // Invalidate affected cache entries
+        token.cache.invalidateRead("balanceOf", { account: senderAddress });
+        token.cache.invalidateRead("balanceOf", { account: recipientAddress });
+        
+        // Trigger UI updates, analytics, etc.
+        analytics.track("TokenTransfer", {
+          amount: 100e18,
+          recipient: recipientAddress,
+        });
+      }
     },
-  },
+  }
 );
+```
+
+### Advanced Transaction Patterns
+
+```ts
+// Approve and transfer pattern
+async function approveAndTransferFrom(
+  token: Contract,
+  spender: Address,
+  from: Address,
+  to: Address,
+  amount: bigint,
+) {
+  // First, simulate both operations
+  await token.simulateWrite("approve", { spender, amount });
+  await token.simulateWrite("transferFrom", { from, to, amount });
+  
+  // Execute approve
+  const approveTx = await token.write("approve", { spender, amount });
+  await drift.waitForTransaction({ hash: approveTx });
+  
+  // Then execute transfer
+  const transferTx = await token.write("transferFrom", { from, to, amount });
+  return transferTx;
+}
+```
+
+## Batched Transactions with `sendCalls`
+
+Use [EIP-5792](https://eip5792.xyz) to batch multiple transactions for better UX and gas efficiency:
+
+```ts
+// Approve token and deposit in one batch
+const batchResult = await drift.sendCalls({
+  calls: [
+    // Approve tokens for vault
+    {
+      abi: erc20.abi,
+      address: tokenAddress,
+      fn: "approve",
+      args: {
+        spender: vaultAddress,
+        amount: BigInt(1000e18),
+      },
+    },
+    // Deposit into vault
+    {
+      abi: vaultAbi,
+      address: vaultAddress,
+      fn: "deposit",
+      args: {
+        assets: BigInt(1000e18),
+        receiver: userAddress,
+      },
+    },
+  ],
+});
+
+console.log("Batch transaction ID:", batchResult.id);
+```
+
+### Mixed Call Types in Batches
+
+```ts
+// Mix ABI calls with raw encoded calls
+const encodedCall = encodeFunctionData({
+  abi: customAbi,
+  fn: "complexFunction",
+  args: { param1: "value", param2: 123n },
+});
+
+await drift.sendCalls({
+  calls: [
+    // ABI-based call
+    {
+      abi: erc20.abi,
+      address: tokenAddress,
+      fn: "transfer",
+      args: { to: "0x...", amount: BigInt(100e18) },
+    },
+    
+    // Raw encoded call
+    {
+      to: customContract,
+      data: encodedCall,
+      value: BigInt(1e18), // Send ETH
+    },
+  ],
+});
+```
+
+### Batch Options
+
+```ts
+await drift.sendCalls({
+  calls: [...],
+  atomic: true,        // All calls succeed or all fail
+  version: "2.0.0",    // EIP-5792 version
+  from: userAddress,   // Specify sender
+  chainId: 1,          // Specify chain
+});
 ```
 
 ## Deployments
 
-You can deploy new contracts using the `deploy` method on the Drift client.
+Deploy contracts using Drift with full type safety:
 
-```typescript
-const txHash = await drift.deploy({
-  abi: ERC20.abi,
-  bytecode: ERC20.bytecode,
+```ts
+// Basic deployment
+const deployTx = await drift.deploy({
+  abi: erc20.abi,
+  bytecode: erc20.bytecode,
   args: {
-    decimals_: 18,
-    initialSupply: 100_000_000n * 10n ** 18n, // 100M
+    name: "My Token",
+    symbol: "MTK",
+    decimals: 18,
   },
 });
 
-// Wait for the receipt to get the contract address
-const receipt = await drift.waitForTransaction({ hash: txHash });
+// Wait for deployment and get address
+const receipt = await drift.waitForTransaction({ hash: deployTx });
 
 if (receipt?.status === "success" && receipt.contractAddress) {
-  console.log("Token deployed at:", receipt.contractAddress);
+  console.log("Contract deployed at:", receipt.contractAddress);
+  
+  // Create contract instance for the deployed contract
+  const deployedToken = drift.contract({
+    abi: erc20.abi,
+    address: receipt.contractAddress,
+  });
+  
+  // Verify deployment
+  const name = await deployedToken.read("name");
+  console.log("Deployed token name:", name);
 }
 ```
+
+### Deployment with Complex Arguments
+
+```ts
+// Deploy a factory contract that creates other contracts
+const factoryTx = await drift.deploy({
+  abi: tokenFactoryAbi,
+  bytecode: tokenFactoryBytecode,
+  args: {
+    owner: userAddress,
+    feeRecipient: feeAddress,
+    defaultDecimals: 18,
+    allowedTokens: [tokenA, tokenB, tokenC],
+  },
+});
+```
+
+### Deployment Hooks
+
+```ts
+const deployTx = await drift.deploy({
+  abi: erc20.abi,
+  bytecode: erc20.bytecode,
+  args: { name: "Test", symbol: "TEST", decimals: 18 },
+},
+{
+  onMined: (receipt) => {
+    if (receipt?.status === "success") {
+      // Store deployment info
+      deployments.save({
+        address: receipt.contractAddress,
+        name: "Test Token",
+        deployedAt: new Date(),
+        blockNumber: receipt.blockNumber,
+      });
+    }
+  },
+});
+```
+
+## Cache Management
+
+Properly manage cache invalidation after state changes:
+
+```ts
+async function transferTokens(
+  token: Contract,
+  from: Address,
+  to: Address,
+  amount: bigint,
+) {
+  const txHash = await token.write("transfer", { to, amount });
+  
+  await drift.waitForTransaction({ hash: txHash });
+  
+  // Invalidate balances for both accounts
+  token.cache.invalidateRead("balanceOf", { account: from });
+  token.cache.invalidateRead("balanceOf", { account: to });
+  
+  // Invalidate total supply if this affects it
+  token.cache.invalidateRead("totalSupply");
+  
+  // Or invalidate all reads for this contract
+  // token.cache.clearReads();
+}
+```
+
+### Selective Cache Invalidation
+
+```ts
+// Invalidate specific function calls
+vault.cache.invalidateRead("balanceOf", { account: userAddress });
+
+// Invalidate all calls to a function
+vault.cache.invalidateReadsMatching("balanceOf");
+
+// Invalidate multiple functions
+vault.cache.invalidateReadsMatching("totalAssets");
+vault.cache.invalidateReadsMatching("totalSupply");
+
+// Clear all cached reads for this contract
+vault.cache.clearReads();
+```
+
+## Error Handling Patterns
+
+### Comprehensive Error Handling
+
+```ts
+async function safeTokenTransfer(
+  token: Contract,
+  to: Address,
+  amount: bigint,
+) {
+  try {
+    // Check balance first
+    const balance = await token.read("balanceOf", { account: userAddress });
+    if (balance < amount) {
+      throw new Error("Insufficient balance");
+    }
+    
+    // Simulate the transaction
+    await token.simulateWrite("transfer", { to, amount });
+    
+    // Send the transaction
+    const txHash = await token.write("transfer", { to, amount });
+    
+    // Wait for confirmation
+    const receipt = await drift.waitForTransaction({ 
+      hash: txHash,
+      timeout: 60_000, // 1 minute timeout
+    });
+    
+    if (receipt?.status !== "success") {
+      throw new Error("Transaction failed");
+    }
+    
+    return receipt;
+    
+  } catch (error) {
+    console.error("Transfer failed:", error);
+    
+    // Handle specific error types
+    if (error.message.includes("insufficient")) {
+      // Handle insufficient balance
+    } else if (error.message.includes("reverted")) {
+      // Handle contract revert
+    } else {
+      // Handle network or other errors
+    }
+    
+    throw error;
+  }
+}
+```
+
+### Retry Logic
+
+```ts
+async function writeWithRetry(
+  contract: Contract,
+  fn: string,
+  args: any,
+  maxRetries = 3,
+) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const txHash = await contract.write(fn, args);
+      return await drift.waitForTransaction({ hash: txHash });
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+      
+      console.log(`Attempt ${i + 1} failed, retrying...`);
+      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+    }
+  }
+}
+```
+
+## Gas Optimization Tips
+
+### 1. Use Simulation for Gas Estimation
+
+```ts
+// Get gas estimate from simulation
+const gasEstimate = await token.simulateWrite("transfer", { to, amount });
+// Add buffer for actual transaction
+const gasLimit = gasEstimate * 110n / 100n; // 10% buffer
+
+await token.write("transfer", { to, amount }, { gasLimit });
+```
+
+### 2. Batch Operations
+
+```ts
+// ❌ Multiple transactions
+await token.write("approve", { spender: vault, amount: 1000n });
+await vault.write("deposit", { assets: 1000n, receiver: user });
+
+// ✅ Single batch transaction
+await drift.sendCalls({
+  calls: [
+    { abi: erc20.abi, address: token, fn: "approve", args: { spender: vault, amount: 1000n } },
+    { abi: vaultAbi, address: vault, fn: "deposit", args: { assets: 1000n, receiver: user } },
+  ],
+});
+```
+
+### 3. Efficient Cache Management
+
+```ts
+// ❌ Clear entire cache
+drift.cache.clear();
+
+// ✅ Invalidate only affected data
+token.cache.invalidateRead("balanceOf", { account: userAddress });
+```
+
+## Next Steps
+
+- [**Events**](/guides/events) - Query and handle contract events
+- [**Testing**](/guides/testing-strategies) - Test write operations with mocks
+- [**Caching**](/advanced/caching) - Advanced cache management strategies
+- [**React Integration**](/integrations/react-query) - Use writes with React Query

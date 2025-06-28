@@ -1,8 +1,38 @@
 import { defineConfig } from "vocs";
+import manifest from "../packages/drift/package.json";
 
 export default defineConfig({
   rootDir: ".",
   title: "Drift",
+  titleTemplate: "%s // Drift",
+  description:
+    "Effortless Ethereum Development Across Web3 Libraries with caching, hooks, and mocks.",
+  editLink: {
+    pattern: "https://github.com/delvtech/drift/edit/main/site/pages/:path",
+    text: "Edit this page",
+  },
+  socials: [
+    {
+      icon: "github",
+      link: "https://github.com/delvtech/drift",
+    },
+  ],
+  topNav: [
+    { text: "Docs", link: "/getting-started", match: "/docs" },
+    {
+      text: "Examples",
+      link: "https://github.com/delvtech/drift/tree/main/examples",
+    },
+    {
+      text: manifest.version,
+      items: [
+        {
+          text: "Changelog",
+          link: "https://github.com/delvtech/drift/blob/main/packages/drift/CHANGELOG.md",
+        },
+      ],
+    },
+  ],
   sidebar: [
     {
       text: "Overview",

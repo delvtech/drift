@@ -2,60 +2,259 @@
 title: Testing Strategies
 ---
 
+import { Callout } from "vocs/components";
+
 # Testing Strategies
 
-Drift includes built-in mocking utilities to make testing your smart contract interactions easy and efficient. This allows you to test your application logic without making actual network calls.
+Drift includes built-in mocking utilities to make testing your smart contract
+interactions easy and efficient. This allows you to test your application logic
+without making actual network calls.
 
-> [!IMPORTANT]
-> Drift's testing mocks have a peer dependency on [Sinon.JS](https://sinonjs.org/). Make sure to install it before using the mocks.
-> 
-> ```sh
-> npm install --save-dev sinon
-> ```
+:::tip
+
+Drift's testing mocks have a peer dependency on
+[Sinon.JS](https://sinonjs.org/). It will need to be installed before the mocks
+can be used.
+
+```sh
+npm install --save-dev sinon
+```
+
+:::
 
 ## Mocking with `createMockDrift`
 
-The `createMockDrift` function from `@delvtech/drift/testing` creates a mocked Drift instance that you can use in your tests.
+The `createMockDrift` function from `@delvtech/drift/testing` creates a mocked
+Drift instance that you can use in your tests.
 
-Here's how you can test a function that makes multiple contract calls:
+Here's how you can test a function that calculates a user's asset value from
+their vault shares:
 
-```typescript
+```ts
 import assert from "node:assert";
 import test from "node:test";
+import { type Address, type Drift, erc4626 } from "@delvtech/drift";
 import { createMockDrift, randomAddress } from "@delvtech/drift/testing";
-import { vaultAbi } from "./abis/vaultAbi";
-import { ReadVault } from "./VaultClient"; // Example from README
 
-test("getAssetValue returns account balances converted to assets", async () => {
+// Simple function that fetches share balance and converts to assets
+async function getUserAssetValue(
+  drift: Drift,
+  vaultAddress: Address,
+  userAddress: Address,
+) {
+  const vault = drift.contract({ abi: erc4626.abi, address: vaultAddress });
+
+  const shares = await vault.read("balanceOf", { account: userAddress });
+  const assets = await vault.read("convertToAssets", { shares });
+
+  return assets;
+}
+
+// Test case for getUserAssetValue function
+test("getUserAssetValue returns user's shares converted to assets", async () => {
   // Set up mocks
-  const address = randomAddress();
-  const account = randomAddress();
+  const vaultAddress = randomAddress();
+  const userAddress = randomAddress();
   const mockDrift = createMockDrift();
-  const mockContract = mockDrift.contract({ abi: vaultAbi, address });
+  const mockVault = mockDrift.contract({
+    abi: erc4626.abi,
+    address: vaultAddress,
+  });
 
-  // Stub the vault's return values using `on*` methods
-  mockContract.onRead("balanceOf", { account }).resolves(
-    // Return 100 shares for the account
-    BigInt(100e18),
+  // Stub the vault's return values using `on*` methods //
+
+  // Return 100 shares for the user's address
+  mockVault
+    .onRead("balanceOf", { account: userAddress })
+    .resolves(BigInt(100e18));
+
+  // Simulate the conversion logic: 1 share = 1.5 assets
+  mockVault
+    .onRead("convertToAssets")
+    .callsFake(
+      async (params) => (params.args.shares * BigInt(1.5e18)) / BigInt(1e18),
+    );
+
+  // Call the function under test
+  const assetValue = await getUserAssetValue(
+    mockDrift,
+    vaultAddress,
+    userAddress,
   );
-  mockContract.onRead("convertToAssets").callsFake(
-    // Simulate the conversion of shares to assets
-    async (params) => (params.args.shares * BigInt(1.5e18)) / BigInt(1e18),
-  );
-
-  // Create your client with the mocked Drift instance
-  const readVault = new ReadVault(address, mockDrift);
-
-  // Call the method you want to test
-  const accountAssetValue = await readVault.getAssetValue(account);
 
   // Assert the expected result
-  assert.strictEqual(accountAssetValue, BigInt(150e18));
+  assert.strictEqual(assetValue, BigInt(150e18));
+});
+```
+
+## Testing Complex Read Sequences
+
+For more complex scenarios involving multiple contract calls, you can stub
+specific multicall requests with `onMulticall` or individual calls with `onRead`
+or `onCall`:
+
+```ts
+import test from "node:test";
+import { erc4626 } from "@delvtech/drift";
+import { createMockDrift, randomAddress } from "@delvtech/drift/testing";
+
+test("fetches multiple vault data points efficiently", async () => {
+  const vaultAddress = randomAddress();
+  const mockDrift = createMockDrift();
+
+  // Stub individual reads
+  mockDrift
+    .onRead({
+      abi: erc4626.abi,
+      address: vaultAddress,
+      fn: "symbol",
+    })
+    .resolves("VAULT");
+  mockDrift
+    .onRead({
+      abi: erc4626.abi,
+      address: vaultAddress,
+      fn: "totalAssets",
+    })
+    .resolves(BigInt(1000e18));
+
+  // Multicall will check individual stubs first
+  const [symbol, totalAssets] = await mockDrift.multicall({
+    allowFailure: false,
+    calls: [
+      { abi: erc4626.abi, address: vaultAddress, fn: "symbol" },
+      { abi: erc4626.abi, address: vaultAddress, fn: "totalAssets" },
+    ],
+  });
+
+  assert.strictEqual(symbol, "VAULT");
+  assert.strictEqual(totalAssets, BigInt(1000e18));
+});
+```
+
+## Testing Write Operations
+
+You can also test write operations and simulations:
+
+```ts
+test("simulates vault deposit before executing", async () => {
+  const vaultAddress = randomAddress();
+  const userAddress = randomAddress();
+  const mockDrift = createMockDrift();
+  const mockVault = mockDrift.contract({
+    abi: erc4626.abi,
+    address: vaultAddress,
+  });
+
+  // Stub the simulation
+  mockVault
+    .onSimulateWrite("deposit", {
+      assets: BigInt(100e18),
+      receiver: userAddress,
+    })
+    .resolves(BigInt(95e18)); // Returns shares received
+
+  // Stub the actual write
+  mockVault.onWrite("deposit").resolves("0x123..."); // Transaction hash
+
+  // Test the simulation
+  const expectedShares = await mockVault.simulateWrite("deposit", {
+    assets: BigInt(100e18),
+    receiver: userAddress,
+  });
+
+  assert.strictEqual(expectedShares, BigInt(95e18));
+
+  // Test the actual write
+  const txHash = await mockVault.write("deposit", {
+    assets: BigInt(100e18),
+    receiver: userAddress,
+  });
+
+  assert.strictEqual(txHash, "0x123...");
+});
+```
+
+## Handling Errors and Edge Cases
+
+Test error scenarios to ensure your application handles failures gracefully:
+
+```ts
+test("handles insufficient balance errors", async () => {
+  const vaultAddress = randomAddress();
+  const userAddress = randomAddress();
+  const mockDrift = createMockDrift();
+  const mockVault = mockDrift.contract({
+    abi: erc4626.abi,
+    address: vaultAddress,
+  });
+
+  // Stub to throw an error
+  mockVault
+    .onRead("balanceOf", { account: userAddress })
+    .rejects(new Error("Execution reverted: Insufficient balance"));
+
+  // Test that your function handles the error appropriately
+  try {
+    await getUserAssetValue(mockDrift, vaultAddress, userAddress);
+    assert.fail("Should have thrown an error");
+  } catch (error) {
+    assert(error instanceof Error);
+    assert.strictEqual(
+      error.message,
+      "Execution reverted: Insufficient balance",
+    );
+  }
+});
+```
+
+## Using Partial Matching
+
+Drift's mocks support partial matching, allowing you to stub calls without
+specifying every parameter:
+
+```ts
+test("supports partial argument matching", async () => {
+  const vaultAddress = randomAddress();
+  const mockDrift = createMockDrift();
+
+  // Stub any call to balanceOf, regardless of the account
+  mockDrift
+    .onRead({
+      abi: erc4626.abi,
+      address: vaultAddress,
+      fn: "balanceOf",
+    })
+    .resolves(BigInt(50e18));
+
+  // This will match the stub above, even with different account addresses
+  const balance1 = await mockDrift.read({
+    abi: erc4626.abi,
+    address: vaultAddress,
+    fn: "balanceOf",
+    args: { account: "0x123..." },
+  });
+
+  const balance2 = await mockDrift.read({
+    abi: erc4626.abi,
+    address: vaultAddress,
+    fn: "balanceOf",
+    args: { account: "0x456..." },
+  });
+
+  assert.strictEqual(balance1, BigInt(50e18));
+  assert.strictEqual(balance2, BigInt(50e18));
 });
 ```
 
 ### Benefits of Mocking
 
--   **No Network Calls:** Tests run faster and more reliably.
--   **Focus on Logic:** Concentrate on testing your application's business logic, not the blockchain.
--   **Easy Setup:** Minimal configuration is required to get started. You can build and test your clients even before your contracts are deployed.
+- **No Network Calls:** Tests run faster and more reliably.
+- **Focus on Logic:** Concentrate on testing your application's business logic,
+  not the blockchain.
+- **Easy Setup:** Minimal configuration is required to get started. You can
+  build and test your clients even before your contracts are deployed.
+- **Comprehensive Coverage:** Test both success and failure scenarios without
+  needing actual contract deployments.
+- **Deterministic Results:** Mocked responses ensure your tests are predictable
+  and repeatable.

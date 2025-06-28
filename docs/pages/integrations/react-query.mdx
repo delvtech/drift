@@ -8,49 +8,116 @@ Drift's internal caching significantly simplifies data fetching in React applica
 
 ## The Problem Without Drift
 
-When using React Query directly with a web3 library, you often need to create a separate hook and a unique query key for each contract call to enable caching and prevent redundant network requests. This can lead to a lot of boilerplate code.
+When using React Query directly with a web3 library, you face several challenges:
 
-```typescript
-// Example without Drift
-function useBalance(address) {
-  return useQuery(['balance', address], () => fetchBalance(address));
+1. **Boilerplate for each call**: You need a separate hook and unique query key for each contract call
+2. **Composition complexity**: When creating hooks that depend on multiple contract calls, you're forced to choose between cache efficiency and clean APIs
+
+### The Composition Problem
+
+Consider creating a hook that returns a user's asset balance from a vault, which requires multiple contract calls:
+
+```ts
+// Without Drift - You're forced into suboptimal choices:
+
+// Option 1: Compose hooks, but lose clean query state
+export function useAssetBalance(account: Address, vault: Address) {
+  const shareBalance = useShareBalance(account, vault);
+  const assetBalance = useConvertToAssets(shareBalance.data, vault, {
+    enabled: shareBalance.status === "success",
+  });
+
+  // You must choose between:
+  // - Returning incomplete query state (losing loading/error info)
+  return { data: assetBalance.data, status: assetBalance.status };
+
+  // - Or manually merging complex state from multiple queries
+  // return {
+  //   data: assetBalance.data,
+  //   isLoading: shareBalance.isLoading || assetBalance.isLoading,
+  //   error: shareBalance.error || assetBalance.error,
+  //   // ... complex state management
+  // };
 }
-function useSymbol() {
-  return useQuery(['symbol'], () => fetchSymbol());
+
+// Option 2: Make direct calls, losing cache benefits
+export function useAssetBalance(account: Address, vault: Address) {
+  return useQuery(["assetBalance", account, vault], async () => {
+    // Direct calls bypass React Query cache for individual operations
+    const shares = await vaultContract.balanceOf(account);
+    const assets = await vaultContract.convertToAssets(shares);
+    return assets;
+    // This means redundant calls if useShareBalance is used elsewhere!
+  });
 }
 
-function MyComponent() {
-  const { data: balance } = useBalance(userAddress);
-  const { data: symbol } = useSymbol();
-  // ...
-}
-```
+// Option 3: Complex manual cache management
+export function useAssetBalance(account: Address, vault: Address) {
+  const queryClient = useQueryClient();
 
-## How Drift Helps
-
-With Drift, you don't need to wrap every contract call in a separate hook. Drift's caching is automatic, so you can make multiple calls within a single `useQuery` hook without worrying about redundant network requests.
-
-### Example
-
-Here is an example of how you can fetch multiple pieces of data from a vault contract within a single React Query hook.
-
-```typescript
-import { useQuery } from "@tanstack/react-query";
-import { ReadVault } from "sdk-core"; // Assuming a reusable SDK layer
-
-function useVaultData(readVault: ReadVault, userAddress: string) {
-  return useQuery(["vaultData", userAddress], async () => {
-    // Perform multiple reads without separate query keys.
-    // Drift handles caching internally.
-    const [balance, symbol, deposits] = await Promise.all([
-      readVault.getBalance(userAddress),
-      readVault.contract.read("symbol"),
-      readVault.getDeposits(userAddress),
-    ]);
-
-    return { balance, symbol, deposits };
+  return useQuery(["assetBalance", account, vault], async () => {
+    // Manually check cache for each call
+    let shares = queryClient.getQueryData(["shareBalance", account, vault]);
+    if (!shares) {
+      shares = await vaultContract.balanceOf(account);
+      queryClient.setQueryData(["shareBalance", account, vault], shares);
+    }
+    // ... more cache management complexity
   });
 }
 ```
 
-This approach simplifies your component code and makes it easier to manage your data fetching logic.
+## How Drift Solves This
+
+With Drift, you get the best of both worlds: automatic caching **and** clean composition. You can make multiple contract calls within a single hook without worrying about redundant network requests or complex state management.
+
+### Clean Composition with Automatic Caching
+
+```ts
+// With Drift - Clean and efficient
+export function useAssetBalance(
+  drift: Drift,
+  account: Address,
+  vault: Address,
+) {
+  return useQuery(["assetBalance", account, vault], async () => {
+    const vaultContract = drift.contract({
+      abi: vaultAbi,
+      address: vault,
+    });
+
+    // Multiple calls with automatic caching - no redundant requests!
+    const shares = await vaultContract.read("balanceOf", { account });
+    const assets = await vaultContract.read("convertToAssets", { shares });
+
+    return assets;
+  });
+}
+
+// If useShareBalance is called elsewhere, Drift's cache prevents redundant calls
+export function useShareBalance(
+  drift: Drift,
+  account: Address,
+  vault: Address,
+) {
+  return useQuery(["shareBalance", account, vault], async () => {
+    return await drift.read({
+      abi: vaultAbi,
+      address: vault,
+      fn: "balanceOf",
+      args: { account },
+    });
+    // This call is cached and won't result in a redundant request
+    // if useAssetBalance was already called!
+  });
+}
+```
+
+## Key Benefits
+
+- **No composition tradeoffs**: Create hooks that depend on multiple contract calls without sacrificing cache efficiency or clean APIs
+- **Automatic deduplication**: Multiple components calling the same contract methods won't result in redundant network requests
+- **Simplified state management**: Get clean React Query state without manual cache coordination
+- **Performance**: Drift's intelligent caching reduces RPC calls across your entire application
+
+This approach dramatically simplifies your React application architecture while maintaining optimal performance.

@@ -4,18 +4,72 @@ layout: landing
 
 # Drift Documentation
 
----
-title: Overview
----
+Drift is a powerful meta-library that simplifies Ethereum development by
+providing a unified, type-safe interface for blockchain interactions across web3
+libraries like [viem](https://viem.sh) and [ethers](https://ethers.org).
 
-# What is Drift?
+## What is Drift?
 
-Drift is a powerful and flexible library that simplifies Ethereum development by providing a unified, type-safe interface for interacting with smart contracts across various web3 libraries like viem, web3.js, and ethers. It's designed to let you write your protocol logic once and run it anywhere, saving you from vendor lock-in and the need to rewrite code when switching providers.
+Drift lets you **write your protocol logic once and run it anywhere**. Your code
+will be usable with multiple providers without rewrites. Built-in caching
+automatically optimizes performance, while type-safe testing mocks make testing
+effortless.
 
 ## Key Problems Drift Solves
 
-- **Reduce RPC Calls:** Built-in caching to optimize performance by reducing redundant RPC calls.
-- **Avoid Provider Lock-In:** Write your protocol logic once and run it anywhere.
-- **Simplify UI State Management:** A unified interface for interacting with smart contracts.
-- **Test with Confidence:** Easy-to-use, type-safe testing mocks.
-- **Extensibility:** Add new web3 libraries with a flexible adapter system.
+### ⚡ Reduce RPC Calls
+
+Built-in caching automatically optimizes performance by reducing redundant RPC
+calls. No need to manage hooks or query keys for each call.
+
+### 🔄 Avoid Provider Lock-In
+
+Write your protocol logic once with Drift's unified interface and run it across
+different web3 libraries without rewriting code.
+
+### 🎯 Simplify UI State Management
+
+Drift's consistent API and built-in caching reduce the complexity of managing
+blockchain data in your UI. Use it directly or wrap calls in your preferred
+state management library.
+
+### 🧪 Test with Confidence
+
+Easy-to-use, type-safe testing mocks that are always in sync with your
+contracts. Test your business logic without network calls.
+
+### 🔌 Extensibility
+
+Add new web3 libraries with a flexible adapter system. Designed to grow with
+your project's needs.
+
+## Quick Start
+
+```sh
+npm install @delvtech/drift
+```
+
+```ts
+import { createDrift, erc20 } from "@delvtech/drift";
+
+const drift = createDrift({
+  rpcUrl: "YOUR_RPC_URL",
+});
+
+// Read with automatic caching
+const balance = await drift.read({
+  abi: erc20.abi,
+  address: "0x...",
+  fn: "balanceOf",
+  args: { account: "0x..." },
+});
+```
+
+## What's Next?
+
+- [**Getting Started**](/getting-started) - Install Drift and make your first
+  calls
+- [**Core Concepts**](/core-concepts) - Understand Drift's architecture and
+  philosophy
+- [**API Reference**](/reference/api) - Complete API documentation
+- [**Examples**](/reference/examples) - See Drift in action
