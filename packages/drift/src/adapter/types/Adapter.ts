@@ -167,7 +167,7 @@ export interface ReadAdapter extends Network {
     TAllowFailure extends boolean = true,
   >(
     params: MulticallParams<TCalls, TAllowFailure>,
-  ): Promise<MulticallReturn<TCalls, TAllowFailure>>;
+  ): Promise<NoInfer<MulticallReturn<TCalls, TAllowFailure>>>;
 }
 
 /**
