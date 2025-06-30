@@ -1,31 +1,30 @@
----
-layout: landing
----
-
 # Drift Documentation
-
-Drift is a powerful meta-library that simplifies Ethereum development by
-providing a unified, type-safe interface for blockchain interactions across web3
-libraries like [viem](https://viem.sh) and [ethers](https://ethers.org).
 
 ## What is Drift?
 
-Drift lets you **write your protocol logic once and run it anywhere**. Your code
-will be usable with multiple providers without rewrites. Built-in caching
-automatically optimizes performance, while type-safe testing mocks make testing
-effortless.
+Drift is a meta-library that simplifies Ethereum development by providing a
+unified, type-safe interface for blockchain interactions across web3 libraries
+like [viem](https://viem.sh) and [ethers](https://ethers.org) with built-in
+caching to automatically optimize performance, type-safe testing mocks for
+effortless testing, and a flexible hook system for middleware.
+
+This makes it possible to **write your protocol logic once and run it
+anywhere**. For example, you can create a library agnostic protocol SDK that can
+be used with multiple providers without maintaining separate
+implementations or rewrites.
 
 ## Key Problems Drift Solves
 
 ### ⚡ Reduce RPC Calls
 
 Built-in caching automatically optimizes performance by reducing redundant RPC
-calls. No need to manage hooks or query keys for each call.
+calls. No need to manage frontend hooks or query keys for each call.
 
-### 🔄 Avoid Provider Lock-In
+### 🌐 Multi-Library Support
 
 Write your protocol logic once with Drift's unified interface and run it across
-different web3 libraries without rewriting code.
+different web3 libraries without rewriting code or maintaining multiple
+implementations.
 
 ### 🎯 Simplify UI State Management
 
@@ -40,16 +39,32 @@ contracts. Test your business logic without network calls.
 
 ### 🔌 Extensibility
 
-Add new web3 libraries with a flexible adapter system. Designed to grow with
-your project's needs.
+Support new web3 libraries and handle cross-cutting concerns like caching,
+logging, and error handling with flexible adapter and hook systems.
 
 ## Quick Start
 
-```sh
+:::code-group
+
+```sh [npm]
 npm install @delvtech/drift
 ```
 
-```ts
+```sh [yarn]
+yarn add @delvtech/drift
+```
+
+```sh [pnpm]
+pnpm add @delvtech/drift
+```
+
+```sh [bun]
+bun add @delvtech/drift
+```
+
+:::
+
+```ts twoslash
 import { createDrift, erc20 } from "@delvtech/drift";
 
 const drift = createDrift({
@@ -69,7 +84,7 @@ const balance = await drift.read({
 
 - [**Getting Started**](/getting-started) - Install Drift and make your first
   calls
-- [**Core Concepts**](/core-concepts) - Understand Drift's architecture and
-  philosophy
+- [**Core Concepts**](/core-concepts) - Learn about Drift's architecture and
+  design
 - [**API Reference**](/reference/api) - Complete API documentation
 - [**Examples**](/reference/examples) - See Drift in action
