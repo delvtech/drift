@@ -52,13 +52,10 @@ export type Contract<
 export type ContractBaseOptions<TAbi extends Abi = Abi> = Eval<
   ContractParams<TAbi> & {
     /**
-     * The earliest block number to use for function calls and event queries.
-     * If defined, the {@linkcode ReadOptions.block block} option of the
-     * {@linkcode Contract.read read} method will be overridden when set to
-     * `"earliest"` or a lower block number; and the
-     * {@linkcode GetEventsOptions.fromBlock fromBlock} option of the
-     * {@linkcode Contract.getEvents getEvents} method will be overridden when
-     * `undefined`, `"earliest"`, or a lower block number.
+     * The earliest block number to use for event queries. If defined,
+     * {@linkcode GetEventsOptions.fromBlock} will be overridden when
+     * `undefined`, `"earliest"`, or a lower block number in
+     * {@linkcode Contract.getEvents}.
      *
      * @example
      * ```ts
@@ -67,10 +64,6 @@ export type ContractBaseOptions<TAbi extends Abi = Abi> = Eval<
      *   address,
      *   client,
      *   epochBlock: 22147561n,
-     * });
-     *
-     * const totalSupply = await contract.read("totalSupply", [], {
-     *   block: 100n, // <- overridden with `this.epochBlock`
      * });
      *
      * const approvals = await contract.getEvents("Approval"); // <- `fromBlock` set to `this.epochBlock`
@@ -242,21 +235,12 @@ export class ReadContract<
   read<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
-    let { block, ...restOptions } = options || {};
-    if (
-      this.epochBlock &&
-      (block === "earliest" ||
-        (typeof block === "bigint" && block < this.epochBlock))
-    ) {
-      block = this.epochBlock;
-    }
     return this.client.read({
       abi: this.abi,
       address: this.address,
       fn,
       args: args as FunctionArgs<TAbi, TFunctionName>,
-      block,
-      ...restOptions,
+      ...options,
     });
   }
 
