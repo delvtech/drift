@@ -181,6 +181,7 @@ const txHash = await token.write(
   { to: "0x..", amount: BigInt(100e18) },
   {
     onMined: (receipt) => {
+      // [!code focus:15]
       if (receipt?.status === "success") {
         console.log("Transfer completed!");
 
@@ -224,6 +225,7 @@ const batchResult = await drift.sendCalls({
         amount: BigInt(1000e18),
       },
     },
+
     // Deposit into vault
     {
       abi: erc4626.abi,
@@ -281,6 +283,7 @@ Deploy contracts using Drift with full type safety:
 ```ts twoslash
 // [!include ~/snippets/drift.ts]
 // [!include ~/snippets/deployableTokenAbi.ts]
+// ---cut---
 // Basic deployment
 const deployTx = await drift.deploy({
   abi: tokenAbi,
@@ -315,35 +318,33 @@ operation to ensure your application reflects the latest state. Drift provides
 several methods for cache management:
 
 ```ts twoslash
-import type { ReadWriteContract, Address, erc20 } from "@delvtech/drift";
+// [!include ~/snippets/token.ts]
+import type { Address } from "@delvtech/drift";
+declare const from: Address;
+declare const to: Address;
+declare const amount: bigint;
+// ---cut---
+token.write(
+  "transfer",
+  { to, amount },
+  {
+    onMined: async (receipt) => {
+      // [!code focus:14]
+      // Precise - invalidate specific entries
+      token.cache.invalidateRead("balanceOf", { account: from });
+      token.cache.invalidateRead("balanceOf", { account: to });
 
-async function transferTokens(
-  token: ReadWriteContract<typeof erc20.abi>,
-  from: Address,
-  to: Address,
-  amount: bigint,
-) {
-  return token.write(
-    "transfer",
-    { to, amount },
-    {
-      onMined: async (receipt) => {
-        // Precise - invalidate specific reads
-        token.cache.invalidateRead("balanceOf", { account: from });
-        token.cache.invalidateRead("balanceOf", { account: to });
+      // Loose - invalidate based on partial arguments
+      token.cache.invalidateReadsMatching("balanceOf");
 
-        // Loose - invalidate based on partial arguments
-        token.cache.invalidateReadsMatching("balanceOf");
+      // Broad - invalidate all reads for this contract
+      token.cache.clearReads();
 
-        // Broad - invalidate all reads for this contract
-        token.cache.clearReads();
-
-        // Nuclear - clear the entire cache
-        token.cache.clear();
-      },
+      // Nuclear - clear the entire cache
+      token.cache.clear();
     },
-  );
-}
+  },
+);
 ```
 
 See [**Caching**](/advanced/caching) for more details on cache management.
@@ -359,7 +360,7 @@ import type { Address, erc20, ReadWriteContract } from "@delvtech/drift";
 
 type Erc20Abi = typeof erc20.abi;
 
-export async function safeTokenTransfer(
+export async function safeTokenTransfer( // [!code focus:99]
   token: ReadWriteContract<Erc20Abi>,
   to: Address,
   amount: bigint,
@@ -403,7 +404,41 @@ export async function safeTokenTransfer(
 An example of a retry mechanism for write operations that may fail due to
 temporary issues like network errors:
 
-```ts twoslash
+:::code-group
+
+```ts twoslash [getTransactionEvents.ts] filename="getTransactionEvents.ts"
+// @filename: types.ts
+// [!include types.ts]
+
+// @filename: writeWithRetry.ts
+// ---cut---
+import type { FunctionName } from "@delvtech/drift";
+import type { Erc20Abi, WriteTokenWithRetryParams } from "./types";
+
+// [!code focus:99]
+export async function writeWithRetry<
+  F extends FunctionName<Erc20Abi, "nonpayable" | "payable">,
+>({ token, fn, args, maxRetries = 3, options }: WriteTokenWithRetryParams<F>) {
+  for (let i = 1; i <= maxRetries; i++) {
+    try {
+      const txHash = await token.write(fn, args, options);
+      return txHash;
+    } catch (error) {
+      if (i === maxRetries) throw error;
+
+      console.log(
+        `Failed attempt ${i}/${maxRetries} for "${fn}" on ${token.address}:`,
+        error,
+      );
+
+      // Exponential backoff
+      await new Promise((resolve) => setTimeout(resolve, 1000 * i));
+    }
+  }
+}
+```
+
+```ts twoslash [types.ts] filename="types.ts"
 import type {
   erc20,
   FunctionArgs,
@@ -412,7 +447,7 @@ import type {
   WriteOptions,
 } from "@delvtech/drift";
 
-type Erc20Abi = typeof erc20.abi;
+export type Erc20Abi = typeof erc20.abi;
 
 export interface WriteTokenWithRetryParams<F extends FunctionName<Erc20Abi>> {
   token: ReadWriteContract<Erc20Abi>;
@@ -421,28 +456,9 @@ export interface WriteTokenWithRetryParams<F extends FunctionName<Erc20Abi>> {
   maxRetries?: number;
   options?: WriteOptions;
 }
-
-export async function writeWithRetry<
-  F extends FunctionName<Erc20Abi, "nonpayable" | "payable">,
->({ token, fn, args, maxRetries = 3, options }: WriteTokenWithRetryParams<F>) {
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      const txHash = await token.write(fn, args, options);
-      return txHash;
-    } catch (error) {
-      if (i === maxRetries - 1) throw error;
-      console.log(
-        `Failed attempt ${i + 1}/${maxRetries} for "${fn}" on ${
-          token.address
-        }:`,
-        error,
-      );
-      // Exponential backoff
-      await new Promise((resolve) => setTimeout(resolve, 1000 * (i + 1)));
-    }
-  }
-}
 ```
+
+:::
 
 ## Next Steps
 

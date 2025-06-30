@@ -32,11 +32,9 @@ const token = drift.contract({
   address: "0x...",
 });
 
-const [name, symbol, decimals] = await Promise.all([
-  token.read("name"),
-  token.read("symbol"),
-  token.read("decimals"),
-]);
+const balance2 = await token.read("balanceOf", {
+  account: "0x...",
+});
 ```
 
 ```ts twoslash [drift.ts] filename="drift.ts"
@@ -256,7 +254,7 @@ const pastBalance = await token.read(
 const latestBalance = await token.read(
   "balanceOf",
   { account: "0x..." },
-  { block: "pending" }, // [!code hl]
+  { block: "safe" }, // [!code hl]
 );
 
 // Works with multicall too
@@ -299,9 +297,11 @@ const [name, symbol, decimals] = await token.multicall({
 // [!include ~/snippets/token.ts]
 // ---cut---
 // Preload static data to avoid network requests
-token.cache.preloadRead({ fn: "name", value: "USD Coin" });
-token.cache.preloadRead({ fn: "symbol", value: "USDC" });
-token.cache.preloadRead({ fn: "decimals", value: 6 });
+await Promise.all([
+  token.cache.preloadRead({ fn: "name", value: "USD Coin" }),
+  token.cache.preloadRead({ fn: "symbol", value: "USDC" }),
+  token.cache.preloadRead({ fn: "decimals", value: 6 }),
+]);
 
 // These calls now return immediately from cache
 const name = await token.read("name"); // No network request
