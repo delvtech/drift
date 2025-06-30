@@ -4,54 +4,26 @@ title: Core Concepts
 
 # Core Concepts
 
-This section explains the fundamental concepts and architecture that make Drift a powerful tool for Ethereum development.
+This section explains the fundamental concepts and architecture that make Drift
+a powerful tool for Ethereum development.
 
 ## What Makes Drift Different?
 
-Drift is not just another web3 library. It's a **meta-library** that provides a consistent, high-level API on top of existing libraries like ethers, viem, and web3.js. This approach offers several key advantages:
-
-### Comparison with Direct Web3 Usage
-
-**Without Drift:**
-```ts
-// Different libraries, different APIs
-import { ethers } from "ethers";
-import { createPublicClient } from "viem";
-
-// Manual caching and state management required
-const provider = new ethers.JsonRpcProvider(rpcUrl);
-const contract = new ethers.Contract(address, abi, provider);
-
-// No automatic caching - repeated calls hit the network
-const balance1 = await contract.balanceOf(account);
-const balance2 = await contract.balanceOf(account); // Redundant network call!
-
-// Complex testing setup
-// Manual mock providers and complex stubbing
-```
-
-**With Drift:**
-```ts
-import { createDrift } from "@delvtech/drift";
-
-const drift = createDrift({ rpcUrl }); // Works with any web3 library
-const contract = drift.contract({ abi, address });
-
-// Automatic caching - no redundant calls
-const balance1 = await contract.read("balanceOf", { account });
-const balance2 = await contract.read("balanceOf", { account }); // Returns cached value
-
-// Simple testing with built-in mocks
-import { createMockDrift } from "@delvtech/drift/testing";
-const mockDrift = createMockDrift();
-```
+Drift is not just another web3 library. It's a **meta-library** that provides a
+consistent, high-level API on top of existing libraries like
+[viem](https://viem.sh) and [ethers](https://ethers.org). This approach offers
+several key advantages:
 
 ### Key Benefits
 
-- **🔄 Provider Abstraction:** Switch between ethers, viem, web3.js without changing your application code
-- **⚡ Automatic Optimization:** Built-in caching and multicall reduce network requests
-- **🛡️ Type Safety:** Full TypeScript support with compile-time contract validation
-- **🧪 Testing Made Easy:** Built-in mocking utilities eliminate complex test setup
+- **🔄 Provider Abstraction:** Switch between ethers, viem, web3.js without
+  changing your application code
+- **⚡ Automatic Optimization:** Built-in caching and multicall reduce network
+  requests
+- **🛡️ Type Safety:** Full TypeScript support with compile-time contract
+  validation
+- **🧪 Testing Made Easy:** Built-in mocking utilities eliminate complex test
+  setup
 - **🔌 Extensibility:** Hooks and custom adapters for advanced use cases
 
 ## Architecture Overview
@@ -59,44 +31,53 @@ const mockDrift = createMockDrift();
 Drift's modular architecture separates concerns for maximum flexibility:
 
 ```
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│  Contract   │───▶│   Client    │───▶│    Hooks    │───▶│    Store    │───▶│   Adapter   │
-│             │    │  (Drift)    │    │             │    │   (Cache)   │    │ (Provider)  │
-│ Type-safe   │    │ Orchestrates│    │ Middleware  │    │ Data Cache  │    │ Web3 Bridge │
-│ Interface   │    │ Operations  │    │ & Plugins   │    │ & State     │    │ Abstraction │
-└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+┌──────────┐    ┌──────────────┐    ┌───────┐    ┌─────────────┐    ┌──────────────────┐
+│ Contract │───▶│ Client/Drift │───▶│ Hooks │───▶│ Store/Cache │───▶│ Adapter/Provider │
+└──────────┘    └──────────────┘    └───────┘    └─────────────┘    └──────────────────┘
 ```
 
 ### The Drift Client
 
-The Drift Client (`createDrift()`) is the orchestrator that coordinates all operations:
+The Drift Client (`createDrift()`) is the orchestrator that coordinates all
+operations:
 
-```ts
+```ts twoslash
+import { createDrift, type Store } from "@delvtech/drift";
+import { viemAdapter } from "@delvtech/drift-viem";
+import type { PublicClient } from "viem";
+declare const publicClient: PublicClient
+declare const customStore: Store;
+// ---cut---
 const drift = createDrift({
   adapter: viemAdapter({ publicClient }),
   store: customStore, // Optional custom cache
 });
 
+// @noErrors
 // The client provides:
-await drift.read(...)      // Contract reads with caching
-await drift.write(...)     // Contract writes with transaction management  
-await drift.multicall(...) // Batched calls for efficiency
-await drift.getEvents(...) // Event queries with caching
+await drift.read(...)           // Contract reads with caching
+await drift.write(...)          // Contract writes with transaction management
+await drift.getEvents(...)      // Event queries with caching
+await drift.getTransaction(...) // Network information with caching
+// and more...
 ```
 
 **Key Responsibilities:**
+
 - Coordinate between components
-- Manage the request/response lifecycle
 - Handle caching strategies
 - Provide unified API across different web3 libraries
 
 ### Contracts & Type Safety
 
-Drift generates fully type-safe contract instances from ABIs:
+Drift provides fully type-safe contract instances from ABIs:
 
-```ts
+```ts twoslash
+// [!include ~/snippets/drift.ts]
+import { erc4626 } from "@delvtech/drift";
+// ---cut---
 const vault = drift.contract({
-  abi: vaultAbi,
+  abi: erc4626.abi,
   address: "0x...",
 });
 
@@ -104,16 +85,20 @@ const vault = drift.contract({
 // ✅ Function names autocompleted
 // ✅ Arguments type-checked
 // ✅ Return types inferred
-const shares: bigint = await vault.read("balanceOf", {
-  account: "0x..." // ✅ Parameter names autocompleted
+const shares = await vault.read("balanceOf", {
+  account: "0x...", // ✅ Parameter names autocompleted
 });
 
-// ❌ This would be a compile-time error:
-// await vault.read("nonExistentFunction");
-// await vault.read("balanceOf", { wrongParam: "0x..." });
+// ✅ Compile-time errors for invalid calls:
+// @errors: 2345 2353
+
+await vault.read("nonExistentFunction");
+
+await vault.read("balanceOf", { wrongParam: "0x..." });
 ```
 
 **Type Safety Benefits:**
+
 - Catch errors at compile time, not runtime
 - IDE autocompletion for function names and parameters
 - Refactoring safety when ABIs change
@@ -123,32 +108,44 @@ const shares: bigint = await vault.read("balanceOf", {
 
 Adapters normalize different web3 libraries into a consistent interface:
 
-```ts
+```ts twoslash
+import { createDrift } from "@delvtech/drift";
+import { viemAdapter } from "@delvtech/drift-viem";
+import { ethersAdapter } from "@delvtech/drift-ethers";
+import { Web3Adapter } from "@delvtech/drift-web3";
+import type { PublicClient } from "viem";
+import type { Provider } from "ethers";
+import type { Web3 } from "web3";
+declare const publicClient: PublicClient;
+declare const provider: Provider;
+declare const web3: Web3;
+// ---cut---
 // All of these work with the same Drift code:
 
 // Using Viem
 const drift1 = createDrift({
-  adapter: viemAdapter({ publicClient })
+  adapter: viemAdapter({ publicClient }),
 });
 
 // Using Ethers
 const drift2 = createDrift({
-  adapter: ethersAdapter({ provider })
+  adapter: ethersAdapter({ provider }),
 });
 
 // Using Web3.js
 const drift3 = createDrift({
-  adapter: new Web3Adapter({ provider })
+  adapter: new Web3Adapter(web3),
 });
 
 // Using just an RPC URL (built-in adapter)
 const drift4 = createDrift({
-  rpcUrl: "https://..."
+  rpcUrl: "https://...",
 });
 ```
 
 **Adapter Benefits:**
-- **No Vendor Lock-in:** Switch providers without code changes
+
+- **No Vendor Lock-in:** Support multiple providers without code changes
 - **Performance Optimization:** Leverage each library's strengths
 - **Gradual Migration:** Migrate between libraries incrementally
 - **Library-Specific Features:** Access provider-specific optimizations
@@ -157,7 +154,16 @@ const drift4 = createDrift({
 
 Drift's caching system automatically prevents redundant network requests:
 
-```ts
+```ts twoslash
+// [!include ~/snippets/drift.ts]
+import { type Address, erc20 } from "@delvtech/drift";
+const contract = drift.contract({
+  abi: erc20.abi,
+  address: "0x...",
+});
+declare const account: Address;
+declare const otherAccount: Address;
+// ---cut---
 // First call hits the network
 const balance1 = await contract.read("balanceOf", { account });
 
@@ -165,14 +171,13 @@ const balance1 = await contract.read("balanceOf", { account });
 const balance2 = await contract.read("balanceOf", { account });
 
 // Different parameters = new network request
-const otherBalance = await contract.read("balanceOf", { account: otherAccount });
-
-// Cache operations available
-contract.cache.invalidateRead("balanceOf", { account });
-contract.cache.preloadRead({ fn: "symbol", value: "USDC" });
+const otherBalance = await contract.read("balanceOf", {
+  account: otherAccount,
+});
 ```
 
 **Caching Features:**
+
 - Automatic request deduplication
 - Parameter-based cache keys
 - Manual cache control (invalidate, preload, clear)
@@ -182,15 +187,18 @@ contract.cache.preloadRead({ fn: "symbol", value: "USDC" });
 
 Hooks provide powerful extension points for custom logic:
 
-```ts
+```ts twoslash
+// [!include ~/snippets/drift.ts]
+declare function processCallResult<T>(result: T): T;
+// ---cut---
 // Add logging to all read operations
-drift.hooks.on("before:read", ({ args }) => {
-  console.log("Reading:", args[0].fn);
+drift.hooks.on("before:read", ({ args: [params] }) => {
+  console.log("Reading:", params.fn);
 });
 
 // Automatically simulate writes before sending
-drift.hooks.on("before:write", async ({ args, resolve }) => {
-  const simulation = await drift.simulateWrite(args[0]);
+drift.hooks.on("before:write", async ({ args: [params] }) => {
+  const simulation = await drift.simulateWrite(params);
   console.log("Simulation result:", simulation);
 });
 
@@ -202,48 +210,19 @@ drift.hooks.on("after:call", ({ result, setResult }) => {
 ```
 
 **Hook Capabilities:**
+
 - Intercept any client method
-- Modify arguments before execution
+- Modify arguments and/or resolve value before execution
 - Transform results after execution
 - Add custom logging, monitoring, or validation
 - Implement middleware patterns
 
-## When to Use Drift vs. Direct Web3 Libraries
-
-### Choose Drift When:
-
-✅ **Building Production dApps**
-- Complex contract interactions
-- Multiple contracts and chains
-- Performance optimization needed
-- Team collaboration and maintenance
-
-✅ **Developer Experience Matters**
-- Type safety is important
-- Testing is a priority
-- Code reusability across projects
-- Future-proofing against library changes
-
-✅ **Advanced Features Required**
-- Automatic caching and optimization
-- Batch operations (multicall)
-- Complex state management
-- Custom middleware or plugins
-
-### Use Direct Libraries When:
-
-❌ **Simple Scripts or Prototypes**
-- One-off scripts or simple interactions
-- Learning web3 development
-- Library-specific features needed
-- Minimal dependencies preferred
-
-### Migration Strategy
+## Migration Strategy
 
 You can adopt Drift incrementally:
 
-1. **Start Small:** Use Drift for new contracts while keeping existing code
-2. **Gradual Migration:** Move contracts to Drift one at a time
+1. **Start Small:** Use Drift for new features while keeping existing code
+2. **Gradual Migration:** Move features to Drift one at a time
 3. **Adapter Bridge:** Use Drift adapters to work with existing providers
 4. **Full Integration:** Eventually migrate entire application to Drift
 
@@ -253,5 +232,7 @@ Now that you understand Drift's core concepts:
 
 - [**Reading Data**](/guides/reading-data) - Learn advanced reading patterns
 - [**Caching Deep Dive**](/advanced/caching) - Master Drift's caching system
-- [**Extending Drift**](/advanced/extending-drift) - Build custom adapters and stores
-- [**Testing Strategies**](/guides/testing-strategies) - Test with confidence using mocks
+- [**Extending Drift**](/advanced/extending-drift) - Build custom adapters and
+  stores
+- [**Testing Strategies**](/guides/testing-strategies) - Test with confidence
+  using mocks
