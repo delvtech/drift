@@ -1,0 +1,15 @@
+.heading-icon-link {
+  display: flex;
+  align-items: center;
+}
+
+.heading-icon-link:hover {
+  color: var(--vocs-color_textHover);
+  transition: all 200ms;
+}
+
+.heading-icon-link svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
