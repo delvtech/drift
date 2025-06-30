@@ -4,14 +4,19 @@ title: Reading Data
 
 # Reading Data
 
-Drift provides multiple ways to read data from smart contracts, each optimized for different use cases. All read operations benefit from automatic caching to reduce redundant network requests.
+Drift provides multiple ways to read data from smart contracts, each optimized
+for different use cases. All read operations benefit from automatic caching to
+reduce redundant network requests.
 
 ## Basic Reads
 
 The simplest way to read contract data is using the `read` method:
 
-```ts
+:::code-group
+
+```ts twoslash [example.ts] filename="example.ts"
 import { erc20 } from "@delvtech/drift";
+import { drift } from "./drift";
 
 // Using the client directly
 const balance = await drift.read({
@@ -21,7 +26,7 @@ const balance = await drift.read({
   args: { account: "0x..." },
 });
 
-// Using a contract instance (recommended for multiple calls)
+// Using a contract instance
 const token = drift.contract({
   abi: erc20.abi,
   address: "0x...",
@@ -34,26 +39,23 @@ const [name, symbol, decimals] = await Promise.all([
 ]);
 ```
 
-### Read Options
-
-You can customize read behavior with additional options:
-
-```ts
-const balance = await token.read(
-  "balanceOf",
-  { account: "0x..." },
-  {
-    block: 18_000_000n, // Read at specific block
-    cache: false,       // Skip cache for this call
-  },
-);
+```ts twoslash [drift.ts] filename="drift.ts"
+// [!include ~/snippets/drift.ts]
 ```
+
+:::
 
 ## Multicall
 
-Multicall batches multiple contract calls into a single RPC request using [Multicall3](https://www.multicall3.com/), dramatically improving performance:
+Multicall batches multiple contract calls into a single RPC request using
+[Multicall3](https://www.multicall3.com/), dramatically improving performance:
 
-```ts
+```ts twoslash
+import { type Address, erc20 } from "@delvtech/drift";
+// [!include ~/snippets/drift.ts]
+declare const tokenA: Address;
+declare const tokenB: Address;
+// ---cut---
 // Basic multicall - returns result objects
 const results = await drift.multicall({
   calls: [
@@ -64,15 +66,21 @@ const results = await drift.multicall({
   ],
 });
 
-console.log(results[0]); // { success: true, value: "Token A" }
+const nameResult = results[0];
+//    ^?
 ```
 
 ### Direct Values with `allowFailure: false`
 
-```ts
+```ts twoslash
+import { type Address, erc20 } from "@delvtech/drift";
+// [!include ~/snippets/drift.ts]
+declare const tokenA: Address;
+declare const tokenB: Address;
+// ---cut---
 // Get values directly (throws if any call fails)
-const [nameA, symbolA, nameB, symbolB] = await drift.multicall({
-  allowFailure: false, // Returns values directly instead of result objects
+const values = await drift.multicall({
+  allowFailure: false, // [!code hl]
   calls: [
     { abi: erc20.abi, address: tokenA, fn: "name" },
     { abi: erc20.abi, address: tokenA, fn: "symbol" },
@@ -80,49 +88,62 @@ const [nameA, symbolA, nameB, symbolB] = await drift.multicall({
     { abi: erc20.abi, address: tokenB, fn: "symbol" },
   ],
 });
+
+const name = values[0];
+//    ^?
 ```
 
 ### Contract Instance Multicall
 
-```ts
+```ts twoslash
+import { erc20 } from "@delvtech/drift";
+// [!include ~/snippets/drift.ts]
+// ---cut---
 // Using a contract instance for cleaner syntax
-const token = drift.contract({ abi: erc20.abi, address: tokenAddress });
+const token = drift.contract({ abi: erc20.abi, address: "0x..." });
 
-const [name, symbol, totalSupply, userBalance] = await token.multicall({
-  allowFailure: false,
+const results = await token.multicall({
   calls: [
     { fn: "name" },
     { fn: "symbol" },
     { fn: "totalSupply" },
-    { fn: "balanceOf", args: { account: userAddress } },
+    {
+      fn: "balanceOf",
+      args: {
+        account: "0x...",
+      },
+    },
   ],
 });
 ```
 
 ### Mixed Contract Multicall
 
-```ts
+```ts twoslash
+// [!include ~/snippets/drift.ts]
+// ---cut---
 import { erc20, erc4626, erc721 } from "@delvtech/drift";
 
 // Call different contracts in one batch
-const [tokenName, vaultBalance, nftOwner] = await drift.multicall({
-  allowFailure: false,
+const results = await drift.multicall({
   calls: [
     {
-      abi: erc20.abi,
-      address: tokenAddress,
+      abi: erc20.abi, // [!code hl]
+      address: "0x...",
       fn: "name",
     },
     {
-      abi: erc4626.abi,
-      address: vaultAddress,
+      abi: erc4626.abi, // [!code hl]
+      address: "0x...",
       fn: "totalAssets",
     },
     {
-      abi: erc721.abi,
-      address: nftAddress,
+      abi: erc721.abi, // [!code hl]
+      address: "0x...",
       fn: "ownerOf",
-      args: { _tokenId: 1n },
+      args: {
+        _tokenId: 1n,
+      },
     },
   ],
 });
@@ -130,9 +151,12 @@ const [tokenName, vaultBalance, nftOwner] = await drift.multicall({
 
 ## Encoded Calls
 
-For advanced use cases, you can work with pre-encoded call data:
+For advanced use cases, the `call` method can be used with pre-encoded call
+data:
 
-```ts
+```ts twoslash
+// [!include ~/snippets/token.ts]
+// ---cut---
 import { encodeFunctionData, decodeFunctionReturn } from "@delvtech/drift";
 
 // Encode call data manually
@@ -144,7 +168,7 @@ const data = encodeFunctionData({
 
 // Make the call with encoded data
 const result = await drift.call({
-  to: tokenAddress,
+  to: "0x...",
   data,
 });
 
@@ -160,154 +184,108 @@ const balance = decodeFunctionReturn({
 
 Multicall supports mixing encoded calls with function calls:
 
-```ts
-const encodedCall = encodeFunctionData({
-  abi: customAbi,
-  fn: "complexFunction",
-  args: { param1: "0x...", param2: 123n },
-});
-
+```ts twoslash
+// [!include ~/snippets/token.ts]
+import type { Bytes } from "@delvtech/drift";
+declare const calldata: Bytes;
+// ---cut---
 const results = await drift.multicall({
   calls: [
-    // Regular function call
-    { abi: erc20.abi, address: tokenAddress, fn: "name" },
+    // ABI function call
+    {
+      abi: erc20.abi,
+      address: "0x...",
+      fn: "name",
+    },
 
     // Encoded call
-    { to: customContract, data: encodedCall },
+    {
+      to: "0x...",
+      data: calldata,
+    },
   ],
 });
 ```
 
 ## Bytecode (Deployless) Calls
 
-Execute contract code without deploying it first - useful for testing and simulations:
+You can call a function directly on contract bytecode without deploying it first
+by passing a `bytecode` to the `call` method instead of a `to` address. This is
+useful for utility contracts that simply read chain state or perform
+calculations without needing to be deployed:
 
-```ts
-import { MockErc20 } from "./artifacts/MockErc20";
+```ts twoslash
+// [!include ~/snippets/token.ts]
+// ---cut---
+import { encodeFunctionData, decodeFunctionReturn } from "@delvtech/drift";
 
 // Call against contract bytecode directly
 const result = await drift.call({
-  bytecode: MockErc20.bytecode,
+  bytecode: "0x...", // [!code hl]
   data: encodeFunctionData({
-    abi: MockErc20.abi,
+    abi: erc20.abi,
     fn: "name",
   }),
 });
 
 // Decode the result
 const name = decodeFunctionReturn({
-  abi: MockErc20.abi,
+  abi: erc20.abi,
   fn: "name",
   data: result,
 });
 ```
 
-### Bytecode with Constructor Arguments
-
-```ts
-// For contracts that need constructor arguments
-const result = await drift.call({
-  bytecode: MockErc20.bytecode,
-  data: encodeFunctionData({
-    abi: MockErc20.abi,
-    fn: "symbol",
-  }),
-  // Constructor args are encoded into the bytecode automatically
-  constructorArgs: {
-    name: "Test Token",
-    symbol: "TEST",
-    decimals: 18,
-  },
-});
-```
-
-### Multicall with Bytecode
-
-You can even use bytecode calls in multicall:
-
-```ts
-const [deployedName, undeployedName] = await drift.multicall({
-  allowFailure: false,
-  calls: [
-    // Call deployed contract
-    { abi: erc20.abi, address: deployedToken, fn: "name" },
-
-    // Call undeployed contract bytecode
-    {
-      bytecode: MockErc20.bytecode,
-      data: encodeFunctionData({
-        abi: MockErc20.abi,
-        fn: "name",
-      }),
-    },
-  ],
-});
-```
-
 ## Reading at Specific Blocks
 
-All read methods support historical data queries:
+All read methods accept a `block` option to specify the block number or tag
+for the read operation. This allows you to query historical data or use block
+tags like `earliest`, `safe`, or `pending`.
 
-```ts
+```ts twoslash
+// [!include ~/snippets/token.ts]
+// ---cut---
 // Read at a specific block number
 const pastBalance = await token.read(
   "balanceOf",
-  { account: userAddress },
-  { block: 18_000_000n },
+  { account: "0x..." },
+  { block: 100n }, // [!code hl]
 );
 
 // Use block tags
 const latestBalance = await token.read(
   "balanceOf",
-  { account: userAddress },
-  { block: "latest" },
+  { account: "0x..." },
+  { block: "pending" }, // [!code hl]
 );
 
 // Works with multicall too
 const historicalData = await drift.multicall({
-  block: 18_000_000n,
   calls: [
-    { abi: erc20.abi, address: tokenA, fn: "totalSupply" },
-    { abi: erc20.abi, address: tokenB, fn: "totalSupply" },
+    { abi: erc20.abi, address: "0xa...", fn: "totalSupply" },
+    { abi: erc20.abi, address: "0xb...", fn: "totalSupply" },
   ],
+  block: 100n, // [!code hl]
 });
-```
-
-## Cache Interaction
-
-Understanding how reads interact with Drift's cache:
-
-```ts
-// First call hits the network and caches the result
-const balance1 = await token.read("balanceOf", { account });
-
-// Second call returns cached value (no network request)
-const balance2 = await token.read("balanceOf", { account });
-
-// Force bypass cache for fresh data
-const freshBalance = await token.read(
-  "balanceOf",
-  { account },
-  { cache: false },
-);
-
-// Check if value is cached without making a call
-const cachedBalance = await token.cache.getRead("balanceOf", { account });
-if (cachedBalance !== undefined) {
-  console.log("Balance is cached:", cachedBalance);
-}
 ```
 
 ## Performance Tips
 
 ### 1. Use Multicall for Multiple Reads
 
-```ts
+```ts twoslash
+// @filename: individual-reads.ts
+// [!include ~/snippets/token.ts]
+// ---cut---
 // ❌ Multiple network requests
 const name = await token.read("name");
 const symbol = await token.read("symbol");
 const decimals = await token.read("decimals");
 
+// ---cut-start---
+// @filename: multicall.ts
+// [!include ~/snippets/token.ts]
+// ---cut-end---
 // ✅ Single network request
 const [name, symbol, decimals] = await token.multicall({
   allowFailure: false,
@@ -315,24 +293,13 @@ const [name, symbol, decimals] = await token.multicall({
 });
 ```
 
-### 2. Leverage Contract Instances
+### 2. Preload Known Values
 
-```ts
-// ❌ Repeating configuration
-await drift.read({ abi: erc20.abi, address, fn: "name" });
-await drift.read({ abi: erc20.abi, address, fn: "symbol" });
-
-// ✅ Configure once, reuse many times
-const token = drift.contract({ abi: erc20.abi, address });
-await token.read("name");
-await token.read("symbol");
-```
-
-### 3. Preload Known Values
-
-```ts
+```ts twoslash
+// [!include ~/snippets/token.ts]
+// ---cut---
 // Preload static data to avoid network requests
-token.cache.preloadRead({ fn: "name", value: "USDC" });
+token.cache.preloadRead({ fn: "name", value: "USD Coin" });
 token.cache.preloadRead({ fn: "symbol", value: "USDC" });
 token.cache.preloadRead({ fn: "decimals", value: 6 });
 
@@ -343,7 +310,8 @@ const symbol = await token.read("symbol"); // No network request
 
 ## Next Steps
 
-- [**Writing Data**](/guides/writing-data) - Learn about transactions and state changes
+- [**Writing Data**](/guides/writing-data) - Learn about transactions and state
+  changes
 - [**Events**](/guides/events) - Query and filter contract events
 - [**Caching Deep Dive**](/advanced/caching) - Master Drift's caching system
 - [**Testing**](/guides/testing-strategies) - Mock contract reads for testing
