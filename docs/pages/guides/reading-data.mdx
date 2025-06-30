@@ -191,14 +191,14 @@ declare const calldata: Bytes;
 // ---cut---
 const results = await drift.multicall({
   calls: [
-    // ABI function call
+    // ABI-based call
     {
       abi: erc20.abi,
       address: "0x...",
       fn: "name",
     },
 
-    // Encoded call
+    // Raw encoded call
     {
       to: "0x...",
       data: calldata,

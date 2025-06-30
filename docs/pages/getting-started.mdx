@@ -208,37 +208,12 @@ const transferEvents = await token.getEvents("Transfer", {
 You can deploy new contracts using Drift:
 
 ```ts twoslash
-// [!include ~/snippets/token.ts]
-
-const tokenAbi = [
-  {
-    type: "constructor",
-    inputs: [
-      {
-        name: "name",
-        type: "string",
-        internalType: "string",
-      },
-      {
-        name: "symbol",
-        type: "string",
-        internalType: "string",
-      },
-      {
-        name: "decimals",
-        type: "uint8",
-        internalType: "uint8",
-      },
-    ],
-    stateMutability: "nonpayable",
-  },
-  ...erc20.abi,
-] as const;
-
+// [!include ~/snippets/drift.ts]
+// [!include ~/snippets/deployableTokenAbi.ts]
 // ---cut---
 const txHash = await drift.deploy({
   abi: tokenAbi,
-  bytecode: "0x608060405234801561001057600080fd5b50...", // Your contract bytecode
+  bytecode: "0x...", // Your contract bytecode
   args: {
     name: "My Token",
     symbol: "MTK",
