@@ -83,13 +83,13 @@ assert(
 
 console.log("Processing generated types...");
 const types = readFileSync(tempTsOutPath, "utf8")
+  // Remove spaces from identifiers: https://regex101.com/r/jfXx65/4
   .replace(
-    // Remove spaces from identifiers: https://regex101.com/r/jfXx65/3
-    /\b(?!(?:export|type|interface)\s+)\b\w[\w\d_$]+(?:\s[\w\d_$]+)+(?=\s*(?:=|\??:))/g,
-    (id) => id.replaceAll(" ", "_"),
+    /\b(?!(?:export|type|interface)\s+)\b\w[\w_$]+(?:\s[\w_$]+)+(?=\s*(?:=|\??:))/g,
+    (id) => toPascalCase(id),
   )
+  // Get types as an array: https://regex101.com/r/EYtni7/5
   .match(
-    // Get types as an array: https://regex101.com/r/EYtni7/5
     /^(?:\/\*\*[^]+?\*\/\n)?(?:export|type|interface)(?:.+?\}|.+?;|[^]+?[}\s]*\})$/gm,
   );
 
@@ -98,9 +98,30 @@ assert(
   `Error: Unable to extract type declarations from the generated file "${tempTsOutPath}". The file might be empty or in an unexpected format.`,
 );
 
+// Collect types in a map keyed by their names to remove duplicates
+const typeMap = types.reduce((map, typeDeclaration) => {
+  // Extract the type name: https://regex101.com/r/Uvty5a/1
+  const match = typeDeclaration.match(
+    /(?<=^(?:export\s+)?(?:type|interface)\s+)(\w+)/m,
+  );
+  if (!match) {
+    throw new Error(
+      `Unable to extract type name from declaration: "${typeDeclaration}"`,
+    );
+  }
+  const typeName = match[0];
+
+  // Keep the longest declaration, which is likely commented.
+  const existingTypeLength = map.get(typeName)?.length ?? 0;
+  if (typeDeclaration.length > existingTypeLength) {
+    map.set(typeName, typeDeclaration);
+  }
+
+  return map;
+}, new Map<string, string>());
+
 const namespace = toPascalCase(tsOutBasename);
-const uniqueTypes = new Set(types);
-const indentedTypes = [...uniqueTypes]
+const indentedTypes = [...typeMap.values()]
   .map((typeDeclaration) => typeDeclaration.replaceAll("\n", "\n  "))
   .join("\n  ");
 
@@ -139,5 +160,5 @@ function run(cmd: string, cwd?: string) {
 }
 
 function toPascalCase(str: string) {
-  return str.replace(/(?:^|-|_|\s)(.)/g, (_, c) => c.toUpperCase());
+  return str.replace(/(?:^|-|_|\s+)(.)/g, (_, c) => c.toUpperCase());
 }
