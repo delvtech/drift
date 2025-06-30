@@ -604,4 +604,14 @@ declare module "@delvtech/drift" {
      */
     maxFeePerBlobGas?: undefined;
   }
+
+  interface WriteOptions {
+    /**
+     *
+     *
+     * **Note**: The web3.js adapter uses an events-based approach for
+     * waiting for transactions to be mined, so this option is not used.
+     */
+    onMinedTimeout?: number;
+  }
 }

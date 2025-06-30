@@ -745,7 +745,19 @@ export type SimulateWriteParams<
  * Options for writing state by calling a contract function.
  */
 export interface WriteOptions extends TransactionOptions {
+  /**
+   * A callback that's called with the transaction receipt when the transaction
+   * is mined.
+   */
   onMined?: (receipt: TransactionReceipt | undefined) => void;
+  /**
+   * The timeout for the onMined callback in milliseconds. If the transaction is
+   * not mined within this time, the callback will not be called.
+   *
+   * This is forwarded to the method that will wait for the transaction receipt
+   * and inherits it's default.
+   */
+  onMinedTimeout?: number;
 }
 
 export type WriteParams<

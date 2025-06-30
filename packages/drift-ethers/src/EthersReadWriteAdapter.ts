@@ -195,6 +195,7 @@ export class EthersReadWriteAdapter<
     to,
     from,
     onMined,
+    onMinedTimeout,
     ...options
   }: SendTransactionParams) {
     const { hash } = await this.signer.sendTransaction({
@@ -215,7 +216,12 @@ export class EthersReadWriteAdapter<
       value: options.value,
     });
 
-    if (onMined) this.waitForTransaction({ hash }).then(onMined);
+    if (onMined) {
+      this.waitForTransaction({
+        hash,
+        timeout: onMinedTimeout,
+      }).then(onMined);
+    }
 
     return hash;
   }

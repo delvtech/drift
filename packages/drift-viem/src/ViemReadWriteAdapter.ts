@@ -120,7 +120,10 @@ export class ViemReadWriteAdapter<
     });
 
     if (params.onMined) {
-      this.waitForTransaction({ hash }).then(params.onMined);
+      this.waitForTransaction({
+        hash,
+        timeout: params.onMinedTimeout,
+      }).then(params.onMined);
     }
 
     return hash;

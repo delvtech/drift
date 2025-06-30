@@ -338,6 +338,7 @@ export class DefaultAdapter
     to,
     from,
     onMined,
+    onMinedTimeout,
     ...options
   }: SendTransactionParams): Promise<Hash> {
     from ??= await this.getSignerAddress().catch(handleError);
@@ -348,7 +349,10 @@ export class DefaultAdapter
       })
       .then((hash) => {
         if (onMined) {
-          this.waitForTransaction({ hash }).then(onMined);
+          this.waitForTransaction({
+            hash,
+            timeout: onMinedTimeout,
+          }).then(onMined);
         }
         return hash;
       })

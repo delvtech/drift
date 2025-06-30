@@ -183,6 +183,7 @@ export class EthersReadWriteAdapter<
     to,
     from,
     onMined,
+    onMinedTimeout,
     ...options
   }: SendTransactionParams) {
     const tx = await this.signer.sendTransaction({
@@ -205,22 +206,10 @@ export class EthersReadWriteAdapter<
     });
 
     if (onMined) {
-      tx.wait().then((ethersReceipt) => {
-        const receipt: TransactionReceipt = {
-          blockHash: ethersReceipt.blockHash,
-          blockNumber: BigInt(ethersReceipt.blockNumber),
-          cumulativeGasUsed: ethersReceipt.cumulativeGasUsed.toBigInt(),
-          gasUsed: ethersReceipt.gasUsed.toBigInt(),
-          effectiveGasPrice: ethersReceipt.effectiveGasPrice.toBigInt(),
-          from: ethersReceipt.from,
-          logsBloom: ethersReceipt.logsBloom,
-          status: ethersReceipt.status ? "success" : "reverted",
-          to: ethersReceipt.to,
-          transactionHash: ethersReceipt.transactionHash,
-          transactionIndex: BigInt(ethersReceipt.transactionIndex),
-        };
-        onMined(receipt);
-      });
+      this.waitForTransaction({
+        hash: tx.hash,
+        timeout: onMinedTimeout,
+      }).then(onMined);
     }
 
     return tx.hash;
