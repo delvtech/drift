@@ -4,25 +4,43 @@ title: Using Drift with React Query
 
 # Using Drift with React Query
 
-Drift's internal caching significantly simplifies data fetching in React applications, especially when using libraries like [React Query](https://tanstack.com/query/latest).
+Drift's internal caching simplifies data fetching in React applications,
+especially when using libraries like [React
+Query](https://tanstack.com/query/latest).
 
 ## The Problem Without Drift
 
-When using React Query directly with a web3 library, you face several challenges:
+When using React Query directly with a web3 library, you face several
+challenges:
 
-1. **Boilerplate for each call**: You need a separate hook and unique query key for each contract call
-2. **Composition complexity**: When creating hooks that depend on multiple contract calls, you're forced to choose between cache efficiency and clean APIs
+1. **Boilerplate for each call**: You need a separate hook and unique query key
+   for each contract call
+2. **Composition complexity**: When creating hooks that depend on multiple
+   contract calls, you're forced to choose between cache efficiency and clean
+   APIs
 
 ### The Composition Problem
 
-Consider creating a hook that returns a user's asset balance from a vault, which requires multiple contract calls:
+Consider creating a hook that returns a user's asset balance from a vault, which
+requires multiple contract calls. Without Drift, you're forced into suboptimal
+choices:
 
-```ts
-// Without Drift - You're forced into suboptimal choices:
+#### Option 1: Compose hooks, but lose clean query state
 
-// Option 1: Compose hooks, but lose clean query state
-export function useAssetBalance(account: Address, vault: Address) {
-  const shareBalance = useShareBalance(account, vault);
+```ts twoslash
+import type { UseQueryResult } from "@tanstack/react-query";
+declare function useShareBalance(
+  account: string,
+  vault: string,
+): UseQueryResult<bigint>;
+declare function useConvertToAssets(
+  shares: bigint | undefined,
+  vault: string,
+  options?: { enabled?: boolean },
+): UseQueryResult<bigint>;
+// ---cut---
+export function useAssetBalance(account: string, vault: string) {
+  const shareBalance = useShareBalance(account, vault); // [!code hl:4]
   const assetBalance = useConvertToAssets(shareBalance.data, vault, {
     enabled: shareBalance.status === "success",
   });
@@ -32,92 +50,132 @@ export function useAssetBalance(account: Address, vault: Address) {
   return { data: assetBalance.data, status: assetBalance.status };
 
   // - Or manually merging complex state from multiple queries
-  // return {
-  //   data: assetBalance.data,
-  //   isLoading: shareBalance.isLoading || assetBalance.isLoading,
-  //   error: shareBalance.error || assetBalance.error,
-  //   // ... complex state management
-  // };
+  return {
+    data: assetBalance.data,
+    isLoading: shareBalance.isLoading || assetBalance.isLoading,
+    error: shareBalance.error || assetBalance.error,
+    // ... complex state management
+  };
 }
+```
 
-// Option 2: Make direct calls, losing cache benefits
-export function useAssetBalance(account: Address, vault: Address) {
-  return useQuery(["assetBalance", account, vault], async () => {
-    // Direct calls bypass React Query cache for individual operations
-    const shares = await vaultContract.balanceOf(account);
-    const assets = await vaultContract.convertToAssets(shares);
-    return assets;
-    // This means redundant calls if useShareBalance is used elsewhere!
+#### Option 2: Make direct calls, losing cache benefits
+
+```ts twoslash
+import { erc4626 } from "@delvtech/drift";
+import { useQuery } from "@tanstack/react-query";
+import type { Provider } from "ethers";
+import { Contract } from "ethers";
+const vaultAbi = erc4626.abi;
+declare const provider: Provider;
+// ---cut---
+export function useAssetBalance(account: string, vault: string) {
+  return useQuery({
+    queryKey: ["assetBalance", account, vault],
+    queryFn: async () => {
+      const vaultContract = new Contract(vault, vaultAbi, provider);
+
+      // Direct calls bypass React Query cache for individual operations
+      const shares = await vaultContract.balanceOf(account); // [!code hl:2]
+      const assets = await vaultContract.convertToAssets(shares);
+      return assets;
+      // This means redundant calls if balanceOf is used elsewhere!
+    },
   });
 }
+```
 
-// Option 3: Complex manual cache management
-export function useAssetBalance(account: Address, vault: Address) {
+#### Option 3: Complex manual cache management
+
+```ts twoslash
+import { erc4626 } from "@delvtech/drift";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { Provider } from "ethers";
+import { Contract } from "ethers";
+const vaultAbi = erc4626.abi;
+declare const provider: Provider;
+// ---cut---
+export function useAssetBalance(account: string, vault: string) {
   const queryClient = useQueryClient();
 
-  return useQuery(["assetBalance", account, vault], async () => {
-    // Manually check cache for each call
-    let shares = queryClient.getQueryData(["shareBalance", account, vault]);
-    if (!shares) {
-      shares = await vaultContract.balanceOf(account);
-      queryClient.setQueryData(["shareBalance", account, vault], shares);
-    }
-    // ... more cache management complexity
+  return useQuery({
+    queryKey: ["assetBalance", account, vault],
+    queryFn: async () => {
+      const vaultContract = new Contract(vault, vaultAbi, provider);
+
+      // Manually check cache for each call
+      let shares = queryClient.getQueryData(["shareBalance", account, vault]); // [!code hl:5]
+      if (!shares) {
+        shares = await vaultContract.balanceOf(account);
+        queryClient.setQueryData(["shareBalance", account, vault], shares);
+      }
+      // ... more cache management complexity
+    },
   });
 }
 ```
 
 ## How Drift Solves This
 
-With Drift, you get the best of both worlds: automatic caching **and** clean composition. You can make multiple contract calls within a single hook without worrying about redundant network requests or complex state management.
+With Drift, you get the best of both worlds: automatic caching **and** clean
+composition. You can make multiple contract calls within a single hook without
+worrying about redundant network requests or complex state management.
 
 ### Clean Composition with Automatic Caching
 
-```ts
-// With Drift - Clean and efficient
-export function useAssetBalance(
-  drift: Drift,
-  account: Address,
-  vault: Address,
-) {
-  return useQuery(["assetBalance", account, vault], async () => {
-    const vaultContract = drift.contract({
-      abi: vaultAbi,
-      address: vault,
-    });
+```ts twoslash
+import { erc4626 } from "@delvtech/drift";
+import { useQuery } from "@tanstack/react-query";
+import type { Address, Drift } from "@delvtech/drift";
+declare const drift: Drift;
+// ---cut---
+export function useAssetBalance(account: Address, vault: Address) {
+  return useQuery({
+    queryKey: ["assetBalance", account, vault],
+    queryFn: async () => {
+      const vaultContract = drift.contract({
+        abi: erc4626.abi,
+        address: vault,
+      });
 
-    // Multiple calls with automatic caching - no redundant requests!
-    const shares = await vaultContract.read("balanceOf", { account });
-    const assets = await vaultContract.read("convertToAssets", { shares });
+      // Multiple calls with automatic caching - no redundant requests!
+      const shares = await vaultContract.read("balanceOf", { account }); // [!code hl:2]
+      const assets = await vaultContract.read("convertToAssets", { shares });
 
-    return assets;
+      return assets;
+    },
   });
 }
 
-// If useShareBalance is called elsewhere, Drift's cache prevents redundant calls
-export function useShareBalance(
-  drift: Drift,
-  account: Address,
-  vault: Address,
-) {
-  return useQuery(["shareBalance", account, vault], async () => {
-    return await drift.read({
-      abi: vaultAbi,
-      address: vault,
-      fn: "balanceOf",
-      args: { account },
-    });
-    // This call is cached and won't result in a redundant request
-    // if useAssetBalance was already called!
+// If balanceOf is called elsewhere, Drift's cache prevents redundant calls
+export function useShareBalance(account: Address, vault: Address) {
+  return useQuery({
+    queryKey: ["shareBalance", account, vault],
+    queryFn: async () => {
+      // [!code hl:7]
+      return drift.read({
+        abi: erc4626.abi,
+        address: vault,
+        fn: "balanceOf",
+        args: { account },
+      });
+      // This call is cached and won't result in a redundant request
+      // if useAssetBalance was already called!
+    },
   });
 }
 ```
 
 ## Key Benefits
 
-- **No composition tradeoffs**: Create hooks that depend on multiple contract calls without sacrificing cache efficiency or clean APIs
-- **Automatic deduplication**: Multiple components calling the same contract methods won't result in redundant network requests
-- **Simplified state management**: Get clean React Query state without manual cache coordination
-- **Performance**: Drift's intelligent caching reduces RPC calls across your entire application
+- **No composition tradeoffs**: Create hooks that depend on multiple contract
+  calls without sacrificing cache efficiency or clean APIs
+- **Automatic deduplication**: Multiple components calling the same contract
+  methods won't result in redundant network requests
+- **Simplified state management**: Get clean React Query state without manual
+  cache coordination
+- **Performance**: Drift's intelligent caching reduces RPC calls across your
+  entire application
 
-This approach dramatically simplifies your React application architecture while maintaining optimal performance.
+This approach dramatically simplifies your React application architecture while
+maintaining optimal performance.
