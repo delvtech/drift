@@ -3283,12 +3283,24 @@
   resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.81.2.tgz#4ff8cc7f07753db41aa493dcbe5413d694dddb0d"
   integrity sha512-QLYkPdrudoMATDFa3MiLEwRhNnAlzHWDf0LKaXUqJd0/+QxN8uTPi7bahRlxoAyH0UbLMBdeDbYzWALj7THOtw==
 
+"@tanstack/query-core@5.81.5":
+  version "5.81.5"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.81.5.tgz#14e0cc778bad8bc11d1cf130709910d8a353bb73"
+  integrity sha512-ZJOgCy/z2qpZXWaj/oxvodDx07XcQa9BF92c0oINjHkoqUPsmm3uG08HpTaviviZ/N9eP1f9CM7mKSEkIo7O1Q==
+
 "@tanstack/react-query@^5.81.2":
   version "5.81.2"
   resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.81.2.tgz#e4cc02102ce4d14a51440d6bcbad152dc8f140ed"
   integrity sha512-pe8kFlTrL2zFLlcAj2kZk9UaYYHDk9/1hg9EBaoO3cxDhOZf1FRGJeziSXKrVZyxIfs7b3aoOj/bw7Lie0mDUg==
   dependencies:
     "@tanstack/query-core" "5.81.2"
+
+"@tanstack/react-query@^5.81.5":
+  version "5.81.5"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.81.5.tgz#660dba8bb35f24c4cf3617b299a1e3990a3bb49e"
+  integrity sha512-lOf2KqRRiYWpQT86eeeftAGnjuTR35myTP8MXyvHa81VlomoAWNEd8x5vkcAfQefu0qtYCvyqLropFZqgI2EQw==
+  dependencies:
+    "@tanstack/query-core" "5.81.5"
 
 "@tybys/wasm-util@^0.9.0":
   version "0.9.0"
@@ -10316,6 +10328,20 @@ viem@^2.31.4:
   version "2.31.4"
   resolved "https://registry.yarnpkg.com/viem/-/viem-2.31.4.tgz#a8cce5579cc495a2586a16dd4062deecc0f53f1d"
   integrity sha512-0UZ/asvzl6p44CIBRDbwEcn3HXIQQurBZcMo5qmLhQ8s27Ockk+RYohgTLlpLvkYs8/t4UUEREAbHLuek1kXcw==
+  dependencies:
+    "@noble/curves" "1.9.2"
+    "@noble/hashes" "1.8.0"
+    "@scure/bip32" "1.7.0"
+    "@scure/bip39" "1.6.0"
+    abitype "1.0.8"
+    isows "1.0.7"
+    ox "0.8.1"
+    ws "8.18.2"
+
+viem@^2.31.6:
+  version "2.31.6"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-2.31.6.tgz#2a4e76b5e7201060a2a01820d1db4d87f420a0e0"
+  integrity sha512-2PPbXL/8bHQxUzaLFDk4R6WHifTcXxAqMC8/j6RBgXl/OexQ1HU8r9OukwfDTqrFoHtWWiYz5fktHATy7+U9nQ==
   dependencies:
     "@noble/curves" "1.9.2"
     "@noble/hashes" "1.8.0"
