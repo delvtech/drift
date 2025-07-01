@@ -4,68 +4,230 @@ title: Extending Drift
 
 # Extending Drift
 
-Drift is designed to be extensible, allowing you to add support for new web3 libraries, create custom cache stores, and use hooks to add middleware to your client.
+Drift is designed to be extensible, allowing you to add support for new web3
+libraries, create custom cache stores, and use hooks to add middleware to your
+client.
 
 ## Implementing Custom Adapters
 
-If you want to use Drift with a web3 library that isn't already supported, you can create a custom adapter. An adapter is an object that implements the `Adapter` interface, which normalizes the behavior of the underlying web3 provider.
+If you want to use Drift with a web3 library that isn't already supported, you
+can create a custom adapter. An adapter is an object that implements the
+`Adapter` interface, which normalizes the behavior of the underlying web3
+provider.
 
-Creating a full adapter is an advanced topic. If you are interested in contributing a new adapter, please open an issue on the Drift GitHub repository to discuss the implementation.
+Drift `Clients`, including `Drift`, extend the prototype of the adapter they're
+provided, inheriting all of it's properties and methods, extending some, and
+adding some of their own. See the
+[`DefaultAdapter`](https://github.com/delvtech/drift/blob/main/packages/drift/src/adapter/DefaultAdapter.ts)
+for an example implementation.
+
+```ts twoslash
+import { DefaultAdapter, createDrift } from "@delvtech/drift";
+
+class CustomAdapter extends DefaultAdapter {
+  override async getChainId() {
+    // Custom implementation...
+    // ---cut-start---
+    return 0;
+    // ---cut-end---
+  }
+}
+
+const drift = await createDrift({
+  adapter: new CustomAdapter({
+    rpcUrl: process.env.RPC_URL,
+  }),
+});
+```
+
+If interested in contributing a new adapter to the Drift repo, open an
+[issue](https://github.com/delvtech/drift/issues) or start a
+[discussion](https://github.com/delvtech/drift/discussions) to discuss the
+implementation.
 
 ## Building Custom Stores
 
-Drift's default cache store is an in-memory cache. For more persistent caching, you can create your own store that implements the `Store` interface. This allows you to use `localStorage`, `IndexedDB`, or any other storage mechanism.
+Drift's default cache store is an in-memory LRU cache. Custom stores can be
+created by implementing the `Store` interface. This allows you to use TTL,
+localStorage, IndexedDB,
+[QueryClient](https://tanstack.com/query/latest/docs/reference/QueryClient), or
+or other storage mechanism, sync or async.
 
-Here is a simplified example of a `localStorage` store:
+Here's a simplified example of a `localStorage` store:
 
-```ts
-import { type Store } from "@delvtech/drift";
+```ts twoslash
+import { createDrift, type Store } from "@delvtech/drift";
 
-const localStorageStore: Store = {
-  get(key) {
+class LocalStorageStore implements Store {
+  get(key: string) {
     const item = localStorage.getItem(key);
     return item ? JSON.parse(item) : undefined;
-  },
-  set(key, value) {
+  }
+  set(key: string, value: unknown) {
     localStorage.setItem(key, JSON.stringify(value));
-  },
-  delete(key) {
+  }
+  delete(key: string) {
     localStorage.removeItem(key);
-  },
+  }
   clear() {
     localStorage.clear();
-  },
-  // ... other methods
-};
+  }
+  has(key: string) {
+    return localStorage.getItem(key) !== undefined;
+  }
+  entries() {
+    return Object.entries(localStorage).map(([key, value]) => [
+      key,
+      JSON.parse(value),
+    ]) as [string, unknown][];
+  }
+}
 
 const drift = createDrift({
   rpcUrl: "YOUR_RPC_URL",
-  store: localStorageStore,
+  store: new LocalStorageStore(),
 });
 ```
 
 ## Using Hooks for Middleware
 
-Hooks allow you to intercept and modify actions before they are executed. You can use hooks to add logging, modify parameters, or implement other custom logic.
+Hooks allow you to intercept and modify Drift operations before and after they
+execute. This enables powerful patterns like automatic simulation, transaction
+management, logging, and cache invalidation.
 
-Here is an example of a hook that logs all `read` calls:
+### Basic Hook Usage
 
-```ts
-// Simulate writes before sending transactions
+```ts twoslash
+// [!include ~/snippets/drift.ts]
+// ---cut---
+// Log all read operations
+drift.hooks.on("before:read", ({ args: [params] }) => {
+  console.log(`Reading ${params.fn} from ${params.address}`);
+});
+```
+
+### Automatic Transaction Management
+
+You can use hooks to automate common transaction patterns:
+
+```ts twoslash
+// [!include ~/snippets/drift.ts]
+// ---cut---
+// Automatically simulate all writes before sending
 drift.hooks.on("before:write", async ({ args: [params] }) => {
+  console.log(`Simulating ${params.fn}...`);
   await drift.simulateWrite(params);
 });
 
-// Run middleware on reads
-drift.hooks.on("before:read", async ({ args: [params], resolve }) => {
-  const cachedValue = await drift.cache.getRead(params);
-  const result = await readMiddleware({ params, cachedValue });
-  resolve(result);
-});
+// Automatically wait for transaction confirmation and handle errors
+drift.hooks.on("after:write", async ({ args: [params], result }) => {
+  const hash = await result;
+  console.log(`Waiting for ${params.fn} transaction: ${hash}`);
 
-// Run middleware to transform the result of calls
-drift.hooks.on("after:call", ({ args: [params], result, setResult }) => {
-  const transformedResult = callResultMiddleware({ params, result });
-  setResult(transformedResult);
+  const receipt = await drift.waitForTransaction({ hash });
+  if (!receipt) {
+    throw new Error(`Timeout waiting for ${params.fn} transaction: ${hash}`);
+  }
+  if (receipt.status !== "success") {
+    throw new Error(`${params.fn} transaction failed: ${hash}`);
+  }
+
+  console.log(`${params.fn} transaction confirmed!`);
 });
 ```
+
+### Request Logging and Analytics
+
+Track usage patterns and performance:
+
+```ts twoslash
+// [!include ~/snippets/drift.ts]
+declare const analytics: any;
+// ---cut---
+// Log performance metrics for reads
+const timings = new Map<string, number>();
+
+drift.hooks.on("before:read", ({ args: [params] }) => {
+  const key = `${params.address}-${params.fn}`;
+  timings.set(key, performance.now());
+});
+
+drift.hooks.on("after:read", ({ args: [params] }) => {
+  const key = `${params.address}-${params.fn}`;
+  const startTime = timings.get(key);
+
+  if (startTime) {
+    const duration = performance.now() - startTime;
+    timings.delete(key);
+    analytics.track("ContractRead", {
+      function: params.fn,
+      address: params.address,
+      duration,
+    });
+  }
+});
+
+// Track transaction patterns
+drift.hooks.on("after:write", async ({ args: [params], result }) => {
+  const hash = await result;
+  analytics.track("TransactionSent", {
+    function: params.fn,
+    address: params.address,
+    hash,
+    gasLimit: params.gas,
+  });
+});
+```
+
+### Error Handling and Retry Logic
+
+Add global error handling and retry capabilities:
+
+```ts twoslash
+// [!include ~/snippets/drift.ts]
+// ---cut---
+// Global retry logic for failed reads
+drift.hooks.on("before:read", async ({ args: [params], resolve }) => {
+  const maxRetries = 3;
+  let attempt = 0;
+
+  while (attempt < maxRetries) {
+    try {
+      const result = await drift.read(params);
+      return resolve(result);
+    } catch (error) {
+      attempt++;
+      if (attempt === maxRetries) throw error;
+
+      console.log(`Read attempt ${attempt} failed, retrying...`);
+      await new Promise((r) => setTimeout(r, 1000 * attempt));
+    }
+  }
+});
+
+// Enhanced error reporting
+drift.hooks.on("after:write", async ({ args: [params], result }) => {
+  try {
+    const hash = await result;
+    const receipt = await drift.waitForTransaction({ hash });
+
+    if (receipt?.status !== "success") {
+      // Enhanced error context
+      const error = new Error(`Transaction failed: ${params.fn}`) as any;
+      error.hash = hash;
+      error.params = params;
+      error.receipt = receipt;
+      throw error;
+    }
+  } catch (error) {
+    // Log to error tracking service
+    console.error("Transaction error:", error);
+    throw error;
+  }
+});
+```
+
+### Available Hook Events
+
+Drift clients provide type-safe `before:<method>` and `after:<method>` hooks for
+**all** methods on the `Adapter` it uses, including custom methods.
