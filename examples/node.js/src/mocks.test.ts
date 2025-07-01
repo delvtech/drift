@@ -20,8 +20,8 @@ async function getUserAssetValue(
 // Test case for getUserAssetValue function
 test("getUserAssetValue returns user's shares converted to assets", async () => {
   // Set up mocks
-  const vaultAddress = randomAddress();
   const userAddress = randomAddress();
+  const vaultAddress = randomAddress();
   const mockDrift = createMockDrift();
   const mockVault = mockDrift.contract({
     abi: erc4626.abi,
