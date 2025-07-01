@@ -323,7 +323,7 @@ export class ReadWriteVault extends ReadVault {
         // Optionally wait for the transaction to be mined and invalidate cache
         onMined: (receipt) => {
           if (receipt?.status === "success") {
-            this.contract.cache.invalidateRead("balanceOf", { account });
+            this.contract.cache.clearReads();
           }
         },
       },

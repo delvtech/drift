@@ -1,0 +1,195 @@
+---
+title: Building Reusable Protocol SDKs
+---
+
+# Building Reusable Protocol SDKs
+
+One of the powerful patterns that Drift enables is the creation of reusable,
+library-agnostic SDKs for your smart contracts. This allows you to
+encapsulate your contract logic into a clean, reusable client that can be
+used across different applications and environments, without being tied to a
+specific web3 library or state management solution.
+
+## Example: A Vault Client
+
+Let's walk through building a simple SDK for an
+[ERC-4626](https://ethereum.org/en/developers/docs/standards/tokens/erc-4626/)
+vault, with both read-only and read-write clients.
+
+### 1. Create a Read-Only Client
+
+First, we define a `ReadVault` class that wrap Drift's `ReadContract`
+abstraction.
+
+:::code-group
+
+```ts twoslash [ReadVault.ts] filename="ReadVault.ts"
+// @filename: ReadVault.ts
+// ---cut---
+import {
+  type Address,
+  createDrift,
+  type Drift,
+  type ReadContract,
+} from "@delvtech/drift";
+import { type VaultAbi, vaultAbi } from "./abi";
+
+/**
+ * A read-only Vault client
+ */
+export class ReadVault {
+  contract: ReadContract<VaultAbi>;
+
+  constructor(address: Address, drift: Drift = createDrift()) {
+    this.contract = drift.contract({
+      abi: vaultAbi,
+      address,
+    });
+  }
+
+  getBalance(account: Address) {
+    return this.contract.read("balanceOf", { account });
+  }
+
+  async getAssetValue(account: Address) {
+    const shares = await this.getBalance(account);
+    return this.contract.read("convertToAssets", { shares });
+  }
+
+  // ... other read methods as needed
+}
+```
+
+```ts twoslash [abi.ts] filename="abi.ts"
+// @filename: abi.ts
+// ---cut---
+import { erc4626 } from "@delvtech/drift";
+
+export type VaultAbi = typeof erc4626.abi;
+export const vaultAbi = erc4626.abi;
+```
+
+:::
+
+### 2. Extend to Create a Read-Write Client
+
+Next, we create a `ReadWriteVault` class that extends `ReadVault` to add write
+operations using Drift's `ReadWriteContract` abstraction.
+
+:::code-group
+
+```ts twoslash [ReadWriteVault.ts] filename="ReadWriteVault.ts"
+// @filename: ReadWriteVault.ts
+// ---cut---
+import {
+  type Address,
+  createDrift,
+  type Drift,
+  type ReadWriteAdapter,
+  type ReadWriteContract,
+} from "@delvtech/drift";
+import type { VaultAbi } from "./abi";
+import { ReadVault } from "./ReadVault";
+
+/**
+ * A read-write Vault client that can sign transactions
+ */
+export class ReadWriteVault extends ReadVault {
+  declare contract: ReadWriteContract<VaultAbi>; // [!code hl]
+
+  constructor(
+    address: Address,
+    drift: Drift<ReadWriteAdapter> = createDrift(), // [!code hl]
+  ) {
+    super(address, drift);
+  }
+
+  deposit(amount: bigint, account: Address) {
+    return this.contract.write(
+      "deposit",
+      { assets: amount, receiver: account },
+      {
+        onMined: (receipt) => {
+          if (receipt?.status === "success") {
+            // Clear cached state for this contract
+            this.contract.cache.clearReads();
+          }
+        },
+      },
+    );
+  }
+
+  // ... other write methods as needed
+}
+```
+
+```ts twoslash [ReadVault.ts]
+// @filename: ReadVault.ts
+// ---cut---
+// [!include ReadVault.ts]
+```
+
+```ts twoslash [abi.ts]
+// @filename: abi.ts
+// ---cut---
+// [!include abi.ts]
+```
+
+:::
+
+### 3. Use the Client in Your Application
+
+You can now use this `VaultClient` in your application with any web3 library
+supported by Drift.
+
+:::code-group
+
+```ts twoslash [example.ts]
+// @filename: vault-sdk.d.ts
+declare module "vault-sdk" {
+  import type { Address, Drift, ReadContract, erc4626 } from "@delvtech/drift";
+  /** A read-only Vault client */
+  export class ReadVault {
+    contract: ReadContract<typeof erc4626.abi>;
+    constructor(address: Address, drift?: Drift);
+    getBalance(account: Address): Promise<bigint>;
+    getAssetValue(account: Address): Promise<bigint>;
+  }
+}
+// @filename: app.ts
+// ---cut---
+import { ReadVault } from "vault-sdk";
+import { drift } from "./clients";
+
+const vault = new ReadVault("0x...", drift);
+const assetValue = await vault.getAssetValue("0x...");
+```
+
+```ts twoslash [clients.ts] filename="clients.ts"
+// @filename: clients.ts
+// ---cut---
+import { createDrift } from "@delvtech/drift";
+import { viemAdapter } from "@delvtech/drift-viem";
+import { createPublicClient, http } from "viem";
+import { mainnet } from "viem/chains";
+
+export const publicClient = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+});
+
+export const drift = createDrift({
+  adapter: viemAdapter({ publicClient }),
+});
+```
+
+:::
+
+### Benefits of This Architecture
+
+- **Reusability:** Write your business logic once and reuse it across
+  different applications and environments.
+- **Simplicity:** Your application code becomes cleaner and more focused on
+  business logic.
+- **Testability:** This pattern is easy to test using Drift's mocking
+  utilities.

@@ -230,4 +230,5 @@ drift.hooks.on("after:write", async ({ args: [params], result }) => {
 ### Available Hook Events
 
 Drift clients provide type-safe `before:<method>` and `after:<method>` hooks for
-**all** methods on the `Adapter` it uses, including custom methods.
+**all** methods and function properties on the `Adapter` it uses, including
+custom methods.

@@ -91,37 +91,27 @@ export default defineConfig({
           text: "Testing Strategies",
           link: "/guides/testing-strategies",
         },
-      ],
-    },
-    {
-      text: "Advanced",
-      collapsed: false,
-      items: [
         {
           text: "Caching",
-          link: "/advanced/caching",
+          link: "/guides/caching",
         },
         {
           text: "Extending Drift",
-          link: "/advanced/extending-drift",
+          link: "/guides/extending-drift",
         },
       ],
     },
     {
-      text: "Integrations",
+      text: "Integration Patterns",
       collapsed: false,
       items: [
         {
           text: "React Query",
-          link: "/integrations/react-query",
+          link: "/integration-patterns/react-query",
         },
         {
-          text: "SDK Layers",
-          link: "/integrations/sdk-layers",
-        },
-        {
-          text: "Multi-chain Deployments",
-          link: "/integrations/multi-chain-deployments",
+          text: "Protocol SDKs",
+          link: "/integration-patterns/protocol-sdks",
         },
       ],
     },

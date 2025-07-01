@@ -18,7 +18,10 @@ The simplest way to read contract data is using the `read` method:
 import { erc20 } from "@delvtech/drift";
 import { drift } from "./drift";
 
-// Using the client directly
+// --- Using the client directly ---
+
+const currentBlockNumber = await drift.getBlockNumber();
+
 const balance = await drift.read({
   abi: erc20.abi,
   address: "0x...",
@@ -26,7 +29,8 @@ const balance = await drift.read({
   args: { account: "0x..." },
 });
 
-// Using a contract instance
+// --- Using a contract instance ---
+
 const token = drift.contract({
   abi: erc20.abi,
   address: "0x...",

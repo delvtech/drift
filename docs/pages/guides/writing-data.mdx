@@ -347,7 +347,7 @@ token.write(
 );
 ```
 
-See [**Caching**](/advanced/caching) for more details on cache management.
+See [**Caching**](/guides/caching) for more details on cache management.
 
 ## Error Handling Patterns
 
@@ -406,10 +406,7 @@ temporary issues like network errors:
 
 :::code-group
 
-```ts twoslash [getTransactionEvents.ts] filename="getTransactionEvents.ts"
-// @filename: types.ts
-// [!include types.ts]
-
+```ts twoslash [writeWithRetry.ts] filename="writeWithRetry.ts"
 // @filename: writeWithRetry.ts
 // ---cut---
 import type { FunctionName } from "@delvtech/drift";
@@ -439,6 +436,7 @@ export async function writeWithRetry<
 ```
 
 ```ts twoslash [types.ts] filename="types.ts"
+// @filename: types.ts
 import type {
   erc20,
   FunctionArgs,
