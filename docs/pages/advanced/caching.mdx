@@ -12,93 +12,122 @@ effectively.
 ## How Caching Works
 
 Drift automatically caches the results of `read`, `getEvents`, and other network
+operations that return chain data. This doesn't include simulation or write
 operations. When you make a call with the same parameters, Drift returns the
 cached result instead of making another network request.
 
 ### Basic Caching Behavior
 
-```ts
+```ts twoslash
+// [!include ~/snippets/token.ts]
+// ---cut---
 // First call: hits the network, result is cached
-const balance1 = await token.read("balanceOf", { account: userAddress });
+const balance1 = await token.read("balanceOf", { account: "0x123..." });
 
 // Second call: returns cached value instantly (no network request)
-const balance2 = await token.read("balanceOf", { account: userAddress });
+const balance2 = await token.read("balanceOf", { account: "0x123..." });
 
 // Different parameters: triggers new network request
-const otherBalance = await token.read("balanceOf", { account: otherAddress });
+const otherBalance = await token.read("balanceOf", { account: "0xabc..." });
 
 // Different options: triggers new network request
 const historicalBalance = await token.read(
   "balanceOf",
-  { account: userAddress },
-  { block: 18_000_000n },
+  { account: "0x123..." },
+  { block: 100n },
 );
 ```
 
-### Cache Key Generation
+### Cache Keys
 
-Drift generates cache keys based on:
+Drift generates cache keys based on the arguments passed to the underlying
+adapter. Every cached method includes a corresponding `*Key` method that can be
+used to get the cache key for a specific call:
 
-- Contract address
-- Function name
-- Function arguments
-- Call options (block number, etc.)
+```ts twoslash
+// [!include ~/snippets/token.ts]
+// ---cut---
+const userBalanceKey = await drift.cache.readKey({
+  abi: erc20.abi,
+  address: "0x...",
+  fn: "balanceOf",
+  args: { account: "0x..." },
+});
 
-```ts
-// These calls have different cache keys:
-await token.read("balanceOf", { account: "0x123" });
-await token.read("balanceOf", { account: "0x456" });
-await token.read("balanceOf", { account: "0x123" }, { block: 100n });
+const transactionKey = await drift.cache.transactionKey({
+  hash: "0x...",
+});
 ```
 
 ### Multicall and Caching
 
-Multicall operations leverage individual call caching, by reducing the number of
-calls made in the batch:
+When using `multicall`, Drift will check the cache for each individual call
+before making network requests. If a call's result is already cached, it will be
+remove from the batch to reduce the size of the request.
 
-```ts
+All individual values returned by `multicall` are cached, so subsequent calls to
+either `multicall` or to the individual functions benefit from the cache.
+
+```ts twoslash
+// [!include ~/snippets/token.ts]
+// ---cut---
 // These individual calls are cached
-await token.read("name");
-await token.read("symbol");
-await token.read("decimals");
+await Promise.all([
+  token.read("name"),
+  token.read("symbol"),
+  token.read("decimals"),
+]);
 
 // Later multicall uses cached values when possible
 const [name, symbol, decimals, totalSupply] = await token.multicall({
   allowFailure: false,
   calls: [
-    { fn: "name" },        // ✅ Uses cache
-    { fn: "symbol" },      // ✅ Uses cache
-    { fn: "decimals" },    // ✅ Uses cache
-    { fn: "totalSupply" }, // ❌ New network request
+    { fn: "name" }, // ✅ Uses cache
+    { fn: "symbol" }, // ✅ Uses cache
+    { fn: "decimals" }, // ✅ Uses cache
+    { fn: "totalSupply" }, // ❌ Network request for "totalSupply" only
   ],
 });
+
+const totalSupply2 = await token.read("totalSupply"); // ✅ Uses cache
 ```
 
 ## Cache Invalidation
 
-When contract state changes (through transactions), you need to invalidate
-affected cache entries to prevent stale data.
+When contract state changes (through transactions), you can invalidate affected
+cache entries using `invalidate*` and `clear*` methods to prevent stale data.
 
-### Manual Invalidation
+```ts twoslash
+// [!include ~/snippets/token.ts]
+// ---cut---
+// Precise - invalidate specific entries
+await token.cache.invalidateRead("balanceOf", { account: "0x..." });
+await drift.cache.invalidateCall({ to: "0x...", data: "0x..." });
 
-```ts
-// Invalidate specific cache entry
-token.cache.invalidateRead("balanceOf", { account: userAddress });
+// Loose - invalidate based on partial arguments
+await token.cache.invalidateReadsMatching("balanceOf");
+await drift.cache.invalidateCallsMatching({ to: "0x..." });
 
-// Invalidate all calls to a function (any arguments)
-token.cache.invalidateReadsMatching("balanceOf");
+// Broad - invalidate all...
+await token.cache.clearReads(); // ...reads for a specific contract
+await drift.cache.clearReads(); // ...reads for all contracts
+await drift.cache.clearCalls(); // ...calls
 
-// Invalidate multiple specific calls
-token.cache.invalidateRead("totalSupply");
-token.cache.invalidateRead("balanceOf", { account: senderAddress });
-token.cache.invalidateRead("balanceOf", { account: receiverAddress });
+// Nuclear - clear the entire cache
+await token.cache.clear();
+await drift.cache.clear();
 ```
 
-### Automatic Invalidation with `onMined`
+### Transaction-based Invalidation
 
 The most common pattern is to invalidate cache in transaction callbacks:
 
-```ts
+```ts twoslash
+// [!include ~/snippets/token.ts]
+import type { Address } from "@delvtech/drift";
+declare const recipientAddress: Address;
+declare const senderAddress: Address;
+// ---cut---
 await token.write(
   "transfer",
   { to: recipientAddress, amount: BigInt(100e18) },
@@ -108,9 +137,6 @@ await token.write(
         // Invalidate affected balances
         token.cache.invalidateRead("balanceOf", { account: senderAddress });
         token.cache.invalidateRead("balanceOf", { account: recipientAddress });
-
-        // Optionally invalidate total supply if it could be affected
-        token.cache.invalidateRead("totalSupply");
       }
     },
   },
@@ -121,60 +147,38 @@ await token.write(
 
 You can also invalidate cache based on events:
 
-```ts
-// Watch for Transfer events and invalidate affected balances
-const transferEvents = await token.getEvents("Transfer", {
-  fromBlock: currentBlock,
+```ts twoslash
+// [!include ~/snippets/token.ts]
+declare const lastProcessedBlock: bigint;
+// ---cut---
+const newTransfers = await token.getEvents("Transfer", {
+  fromBlock: lastProcessedBlock,
   toBlock: "latest",
 });
 
-transferEvents.forEach((event) => {
-  const { from, to } = event.args;
+for (const transfer of newTransfers) {
+  const { from, to } = transfer.args;
   token.cache.invalidateRead("balanceOf", { account: from });
   token.cache.invalidateRead("balanceOf", { account: to });
-});
-```
-
-## Cache Clearing
-
-### Selective Clearing
-
-```ts
-// Clear all reads for a specific contract
-token.cache.clearReads();
-
-// Clear all events for a specific contract
-token.cache.clearEvents();
-
-// Clear everything for a specific contract
-token.cache.clear();
-
-// Clear specific data types across all contracts
-drift.cache.clearReads();    // All read calls
-drift.cache.clearEvents();   // All events
-drift.cache.clearBalances(); // All balance queries
-drift.cache.clearBlocks();   // All block data
-```
-
-### Complete Cache Reset
-
-```ts
-// Clear everything in the cache
-drift.cache.clear();
+}
 ```
 
 ## Preloading Data
 
-Preloading allows you to populate the cache with known values, avoiding network
-requests entirely.
+Preloading allows you to populate the cache with known values using `preload*`,
+avoiding network requests entirely.
 
 ### Preloading Reads
 
-```ts
+```ts twoslash
+// [!include ~/snippets/token.ts]
+// ---cut---
 // Preload static token data
-token.cache.preloadRead({ fn: "name", value: "USD Coin" });
-token.cache.preloadRead({ fn: "symbol", value: "USDC" });
-token.cache.preloadRead({ fn: "decimals", value: 6 });
+await Promise.all([
+  token.cache.preloadRead({ fn: "name", value: "USD Coin" }),
+  token.cache.preloadRead({ fn: "symbol", value: "USDC" }),
+  token.cache.preloadRead({ fn: "decimals", value: 6 }),
+]);
 
 // These calls now return instantly without network requests
 const name = await token.read("name");
@@ -184,53 +188,85 @@ const decimals = await token.read("decimals");
 
 ### Preloading from External Sources
 
-```ts
+```ts twoslash
+// [!include ~/snippets/token.ts]
+import type { Address } from "@delvtech/drift";
+type TokenList = {
+  name: string;
+  logoURI: string;
+  keywords: string[];
+  tags: Record<string, { name: string; description: string }>;
+  timestamp: string;
+  version: { major: number; minor: number; patch: number };
+  tokens: {
+    name: string;
+    decimals: number;
+    symbol: string;
+    address: Address;
+    chainId: number;
+    tags: string[];
+  }[];
+};
+// ---cut---
 // Preload data from token lists or APIs
-const tokenList = await fetch("https://tokens.coingecko.com/uniswap/all.json");
+const tokenList = await fetch("https://...").then(
+  (res) => res.json() as Promise<TokenList>,
+);
 
-tokenList.tokens.forEach((tokenData) => {
-  const tokenContract = drift.contract({
-    abi: erc20.abi,
-    address: tokenData.address,
-  });
+await Promise.all(
+  tokenList.tokens.flatMap((tokenData) => {
+    const tokenContract = drift.contract({
+      abi: erc20.abi,
+      address: tokenData.address,
+    });
 
-  tokenContract.cache.preloadRead({ fn: "name", value: tokenData.name });
-  tokenContract.cache.preloadRead({ fn: "symbol", value: tokenData.symbol });
-  tokenContract.cache.preloadRead({
-    fn: "decimals",
-    value: tokenData.decimals,
-  });
-});
+    return [
+      tokenContract.cache.preloadRead({ fn: "name", value: tokenData.name }),
+      tokenContract.cache.preloadRead({
+        fn: "symbol",
+        value: tokenData.symbol,
+      }),
+      tokenContract.cache.preloadRead({
+        fn: "decimals",
+        value: tokenData.decimals,
+      }),
+    ];
+  }),
+);
 ```
 
 ### Preloading Events
 
-```ts
+```ts twoslash
+// [!include ~/snippets/token.ts]
+// ---cut---
+// @noErrors
 // Preload empty events to avoid unnecessary queries
-token.cache.preloadEvents({
+await token.cache.preloadEvents({
   event: "Transfer",
-  value: [], // Empty array indicates no events in this range
-  fromBlock: 18_000_000n,
-  toBlock: 18_100_000n,
+  value: [...], // Empty array or actual events
+  fromBlock: 100n,
+  toBlock: 200n,
 });
 
-// This query will return immediately with empty array
+// This query will return immediately with the preloaded data
 const events = await token.getEvents("Transfer", {
-  fromBlock: 18_000_000n,
-  toBlock: 18_100_000n,
+  fromBlock: 100n,
+  toBlock: 200n,
 });
 ```
 
 ## Direct Cache Access
 
-For advanced use cases, you can directly interact with the cache.
+Drift clients will automatically check the cache before fetching new data, but
+direct access to the cached data is available via `get*` methods.
 
-### Reading from Cache
-
-```ts
+```ts twoslash
+// [!include ~/snippets/token.ts]
+// ---cut---
 // Check if a value is cached without triggering a network request
 const cachedBalance = await token.cache.getRead("balanceOf", {
-  account: userAddress,
+  account: "0x...",
 });
 
 if (cachedBalance !== undefined) {
@@ -241,236 +277,50 @@ if (cachedBalance !== undefined) {
 
 // Get cached events
 const cachedEvents = await token.cache.getEvents("Transfer", {
-  fromBlock: 18_000_000n,
-  toBlock: 18_100_000n,
+  fromBlock: 100n,
+  toBlock: 200n,
 });
-```
-
-### Writing to Cache
-
-```ts
-// Directly set cache values
-await token.cache.setRead(
-  { fn: "balanceOf", args: { account: userAddress } },
-  BigInt(1000e18),
-);
-
-// Set multiple values
-await Promise.all([
-  token.cache.setRead({ fn: "name" }, "My Token"),
-  token.cache.setRead({ fn: "symbol" }, "MTK"),
-  token.cache.setRead({ fn: "decimals" }, 18),
-]);
 ```
 
 ## Cache Sharing and Isolation
 
-### Shared Cache Across Contracts
+### Shared Cache Across Clients
 
-All Drift contracts share the same cache instance by default:
+Drift's cache is shared across all contract instances created from the same
+`Drift` client. This means any cache operations (reads, invalidations, etc.)
+performed on the `Drift` client or any of its contract instances will
+automatically apply to all other instances created from that client.
 
-```ts
-const drift = createDrift({ rpcUrl: "..." });
+```ts twoslash filename="shared-cache.ts"
+import { createDrift, erc20 } from "@delvtech/drift";
+// ---cut---
+const drift = createDrift();
+const tokenA = drift.contract({ abi: erc20.abi, address: "0xa..." });
+const tokenB = drift.contract({ abi: erc20.abi, address: "0xb..." });
 
-const tokenA = drift.contract({ abi: erc20.abi, address: addressA });
-const tokenB = drift.contract({ abi: erc20.abi, address: addressB });
-
-// These share the same cache
-tokenA.cache === tokenB.cache; // true
+drift.cache.store === tokenA.cache.store; // true
+tokenA.cache.store === tokenB.cache.store; // true
 ```
 
-### Contract-Specific Operations
+### Contract-Specific `clearReads`
 
-Even though the cache is shared, operations are contract-specific:
+The `clearReads` method on a contract instance is scoped to that specific
+contract.
 
-```ts
+```ts twoslash
+// [!include shared-cache.ts]
+// ---cut---
 // This only invalidates reads for tokenA
-tokenA.cache.clearReads();
+await tokenA.cache.clearReads();
 
 // tokenB's cache entries are unaffected
 const tokenBName = await tokenB.read("name"); // Uses cache if available
 ```
 
-## Performance Optimization Patterns
-
-### 1. Batch Cache Invalidation
-
-```ts
-// ❌ Multiple individual invalidations
-token.cache.invalidateRead("balanceOf", { account: user1 });
-token.cache.invalidateRead("balanceOf", { account: user2 });
-token.cache.invalidateRead("balanceOf", { account: user3 });
-
-// ✅ Batch invalidation
-function invalidateUserBalances(users: Address[]) {
-  users.forEach((user) => {
-    token.cache.invalidateRead("balanceOf", { account: user });
-  });
-}
-
-// Or clear all balance calls if many are affected
-token.cache.invalidateReadsMatching("balanceOf");
-```
-
-### 2. Strategic Preloading
-
-```ts
-// Preload commonly accessed data at app startup
-async function initializeTokenCache(token: Contract) {
-  // Preload static data that never changes
-  const [name, symbol, decimals] = await token.multicall({
-    allowFailure: false,
-    calls: [{ fn: "name" }, { fn: "symbol" }, { fn: "decimals" }],
-  });
-
-  // Data is now cached for future use
-}
-```
-
-### 3. Cache-Aware Data Fetching
-
-```ts
-async function getUserData(userAddress: Address) {
-  // Check cache first to avoid unnecessary multicall
-  const cachedBalance = await token.cache.getRead("balanceOf", {
-    account: userAddress,
-  });
-
-  if (cachedBalance !== undefined) {
-    // Use cached data
-    return {
-      balance: cachedBalance,
-      // ... other data
-    };
-  }
-
-  // Fetch all data if balance not cached
-  const [balance, allowances] = await token.multicall({
-    allowFailure: false,
-    calls: [
-      { fn: "balanceOf", args: { account: userAddress } },
-      // ... other calls
-    ],
-  });
-
-  return { balance, allowances };
-}
-```
-
 ## Custom Store Implementation
 
-For persistent caching or custom cache policies, implement a custom store:
+Custom stores allow you to implement your own caching logic, such as using
+localStorage, IndexedDB, or any other storage mechanism.
 
-```ts
-import { type Store } from "@delvtech/drift";
-
-// Example: localStorage-backed cache
-class LocalStorageStore implements Store {
-  private prefix = "drift-cache:";
-
-  get(key: string): unknown {
-    const item = localStorage.getItem(this.prefix + key);
-    return item ? JSON.parse(item) : undefined;
-  }
-
-  set(key: string, value: unknown): void {
-    localStorage.setItem(this.prefix + key, JSON.stringify(value));
-  }
-
-  delete(key: string): void {
-    localStorage.removeItem(this.prefix + key);
-  }
-
-  clear(): void {
-    Object.keys(localStorage)
-      .filter((key) => key.startsWith(this.prefix))
-      .forEach((key) => localStorage.removeItem(key));
-  }
-
-  // Implement other Store interface methods...
-}
-
-const drift = createDrift({
-  rpcUrl: "...",
-  store: new LocalStorageStore(),
-});
-```
-
-## Cache Debugging
-
-### Monitoring Cache Performance
-
-```ts
-// Add hooks to monitor cache hits/misses
-drift.hooks.on("before:read", ({ args }) => {
-  const params = args[0];
-  const cached = drift.cache.getRead(params);
-  console.log(cached ? "CACHE HIT" : "CACHE MISS", params.fn);
-});
-
-drift.hooks.on("after:read", ({ args, result }) => {
-  console.log("Read completed:", args[0].fn, "->", result);
-});
-```
-
-### Cache Inspection
-
-```ts
-// Get all cached read calls for debugging
-function inspectCache(contract: Contract) {
-  // Note: This would require extending the cache interface
-  // to expose internal state for debugging
-  console.log("Cache contents:", contract.cache.debug?.getAll());
-}
-```
-
-## Best Practices
-
-### 1. Invalidate Conservatively
-
-```ts
-// ❌ Over-invalidation hurts performance
-drift.cache.clear(); // Clears everything
-
-// ✅ Invalidate only what's affected
-token.cache.invalidateRead("balanceOf", { account: affectedAddress });
-```
-
-### 2. Use Multicall for Initial Data Loading
-
-```ts
-// ❌ Sequential calls (even if cached, less efficient)
-const name = await token.read("name");
-const symbol = await token.read("symbol");
-const decimals = await token.read("decimals");
-
-// ✅ Batch initial loading
-const [name, symbol, decimals] = await token.multicall({
-  allowFailure: false,
-  calls: [{ fn: "name" }, { fn: "symbol" }, { fn: "decimals" }],
-});
-```
-
-### 3. Strategic Cache Warming
-
-```ts
-// Warm cache for frequently accessed data
-async function warmCache() {
-  await Promise.all([
-    // Load token metadata
-    token.multicall({
-      calls: [{ fn: "name" }, { fn: "symbol" }, { fn: "totalSupply" }],
-    }),
-
-    // Load user-specific data
-    token.read("balanceOf", { account: currentUser }),
-  ]);
-}
-```
-
-## Next Steps
-
-- [**Reading Data**](/guides/reading-data) - Learn how reads interact with cache
-- [**Writing Data**](/guides/writing-data) - Cache invalidation patterns
-- [**Extending Drift**](/advanced/extending-drift) - Custom store implementations
-- [**Testing**](/guides/testing-strategies) - Test cache behavior with mocks
+See [Extending Drift](/advanced/extending-drift#building-custom-stores) for more
+details.

@@ -188,7 +188,7 @@ export class ClientCache<T extends Store = Store> {
   }
 
   /**
-   * Get the key used to store a transaction,
+   * Get the key used to store a transaction.
    */
   async transactionKey({ hash }: GetTransactionParams): Promise<string> {
     return this.#partialTransactionKey({ hash });
