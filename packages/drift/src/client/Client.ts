@@ -219,6 +219,15 @@ export function createClient<
       });
     },
 
+    getEvents({ fromBlock = "earliest", toBlock = "latest", ...restParams }) {
+      const params = { fromBlock, toBlock, ...restParams };
+      return getOrSet({
+        store: this.cache.store,
+        key: this.cache.eventsKey(params),
+        fn: async () => this.adapter.getEvents(params),
+      });
+    },
+
     call(params) {
       return getOrSet({
         store: this.cache.store,
@@ -227,12 +236,20 @@ export function createClient<
       });
     },
 
+    read(params) {
+      return getOrSet({
+        store: this.cache.store,
+        key: this.cache.readKey(params),
+        fn: () => this.adapter.read(params),
+      });
+    },
+
     async multicall({ calls, ...options }) {
       const uncachedCallIndices = new Map<number, number>();
       const unCachedCalls: MulticallCalls = [];
 
       // Check the cache for each call to ensure we only fetch uncached calls.
-      const cachedResults: unknown[] = await Promise.all(
+      const results: unknown[] = await Promise.all(
         calls.map(async (call, i) => {
           let cached: unknown | undefined;
 
@@ -265,7 +282,7 @@ export function createClient<
         }),
       );
 
-      if (!unCachedCalls.length) return cachedResults;
+      if (!unCachedCalls.length) return results;
 
       const fetched = await this.adapter.multicall({
         calls: unCachedCalls,
@@ -274,20 +291,17 @@ export function createClient<
 
       // Merge cached results with fetched results and return in the same order.
       return Promise.all(
-        cachedResults.map(async (cachedResult, i) => {
+        results.map(async (result, i) => {
           // If the value was cached, return it directly.
-          if (cachedResult !== undefined) return cachedResult;
+          if (result !== undefined) return result;
 
           const index = uncachedCallIndices.get(i)!;
           const { abi, address, fn, args, to, data } = unCachedCalls[index]!;
           const fetchedResult = fetched[index]!;
-          let fetchedValue: unknown;
-
-          if (options.allowFailure === false) {
-            fetchedValue = fetchedResult;
-          } else {
-            fetchedValue = (fetchedResult as MulticallCallResult).value;
-          }
+          const fetchedValue =
+            options.allowFailure === false
+              ? fetchedResult
+              : (fetchedResult as MulticallCallResult).value;
 
           // Cache the newly fetched value.
           if (fetchedValue !== undefined) {
@@ -295,8 +309,8 @@ export function createClient<
               await this.cache.preloadCall({
                 to,
                 data,
-                preloadValue: fetchedValue as Bytes,
                 ...options,
+                preloadValue: fetchedValue as Bytes,
               });
             } else {
               await this.cache.preloadRead({
@@ -315,23 +329,6 @@ export function createClient<
           return fetchedResult;
         }),
       );
-    },
-
-    getEvents({ fromBlock = "earliest", toBlock = "latest", ...restParams }) {
-      const params = { fromBlock, toBlock, ...restParams };
-      return getOrSet({
-        store: this.cache.store,
-        key: this.cache.eventsKey(params),
-        fn: async () => this.adapter.getEvents(params),
-      });
-    },
-
-    read(params) {
-      return getOrSet({
-        store: this.cache.store,
-        key: this.cache.readKey(params),
-        fn: () => this.adapter.read(params),
-      });
     },
   };
 

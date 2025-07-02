@@ -3,6 +3,7 @@ import type { Eval, FunctionKey, MaybePromise } from "src/utils/types";
 /**
  * A registry for managing and executing hook handlers. Handlers are executed
  * sequentially in registration order.
+ *
  * @typeParam THooks - An object that maps hook names to their corresponding
  * handler function types. The handler function type should accept a single
  * payload argument.
