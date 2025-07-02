@@ -37,6 +37,7 @@ yarn-error.log*
 # AI
 .github/copilot-instructions.md
 .github/instructions
+GEMINI.md
 
 # OS
 .DS_Store
