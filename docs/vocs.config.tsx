@@ -2,6 +2,7 @@ import manifest from "@delvtech/drift/package.json" with { type: "json" };
 import { defineConfig } from "vocs";
 
 export default defineConfig({
+  basePath: process.env.BASE_PATH,
   rootDir: ".",
   title: "Drift",
   titleTemplate: "%s // Drift",
