@@ -4,7 +4,7 @@ title: Testing Strategies
 
 # Testing Strategies
 
-Drift includes built-in mocking utilities to make testing your smart contract
+Drift includes built-in mocking utilities to make testing your network
 interactions easy and efficient. This allows you to test your application logic
 without making actual network calls.
 
@@ -93,7 +93,7 @@ test("getUserAssetValue returns user's shares converted to assets", async () => 
 - **Easy Setup:** Minimal configuration is required to get started. You can even
   build and test your clients before your contracts are deployed.
 - **Comprehensive Coverage:** Test both success and failure scenarios without
-  needing actual contract deployments.
+  needing actual contract deployments or network access. Ideal for CI/CD.
 - **Deterministic Results:** Mocked responses ensure your tests are predictable
   and repeatable.
 

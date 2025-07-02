@@ -4,9 +4,6 @@ title: Getting Started
 
 # Getting Started
 
-This guide will walk you through the basics of using Drift to interact with your
-smart contracts.
-
 ## Installation
 
 First, install the core Drift library.
@@ -56,9 +53,9 @@ npm install @delvtech/drift-web3
 
 ## Creating a Drift Client
 
-The Drift client is the entry point for all interactions with your smart
-contracts. You can create a client with just an RPC URL, or by using an adapter
-to connect to an existing web3 provider.
+The Drift client is the entry point for all interactions with Ethereum. You can
+create a client with just an RPC URL, or by using an adapter to connect to an
+existing web3 provider.
 
 **With an RPC URL:**
 
@@ -96,7 +93,8 @@ const drift = createDrift({
 
 ## Read Operations
 
-Once you have a Drift client, you can interact with your contracts.
+Once you have a Drift client, you can interact with your contracts using the
+`read` method.
 
 :::code-group
 
@@ -164,7 +162,7 @@ console.log("Transaction hash:", txHash);
 
 ## Contract Instances
 
-You can create contract instances to write your options once and get a
+You can create `Contract` instances to write your options once and get a
 streamlined, type-safe API to re-use across your application.
 
 ```ts twoslash
@@ -184,7 +182,8 @@ const txHash = await token.write("transfer", { to: "0x...", amount: 100n });
 
 ## Fetching Events
 
-Drift provides a simple way to fetch contract events with built-in caching:
+The `getEvents` method provides an intuitive way to fetch contract events with
+built-in caching:
 
 ```ts twoslash
 // [!include ~/snippets/token.ts]
@@ -206,7 +205,7 @@ const transferEvents = await token.getEvents("Transfer", {
 
 ## Deployments
 
-You can deploy new contracts using Drift:
+You can deploy new contracts using the `deploy` method:
 
 ```ts twoslash
 // [!include ~/snippets/drift.ts]
@@ -305,6 +304,6 @@ Now that you understand the basics:
   design
 - [**Reading Data**](/guides/reading-data) - Reading patterns and techniques
 - [**Writing Data**](/guides/writing-data) - Transaction management and batching
-- [**Testing Strategies**](/guides/testing-strategies) - Mock your contracts for
-  testing
+- [**Testing Strategies**](/guides/testing-strategies) - Mock network
+  interactions
 - [**Caching**](/guides/caching) - Deep dive into Drift's caching system

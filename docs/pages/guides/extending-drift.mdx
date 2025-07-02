@@ -119,20 +119,10 @@ drift.hooks.on("before:write", async ({ args: [params] }) => {
   await drift.simulateWrite(params);
 });
 
-// Automatically wait for transaction confirmation and handle errors
-drift.hooks.on("after:write", async ({ args: [params], result }) => {
-  const hash = await result;
-  console.log(`Waiting for ${params.fn} transaction: ${hash}`);
-
-  const receipt = await drift.waitForTransaction({ hash });
-  if (!receipt) {
-    throw new Error(`Timeout waiting for ${params.fn} transaction: ${hash}`);
-  }
-  if (receipt.status !== "success") {
-    throw new Error(`${params.fn} transaction failed: ${hash}`);
-  }
-
-  console.log(`${params.fn} transaction confirmed!`);
+// Automatically clear cached contract state after writes
+drift.hooks.on("after:write", ({ args: [params] }) => {
+  console.log(`Clearing cache for ${params.address}`);
+  drift.cache.invalidateReadsMatching({ address: params.address });
 });
 ```
 
@@ -153,16 +143,16 @@ drift.hooks.on("before:read", ({ args: [params] }) => {
 });
 
 drift.hooks.on("after:read", ({ args: [params] }) => {
+  const now = performance.now();
   const key = `${params.address}-${params.fn}`;
   const startTime = timings.get(key);
 
   if (startTime) {
-    const duration = performance.now() - startTime;
     timings.delete(key);
     analytics.track("ContractRead", {
       function: params.fn,
       address: params.address,
-      duration,
+      duration: now - startTime,
     });
   }
 });
@@ -211,9 +201,15 @@ drift.hooks.on("after:write", async ({ args: [params], result }) => {
     const hash = await result;
     const receipt = await drift.waitForTransaction({ hash });
 
-    if (receipt?.status !== "success") {
-      // Enhanced error context
-      const error = new Error(`Transaction failed: ${params.fn}`) as any;
+    // Enhanced error context
+    if (!receipt) {
+      const error: any = new Error(`Timeout waiting transaction: ${params.fn}`);
+      error.hash = hash;
+      error.params = params;
+      throw error;
+    }
+    if (receipt.status !== "success") {
+      const error: any = new Error(`Transaction failed: ${params.fn}`);
       error.hash = hash;
       error.params = params;
       error.receipt = receipt;
@@ -227,8 +223,37 @@ drift.hooks.on("after:write", async ({ args: [params], result }) => {
 });
 ```
 
-### Available Hook Events
+### Available Hooks
 
-Drift clients provide type-safe `before:<method>` and `after:<method>` hooks for
-**all** methods and function properties on the `Adapter` it uses, including
-custom methods.
+Drift clients use a
+[`Proxy`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
+to provide type-safe `before:<fn>` and `after:<fn>` hooks for **_all_** methods
+and function properties on the `Adapter` it uses, including custom functions not
+already defined in the Drift API.
+
+```ts twoslash
+// @noErrors
+import { type Address, createDrift, DefaultAdapter } from "@delvtech/drift";
+
+class CustomAdapter extends DefaultAdapter {
+  async customMethod(
+    account: Address,
+    amount: bigint,
+  ): Promise<{ success: boolean; message: string }> {
+    // Custom logic...
+  }
+}
+
+const drift = createDrift({
+  adapter: new CustomAdapter(),
+});
+
+// Hooks for all Adapter and Client methods/function props
+drift.hooks.on("before:getEvents", ({ args, resolve, setArgs }) => {});
+drift.hooks.on("after:getEvents", ({ args, result, setResult }) => {});
+// ...
+
+// Plus, type-safe hooks for custom methods/function props
+drift.hooks.on("before:customMethod", ({ args, resolve, setArgs }) => {});
+drift.hooks.on("after:customMethod", async ({ args, result, setResult }) => {});
+```

@@ -5,8 +5,9 @@
   - [Installing Dependencies](#installing-dependencies)
   - [Working in a Monorepo](#working-in-a-monorepo)
 - [Testing](#testing)
-- [Branch Naming](#branch-naming)
-- [Creating a release](#creating-a-release)
+- [Maintainer Guidance](#maintainer-guidance)
+  - [Branch Naming](#branch-naming)
+  - [Creating a release](#creating-a-release)
 
 ## Getting Started
 
@@ -84,7 +85,9 @@ yarn test
 yarn workspace <package-name> test
 ```
 
-## Branch Naming
+## Maintainer Guidance
+
+### Branch Naming
 
 Use lower-hyphen-case in the following format for branch names:
 
@@ -108,7 +111,7 @@ ryangoree/chore/fix-comment-typo
 ryangoree/chore/update-readme-examples
 ```
 
-## Creating a release
+### Creating a release
 
 This repo uses [changesets](https://github.com/changesets/changesets) to manage
 versioning and changelogs. This means you shouldn't need to manually change any

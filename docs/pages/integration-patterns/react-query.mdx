@@ -14,10 +14,10 @@ When using React Query directly with a web3 library, you face several
 challenges:
 
 1. **Boilerplate for each call**: You need a separate hook and unique query key
-   for each contract call
+   for each network call.
 2. **Composition complexity**: When creating hooks that depend on multiple
-   contract calls, you're forced to choose between cache efficiency and clean
-   APIs
+   network calls, you're forced to choose between cache efficiency and clean
+   APIs.
 
 ### The Composition Problem
 
@@ -46,10 +46,14 @@ export function useAssetBalance(account: string, vault: string) {
   });
 
   // You must choose between:
-  // - Returning incomplete query state (losing loading/error info)
-  return { data: assetBalance.data, status: assetBalance.status };
 
-  // - Or manually merging complex state from multiple queries
+  // A. Returning incomplete query state (losing full loading/error info)
+  return {
+    data: assetBalance.data,
+    status: assetBalance.status,
+  };
+
+  // B. Manually merging complex state from multiple queries
   return {
     data: assetBalance.data,
     isLoading: shareBalance.isLoading || assetBalance.isLoading,
@@ -76,10 +80,11 @@ export function useAssetBalance(account: string, vault: string) {
       const vaultContract = new Contract(vault, vaultAbi, provider);
 
       // Direct calls bypass React Query cache for individual operations
+      // This means redundant calls if balanceOf is used elsewhere!
       const shares = await vaultContract.balanceOf(account); // [!code hl:2]
       const assets = await vaultContract.convertToAssets(shares);
+
       return assets;
-      // This means redundant calls if balanceOf is used elsewhere!
     },
   });
 }
@@ -104,16 +109,21 @@ export function useAssetBalance(account: string, vault: string) {
       const vaultContract = new Contract(vault, vaultAbi, provider);
 
       // Manually check cache for each call
-      let shares = queryClient.getQueryData(["shareBalance", account, vault]); // [!code hl:5]
+      const sharesKey = ["shareBalance", account, vault]; // Hope this is right! // [!code hl:6]
+      let shares = queryClient.getQueryData(sharesKey);
       if (!shares) {
         shares = await vaultContract.balanceOf(account);
-        queryClient.setQueryData(["shareBalance", account, vault], shares);
+        queryClient.setQueryData(sharesKey, shares);
       }
+
       // ... more cache management complexity
     },
   });
 }
 ```
+
+The complexity grows with each additional call, leading to maintenance headaches
+and potential performance issues.
 
 ## How Drift Solves This
 

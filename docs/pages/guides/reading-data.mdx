@@ -4,13 +4,13 @@ title: Reading Data
 
 # Reading Data
 
-Drift provides multiple ways to read data from smart contracts, each optimized
+Drift provides multiple ways to read data from the blockchain, each optimized
 for different use cases. All read operations benefit from automatic caching to
 reduce redundant network requests.
 
 ## Basic Reads
 
-The simplest way to read contract data is using the `read` method:
+The simplest way to read data is using the `read` method:
 
 :::code-group
 
@@ -18,10 +18,7 @@ The simplest way to read contract data is using the `read` method:
 import { erc20 } from "@delvtech/drift";
 import { drift } from "./drift";
 
-// --- Using the client directly ---
-
-const currentBlockNumber = await drift.getBlockNumber();
-
+// Using the client directly
 const balance = await drift.read({
   abi: erc20.abi,
   address: "0x...",
@@ -29,8 +26,7 @@ const balance = await drift.read({
   args: { account: "0x..." },
 });
 
-// --- Using a contract instance ---
-
+// Using a contract instance
 const token = drift.contract({
   abi: erc20.abi,
   address: "0x...",
@@ -240,9 +236,9 @@ const name = decodeFunctionReturn({
 
 ## Reading at Specific Blocks
 
-All read methods accept a `block` option to specify the block number or tag
-for the read operation. This allows you to query historical data or use block
-tags like `earliest`, `safe`, or `pending`.
+All read methods accept a `block` option to specify the block number or tag for
+the read operation. This allows you to query historical data or use block tags
+like `earliest`, `safe`, or `pending`.
 
 ```ts twoslash
 // [!include ~/snippets/token.ts]

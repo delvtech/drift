@@ -11,12 +11,14 @@
   "dependencies": {
     "@delvtech/drift": "^0.10.1",
     "@delvtech/drift-viem": "^0.10.1",
+    "@delvtech/drift-web3": "^0.10.1",
     "@tanstack/react-query": "^5.81.5",
     "ethers": "^6.14.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "viem": "^2.31.6",
-    "vocs": "^1.0.12"
+    "vocs": "^1.0.12",
+    "web3": "^4.16.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.4",

@@ -5,10 +5,10 @@ title: Building Reusable Protocol SDKs
 # Building Reusable Protocol SDKs
 
 One of the powerful patterns that Drift enables is the creation of reusable,
-library-agnostic SDKs for your smart contracts. This allows you to
-encapsulate your contract logic into a clean, reusable client that can be
-used across different applications and environments, without being tied to a
-specific web3 library or state management solution.
+library-agnostic SDKs for your smart contracts. This allows you to encapsulate
+your contract logic into a clean, reusable client that can be used across
+different applications and environments, without being tied to a specific web3
+library or state management solution.
 
 ## Example: A Vault Client
 
@@ -71,10 +71,10 @@ export const vaultAbi = erc4626.abi;
 
 :::
 
-### 2. Extend to Create a Read-Write Client
+### 2. Create a Read-Write Client
 
-Next, we create a `ReadWriteVault` class that extends `ReadVault` to add write
-operations using Drift's `ReadWriteContract` abstraction.
+Next, we create a `ReadWriteVault` class that extends the `ReadVault` to add
+write operations using Drift's `ReadWriteContract` abstraction.
 
 :::code-group
 
@@ -144,52 +144,82 @@ supported by Drift.
 
 :::code-group
 
-```ts twoslash [example.ts]
+```ts twoslash [viem]
 // @filename: vault-sdk.d.ts
-declare module "vault-sdk" {
-  import type { Address, Drift, ReadContract, erc4626 } from "@delvtech/drift";
-  /** A read-only Vault client */
-  export class ReadVault {
-    contract: ReadContract<typeof erc4626.abi>;
-    constructor(address: Address, drift?: Drift);
-    getBalance(account: Address): Promise<bigint>;
-    getAssetValue(account: Address): Promise<bigint>;
-  }
-}
+// [!include ~/snippets/vault-sdk.d.ts]
 // @filename: app.ts
-// ---cut---
-import { ReadVault } from "vault-sdk";
-import { drift } from "./clients";
-
-const vault = new ReadVault("0x...", drift);
-const assetValue = await vault.getAssetValue("0x...");
-```
-
-```ts twoslash [clients.ts] filename="clients.ts"
-// @filename: clients.ts
 // ---cut---
 import { createDrift } from "@delvtech/drift";
 import { viemAdapter } from "@delvtech/drift-viem";
 import { createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
+import { ReadVault } from "vault-sdk";
 
-export const publicClient = createPublicClient({
+const publicClient = createPublicClient({
   chain: mainnet,
-  transport: http(),
+  transport: http(process.env.RPC_URL),
 });
 
-export const drift = createDrift({
+const drift = createDrift({
   adapter: viemAdapter({ publicClient }),
 });
+
+const vault = new ReadVault("0x...", drift);
+const assetValue = await vault.getAssetValue("0x...");
+
+console.log(`Asset value: ${assetValue}`);
+```
+
+```ts twoslash [ethers]
+// @filename: vault-sdk.d.ts
+// [!include ~/snippets/vault-sdk.d.ts]
+// @filename: app.ts
+// ---cut---
+import { createDrift } from "@delvtech/drift";
+import { ethersAdapter } from "@delvtech/drift-ethers";
+import { getDefaultProvider } from "ethers";
+import { ReadVault } from "vault-sdk";
+
+const provider = getDefaultProvider(process.env.RPC_URL);
+
+const drift = createDrift({
+  adapter: ethersAdapter({ provider }),
+});
+
+const vault = new ReadVault("0x...", drift);
+const assetValue = await vault.getAssetValue("0x...");
+
+console.log(`Asset value: ${assetValue}`);
+```
+
+```ts twoslash [web3.js (legacy)]
+// @filename: vault-sdk.d.ts
+// [!include ~/snippets/vault-sdk.d.ts]
+// @filename: app.ts
+// ---cut---
+import { createDrift } from "@delvtech/drift";
+import { Web3Adapter } from "@delvtech/drift-web3";
+import { ReadVault } from "vault-sdk";
+import { Web3 } from "web3";
+
+const web3 = new Web3(process.env.RPC_URL);
+
+const drift = createDrift({
+  adapter: new Web3Adapter(web3),
+});
+
+const vault = new ReadVault("0x...", drift);
+const assetValue = await vault.getAssetValue("0x...");
+
+console.log(`Asset value: ${assetValue}`);
 ```
 
 :::
 
 ### Benefits of This Architecture
 
-- **Reusability:** Write your business logic once and reuse it across
-  different applications and environments.
+- **Reusability:** Write your business logic once and reuse it across different
+  applications and environments.
 - **Simplicity:** Your application code becomes cleaner and more focused on
   business logic.
-- **Testability:** This pattern is easy to test using Drift's mocking
-  utilities.
+- **Testability:** This pattern is easy to test using Drift's mocking utilities.
