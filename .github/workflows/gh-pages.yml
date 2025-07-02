@@ -33,7 +33,7 @@ jobs:
         run: yarn --frozen-lockfile
 
       - name: Build Packages
-        run: yarn build:packages
+        run: yarn build
 
       - name: Build Docs
         run: yarn workspace docs build
