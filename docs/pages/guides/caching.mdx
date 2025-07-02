@@ -134,9 +134,8 @@ await token.write(
   {
     onMined: (receipt) => {
       if (receipt?.status === "success") {
-        // Invalidate affected balances
-        token.cache.invalidateRead("balanceOf", { account: senderAddress });
-        token.cache.invalidateRead("balanceOf", { account: recipientAddress });
+        // Clear cached reads for the token
+        token.cache.clearReads();
       }
     },
   },
@@ -241,7 +240,7 @@ await Promise.all(
 // [!include ~/snippets/token.ts]
 // ---cut---
 // @noErrors
-// Preload empty events to avoid unnecessary queries
+// Preload events to avoid unnecessary queries
 await token.cache.preloadEvents({
   event: "Transfer",
   value: [...], // Empty array or actual events
@@ -304,8 +303,9 @@ tokenA.cache.store === tokenB.cache.store; // true
 
 ### Contract-Specific `clearReads`
 
-The `clearReads` method on a contract instance is scoped to that specific
-contract.
+When called on a Drift client, the `clearReads` method will clear all cached
+reads, but when called on a contract instance it will only clear reads
+associated with that specific contract.
 
 ```ts twoslash
 // [!include shared-cache.ts]

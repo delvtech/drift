@@ -180,8 +180,8 @@ const txHash = await token.write(
   "transfer",
   { to: "0x..", amount: BigInt(100e18) },
   {
+    // [!code focus:15]
     onMined: (receipt) => {
-      // [!code focus:15]
       if (receipt?.status === "success") {
         console.log("Transfer completed!");
 
@@ -328,8 +328,8 @@ token.write(
   "transfer",
   { to, amount },
   {
+    // [!code focus:14]
     onMined: async (receipt) => {
-      // [!code focus:14]
       // Precise - invalidate specific entries
       token.cache.invalidateRead("balanceOf", { account: from });
       token.cache.invalidateRead("balanceOf", { account: to });
