@@ -10,11 +10,10 @@ export default defineConfig({
     "Effortless Ethereum Development Across Web3 Libraries with caching, hooks, and mocks.",
   aiCta: {
     query() {
-      let msg = `Research and analyze this page: ${window.location} so I can ask you `;
-      msg += "questions about it. Once you have read it, prompt me with any ";
-      msg += "questions you have. Do not post content from the page in your ";
-      msg += "response. Any of my follow up questions must reference the site ";
-      msg += "I gave you.";
+      let msg = `Research and analyze this page: ${window.location} so I can `;
+      msg += "ask you questions about it. Use the information on the site to ";
+      msg += "answer my questions. If you don't know the answer, say 'I don't ";
+      msg += "know'.";
       return msg;
     },
   },
