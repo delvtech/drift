@@ -1,5 +1,17 @@
 # @delvtech/drift
 
+## 0.10.2
+
+### Patch Changes
+
+- f65f915: Renamed `abiFn` to `abiEntry` in the following return objects for consistency:
+  - `prepareDeployData`
+  - `prepareFunctionData`
+  - `prepareFunctionReturn`
+- d426510: Added `NoInfer` to the return type of `multicall` to avoid widening the inferred args type when the return value is destructured.
+- 1fe3b74: Added an `onMinedTimeout` option to `WriteOptions` to modify the default timeout for the awaited transaction receipt. If the timeout is reached, the receipt with be `undefined`.
+- 47c5bc4: Removed block overriding in `Contract.read` when provided a block earlier than the contract's `epochBlock`. If the contract was constructed with an `epochBlock`, it used to overwrite the `block` option passed to `read` to ensure it didn't read from a block where there was no data, but this can misleading by implying that there was data where there wasn't. So, `epochBlock` now only affects the behavior of event queries.
+
 ## 0.10.1
 
 ### Patch Changes
