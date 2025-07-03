@@ -30,7 +30,7 @@ export function prepareDeployData<TAbi extends Abi>({
       value: args,
     });
     return {
-      abiFn: abiEntry,
+      abiEntry,
       data: AbiConstructor.encode(abiEntry, { args: params as any, bytecode }),
     };
   } catch (e) {

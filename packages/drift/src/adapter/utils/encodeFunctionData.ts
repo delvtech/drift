@@ -31,7 +31,7 @@ export function prepareFunctionData<
       value: args,
     });
     return {
-      abiFn: abiEntry,
+      abiEntry,
       data: AbiFunction.encodeData(abiEntry, params),
     };
   } catch (e) {

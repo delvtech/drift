@@ -24,10 +24,10 @@ export async function read<
     block,
   }: ReadParams<TAbi, TFunctionName>,
 ): Promise<FunctionReturn<TAbi, TFunctionName>> {
-  const { data, abiFn } = prepareFunctionData({ abi, fn, args });
+  const { abiEntry, data } = prepareFunctionData({ abi, fn, args });
   const returnData = await adapter.call({ to: address, data, block });
   return adapter.decodeFunctionReturn({
-    abi: [abiFn] as Abi,
+    abi: [abiEntry] as Abi,
     data: returnData,
     fn,
   });

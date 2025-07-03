@@ -68,15 +68,15 @@ export type PreparedCall<TCall = PrepareCallParams> = Eval<
  * @example
  * ```ts
  * const approveCall = prepareCall({
- *   address: "0xabc123...",
  *   abi: erc20.abi,
+ *   address: "0x123...",
  *   fn: "approve",
  *   args: { amount: 123n, spender: "0x..." },
  * });
  * // -> {
- * //   to: "0xabc123...",
+ * //   to: "0x123...",
  * //   data: "0x...",
- * //   abiFn: { type: "function", name: "approve", ... },
+ * //   abiEntry: { type: "function", name: "approve", ... },
  * // }}
  *
  * const bytecodeCall = prepareCall({
@@ -107,21 +107,14 @@ export function prepareCall<TCall>({
   : never): PreparedCall<TCall> {
   // ABI function call
   if (abi && fn) {
-    const { abiFn, data } = prepareFunctionData({ abi, fn, args });
-    return {
-      to,
-      data,
-      abiEntry: abiFn,
-    } as PreparedCall as PreparedCall<TCall>;
+    const { abiEntry, data } = prepareFunctionData({ abi, fn, args });
+    return { to, data, abiEntry } as PreparedCall as PreparedCall<TCall>;
   }
 
   // ABI deploy call
   if (abi && bytecode) {
-    const { abiFn, data } = prepareDeployData({ abi, bytecode, args });
-    return {
-      data,
-      abiEntry: abiFn,
-    } as PreparedCall as PreparedCall<TCall>;
+    const { abiEntry, data } = prepareDeployData({ abi, bytecode, args });
+    return { data, abiEntry } as PreparedCall as PreparedCall<TCall>;
   }
 
   // Bytecode call
@@ -132,8 +125,5 @@ export function prepareCall<TCall>({
   }
 
   // Encoded call
-  return {
-    to,
-    data,
-  } as PreparedCall as PreparedCall<TCall>;
+  return { to, data } as PreparedCall as PreparedCall<TCall>;
 }

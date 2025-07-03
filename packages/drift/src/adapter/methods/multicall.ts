@@ -23,7 +23,7 @@ export async function multicall<
     ...options
   }: MulticallParams<TCalls, TAllowFailure>,
 ): Promise<MulticallReturn<TCalls, TAllowFailure>> {
-  const abiFnMap = new Map<number, AbiEntry<Abi, "function">>();
+  const abiEntryMap = new Map<number, AbiEntry<Abi, "function">>();
 
   const results = await adapter.simulateWrite({
     abi: IMulticall3.abi,
@@ -32,7 +32,7 @@ export async function multicall<
     args: {
       calls: calls.map((call, i) => {
         const { to, data, abiEntry } = prepareCall(call);
-        if (abiEntry) abiFnMap.set(i, abiEntry);
+        if (abiEntry) abiEntryMap.set(i, abiEntry);
         return {
           target: to,
           callData: data || "0x",
@@ -59,12 +59,12 @@ export async function multicall<
 
     let value: unknown = returnData;
 
-    const abiFn = abiFnMap.get(i);
-    if (abiFn)
+    const abiEntry = abiEntryMap.get(i);
+    if (abiEntry)
       value = adapter.decodeFunctionReturn({
-        abi: [abiFn],
+        abi: [abiEntry],
         data: returnData,
-        fn: abiFn.name,
+        fn: abiEntry.name,
       });
 
     return allowFailure === false ? value : { success, value };

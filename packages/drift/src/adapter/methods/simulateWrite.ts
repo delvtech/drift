@@ -25,7 +25,7 @@ export async function simulateWrite<
     ...options
   }: SimulateWriteParams<TAbi, TFunctionName>,
 ): Promise<FunctionReturn<TAbi, TFunctionName>> {
-  const { abiFn, data } = prepareFunctionData({ abi, fn, args });
+  const { abiEntry, data } = prepareFunctionData({ abi, fn, args });
   const result = await adapter.call({
     data,
     from: from ?? (await adapter.getSignerAddress?.().catch(() => undefined)),
@@ -33,7 +33,7 @@ export async function simulateWrite<
     ...options,
   });
   return adapter.decodeFunctionReturn({
-    abi: [abiFn] as Abi,
+    abi: [abiEntry] as Abi,
     data: result,
     fn,
   });
