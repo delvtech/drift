@@ -9,8 +9,8 @@ export default defineConfig({
   description:
     "Effortless Ethereum Development Across Web3 Libraries with caching, hooks, and mocks.",
   aiCta: {
-    query({ location }) {
-      let msg = `Research and analyze this page: ${location} so I can ask you `;
+    query() {
+      let msg = `Research and analyze this page: ${window.location} so I can ask you `;
       msg += "questions about it. Once you have read it, prompt me with any ";
       msg += "questions you have. Do not post content from the page in your ";
       msg += "response. Any of my follow up questions must reference the site ";
