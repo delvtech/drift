@@ -2,14 +2,24 @@ import manifest from "@delvtech/drift/package.json" with { type: "json" };
 import { defineConfig } from "vocs";
 
 export default defineConfig({
-  basePath: process.env.BASE_PATH,
   rootDir: ".",
+  basePath: process.env.BASE_PATH,
   title: "Drift",
   titleTemplate: "%s // Drift",
   description:
     "Effortless Ethereum Development Across Web3 Libraries with caching, hooks, and mocks.",
+  aiCta: {
+    query({ location }) {
+      let msg = `Research and analyze this page: ${location} so I can ask you `;
+      msg += "questions about it. Once you have read it, prompt me with any ";
+      msg += "questions you have. Do not post content from the page in your ";
+      msg += "response. Any of my follow up questions must reference the site ";
+      msg += "I gave you.";
+      return msg;
+    },
+  },
   editLink: {
-    pattern: "https://github.com/delvtech/drift/edit/main/site/pages/:path",
+    pattern: "https://github.com/delvtech/drift/edit/main/docs/pages/:path",
     text: "Edit this page",
   },
   topNav: [
