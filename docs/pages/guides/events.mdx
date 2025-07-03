@@ -57,7 +57,8 @@ const userTransfers = await token.getEvents("Transfer", {
 
 ## Block Range Queries
 
-Control the block range for event queries using `fromBlock` and `toBlock`:
+By default, event queries fetch events from `"earliest"` to `"latest"` blocks.
+This can be customized using the `fromBlock` and `toBlock` options:
 
 ```ts twoslash
 // [!include ~/snippets/token.ts]
@@ -243,32 +244,7 @@ export async function getUserTokenHistory(
 
 ## Performance Tips
 
-### 1. Use Appropriate Block Ranges
-
-Depending on your RPC provider, querying too large a block range can be slow or
-even fail. Use reasonable ranges and consider pagination:
-
-```ts twoslash
-// @filename: bad.ts
-// [!include ~/snippets/token.ts]
-// ---cut---
-// ⚠️ Defaults to "earliest" to "latest" block range
-const events = await token.getEvents("Transfer");
-
-// ---cut-start---
-// @filename: good.ts
-// [!include ~/snippets/token.ts]
-declare const startBlock: bigint;
-// ---cut-end---
-// ✅ Use reasonable ranges and pagination
-const BLOCKS_PER_QUERY = 10_000n;
-const events = await token.getEvents("Transfer", {
-  fromBlock: startBlock, // [!code hl:2]
-  toBlock: startBlock + BLOCKS_PER_QUERY,
-});
-```
-
-### 2. Filter at the Source
+### 1. Filter at the Source
 
 ```ts twoslash
 // @filename: bad.ts
@@ -288,7 +264,32 @@ const userEvents = await token.getEvents("Transfer", {
 });
 ```
 
-### 3. Leverage Contract Instances with an `epochBlock`
+### 2. Use Appropriate Block Ranges
+
+Depending on your RPC provider, querying too large a block range can be slow or
+even fail. Use reasonable ranges and consider pagination:
+
+```ts twoslash
+// @filename: bad.ts
+// [!include ~/snippets/token.ts]
+// ---cut---
+// ⚠️ Defaults to "earliest" to "latest" block range
+const events = await token.getEvents("Transfer");
+
+// ---cut-start---
+// @filename: good.ts
+// [!include ~/snippets/token.ts]
+declare const currentBlock: bigint;
+// ---cut-end---
+// ✅ Use reasonable ranges and pagination
+const BLOCKS_PER_QUERY = 10_000n;
+const events = await token.getEvents("Transfer", {
+  fromBlock: currentBlock - BLOCKS_PER_QUERY, // [!code hl:2]
+  toBlock: currentBlock,
+});
+```
+
+### 3. Leverage `epochBlock` for Contract Instances
 
 The `epochBlock` option on contract instances automatically limits how far back
 event queries can go, preventing unnecessarily large queries without requiring
@@ -300,13 +301,14 @@ contract's deployment block.
 // [!include ~/snippets/drift.ts]
 import { erc20 } from "@delvtech/drift";
 // ---cut---
-// ❌ Without epochBlock
-const approvals = await drift.getEvents({
+// ⚠️ Without epochBlock
+const token = drift.contract({
   abi: erc20.abi,
   address: "0x...",
-  event: "Transfer",
-  // Missing fromBlock - queries from the earliest block! // [!code hl]
 });
+
+// Missing fromBlock - queries from the earliest block
+const transfers = await token.getEvents("Transfer");
 
 // ---cut-start---
 // @filename: with-epoch.ts
