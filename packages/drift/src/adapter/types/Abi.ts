@@ -1,11 +1,11 @@
 import type {
+  Abi as _Abi,
   AbiItemType,
   AbiParameter,
   AbiParameterKind,
-  AbiParameterToPrimitiveType,
   AbiParametersToPrimitiveTypes,
+  AbiParameterToPrimitiveType,
   AbiStateMutability,
-  Abi as _Abi,
 } from "abitype";
 import type {
   EmptyObject,
@@ -162,7 +162,7 @@ export type AbiParameters<
   TName extends AbiEntryName<TAbi, TItemType> = AbiEntryName<TAbi, TItemType>,
   TParameterKind extends AbiParameterKind = AbiParameterKind,
 > = Abi extends TAbi
-  ? readonly AbiParameter[] | []
+  ? AbiParameter[]
   : AbiEntry<TAbi, TItemType, TName> extends infer TAbiEntry
     ? TAbiEntry extends TAbiEntry
       ? TParameterKind extends keyof TAbiEntry
