@@ -185,9 +185,8 @@ const txHash = await token.write(
       if (receipt?.status === "success") {
         console.log("Transfer completed!");
 
-        // Invalidate affected cache entries
-        token.cache.invalidateRead("balanceOf", { account: "0x..." });
-        token.cache.invalidateRead("balanceOf", { account: "0x..." });
+        // Clear cached reads for this token
+        token.cache.clearReads();
 
         // Trigger UI updates, analytics, etc.
         analytics.track("TokenTransfer", {
