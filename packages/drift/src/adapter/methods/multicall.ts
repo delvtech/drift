@@ -22,7 +22,7 @@ export async function multicall<
     allowFailure = true as TAllowFailure,
     ...options
   }: MulticallParams<TCalls, TAllowFailure>,
-): Promise<MulticallReturn<TCalls, TAllowFailure>> {
+): Promise<NoInfer<MulticallReturn<TCalls, TAllowFailure>>> {
   const abiEntryMap = new Map<number, AbiEntry<Abi, "function">>();
 
   const results = await adapter.simulateWrite({
