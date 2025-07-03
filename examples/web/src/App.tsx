@@ -3,15 +3,10 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useQuery } from "@tanstack/react-query";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { nightOwl } from "react-syntax-highlighter/dist/esm/styles/hljs";
-// import { useAccount } from "wagmi";
-import { useDrift } from "src/drift/viem/useDrift";
 import { useCopy } from "src/hooks/useCopy";
-
-// const daiAddress = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
-// const yearnVault = "0x028eC7330ff87667b6dfb0D94b954c820195336c";
+import { useDrift } from "src/hooks/useDrift";
 
 function App() {
-  // const { address: account } = useAccount();
   const { copy, copied } = useCopy();
   const drift = useDrift();
 
@@ -32,32 +27,6 @@ function App() {
             drift.getChainId(),
             drift.getBlockNumber(),
             drift.getWalletCapabilities?.(),
-
-            // Send a batch of calls via EIP-5792
-            // account
-            //   ? drift.sendCalls?.({
-            //       calls: [
-            //         {
-            //           abi: erc20.abi,
-            //           address: daiAddress,
-            //           fn: "approve",
-            //           args: {
-            //             amount: 1n,
-            //             spender: yearnVault,
-            //           },
-            //         },
-            //         {
-            //           abi: erc4626.abi,
-            //           address: yearnVault,
-            //           fn: "deposit",
-            //           args: {
-            //             assets: 1n,
-            //             receiver: account,
-            //           },
-            //         },
-            //       ],
-            //     })
-            //   : undefined,
           ]);
         }
       : undefined,

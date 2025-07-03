@@ -1,4 +1,4 @@
-import { createDrift, type Store } from "@delvtech/drift";
+import { createDrift, LruStore, type Store } from "@delvtech/drift";
 import { viemAdapter } from "@delvtech/drift-viem";
 import {
   type GetPublicClientParameters,
@@ -6,8 +6,12 @@ import {
   getPublicClient,
   getWalletClient,
 } from "@wagmi/core";
-import { driftStore } from "src/config/drift";
-import { type WagmiConfig, wagmiConfig } from "src/config/wagmi";
+import { type WagmiConfig, wagmiConfig } from "src/lib/wagmi";
+
+export const driftStore = new LruStore({
+  max: 500,
+  ttl: 60_000, // 1 minute TTL to match the queryClient's staleTime
+});
 
 export type GetDriftViemOptions = GetPublicClientParameters<WagmiConfig> &
   GetWalletClientParameters<WagmiConfig> & {

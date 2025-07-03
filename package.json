@@ -31,7 +31,8 @@
     "typescript": "^5.8.3"
   },
   "resolutions": {
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "viem": "^2.31.6"
   },
   "packageManager": "yarn@1.22.21"
 }

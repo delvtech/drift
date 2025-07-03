@@ -13,19 +13,15 @@
   },
   "dependencies": {
     "@delvtech/drift": "^0.10.1",
-    "@delvtech/drift-ethers": "^0.10.1",
     "@delvtech/drift-viem": "^0.10.1",
-    "@delvtech/drift-web3": "^0.10.1",
     "@gud/math": "^1.0.0",
     "@rainbow-me/rainbowkit": "^2.2.8",
     "@tanstack/react-query": "^5.81.2",
-    "ethers": "^6.14.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-syntax-highlighter": "^15.6.1",
-    "viem": "^2.31.4",
-    "wagmi": "^2.15.6",
-    "web3": "^4.16.0"
+    "viem": "^2.31.6",
+    "wagmi": "^2.15.6"
   },
   "devDependencies": {
     "@gud/typescale": "^2.0.1",
