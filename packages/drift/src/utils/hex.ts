@@ -8,6 +8,9 @@ export interface IsHexStringOptions {
   prefix?: boolean;
 }
 
+type ConditionalHexStringType<TOptions extends ToHexStringOptions> =
+  TOptions["prefix"] extends false ? string : `0x${string}`;
+
 /**
  * Checks if a value is a valid hexadecimal string, optionally checking for
  * the '0x' prefix.
@@ -30,10 +33,9 @@ export interface IsHexStringOptions {
 export function isHexString<TOptions extends IsHexStringOptions>(
   value: unknown,
   { prefix = true } = {} as TOptions & IsHexStringOptions,
-): value is TOptions["prefix"] extends false ? string : `0x${string}` {
+): value is ConditionalHexStringType<TOptions> {
   return (
-    typeof value === "string" &&
-    HEX_REGEX.test(prefix === false ? `0x${value}` : value)
+    typeof value === "string" && HEX_REGEX.test(prefix ? value : `0x${value}`)
   );
 }
 
@@ -44,9 +46,6 @@ export interface ToHexStringOptions {
    */
   prefix?: boolean;
 }
-
-type ToHexStringReturn<TOptions extends ToHexStringOptions> =
-  TOptions["prefix"] extends false ? string : `0x${string}`;
 
 /**
  * Converts a value to a hexadecimal string, optionally prefixed with '0x'.
@@ -72,11 +71,11 @@ type ToHexStringReturn<TOptions extends ToHexStringOptions> =
 export function toHexString<TOptions extends ToHexStringOptions>(
   value: string | number | bigint | Uint8Array,
   { prefix = true } = {} as TOptions & ToHexStringOptions,
-): ToHexStringReturn<TOptions> {
+): ConditionalHexStringType<TOptions> {
   const _prefix = prefix === false ? "" : "0x";
 
   if (typeof value === "number" || typeof value === "bigint") {
-    return `${_prefix}${value.toString(16)}` as ToHexStringReturn<TOptions>;
+    return `${_prefix}${value.toString(16)}` as ConditionalHexStringType<TOptions>;
   }
 
   const encoder = new TextEncoder();
@@ -93,5 +92,5 @@ export function toHexString<TOptions extends ToHexStringOptions>(
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 
-  return `${_prefix}${hexChars}` as ToHexStringReturn<TOptions>;
+  return `${_prefix}${hexChars}` as ConditionalHexStringType<TOptions>;
 }
