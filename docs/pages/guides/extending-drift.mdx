@@ -55,16 +55,21 @@ or other storage mechanism, sync or async.
 
 Here's a simplified example of a `localStorage` store:
 
-```ts twoslash
+:::code-group
+
+```ts twoslash [LocalStorageStore.ts]
+// @filename: LocalStorageStore.ts
+// ---cut---
 import { createDrift, type Store } from "@delvtech/drift";
+import { parse, stringify } from "./serde";
 
 class LocalStorageStore implements Store {
   get(key: string) {
     const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : undefined;
+    return item ? parse(item) : undefined;
   }
   set(key: string, value: unknown) {
-    localStorage.setItem(key, JSON.stringify(value));
+    localStorage.setItem(key, stringify(value));
   }
   delete(key: string) {
     localStorage.removeItem(key);
@@ -78,7 +83,7 @@ class LocalStorageStore implements Store {
   entries() {
     return Object.entries(localStorage).map(([key, value]) => [
       key,
-      JSON.parse(value),
+      parse(value),
     ]) as [string, unknown][];
   }
 }
@@ -88,6 +93,36 @@ const drift = createDrift({
   store: new LocalStorageStore(),
 });
 ```
+
+```ts twoslash [serde.ts] filename="serde.ts"
+export function stringify(value: unknown): string {
+  return JSON.stringify(value, (_, v) => {
+    if (typeof v === "bigint") {
+      return `${v}n`; // Append 'n' to indicate bigint
+    }
+    return v;
+  });
+}
+
+export function parse(value: string): unknown {
+  return JSON.parse(value, (_, v) => {
+    if (/^-?\d+n$/.test(v)) {
+      return BigInt(v.slice(0, -1)); // Deserialize bigint
+    }
+    return v;
+  });
+}
+```
+
+:::
+
+:::tip
+
+This simplified example will grow indefinitely as items are added. For
+production use, you should implement a size limit and eviction policy (e.g.,
+LRU) to prevent unbounded growth.
+
+:::
 
 ## Using Hooks for Middleware
 
@@ -176,25 +211,6 @@ Add global error handling and retry capabilities:
 ```ts twoslash
 // [!include ~/snippets/drift.ts]
 // ---cut---
-// Global retry logic for failed reads
-drift.hooks.on("before:read", async ({ args: [params], resolve }) => {
-  const maxRetries = 3;
-  let attempt = 0;
-
-  while (attempt < maxRetries) {
-    try {
-      const result = await drift.read(params);
-      return resolve(result);
-    } catch (error) {
-      attempt++;
-      if (attempt === maxRetries) throw error;
-
-      console.log(`Read attempt ${attempt} failed, retrying...`);
-      await new Promise((r) => setTimeout(r, 1000 * attempt));
-    }
-  }
-});
-
 // Enhanced error reporting
 drift.hooks.on("after:write", async ({ args: [params], result }) => {
   try {
@@ -219,6 +235,27 @@ drift.hooks.on("after:write", async ({ args: [params], result }) => {
     // Log to error tracking service
     console.error("Transaction error:", error);
     throw error;
+  }
+});
+
+// Global retry logic for failed reads
+drift.hooks.on("before:read", async ({ args: [params], resolve }) => {
+  const maxRetries = 3;
+  let attempt = 0;
+
+  while (attempt < maxRetries) {
+    try {
+      const result = await drift.read(params);
+      return resolve(result);
+    } catch (error) {
+      attempt++;
+      if (attempt === maxRetries) throw error;
+
+      console.log(
+        `Read attempt ${attempt + 1} of ${maxRetries} failed, retrying...`,
+      );
+      await new Promise((r) => setTimeout(r, 1000 * attempt));
+    }
   }
 });
 ```
@@ -255,5 +292,5 @@ drift.hooks.on("after:getEvents", ({ args, result, setResult }) => {});
 
 // Plus, type-safe hooks for custom methods/function props
 drift.hooks.on("before:customMethod", ({ args, resolve, setArgs }) => {});
-drift.hooks.on("after:customMethod", async ({ args, result, setResult }) => {});
+drift.hooks.on("after:customMethod", ({ args, result, setResult }) => {});
 ```

@@ -24,7 +24,7 @@ cached result instead of making another network request.
 // First call: hits the network, result is cached
 const balance1 = await token.read("balanceOf", { account: "0x123..." });
 
-// Second call: returns cached value instantly (no network request)
+// Second call: returns cached value (no network request)
 const balance2 = await token.read("balanceOf", { account: "0x123..." });
 
 // Different parameters: triggers new network request
@@ -36,27 +36,6 @@ const historicalBalance = await token.read(
   { account: "0x123..." },
   { block: 100n },
 );
-```
-
-### Cache Keys
-
-Drift generates cache keys based on the arguments passed to the underlying
-adapter. Every cached method includes a corresponding `*Key` method that can be
-used to get the cache key for a specific call:
-
-```ts twoslash
-// [!include ~/snippets/token.ts]
-// ---cut---
-const userBalanceKey = await drift.cache.readKey({
-  abi: erc20.abi,
-  address: "0x...",
-  fn: "balanceOf",
-  args: { account: "0x..." },
-});
-
-const transactionKey = await drift.cache.transactionKey({
-  hash: "0x...",
-});
 ```
 
 ### Multicall and Caching
@@ -179,7 +158,7 @@ await Promise.all([
   token.cache.preloadRead({ fn: "decimals", value: 6 }),
 ]);
 
-// These calls now return instantly without network requests
+// These calls now return without network requests
 const name = await token.read("name");
 const symbol = await token.read("symbol");
 const decimals = await token.read("decimals");
@@ -279,6 +258,27 @@ const cachedEvents = await token.cache.getEvents("Transfer", {
   fromBlock: 100n,
   toBlock: 200n,
 });
+```
+
+## Cache Keys
+
+Drift provides first-class methods for most things you need to do with the
+cache, but for advanced usage, every cached method includes a corresponding
+`*Key` method that can be used to access cache keys directly.
+
+```ts twoslash
+// [!include ~/snippets/token.ts]
+// ---cut---
+const account = "0x123...";
+
+const tokenBalanceKey = await drift.cache.readKey({
+  abi: erc20.abi,
+  address: "0x...",
+  fn: "balanceOf",
+  args: { account },
+});
+
+const ethBalanceKey = await drift.cache.balanceKey({ address: account });
 ```
 
 ## Cache Sharing and Isolation

@@ -169,8 +169,6 @@ export function useShareBalance(account: Address, vault: Address) {
         fn: "balanceOf",
         args: { account },
       });
-      // This call is cached and won't result in a redundant request
-      // if useAssetBalance was already called!
     },
   });
 }
@@ -178,14 +176,11 @@ export function useShareBalance(account: Address, vault: Address) {
 
 ## Key Benefits
 
-- **No composition tradeoffs**: Create hooks that depend on multiple contract
-  calls without sacrificing cache efficiency or clean APIs
-- **Automatic deduplication**: Multiple components calling the same contract
-  methods won't result in redundant network requests
-- **Simplified state management**: Get clean React Query state without manual
-  cache coordination
-- **Performance**: Drift's intelligent caching reduces RPC calls across your
-  entire application
+- **Compose Without Compromise** - Create hooks that depend on multiple contract
+  calls without sacrificing cache efficiency or full query state.
+- **Zero-Configuration Caching** - Drift automatically deduplicates contract
+  calls across your application, eliminating the need to manually manage cache
+  keys for individual operations.
 
 This approach dramatically simplifies your React application architecture while
 maintaining optimal performance.
