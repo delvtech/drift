@@ -119,7 +119,7 @@ export interface TransactionOptions {
   /**
    * Chain ID that this transaction is valid on.
    */
-  chainId?: bigint;
+  chainId?: number;
 }
 
 // https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/schemas/transaction.yaml#L1

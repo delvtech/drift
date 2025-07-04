@@ -411,7 +411,7 @@ function prepareTransactionOptions(
 ) {
   return convert(
     options,
-    (value) => typeof value === "bigint",
+    (value) => typeof value === "bigint" || typeof value === "number",
     (value): HexString => toHexString(value),
   );
 }
