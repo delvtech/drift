@@ -12,6 +12,7 @@ import type {
 } from "src/adapter/types/Adapter";
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
 import type { GetBlockReturn } from "src/adapter/types/Network";
+import { CallBatcher } from "src/client/batching/CallBatcher";
 import { ClientCache } from "src/client/cache/ClientCache";
 import { BlockNotFoundError } from "src/client/errors";
 import type { HookRegistry } from "src/client/hooks/HookRegistry";
@@ -127,6 +128,17 @@ export type ClientOptions<
      * The chain ID to use for the client. Fetched from the adapter by default.
      */
     chainId?: number;
+
+    /**
+     * Whether to enable automatic request batching for calls and reads.
+     * @default true
+     */
+    batch?: boolean;
+
+    /**
+     * The maximum batch size for automatic request batching.
+     */
+    maxBatchSize?: number;
   }
 >;
 
@@ -144,21 +156,28 @@ export function createClient<
     adapter: maybeAdapter,
     store: storeOrOptions,
     chainId,
+    batch = true,
+    maxBatchSize,
     ...adapterOptions
   } = options;
   const interceptor = new MethodInterceptor<TAdapter>();
 
-  // Handle adapter options
+  // Handle adapter options.
   const adapter = (maybeAdapter ||
     new DefaultAdapter(adapterOptions)) as TAdapter;
 
-  // Handle cache options
+  // Handle cache options.
   const isInstance = storeOrOptions && "clear" in storeOrOptions;
   const store = (
     isInstance ? storeOrOptions : new LruStore(storeOrOptions)
   ) as TStore;
 
-  // Prepare client properties
+  // Create batcher for automatic request batching.
+  const callBatcher = batch
+    ? new CallBatcher({ adapter, maxBatchSize })
+    : undefined;
+
+  // Prepare client properties.
   const clientProps: Client<TAdapter, TStore> = {
     ...adapter,
     adapter,
@@ -232,7 +251,7 @@ export function createClient<
       return getOrSet({
         store: this.cache.store,
         key: this.cache.callKey(params),
-        fn: () => this.adapter.call(params),
+        fn: () => callBatcher?.handle(params) ?? this.adapter.call(params),
       });
     },
 
@@ -240,7 +259,7 @@ export function createClient<
       return getOrSet({
         store: this.cache.store,
         key: this.cache.readKey(params),
-        fn: () => this.adapter.read(params),
+        fn: () => callBatcher?.handle(params) ?? this.adapter.read(params),
       });
     },
 
@@ -253,17 +272,17 @@ export function createClient<
         calls.map(async (call, i) => {
           let cached: unknown | undefined;
 
-          if (call.to) {
-            // Check call cache
-            cached = await this.cache.getCall({
-              ...call,
-              ...options,
-            });
-          } else {
+          if (call.abi) {
             // Check read cache
             cached = await this.cache.getRead({
               ...call,
               block: options?.block,
+            });
+          } else {
+            // Check call cache
+            cached = await this.cache.getCall({
+              ...call,
+              ...options,
             });
           }
 
