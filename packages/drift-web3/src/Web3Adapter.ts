@@ -185,7 +185,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
 
   async sendRawTransaction(transaction: Bytes) {
     const tx = await this.web3.eth.sendSignedTransaction(transaction);
-    return normalizePossibleByteArray(tx.transactionHash);
+    return toHexString(tx.transactionHash);
   }
 
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
@@ -463,26 +463,22 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
           value: value?.toString(),
         })
         .on("error", reject)
-        .on("transactionHash", (hash) =>
-          resolve(normalizePossibleByteArray(hash)),
-        );
+        .on("transactionHash", (hash) => resolve(toHexString(hash)));
 
       if (onMined) {
         req.on("receipt", (receipt) => {
           onMined({
-            blockHash: normalizePossibleByteArray(receipt.blockHash),
+            blockHash: toHexString(receipt.blockHash),
             contractAddress: receipt.contractAddress,
             cumulativeGasUsed: BigInt(receipt.cumulativeGasUsed),
             effectiveGasPrice: BigInt(receipt.effectiveGasPrice ?? 0n),
             blockNumber: BigInt(receipt.blockNumber),
             from: receipt.from,
-            logsBloom: normalizePossibleByteArray(receipt.logsBloom),
+            logsBloom: toHexString(receipt.logsBloom),
             status: receipt.status ? "success" : "reverted",
             gasUsed: BigInt(receipt.gasUsed),
             to: receipt.to,
-            transactionHash: normalizePossibleByteArray(
-              receipt.transactionHash,
-            ),
+            transactionHash: toHexString(receipt.transactionHash),
             transactionIndex: BigInt(receipt.transactionIndex),
           });
         });
@@ -561,12 +557,6 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
 
     return { contract, method };
   }
-}
-
-function normalizePossibleByteArray(value: string | Uint8Array) {
-  return typeof value === "string"
-    ? value
-    : `0x${Buffer.from(value).toString("hex")}`;
 }
 
 interface WalletGetCallsStatusReturn {

@@ -225,6 +225,7 @@ export { DriftError, type DriftErrorOptions } from "src/error/DriftError";
 export { type Converted, convert } from "src/utils/convert";
 export {
   HEX_REGEX,
+  hexToString,
   type IsHexStringOptions,
   isHexString,
   type ToHexStringOptions,

@@ -78,12 +78,11 @@ export function toHexString<TOptions extends ToHexStringOptions>(
     return `${_prefix}${value.toString(16)}` as ConditionalHexStringType<TOptions>;
   }
 
-  const encoder = new TextEncoder();
   let bytes: Uint8Array;
 
   if (typeof value === "string") {
     if (isHexString(value, { prefix })) return value;
-    bytes = encoder.encode(value);
+    bytes = getTextEncoder().encode(value);
   } else {
     bytes = value;
   }
@@ -93,4 +92,32 @@ export function toHexString<TOptions extends ToHexStringOptions>(
     .join("");
 
   return `${_prefix}${hexChars}` as ConditionalHexStringType<TOptions>;
+}
+
+/**
+ * Converts a hexadecimal string to a UTF-8 string.
+ * @param hex - The hexadecimal string to convert.
+ * @param options - Options to control the validation of the hex string.
+ */
+export function hexToString(hex: string, options?: IsHexStringOptions): string {
+  if (!isHexString(hex, options)) {
+    throw new Error(`Invalid hex string: ${hex}`);
+  }
+  const bytes = new Uint8Array(
+    hex
+      .replace("0x", "")
+      .match(/.{1,2}/g)
+      ?.map((byte) => parseInt(byte, 16)) || [],
+  );
+  return getTextDecoder().decode(bytes);
+}
+
+let encoder: InstanceType<typeof TextEncoder> | undefined;
+function getTextEncoder() {
+  return encoder || (encoder = new TextEncoder());
+}
+
+let decoder: InstanceType<typeof TextDecoder> | undefined;
+function getTextDecoder() {
+  return decoder || (decoder = new TextDecoder());
 }

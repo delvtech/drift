@@ -7,6 +7,7 @@ import type {
 import { prepareCall } from "src/adapter/utils/prepareCall";
 import { IMulticall3 } from "src/artifacts/IMulticall3";
 import { DriftError } from "src/error/DriftError";
+import { hexToString } from "src/utils/hex";
 
 export const DEFAULT_MULTICALL_ADDRESS =
   "0xcA11bde05977b3631167028862bE2a173976CA11";
@@ -52,7 +53,7 @@ export async function multicall<
         error: new DriftError(
           // Slice off the `0x` prefix and the first 4 bytes (function
           // selector) to get the error message.
-          Buffer.from(returnData.slice(10), "hex").toString(),
+          hexToString(returnData.slice(10)),
         ),
       };
     }
