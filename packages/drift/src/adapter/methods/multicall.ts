@@ -26,23 +26,33 @@ export async function multicall<
 ): Promise<NoInfer<MulticallReturn<TCalls, TAllowFailure>>> {
   const abiEntryMap = new Map<number, AbiEntry<Abi, "function">>();
 
-  const results = await adapter.simulateWrite({
-    abi: IMulticall3.abi,
-    address: multicallAddress,
-    fn: "aggregate3",
-    args: {
-      calls: calls.map((call, i) => {
-        const { to, data, abiEntry } = prepareCall(call);
-        if (abiEntry) abiEntryMap.set(i, abiEntry);
-        return {
-          target: to,
-          callData: data || "0x",
-          allowFailure,
-        };
+  const results = await adapter
+    .call({
+      to: multicallAddress,
+      data: adapter.encodeFunctionData({
+        abi: IMulticall3.abi,
+        fn: "aggregate3",
+        args: {
+          calls: calls.map((call, i) => {
+            const { to, data, abiEntry } = prepareCall(call);
+            if (abiEntry) abiEntryMap.set(i, abiEntry);
+            return {
+              target: to,
+              callData: data || "0x",
+              allowFailure,
+            };
+          }),
+        },
       }),
-    },
-    ...options,
-  });
+      ...options,
+    })
+    .then((data) =>
+      adapter.decodeFunctionReturn({
+        abi: IMulticall3.abi,
+        data,
+        fn: "aggregate3",
+      }),
+    );
 
   return results.map(({ returnData, success }, i) => {
     if (!success) {
@@ -53,7 +63,7 @@ export async function multicall<
         error: new DriftError(
           // Slice off the `0x` prefix and the first 4 bytes (function
           // selector) to get the error message.
-          hexToString(returnData.slice(10)),
+          hexToString(returnData.slice(10), { prefix: false }),
         ),
       };
     }
