@@ -43,6 +43,7 @@
   "scripts": {
     "generate:artifacts": "sh scripts/generateArtifacts.sh",
     "generate:ethereum": "tsx scripts/generateEthereum.ts",
+    "generate:multicall-addresses": "tsx scripts/generateMulticallAddresses.ts",
     "build": "tsup",
     "watch": "tsup --watch",
     "test": "vitest run",

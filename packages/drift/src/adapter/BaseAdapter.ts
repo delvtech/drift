@@ -1,9 +1,6 @@
 import { AbiEncoder } from "src/adapter/AbiEncoder";
 import { deploy } from "src/adapter/methods/deploy";
-import {
-  DEFAULT_MULTICALL_ADDRESS,
-  multicall,
-} from "src/adapter/methods/multicall";
+import { multicall } from "src/adapter/methods/multicall";
 import { read } from "src/adapter/methods/read";
 import { simulateWrite } from "src/adapter/methods/simulateWrite";
 import { write } from "src/adapter/methods/write";
@@ -80,12 +77,12 @@ export abstract class BaseReadAdapter
 
   pollingInterval: number;
   pollingTimeout: number;
-  multicallAddress: Address;
+  multicallAddress: Address | undefined;
 
   constructor({
     pollingInterval = BaseReadAdapter.DEFAULT_POLLING_INTERVAL,
     pollingTimeout = BaseReadAdapter.DEFAULT_TIMEOUT,
-    multicallAddress = DEFAULT_MULTICALL_ADDRESS,
+    multicallAddress,
   }: BaseAdapterOptions = {}) {
     super();
     this.pollingInterval = pollingInterval;

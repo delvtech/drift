@@ -4,13 +4,11 @@ import type {
   MulticallParams,
   MulticallReturn,
 } from "src/adapter/types/Adapter";
+import { getMulticallAddress } from "src/adapter/utils/getMulticallAddress";
 import { prepareCall } from "src/adapter/utils/prepareCall";
 import { IMulticall3 } from "src/artifacts/IMulticall3";
 import { DriftError } from "src/error/DriftError";
 import { hexToString } from "src/utils/hex";
-
-export const DEFAULT_MULTICALL_ADDRESS =
-  "0xcA11bde05977b3631167028862bE2a173976CA11";
 
 export async function multicall<
   TCalls extends readonly unknown[],
@@ -19,12 +17,22 @@ export async function multicall<
   adapter: Adapter,
   {
     calls,
-    multicallAddress = DEFAULT_MULTICALL_ADDRESS,
+    multicallAddress,
     allowFailure = true as TAllowFailure,
     ...options
   }: MulticallParams<TCalls, TAllowFailure>,
 ): Promise<NoInfer<MulticallReturn<TCalls, TAllowFailure>>> {
   const abiEntryMap = new Map<number, AbiEntry<Abi, "function">>();
+
+  if (!multicallAddress) {
+    const chainId = await adapter.getChainId();
+    multicallAddress = getMulticallAddress(chainId);
+    if (!multicallAddress) {
+      throw new DriftError(
+        `No multicall address found for chain ID ${chainId}. Please provide a valid multicall address.`,
+      );
+    }
+  }
 
   const results = await adapter
     .call({

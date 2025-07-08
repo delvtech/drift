@@ -136,6 +136,10 @@ export {
   encodeFunctionReturn,
   prepareFunctionReturn,
 } from "src/adapter/utils/encodeFunctionReturn";
+export {
+  getMulticallAddress,
+  type MulticallChainId,
+} from "src/adapter/utils/getMulticallAddress";
 export { getWalletCallsStatusLabel } from "src/adapter/utils/getWalletCallsStatusLabel";
 export {
   type PrepareCallParams,

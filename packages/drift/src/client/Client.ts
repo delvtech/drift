@@ -12,6 +12,7 @@ import type {
 } from "src/adapter/types/Adapter";
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
 import type { GetBlockReturn } from "src/adapter/types/Network";
+import { getMulticallAddress } from "src/adapter/utils/getMulticallAddress";
 import { CallBatcher } from "src/client/batching/CallBatcher";
 import { ClientCache } from "src/client/cache/ClientCache";
 import { BlockNotFoundError } from "src/client/errors";
@@ -263,7 +264,7 @@ export function createClient<
       });
     },
 
-    async multicall({ calls, ...options }) {
+    async multicall({ calls, multicallAddress, allowFailure, ...callOptions }) {
       const uncachedCallIndices = new Map<number, number>();
       const unCachedCalls: MulticallCalls = [];
 
@@ -276,18 +277,18 @@ export function createClient<
             // Check read cache
             cached = await this.cache.getRead({
               ...call,
-              block: options?.block,
+              block: callOptions?.block,
             });
           } else {
             // Check call cache
             cached = await this.cache.getCall({
               ...call,
-              ...options,
+              ...callOptions,
             });
           }
 
           if (cached !== undefined) {
-            return options.allowFailure === false
+            return allowFailure === false
               ? cached
               : ({
                   success: true,
@@ -303,9 +304,16 @@ export function createClient<
 
       if (!unCachedCalls.length) return results;
 
+      if (!multicallAddress) {
+        const chainId = await this.getChainId();
+        multicallAddress = getMulticallAddress(chainId);
+      }
+
       const fetched = await this.adapter.multicall({
         calls: unCachedCalls,
-        ...options,
+        multicallAddress,
+        allowFailure,
+        ...callOptions,
       });
 
       // Merge cached results with fetched results and return in the same order.
@@ -318,7 +326,7 @@ export function createClient<
           const { abi, address, fn, args, to, data } = unCachedCalls[index]!;
           const fetchedResult = fetched[index]!;
           const fetchedValue =
-            options.allowFailure === false
+            allowFailure === false
               ? fetchedResult
               : (fetchedResult as MulticallCallResult).value;
 
@@ -328,7 +336,7 @@ export function createClient<
               await this.cache.preloadCall({
                 to,
                 data,
-                ...options,
+                ...callOptions,
                 preloadValue: fetchedValue as Bytes,
               });
             } else {
@@ -337,7 +345,7 @@ export function createClient<
                 address,
                 fn,
                 args,
-                block: options?.block,
+                block: callOptions?.block,
                 value: fetchedValue,
               } as ReadParams & {
                 value: unknown;
