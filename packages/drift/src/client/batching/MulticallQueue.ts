@@ -7,6 +7,8 @@ import type {
 } from "src/adapter/types/Adapter";
 import { getMulticallAddress } from "src/adapter/utils/getMulticallAddress";
 import { MicrotaskQueue } from "src/client/batching/MicrotaskQueue";
+import type { ClientCache } from "src/client/cache/ClientCache";
+import { cachedMulticall } from "src/client/utils/cachedMulticall";
 import { stringifyKey } from "src/utils/stringifyKey";
 import type { OneOf } from "src/utils/types";
 
@@ -16,6 +18,7 @@ import type { OneOf } from "src/utils/types";
  */
 export interface MulticallQueueOptions {
   adapter: Adapter;
+  cache: ClientCache;
   getChainId: () => Promise<number>;
   maxBatchSize?: number;
 }
@@ -28,10 +31,15 @@ export class MulticallQueue extends MicrotaskQueue<
   OneOf<CallParams | ReadParams>,
   unknown
 > {
-  constructor({ adapter, getChainId, maxBatchSize }: MulticallQueueOptions) {
+  constructor({
+    adapter,
+    cache,
+    getChainId,
+    maxBatchSize,
+  }: MulticallQueueOptions) {
     super({
       maxBatchSize: maxBatchSize,
-      processFn: async (queue) => {
+      batchFn: async (queue) => {
         // Forward single calls directly to the adapter. This avoids unnecessary
         // overhead from bucketing when there's only one call in the queue.
         if (queue.length === 1) {
@@ -83,17 +91,19 @@ export class MulticallQueue extends MicrotaskQueue<
         // Process buckets.
         return Promise.all(
           CallBuckets.values().map(async ({ calls, callbacks, options }) => {
-            const chainId = await getChainId();
-            const multicallAddress = getMulticallAddress(chainId);
-
             // Forward single calls directly to the adapter.
             if (calls.length === 1) {
               return forwardCalls({ adapter, calls, callbacks, options });
             }
 
             // Batch multiple calls using multicall.
-            return adapter
-              .multicall({ calls, multicallAddress, ...options })
+            const chainId = await getChainId();
+            const multicallAddress = getMulticallAddress(chainId);
+            return cachedMulticall({
+              adapter,
+              cache,
+              params: { calls, multicallAddress, ...options },
+            })
               .then((results) => {
                 for (const [i, result] of results.entries()) {
                   const { resolve, reject } = callbacks[i] || {};

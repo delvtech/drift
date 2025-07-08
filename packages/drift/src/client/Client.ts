@@ -2,14 +2,7 @@ import {
   DefaultAdapter,
   type DefaultAdapterOptions,
 } from "src/adapter/DefaultAdapter";
-import type { Bytes } from "src/adapter/types/Abi";
-import type {
-  Adapter,
-  MulticallCallResult,
-  MulticallCalls,
-  ReadParams,
-  ReadWriteAdapter,
-} from "src/adapter/types/Adapter";
+import type { Adapter, ReadWriteAdapter } from "src/adapter/types/Adapter";
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
 import type { GetBlockReturn } from "src/adapter/types/Network";
 import { getMulticallAddress } from "src/adapter/utils/getMulticallAddress";
@@ -21,6 +14,7 @@ import {
   type MethodHooks,
   MethodInterceptor,
 } from "src/client/hooks/MethodInterceptor";
+import { cachedMulticall } from "src/client/utils/cachedMulticall";
 import { LruStore, type LruStoreOptions } from "src/store/LruStore";
 import type { Store } from "src/store/Store";
 import { getOrSet } from "src/store/utils/getOrSet";
@@ -179,9 +173,12 @@ export function createClient<
     return chainId;
   }
 
+  // Create a cache for storing responses from the adapter.
+  const cache = new ClientCache({ store, namespace: getChainId });
+
   // Create a multicall queue for automatic request aggregation.
   const multicallQueue = batch
-    ? new MulticallQueue({ adapter, getChainId, maxBatchSize })
+    ? new MulticallQueue({ adapter, cache, getChainId, maxBatchSize })
     : undefined;
 
   // Prepare client properties.
@@ -189,10 +186,7 @@ export function createClient<
     ...adapter,
     adapter,
     hooks: interceptor.hooks,
-    cache: new ClientCache({
-      store,
-      namespace: getChainId,
-    }),
+    cache,
 
     isReadWrite(): this is Client<ReadWriteAdapter, TStore> {
       return typeof this.adapter.write === "function";
@@ -252,113 +246,37 @@ export function createClient<
     },
 
     call(params) {
-      return getOrSet({
-        store: this.cache.store,
-        key: this.cache.callKey(params),
-        fn: () => multicallQueue?.submit(params) ?? this.adapter.call(params),
-      });
+      return (
+        multicallQueue?.submit(params) ??
+        getOrSet({
+          store: this.cache.store,
+          key: this.cache.callKey(params),
+          fn: () => this.adapter.call(params),
+        })
+      );
     },
 
     read(params) {
-      return getOrSet({
-        store: this.cache.store,
-        key: this.cache.readKey(params),
-        fn: () => multicallQueue?.submit(params) ?? this.adapter.read(params),
-      });
+      return (
+        multicallQueue?.submit(params) ??
+        getOrSet({
+          store: this.cache.store,
+          key: this.cache.readKey(params),
+          fn: () => this.adapter.read(params),
+        })
+      );
     },
 
-    async multicall({ calls, multicallAddress, allowFailure, ...callOptions }) {
-      const uncachedCallIndices = new Map<number, number>();
-      const unCachedCalls: MulticallCalls = [];
-
-      // Check the cache for each call to ensure we only fetch uncached calls.
-      const results: unknown[] = await Promise.all(
-        calls.map(async (call, i) => {
-          let cached: unknown | undefined;
-
-          if (call.abi) {
-            // Check read cache
-            cached = await this.cache.getRead({
-              ...call,
-              block: callOptions?.block,
-            });
-          } else {
-            // Check call cache
-            cached = await this.cache.getCall({
-              ...call,
-              ...callOptions,
-            });
-          }
-
-          if (cached !== undefined) {
-            return allowFailure === false
-              ? cached
-              : ({
-                  success: true,
-                  value: cached,
-                } satisfies MulticallCallResult);
-          }
-
-          uncachedCallIndices.set(i, unCachedCalls.length);
-          unCachedCalls.push(call);
-          return undefined;
-        }),
-      );
-
-      if (!unCachedCalls.length) return results;
-
+    async multicall({ multicallAddress, ...restParams }) {
       if (!multicallAddress) {
         const chainId = await this.getChainId();
         multicallAddress = getMulticallAddress(chainId);
       }
-
-      const fetched = await this.adapter.multicall({
-        calls: unCachedCalls,
-        multicallAddress,
-        allowFailure,
-        ...callOptions,
+      return cachedMulticall({
+        adapter: this.adapter,
+        cache: this.cache,
+        params: { multicallAddress, ...restParams },
       });
-
-      // Merge cached results with fetched results and return in the same order.
-      return Promise.all(
-        results.map(async (result, i) => {
-          // If the value was cached, return it directly.
-          if (result !== undefined) return result;
-
-          const index = uncachedCallIndices.get(i)!;
-          const { abi, address, fn, args, to, data } = unCachedCalls[index]!;
-          const fetchedResult = fetched[index]!;
-          const fetchedValue =
-            allowFailure === false
-              ? fetchedResult
-              : (fetchedResult as MulticallCallResult).value;
-
-          // Cache the newly fetched value.
-          if (fetchedValue !== undefined) {
-            if (to) {
-              await this.cache.preloadCall({
-                to,
-                data,
-                ...callOptions,
-                preloadValue: fetchedValue as Bytes,
-              });
-            } else {
-              await this.cache.preloadRead({
-                abi,
-                address,
-                fn,
-                args,
-                block: callOptions?.block,
-                value: fetchedValue,
-              } as ReadParams & {
-                value: unknown;
-              });
-            }
-          }
-
-          return fetchedResult;
-        }),
-      );
     },
   };
 

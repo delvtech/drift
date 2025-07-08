@@ -30,7 +30,7 @@ export interface MicrotaskQueueOptions<
    * requests and should return a promise that resolves when all requests in the
    * queue have been processed.
    */
-  processFn: ProcessFunction<TRequest, TResponse>;
+  batchFn: ProcessFunction<TRequest, TResponse>;
 
   /**
    * The maximum number of requests to batch together.
@@ -55,11 +55,11 @@ export class MicrotaskQueue<TRequest = unknown, TResponse = unknown> {
   #processBatch: ProcessFunction<TRequest, TResponse>;
 
   constructor({
-    processFn,
+    batchFn,
     maxBatchSize,
   }: MicrotaskQueueOptions<TRequest, TResponse>) {
     this.maxBatchSize = maxBatchSize;
-    this.#processBatch = processFn;
+    this.#processBatch = batchFn;
   }
 
   submit(request: TRequest): Promise<TResponse> {

@@ -1,10 +1,12 @@
-// import { erc20, erc4626 } from "@delvtech/drift";
+import { erc20 } from "@delvtech/drift";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useQuery } from "@tanstack/react-query";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { nightOwl } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { useCopy } from "src/hooks/useCopy";
 import { useDrift } from "src/hooks/useDrift";
+
+const mainnetDai = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
 
 function App() {
   const { copy, copied } = useCopy();
@@ -24,9 +26,22 @@ function App() {
     queryFn: drift
       ? async () => {
           return Promise.all([
-            drift.getChainId(),
             drift.getBlockNumber(),
-            drift.getWalletCapabilities?.(),
+            drift.read({
+              abi: erc20.abi,
+              address: mainnetDai,
+              fn: "symbol",
+            }),
+            drift.read({
+              abi: erc20.abi,
+              address: mainnetDai,
+              fn: "name",
+            }),
+            drift.read({
+              abi: erc20.abi,
+              address: mainnetDai,
+              fn: "totalSupply",
+            }),
           ]);
         }
       : undefined,
