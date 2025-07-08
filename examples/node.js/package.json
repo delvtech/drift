@@ -20,7 +20,7 @@
     "@gud/math": "^1.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24.0.3",
+    "@types/node": "^24.0.11",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
   }

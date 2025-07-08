@@ -29,14 +29,14 @@
   },
   "peerDependencies": {
     "@delvtech/drift": "^0.10.1",
-    "viem": "^2.31.6"
+    "viem": "^2.31.7"
   },
   "devDependencies": {
     "@delvtech/drift": "^0.10.1",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3",
-    "viem": "^2.31.6",
+    "viem": "^2.31.7",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   },
