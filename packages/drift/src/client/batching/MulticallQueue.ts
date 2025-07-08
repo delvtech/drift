@@ -19,6 +19,10 @@ import type { OneOf } from "src/utils/types";
 export interface MulticallQueueOptions {
   adapter: Adapter;
   cache: ClientCache;
+  /**
+   * The Client's cached getChainId method, used to determine the multicall
+   * address without repeatedly fetching it from the Adapter.
+   */
   getChainId: () => Promise<number>;
   maxBatchSize?: number;
 }
