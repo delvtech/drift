@@ -1,6 +1,6 @@
 # @delvtech/drift-viem
 
-## 1.0.0
+## 0.11.0
 
 ### Patch Changes
 
@@ -13,7 +13,7 @@
 - Updated dependencies [5462088]
 - Updated dependencies [f2ec661]
 - Updated dependencies [f2ec661]
-  - @delvtech/drift@1.0.0
+  - @delvtech/drift@0.11.0
 
 ## 0.10.1
 
