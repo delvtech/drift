@@ -13,7 +13,7 @@ import type {
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
 import type { GetBlockReturn } from "src/adapter/types/Network";
 import { getMulticallAddress } from "src/adapter/utils/getMulticallAddress";
-import { CallBatcher } from "src/client/batching/CallBatcher";
+import { MulticallQueue } from "src/client/batching/MulticallQueue";
 import { ClientCache } from "src/client/cache/ClientCache";
 import { BlockNotFoundError } from "src/client/errors";
 import type { HookRegistry } from "src/client/hooks/HookRegistry";
@@ -173,9 +173,15 @@ export function createClient<
     isInstance ? storeOrOptions : new LruStore(storeOrOptions)
   ) as TStore;
 
-  // Create batcher for automatic request batching.
-  const callBatcher = batch
-    ? new CallBatcher({ adapter, maxBatchSize })
+  // Create a getter for the chain ID to ensure it's only fetched once.
+  async function getChainId() {
+    chainId ??= await adapter.getChainId();
+    return chainId;
+  }
+
+  // Create a multicall queue for automatic request aggregation.
+  const multicallQueue = batch
+    ? new MulticallQueue({ adapter, getChainId, maxBatchSize })
     : undefined;
 
   // Prepare client properties.
@@ -185,7 +191,7 @@ export function createClient<
     hooks: interceptor.hooks,
     cache: new ClientCache({
       store,
-      namespace: () => clientProps.getChainId(),
+      namespace: getChainId,
     }),
 
     isReadWrite(): this is Client<ReadWriteAdapter, TStore> {
@@ -198,10 +204,7 @@ export function createClient<
 
     // Cached methods //
 
-    async getChainId() {
-      chainId ??= await adapter.getChainId();
-      return chainId;
-    },
+    getChainId,
 
     async getBlock(blockId?: BlockIdentifier, options?: GetBlockOptions) {
       const block = await getOrSet({
@@ -252,7 +255,7 @@ export function createClient<
       return getOrSet({
         store: this.cache.store,
         key: this.cache.callKey(params),
-        fn: () => callBatcher?.handle(params) ?? this.adapter.call(params),
+        fn: () => multicallQueue?.submit(params) ?? this.adapter.call(params),
       });
     },
 
@@ -260,7 +263,7 @@ export function createClient<
       return getOrSet({
         store: this.cache.store,
         key: this.cache.readKey(params),
-        fn: () => callBatcher?.handle(params) ?? this.adapter.read(params),
+        fn: () => multicallQueue?.submit(params) ?? this.adapter.read(params),
       });
     },
 
