@@ -13,8 +13,8 @@ export type PendingRequest<TRequest = unknown, TResponse = unknown> = {
  * A function that processes a batch of requests in a microtask queue.
  * @internal
  */
-export type ProcessFunction<TRequest = unknown, TResponse = unknown> = (
-  queue: PendingRequest<TRequest, TResponse>[],
+export type BatchFunction<TRequest = unknown, TResponse = unknown> = (
+  requests: PendingRequest<TRequest, TResponse>[],
 ) => Promise<any>;
 
 /**
@@ -27,10 +27,10 @@ export interface MicrotaskQueueOptions<
 > {
   /**
    * The function to call for each batch of requests. It receives a queue of
-   * requests and should return a promise that resolves when all requests in the
-   * queue have been processed.
+   * pending requests and should return a promise that resolves when all
+   * requests in the queue have been processed.
    */
-  batchFn: ProcessFunction<TRequest, TResponse>;
+  batchFn: BatchFunction<TRequest, TResponse>;
 
   /**
    * The maximum number of requests to batch together.
@@ -40,8 +40,8 @@ export interface MicrotaskQueueOptions<
 }
 
 /**
- * A queue that processes requests in microtasks, allowing for batching and
- * asynchronous processing.
+ * A queue that processes requests in microtasks to aggregate them into
+ * batches and reduce the number of calls made to an external service.
  * @internal
  */
 export class MicrotaskQueue<TRequest = unknown, TResponse = unknown> {
@@ -52,14 +52,14 @@ export class MicrotaskQueue<TRequest = unknown, TResponse = unknown> {
   pending: PendingRequest<TRequest, TResponse>[] = [];
   maxBatchSize?: number;
 
-  #processBatch: ProcessFunction<TRequest, TResponse>;
+  #batchFn: BatchFunction<TRequest, TResponse>;
 
   constructor({
     batchFn,
     maxBatchSize,
   }: MicrotaskQueueOptions<TRequest, TResponse>) {
     this.maxBatchSize = maxBatchSize;
-    this.#processBatch = batchFn;
+    this.#batchFn = batchFn;
   }
 
   submit(request: TRequest): Promise<TResponse> {
@@ -78,7 +78,7 @@ export class MicrotaskQueue<TRequest = unknown, TResponse = unknown> {
 
           if (!this.maxBatchSize) {
             // Process the entire queue as a single batch.
-            return this.#processBatch(queued).catch((error) => {
+            return this.#batchFn(queued).catch((error) => {
               for (const { reject } of queued) reject(error);
             });
           }
@@ -92,7 +92,7 @@ export class MicrotaskQueue<TRequest = unknown, TResponse = unknown> {
           // Process each batch.
           Promise.all(
             batches.flatMap((batch) =>
-              this.#processBatch(batch).catch((error) => {
+              this.#batchFn(batch).catch((error) => {
                 // Reject all promises in the batch with the error.
                 for (const { reject } of batch) reject(error);
               }),
