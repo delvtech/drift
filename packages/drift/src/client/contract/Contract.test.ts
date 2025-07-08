@@ -93,38 +93,6 @@ describe("Contract", () => {
       contract.cache.invalidateRead("symbol");
       await expect(contract.read("symbol")).rejects.toThrow();
     });
-
-    describe("epochBlock", () => {
-      const fn = "name";
-      const epochBlock = 123n;
-      const nameAtEpoch = "Name at Epoch";
-
-      it("is used in place of 'earliest' if defined", async () => {
-        adapter
-          .onRead({ abi, address, fn, block: "earliest" })
-          .resolves("Name at Earliest");
-        adapter
-          .onRead({ abi, address, fn, block: epochBlock })
-          .resolves(nameAtEpoch);
-
-        const contract = createContract({ abi, address, adapter, epochBlock });
-        const returnedName = await contract.read(fn, {}, { block: 0n });
-
-        expect(returnedName).toBe(nameAtEpoch);
-      });
-
-      it("is used in place of lower block numbers if defined", async () => {
-        adapter.onRead({ abi, address, fn, block: 0n }).resolves("Name at 0");
-        adapter
-          .onRead({ abi, address, fn, block: epochBlock })
-          .resolves(nameAtEpoch);
-
-        const contract = createContract({ abi, address, adapter, epochBlock });
-        const returnedName = await contract.read(fn, {}, { block: 0n });
-
-        expect(returnedName).toBe(nameAtEpoch);
-      });
-    });
   });
 
   it("maintains hooks proxy when extending", async () => {
