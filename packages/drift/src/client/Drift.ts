@@ -6,14 +6,12 @@ import {
   type ClientOptions,
   createClient,
 } from "src/client/Client";
-// biome-ignore lint/correctness/noUnusedImports: Used for JSDoc links
 import type { ClientCache } from "src/client/cache/ClientCache";
 import {
   type Contract,
   type ContractBaseOptions,
   createContract,
 } from "src/client/contract/Contract";
-// biome-ignore lint/correctness/noUnusedImports: Used for JSDoc links
 import type { HookRegistry } from "src/client/hooks/HookRegistry";
 import type { LruStore } from "src/store/LruStore";
 import type { Store } from "src/store/Store";
