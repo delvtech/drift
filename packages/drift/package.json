@@ -3,33 +3,28 @@
   "description": "Effortless ethereum development across Web3 libraries",
   "version": "0.10.1",
   "license": "Apache-2.0",
+  "author": "Ryan Goree (https://github.com/ryangoree)",
+  "repository": "https://github.com/delvtech/drift",
+  "homepage": "https://delvtech.github.io/drift",
+  "bugs": "https://github.com/delvtech/drift/issues",
   "type": "module",
-  "main": "dist/index.cjs",
   "sideEffects": false,
-  "types": "dist/index.d.cts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
   "exports": {
     ".": {
-      "types": {
-        "import": "./dist/index.d.ts",
-        "require": "./dist/index.d.cts"
-      },
-      "default": {
-        "import": "./dist/index.js",
-        "require": "./dist/index.cjs"
-      }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
     "./testing": {
-      "types": {
-        "import": "./dist/testing.d.ts",
-        "require": "./dist/testing.d.cts"
-      },
-      "default": {
-        "import": "./dist/testing.js",
-        "require": "./dist/testing.cjs"
-      }
+      "types": "./dist/testing.d.ts",
+      "import": "./dist/testing.js",
+      "require": "./dist/testing.cjs"
     },
     "./package.json": "./package.json"
   },
+  "types": "dist/index.d.ts",
   "typesVersions": {
     "*": {
       ".": [
@@ -81,13 +76,6 @@
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   },
-  "author": {
-    "name": "DELV",
-    "email": "contact@delv.tech",
-    "url": "https://github.com/delvtech"
-  },
-  "repository": "https://github.com/delvtech/drift",
-  "bugs": "https://github.com/delvtech/drift/issues",
   "publishConfig": {
     "access": "public"
   },

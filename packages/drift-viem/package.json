@@ -3,21 +3,29 @@
   "description": "Viem adapter for Drift",
   "version": "0.10.1",
   "license": "Apache-2.0",
+  "author": "Ryan Goree (https://github.com/ryangoree)",
+  "repository": "https://github.com/delvtech/drift",
+  "homepage": "https://delvtech.github.io/drift",
+  "bugs": "https://github.com/delvtech/drift/issues",
   "type": "module",
+  "sideEffects": false,
   "main": "dist/index.cjs",
-  "types": "dist/index.d.cts",
+  "module": "dist/index.js",
   "exports": {
     ".": {
-      "types": {
-        "import": "./dist/index.d.ts",
-        "require": "./dist/index.d.cts"
-      },
-      "default": {
-        "import": "./dist/index.js",
-        "require": "./dist/index.cjs"
-      }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
     "./package.json": "./package.json"
+  },
+  "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ]
+    }
   },
   "scripts": {
     "build": "tsup",
@@ -40,13 +48,6 @@
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   },
-  "author": {
-    "name": "DELV",
-    "email": "contact@delv.tech",
-    "url": "https://github.com/delvtech"
-  },
-  "repository": "https://github.com/delvtech/drift",
-  "bugs": "https://github.com/delvtech/drift/issues",
   "publishConfig": {
     "access": "public"
   },

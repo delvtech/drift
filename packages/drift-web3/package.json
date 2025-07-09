@@ -3,21 +3,29 @@
   "description": "Web3.js adapter for Drift",
   "version": "0.10.1",
   "license": "Apache-2.0",
+  "author": "Ryan Goree (https://github.com/ryangoree)",
+  "repository": "https://github.com/delvtech/drift",
+  "homepage": "https://delvtech.github.io/drift",
+  "bugs": "https://github.com/delvtech/drift/issues",
   "type": "module",
+  "sideEffects": false,
   "main": "dist/Web3Adapter.cjs",
-  "types": "dist/Web3Adapter.d.cts",
+  "module": "dist/Web3Adapter.js",
   "exports": {
     ".": {
-      "types": {
-        "import": "./dist/Web3Adapter.d.ts",
-        "require": "./dist/Web3Adapter.d.cts"
-      },
-      "default": {
-        "import": "./dist/Web3Adapter.js",
-        "require": "./dist/Web3Adapter.cjs"
-      }
+      "types": "./dist/Web3Adapter.d.ts",
+      "import": "./dist/Web3Adapter.js",
+      "require": "./dist/Web3Adapter.cjs"
     },
     "./package.json": "./package.json"
+  },
+  "types": "dist/Web3Adapter.d.ts",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/Web3Adapter.d.ts"
+      ]
+    }
   },
   "scripts": {
     "build": "tsup",
@@ -40,17 +48,10 @@
     "vitest": "^3.2.4",
     "web3": "^4.16.0"
   },
-  "author": {
-    "name": "DELV",
-    "email": "contact@delv.tech",
-    "url": "https://github.com/delvtech"
-  },
-  "repository": "https://github.com/delvtech/drift",
-  "bugs": "https://github.com/delvtech/drift/issues",
-  "publishConfig": {
-    "access": "public"
-  },
   "files": [
     "dist"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }
