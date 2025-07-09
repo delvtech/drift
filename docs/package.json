@@ -9,9 +9,9 @@
     "preview": "vocs preview"
   },
   "dependencies": {
-    "@delvtech/drift": "^0.10.1",
-    "@delvtech/drift-viem": "^0.10.1",
-    "@delvtech/drift-web3": "^0.10.1",
+    "@delvtech/drift": "^0.11.0",
+    "@delvtech/drift-viem": "^0.11.0",
+    "@delvtech/drift-web3": "^0.11.0",
     "@tanstack/react-query": "^5.81.5",
     "ethers": "^6.15.0",
     "react": "^19.1.0",
