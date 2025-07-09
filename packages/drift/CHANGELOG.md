@@ -1,5 +1,25 @@
 # @delvtech/drift
 
+## 1.0.0
+
+### Minor Changes
+
+- f65f915: Renamed `abiFn` to `abiEntry` in the following return objects for consistency:
+  - `prepareDeployData`
+  - `prepareFunctionData`
+  - `prepareFunctionReturn`
+- 5462088: Changed `chainId` from `bigint` to `number` in `TransactionOptions` to be consistent with all other `chainId` param and option types.
+
+### Patch Changes
+
+- 367ff3c: Added automatic call batching via `Multicall3`. This can be controlled with new `batch` and `maxBatchSize` options when creating new clients, e.g., `createDrift({ batch: false })`, or `createDrift({ maxBatchSize: 10 })`.
+- d426510: Added `NoInfer` to the return type of `multicall` to avoid widening the inferred args type when the return value is destructured.
+- ca01657: Added a `getMulticallAddress` util for known Multicall3 deployments and integrated into `Client.multicall` and the standalone `multicall` adapter method that's used by all adapters via `BaseAdapter.multicall`.
+- 1fe3b74: Added an `onMinedTimeout` option to `WriteOptions` to modify the default timeout for the awaited transaction receipt. If the timeout is reached, the receipt with be `undefined`.
+- 47c5bc4: Removed block overriding in `Contract.read` when provided a block earlier than the contract's `epochBlock`. If the contract was constructed with an `epochBlock`, it used to overwrite the `block` option passed to `read` to ensure it didn't read from a block where there was no data, but this can misleading by implying that there was data where there wasn't. So, `epochBlock` now only affects the behavior of event queries.
+- f2ec661: Added `hexToString` util
+- f2ec661: Removed use of `Buffer` node util in `multicall` and `Web3Adapter`.
+
 ## 0.10.1
 
 ### Patch Changes
