@@ -63,7 +63,7 @@ export class MulticallQueue extends MicrotaskQueue<
     maxBatchSize,
   }: MulticallQueueOptions) {
     super({
-      maxBatchSize: maxBatchSize,
+      maxBatchSize,
       batchFn: (requests) => this.#batchFn(requests),
     });
     this.#adapter = adapter;
@@ -116,9 +116,7 @@ export class MulticallQueue extends MicrotaskQueue<
 
   async #processBucket(bucket: CallBucket) {
     // Forward single call buckets directly to the adapter.
-    if (bucket.calls.length === 1) {
-      return this.#forwardCalls(bucket);
-    }
+    if (bucket.calls.length === 1) return this.#forwardCalls(bucket);
 
     const { calls, callbacks, options } = bucket;
     const chainId = await this.#getChainId();
@@ -148,9 +146,7 @@ export class MulticallQueue extends MicrotaskQueue<
         // If there's no known multicall address, and the call failed, try again
         // with each call individually in case the error is due to a missing
         // multicall address.
-        if (!multicallAddress) {
-          return this.#forwardCalls(bucket);
-        }
+        if (!multicallAddress) return this.#forwardCalls(bucket);
 
         // Otherwise, reject all calls in the bucket with the error.
         for (const { reject } of callbacks) reject(error);

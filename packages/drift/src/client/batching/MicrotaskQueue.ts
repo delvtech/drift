@@ -93,7 +93,6 @@ export class MicrotaskQueue<TRequest = unknown, TResponse = unknown> {
           Promise.all(
             batches.flatMap((batch) =>
               this.#batchFn(batch).catch((error) => {
-                // Reject all promises in the batch with the error.
                 for (const { reject } of batch) reject(error);
               }),
             ),

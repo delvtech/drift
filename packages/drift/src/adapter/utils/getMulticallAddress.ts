@@ -28,11 +28,7 @@ type GetMulticallAddressReturn<
 export function getMulticallAddress<
   TChainId extends MulticallChainId | (number & {}),
 >(chainId: TChainId): GetMulticallAddressReturn<TChainId> {
-  const address = MULTICALL_ADDRESSES[chainId as MulticallChainId];
-  if (!address) {
-    console.warn(
-      `No multicall address found for chain ID ${chainId}. Please provide a valid multicall address.`,
-    );
-  }
-  return address as GetMulticallAddressReturn<TChainId>;
+  return MULTICALL_ADDRESSES[
+    chainId as MulticallChainId
+  ] as GetMulticallAddressReturn<TChainId>;
 }

@@ -22,7 +22,7 @@ function App() {
     status,
     refetch,
   } = useQuery({
-    queryKey: ["home-data", typeof drift?.getWalletCapabilities],
+    queryKey: ["home-data"],
     queryFn: drift
       ? async () => {
           return Promise.all([
@@ -50,8 +50,8 @@ function App() {
     refetchOnWindowFocus: false,
   });
 
-  if (data) console.log("Data:", data);
-  if (error) console.error(error);
+  // biome-ignore lint/suspicious/noExplicitAny: debugging
+  (window as any).drift = drift;
 
   const responseText =
     status === "error"
@@ -118,6 +118,7 @@ function App() {
                 {copied ? "copied!" : "copy"}
               </span>
               <svg
+                role="graphics-symbol"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
                 className="size-5 fill-current"
