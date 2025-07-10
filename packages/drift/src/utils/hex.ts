@@ -114,10 +114,12 @@ export function hexToString(hex: string, options?: IsHexStringOptions): string {
 
 let encoder: InstanceType<typeof TextEncoder> | undefined;
 function getTextEncoder() {
-  return encoder || (encoder = new TextEncoder());
+  encoder ||= new TextEncoder("utf-8");
+  return encoder;
 }
 
 let decoder: InstanceType<typeof TextDecoder> | undefined;
 function getTextDecoder() {
-  return decoder || (decoder = new TextDecoder());
+  decoder ||= new TextDecoder("utf-8");
+  return decoder;
 }
