@@ -83,4 +83,22 @@ test("prepareParams", () => {
     },
   });
   expect(fromObjectWithNumberKeys.params).toEqual(["0x123", 0n]);
+
+  const fromDeeplyNestedArray = prepareParams({
+    abi: [
+      {
+        inputs: [{ name: "", type: "uint8[][][]" }],
+        name: "items",
+        outputs: [],
+        stateMutability: "view",
+        type: "function",
+      },
+    ] as const,
+    type: "function",
+    kind: "inputs",
+    name: "items",
+    value: [[[1, 2, 3]]],
+  });
+
+  expect(fromDeeplyNestedArray.params).toEqual([[[[1, 2, 3]]]]);
 });

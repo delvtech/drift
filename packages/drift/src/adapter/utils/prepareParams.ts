@@ -200,6 +200,6 @@ function isUnpacked(value: unknown, params: readonly AbiParameter[]) {
   // the array has to be checked to determine if it's wrapped in an extra array
   // which is interpreted the same as `{ 0: value }`
   let innerValue = value;
-  for (const _ of arrayBrackets.match(/\[\d*]/g)!) innerValue = value?.[0];
+  for (const _ of arrayBrackets.match(/\[\d*]/g)!) innerValue = innerValue?.[0];
   return !Array.isArray(innerValue);
 }
