@@ -4,28 +4,26 @@
   "version": "0.11.0",
   "license": "Apache-2.0",
   "author": "Ryan Goree (https://github.com/ryangoree)",
-  "repository": "https://github.com/delvtech/drift",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/delvtech/drift.git"
+  },
   "homepage": "https://delvtech.github.io/drift",
   "bugs": "https://github.com/delvtech/drift/issues",
   "type": "module",
   "sideEffects": false,
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./package.json": "./package.json"
-  },
-  "types": "dist/index.d.ts",
-  "typesVersions": {
-    "*": {
-      ".": [
-        "./dist/index.d.ts"
-      ]
-    }
   },
   "scripts": {
     "build": "tsup",
@@ -48,10 +46,20 @@
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   },
-  "publishConfig": {
-    "access": "public"
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ]
+    }
   },
   "files": [
     "dist"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }
