@@ -1,5 +1,13 @@
 # @delvtech/drift
 
+## 0.11.1
+
+### Patch Changes
+
+- c93d76c: Patched a bug in `prepareArgs` that was affecting it's ability to identify simplified (derefed) deeply nested tuple values.
+- 0a248f2: Bumped deps.
+- 2a418f1: Improved package.json configs.
+
 ## 0.11.0
 
 ### Minor Changes
