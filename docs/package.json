@@ -12,17 +12,17 @@
     "@delvtech/drift": "^0.11.0",
     "@delvtech/drift-viem": "^0.11.0",
     "@delvtech/drift-web3": "^0.11.0",
-    "@tanstack/react-query": "^5.81.5",
+    "@tanstack/react-query": "^5.84.0",
     "ethers": "^6.15.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "viem": "^2.31.7",
-    "vocs": "^1.0.12",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "viem": "^2.33.2",
+    "vocs": "^1.0.13",
     "web3": "^4.16.0"
   },
   "devDependencies": {
-    "@types/node": "^24.0.11",
-    "@types/react": "^19.1.8",
-    "typescript": "^5.8.3"
+    "@types/node": "^24.1.0",
+    "@types/react": "^19.1.9",
+    "typescript": "^5.9.2"
   }
 }
