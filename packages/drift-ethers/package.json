@@ -1,7 +1,7 @@
 {
   "name": "@delvtech/drift-ethers",
   "description": "Ethers.js adapter for Drift",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "license": "Apache-2.0",
   "author": "Ryan Goree (https://github.com/ryangoree)",
   "repository": {
@@ -38,7 +38,7 @@
     "ethers": "^6.15.0"
   },
   "devDependencies": {
-    "@delvtech/drift": "^0.11.0",
+    "@delvtech/drift": "^0.11.1",
     "ethers": "^6.15.0",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.5.0",

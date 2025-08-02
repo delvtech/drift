@@ -1,5 +1,11 @@
 # @delvtech/drift-viem
 
+## 0.11.1
+
+### Patch Changes
+
+- 2a418f1: Improved package.json configs.
+
 ## 0.11.0
 
 ### Patch Changes
