@@ -1,5 +1,14 @@
 # @delvtech/drift-ethers
 
+## 1.0.0
+
+### Patch Changes
+
+- 09d18d4: Added `blockHash` and `logIndex` to `EventLog`.
+- Updated dependencies [09d18d4]
+- Updated dependencies [cb23fdb]
+  - @delvtech/drift@1.0.0
+
 ## 0.11.1
 
 ### Patch Changes
