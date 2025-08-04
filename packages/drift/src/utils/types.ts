@@ -1,3 +1,5 @@
+export type IsAny<T> = 0 extends 1 & NoInfer<T> ? true : false;
+
 export type EmptyObject = Record<PropertyKey, never>;
 export type AnyObject = Record<PropertyKey, any>;
 

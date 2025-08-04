@@ -11,6 +11,7 @@ import type {
   EmptyObject,
   Eval,
   ExtractFiltered,
+  IsAny,
   Replace,
 } from "src/utils/types";
 
@@ -105,7 +106,7 @@ export type AbiEntryName<
     // types in complex generic contexts, but needs more thorough testing and
     // documentation. Edit with caution.
     (
-        TAbi[number] extends infer TEntry
+        (IsAny<TAbi> extends true ? Abi : TAbi)[number] extends infer TEntry
           ? ExtractFiltered<
               TEntry,
               AbiFilter<TItemType, string, TStateMutability, TParameterKind>
