@@ -3,6 +3,14 @@ import type { EventLog, EventName } from "src/adapter/types/Event";
 import { randomHex } from "src/utils/testing/randomHex";
 import type { Eval, PartialBy } from "src/utils/types";
 
+type PartialEventLog<
+  TAbi extends Abi,
+  TEventName extends EventName<TAbi>,
+> = PartialBy<
+  EventLog<TAbi, TEventName>,
+  "data" | "transactionHash" | "blockNumber" | "blockHash" | "logIndex"
+>;
+
 type CreateStubEventParams<
   TAbi extends Abi = Abi,
   TEventName extends EventName<TAbi> = EventName<TAbi>,
@@ -10,10 +18,7 @@ type CreateStubEventParams<
   {
     abi?: TAbi;
     eventName: TEventName;
-  } & PartialBy<
-    EventLog<TAbi, TEventName>,
-    "blockNumber" | "data" | "transactionHash"
-  >
+  } & PartialEventLog<TAbi, TEventName>
 >;
 
 /**
@@ -25,8 +30,10 @@ export function createStubEvent<
 >(params: CreateStubEventParams<TAbi, TEventName>): EventLog<TAbi, TEventName> {
   const { abi, ...overrides } = params;
   return {
+    blockHash: randomHex(32),
     blockNumber: 1n,
     data: randomHex(),
+    logIndex: 0,
     transactionHash: randomHex(32),
     ...overrides,
   };
@@ -38,15 +45,7 @@ type CreateStubEventsParams<
 > = Eval<{
   abi: TAbi;
   eventName: TEventName;
-  events: readonly Eval<
-    Omit<
-      PartialBy<
-        EventLog<TAbi, TEventName>,
-        "blockNumber" | "data" | "transactionHash"
-      >,
-      "eventName"
-    >
-  >[];
+  events: readonly Eval<Omit<PartialEventLog<TAbi, TEventName>, "eventName">>[];
 }>;
 
 /**
@@ -59,7 +58,7 @@ export function createStubEvents<
   params: CreateStubEventsParams<TAbi, TEventName>,
 ): EventLog<TAbi, TEventName>[] {
   const { abi, eventName, events } = params;
-  return events.map((overrides) =>
-    createStubEvent({ abi, eventName, ...overrides }),
+  return events.map((overrides, i) =>
+    createStubEvent({ abi, eventName, logIndex: i, ...overrides }),
   );
 }

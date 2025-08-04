@@ -62,6 +62,8 @@ export type EventLog<
   eventName: TEventName;
   args: EventArgs<TAbi, TEventName>;
   data: Bytes;
-  blockNumber?: bigint;
-  transactionHash?: Hash;
+  blockHash: Hash | undefined;
+  blockNumber: bigint | undefined;
+  logIndex: number | undefined;
+  transactionHash: Hash | undefined;
 };

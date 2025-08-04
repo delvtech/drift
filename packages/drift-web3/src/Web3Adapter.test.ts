@@ -4,14 +4,14 @@ import {
   type DecodedFunctionData,
   DriftError,
   type EventLog,
+  erc20,
   type FunctionArgs,
-  HEX_REGEX,
   type Hash,
+  HEX_REGEX,
   type MulticallCallResult,
   type Transaction,
   type TransactionReceipt,
   ZERO_ADDRESS,
-  erc20,
 } from "@delvtech/drift";
 import { mockErc20, testToken } from "@delvtech/drift/testing";
 import { Web3Adapter } from "src/Web3Adapter";
@@ -49,7 +49,7 @@ describe("Web3Adapter", () => {
     expect(block).toMatchObject({
       number: expect.any(BigInt),
       timestamp: expect.any(BigInt),
-    } as Partial<Block>);
+    } satisfies Partial<Block>);
   });
 
   it("fetches account balances", async () => {
@@ -249,11 +249,14 @@ describe("Web3Adapter", () => {
     expect(events).toBeInstanceOf(Array);
     expect(events[0]).toEqual(
       expect.objectContaining({
+        eventName: "Transfer",
         args: expect.any(Object),
+        blockHash: expect.stringMatching(HEX_REGEX),
         blockNumber: expect.any(BigInt),
         data: expect.stringMatching(HEX_REGEX),
+        logIndex: expect.any(Number),
         transactionHash: expect.stringMatching(HEX_REGEX),
-      } as EventLog<typeof erc20.abi, "Transfer">),
+      } satisfies EventLog<typeof erc20.abi, "Transfer">),
     );
   });
 
@@ -360,7 +363,7 @@ describe("Web3Adapter", () => {
     expect(decoded).toMatchObject({
       args,
       functionName: "transfer",
-    } as DecodedFunctionData<typeof erc20.abi, "transfer">);
+    } satisfies DecodedFunctionData<typeof erc20.abi, "transfer">);
   });
 
   it("decodes function return data", async () => {

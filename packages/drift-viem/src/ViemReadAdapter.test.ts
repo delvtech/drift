@@ -12,10 +12,10 @@ import {
 import { mockErc20, testToken } from "@delvtech/drift/testing";
 import { ViemReadAdapter } from "src/ViemReadAdapter";
 import {
-  http,
   type Address,
   createPublicClient,
   erc20Abi,
+  http,
   zeroAddress,
 } from "viem";
 import { anvil } from "viem/chains";
@@ -150,8 +150,10 @@ describe("ViemReadAdapter", () => {
     expect(events[0]).toMatchObject({
       eventName: "Transfer",
       args: expect.any(Object),
+      blockHash: expect.stringMatching(HEX_REGEX),
       blockNumber: expect.any(BigInt),
       data: expect.stringMatching(HEX_REGEX),
+      logIndex: expect.any(Number),
       transactionHash: expect.stringMatching(HEX_REGEX),
     } satisfies EventLog<typeof erc20Abi, "Transfer">);
   });

@@ -218,9 +218,17 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
 
       return {
         args: event.returnValues as EventArgs<TAbi, TEventName>,
-        blockNumber: event.blockNumber ? BigInt(event.blockNumber) : undefined,
+        blockHash: event.blockHash,
+        blockNumber:
+          typeof event.blockNumber === "undefined"
+            ? event.blockNumber
+            : BigInt(event.blockNumber),
         data: event.data,
         eventName,
+        logIndex:
+          typeof event.logIndex === "undefined"
+            ? event.logIndex
+            : Number(event.logIndex),
         transactionHash: event.transactionHash,
       };
     });

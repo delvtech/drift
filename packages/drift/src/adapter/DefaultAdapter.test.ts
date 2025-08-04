@@ -161,9 +161,11 @@ describe("DefaultAdapter", () => {
     });
     expect(event).toMatchObject({
       args: expect.any(Object),
+      blockHash: expect.stringMatching(HEX_REGEX),
       blockNumber: expect.any(BigInt),
       data: expect.stringMatching(HEX_REGEX),
       eventName: "Transfer",
+      logIndex: expect.any(Number),
       transactionHash: expect.stringMatching(HEX_REGEX),
     } satisfies EventLog<typeof TestToken.abi, "Transfer">);
   });

@@ -242,8 +242,10 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
           ) as any,
         }),
         eventName: ethersEvent.event as TEventName,
+        blockHash: ethersEvent.blockHash,
         blockNumber: BigInt(ethersEvent.blockNumber),
         data: ethersEvent.data,
+        logIndex: ethersEvent.logIndex,
         transactionHash: ethersEvent.transactionHash,
       };
       return event;

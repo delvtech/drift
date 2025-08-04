@@ -4,14 +4,14 @@ import {
   type DecodedFunctionData,
   DriftError,
   type EventLog,
+  erc20,
   type FunctionArgs,
-  HEX_REGEX,
   type Hash,
+  HEX_REGEX,
   type MulticallCallResult,
   type Transaction,
   type TransactionReceipt,
   ZERO_ADDRESS,
-  erc20,
 } from "@delvtech/drift";
 import { mockErc20, testToken } from "@delvtech/drift/testing";
 import { providers } from "ethers";
@@ -252,8 +252,10 @@ describe("EthersReadAdapter", () => {
       expect.objectContaining({
         eventName: "Transfer",
         args: expect.any(Object),
+        blockHash: expect.stringMatching(HEX_REGEX),
         blockNumber: expect.any(BigInt),
         data: expect.stringMatching(HEX_REGEX),
+        logIndex: expect.any(Number),
         transactionHash: expect.stringMatching(HEX_REGEX),
       } satisfies EventLog<typeof erc20.abi, "Transfer">),
     );

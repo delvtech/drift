@@ -229,9 +229,11 @@ export class DefaultReadAdapter extends BaseReadAdapter implements ReadAdapter {
         logs.map((log) => {
           return {
             args: AbiEvent.decode(abiEntry, log) as EventArgs<TAbi, TEventName>,
+            blockHash: log.blockHash,
             blockNumber: BigInt(log.blockNumber),
             data: log.data,
             eventName: event,
+            logIndex: Number(log.logIndex),
             transactionHash: log.transactionHash,
           };
         }),

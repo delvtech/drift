@@ -25,8 +25,10 @@ describe("createStubEvent", () => {
         to: "0xAlice",
         value: 100n,
       },
+      blockHash: expect.stringMatching(HEX_REGEX),
       blockNumber: expect.any(BigInt),
       data: expect.stringMatching(HEX_REGEX),
+      logIndex: expect.any(Number),
       transactionHash: expect.stringMatching(HEX_REGEX),
     } satisfies EventLog<typeof IERC20.abi, "Transfer">);
   });
@@ -62,8 +64,10 @@ describe("createStubEvents", () => {
           to: "0xBob",
           value: 123n,
         },
+        blockHash: expect.stringMatching(HEX_REGEX),
         blockNumber: expect.any(BigInt),
         data: expect.stringMatching(HEX_REGEX),
+        logIndex: expect.any(Number),
         transactionHash: expect.stringMatching(HEX_REGEX),
       },
       {
@@ -73,8 +77,10 @@ describe("createStubEvents", () => {
           to: "0xAlice",
           value: 456n,
         },
+        blockHash: expect.stringMatching(HEX_REGEX),
         blockNumber: expect.any(BigInt),
         data: expect.stringMatching(HEX_REGEX),
+        logIndex: expect.any(Number),
         transactionHash: expect.stringMatching(HEX_REGEX),
       },
     ] satisfies EventLog<typeof IERC20.abi, "Transfer">[]);

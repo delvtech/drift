@@ -160,7 +160,15 @@ export class ViemReadAdapter<TClient extends AnyClient = PublicClient>
       args: filter,
     });
     return events.map(
-      ({ args, blockNumber, data, transactionHash, topics }) => {
+      ({
+        args,
+        blockHash,
+        blockNumber,
+        data,
+        logIndex,
+        transactionHash,
+        topics,
+      }) => {
         const objectArgs = (
           Array.isArray(args)
             ? decodeEventLog({
@@ -174,9 +182,11 @@ export class ViemReadAdapter<TClient extends AnyClient = PublicClient>
 
         return {
           args: objectArgs,
+          blockHash: blockHash ?? undefined,
           blockNumber: blockNumber ?? undefined,
           data,
           eventName: event,
+          logIndex: logIndex ?? undefined,
           transactionHash: transactionHash ?? undefined,
         };
       },
