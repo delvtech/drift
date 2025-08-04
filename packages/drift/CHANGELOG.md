@@ -1,5 +1,15 @@
 # @delvtech/drift
 
+## 1.0.0
+
+### Minor Changes
+
+- cb23fdb: Modified `stringifyKey` to append "n" to `BigInt` values before converting them to strings and added a `parseKey` util function for reviving them back to their original form.
+
+### Patch Changes
+
+- 09d18d4: Added `blockHash` and `logIndex` to `EventLog`.
+
 ## 0.11.1
 
 ### Patch Changes
