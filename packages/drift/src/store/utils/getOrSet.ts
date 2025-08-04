@@ -18,10 +18,8 @@ export async function getOrSet<
 }): Promise<AwaitedReturnType<T>> {
   key = await key;
   if (await store.has(key)) return store.get(key);
-
   const value = await fn();
   if (value === undefined) return value;
-
-  const setOp = store.set(key, value);
-  return setOp instanceof Promise ? setOp.then(() => value) : value;
+  await store.set(key, value);
+  return value;
 }

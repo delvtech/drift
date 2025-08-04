@@ -2,6 +2,7 @@ import isMatch from "lodash.ismatch";
 import { type SinonStub, stub as sinonStub } from "sinon";
 import { DriftError, type DriftErrorOptions } from "src/error/DriftError";
 import { formatArgsForDisplay } from "src/utils/formatArgsForDisplay";
+import { parseKey, stringifyKey } from "src/utils/keys";
 import type { FunctionKey, Replace } from "src/utils/types";
 
 /**
@@ -39,14 +40,17 @@ export class StubStore<T> {
 
     if (!methodStore) return false;
     if (!key) return !!methodStore.defaultStub;
-    if (methodStore.keyedStubs.has(key)) return true;
+
+    const keyString = stringifyKey(key);
+
+    if (methodStore.keyedStubs.has(keyString)) return true;
     if (!matchPartial) return false;
     if (methodStore.defaultStub) return true;
     if (!methodStore.keyedStubs.size) return false;
 
-    const parsedKey = JSON.parse(key);
+    const objectKey = typeof key !== "object" ? [key] : key;
     for (const storedKey of methodStore.keyedStubs.keys()) {
-      if (isMatch(parsedKey, JSON.parse(storedKey))) return true;
+      if (isMatch(objectKey, parseKey(storedKey))) return true;
     }
 
     return false;
@@ -93,7 +97,8 @@ export class StubStore<T> {
           TReturnType
         >;
         if (key) {
-          methodStore.keyedStubs.set(key, newStub);
+          const keyString = stringifyKey(key);
+          methodStore.keyedStubs.set(keyString, newStub);
         } else {
           methodStore.defaultStub = newStub;
         }
@@ -109,9 +114,11 @@ export class StubStore<T> {
       return methodStore.defaultStub as SinonStub<TArgs, TReturnType>;
     }
 
+    const keyString = stringifyKey(key);
+
     // Return the keyed stub if it exists.
-    if (methodStore.keyedStubs.has(key)) {
-      return methodStore.keyedStubs.get(key);
+    if (methodStore.keyedStubs.has(keyString)) {
+      return methodStore.keyedStubs.get(keyString);
     }
 
     // Return the stub with the closest matching key or the default stub if
@@ -119,12 +126,12 @@ export class StubStore<T> {
     if (matchPartial) {
       let closestMatch = methodStore.defaultStub;
       if (methodStore.keyedStubs.size) {
-        const parsedKey = JSON.parse(key);
+        const keyObject = typeof key !== "object" ? [key] : key;
         let closestMatchKey = "";
         for (const [storedKey, stub] of methodStore.keyedStubs.entries()) {
           if (
             storedKey.length > closestMatchKey.length &&
-            isMatch(parsedKey, JSON.parse(storedKey))
+            isMatch(keyObject, parseKey(storedKey))
           ) {
             closestMatch = stub;
             closestMatchKey = storedKey;
@@ -140,7 +147,7 @@ export class StubStore<T> {
     const newStub = create
       ? create(createDefaultStub(methodName))
       : createDefaultStub(methodName);
-    methodStore.keyedStubs.set(key, newStub);
+    methodStore.keyedStubs.set(keyString, newStub);
     return newStub as any;
   }
 }
@@ -167,7 +174,7 @@ export interface HasStubParams<T> {
    * });
    * ```
    */
-  key?: string;
+  key?: unknown;
 
   /**
    * Whether to allow partial matching of the key. If `true`, the store will be

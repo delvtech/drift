@@ -24,7 +24,7 @@ import type { Client } from "src/client/Client";
 import { LruStore } from "src/store/LruStore";
 import type { Store } from "src/store/Store";
 import { deleteMatches } from "src/store/utils/deleteMatches";
-import { stringifyKey } from "src/utils/stringifyKey";
+import { stringifyKey } from "src/utils/keys";
 import type { MaybePromise, Replace } from "src/utils/types";
 
 export type ClientCacheOptions<T extends Store = Store> = {

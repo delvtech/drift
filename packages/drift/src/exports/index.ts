@@ -235,7 +235,7 @@ export {
   type ToHexStringOptions,
   toHexString,
 } from "src/utils/hex";
-export { stringifyKey } from "src/utils/stringifyKey";
+export { parseKey, stringifyKey as stringifyKey } from "src/utils/keys";
 export type {
   AnyFunction,
   AnyObject,

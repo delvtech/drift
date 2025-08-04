@@ -13,7 +13,7 @@ import {
 import type { ClientCache } from "src/client/cache/ClientCache";
 import { cachedMulticall } from "src/client/utils/cachedMulticall";
 import { getOrSet } from "src/store/utils/getOrSet";
-import { stringifyKey } from "src/utils/stringifyKey";
+import { stringifyKey } from "src/utils/keys";
 import type { OneOf } from "src/utils/types";
 
 /**

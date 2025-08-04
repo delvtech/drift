@@ -49,7 +49,6 @@ import type {
   TransactionReceipt,
 } from "src/adapter/types/Transaction";
 import { convert } from "src/utils/convert";
-import { stringifyKey } from "src/utils/stringifyKey";
 import { MissingStubError, StubStore } from "src/utils/testing/StubStore";
 import type {
   Extended,
@@ -66,16 +65,14 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     return this.stubs.reset(method);
   }
 
-  protected createKey(params?: unknown) {
+  protected createKey<T>(params?: T) {
     if (!params) return undefined;
-    return stringifyKey(
-      // Remove ABIs
-      convert(
-        params,
-        (v): v is Extended<{ abi: Abi }> =>
-          v && typeof v === "object" && "abi" in v,
-        ({ abi, ...rest }) => rest,
-      ),
+    // Remove ABIs
+    return convert(
+      params,
+      (v): v is Extended<{ abi: Abi }> =>
+        v && typeof v === "object" && "abi" in v,
+      ({ abi, ...rest }) => rest,
     );
   }
 
