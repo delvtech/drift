@@ -26,17 +26,50 @@ export function convert<T, TOriginal, TNew>(
   predicateFn: (value: any) => value is TOriginal,
   converterFn: (value: TOriginal) => TNew,
 ): Converted<T, TOriginal, TNew> {
+  // Direct conversion
   if (predicateFn(value)) {
     return converterFn(value) as Converted<T, TOriginal, TNew>;
   }
 
+  // Arrays
   if (Array.isArray(value)) {
     return value.map((item) =>
       convert(item, predicateFn, converterFn),
     ) as Converted<T, TOriginal, TNew>;
   }
 
+  // Objects
   if (value && typeof value === "object") {
+    // Non-iterables
+    if (
+      value instanceof Date ||
+      value instanceof RegExp ||
+      value instanceof URL
+    ) {
+      return value as Converted<T, TOriginal, TNew>;
+    }
+
+    // Maps
+    if (value instanceof Map) {
+      const convertedMap = new Map();
+      for (const [key, val] of value.entries()) {
+        convertedMap.set(
+          convert(key, predicateFn, converterFn),
+          convert(val, predicateFn, converterFn),
+        );
+      }
+      return convertedMap as Converted<T, TOriginal, TNew>;
+    }
+
+    // Sets
+    if (value instanceof Set) {
+      const convertedSet = new Set();
+      for (const item of value) {
+        convertedSet.add(convert(item, predicateFn, converterFn));
+      }
+      return convertedSet as Converted<T, TOriginal, TNew>;
+    }
+
     return Object.fromEntries(
       Object.entries(value).map(([key, value]) => [
         key,
@@ -68,6 +101,13 @@ export type Converted<T, U, V> = T extends U
   ? V
   : T extends Array<infer Inner>
     ? Converted<Inner, U, V>[]
-    : T extends object
-      ? { [K in keyof T]: Converted<T[K], U, V> }
-      : T;
+    : // Non-iterable objects
+      T extends Date | RegExp | URL
+      ? T
+      : T extends Map<infer K, infer R>
+        ? Map<Converted<K, U, V>, Converted<R, U, V>>
+        : T extends Set<infer InnerSet>
+          ? Set<Converted<InnerSet, U, V>>
+          : T extends object
+            ? { [K in keyof T]: Converted<T[K], U, V> }
+            : T;

@@ -5,7 +5,6 @@ import type { Extended } from "src/utils/types";
 
 /**
  * Format arguments for display in a human-readable way. Useful for debugging.
- * @internal
  */
 export function formatArgsForDisplay(args: any, truncateAbi = true) {
   if (truncateAbi) {

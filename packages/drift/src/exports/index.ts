@@ -227,6 +227,7 @@ export { DriftError, type DriftErrorOptions } from "src/error/DriftError";
 // Utils //
 
 export { type Converted, convert } from "src/utils/convert";
+export { formatArgsForDisplay } from "src/utils/formatArgsForDisplay";
 export {
   HEX_REGEX,
   hexToString,
@@ -235,7 +236,7 @@ export {
   type ToHexStringOptions,
   toHexString,
 } from "src/utils/hex";
-export { parseKey, stringifyKey as stringifyKey } from "src/utils/keys";
+export { parseKey, stringifyKey } from "src/utils/keys";
 export type {
   AnyFunction,
   AnyObject,

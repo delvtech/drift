@@ -11,17 +11,20 @@
     "bytecode_call": "yarn execute src/bytecode_call.ts",
     "hooks_and_extensions": "yarn execute src/hooks_and_extensions.ts",
     "multicall": "yarn execute src/multicall.ts",
-    "test": "yarn execute --test",
-    "test:watch": "yarn test --watch",
-    "sdk_client": "yarn execute src/sdk_client.ts"
+    "test": "vitest run",
+    "test:watch": "vitest --reporter=verbose",
+    "sdk_client": "yarn execute src/sdk_client.ts",
+    "normalizedCache": "yarn execute src/normalizedCache.ts"
   },
   "dependencies": {
     "@delvtech/drift": "^0.11.1",
-    "@gud/math": "^1.0.0"
+    "@gud/math": "^1.0.0",
+    "lru-cache": "^11.1.0"
   },
   "devDependencies": {
     "@types/node": "^24.1.0",
     "tsx": "^4.20.3",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
   }
 }
