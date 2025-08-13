@@ -41,6 +41,7 @@
     "generate:multicall-addresses": "tsx scripts/generateMulticallAddresses.ts",
     "build": "tsup",
     "watch": "tsup --watch",
+    "build:docs": "typedoc",
     "test": "vitest run",
     "test:watch": "vitest --reporter=verbose",
     "coverage": "vitest run --coverage",
@@ -72,6 +73,8 @@
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.5.0",
     "tsx": "^4.20.3",
+    "typedoc": "^0.28.10",
+    "typedoc-plugin-markdown": "^4.8.1",
     "typescript": "^5.9.2",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"

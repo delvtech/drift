@@ -1,0 +1,9 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["./src/exports/index.ts", "./src/exports/testing.ts"],
+  "plugin": ["typedoc-plugin-markdown"],
+  "out": "docs",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeExternals": true
+}
