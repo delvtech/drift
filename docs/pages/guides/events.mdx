@@ -85,15 +85,15 @@ Events returned by Drift have a simple and consistent structure:
 // ---cut---
 const transfers = await token.getEvents("Transfer");
 
-for (const event of transfers) {
-  console.log({
-    eventName: event.eventName,             // "Transfer"
-    blockNumber: event.blockNumber,         // bigint
-    transactionHash: event.transactionHash, // HexString
-    args: event.args,                       // Decoded event arguments
-    data: event.data,                       // Raw hex data
-  });
-}
+const {
+  eventName,        // "Transfer"
+  args,             // Decoded event arguments
+  data,             // Encoded event arguments
+  transactionHash,  // Hash of the transaction this event was created from
+  blockHash,        // Hash of the block the event was in
+  blockNumber,      // Block number the event was in
+  logIndex,         // The index of the log in the block.
+} = transfers[0];
 ```
 
 ## Working with Event Arguments
