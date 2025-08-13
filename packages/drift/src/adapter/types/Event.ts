@@ -59,11 +59,32 @@ export type EventLog<
   TAbi extends Abi = Abi,
   TEventName extends EventName<TAbi> = EventName<TAbi>,
 > = {
+  /**
+   * The name of the emitted event.
+   */
   eventName: TEventName;
+  /**
+   * The decoded arguments of the event.
+   */
   args: EventArgs<TAbi, TEventName>;
+  /**
+   * Zero or more 32 Bytes non-indexed arguments of the event.
+   */
   data: Bytes;
+  /**
+   * The hash of the block this log was in or `undefined` if pending.
+   */
   blockHash: Hash | undefined;
+  /**
+   * The block number this log was in or `undefined` if pending.
+   */
   blockNumber: bigint | undefined;
+  /**
+   * The index of the log in the block or `undefined` if pending.
+   */
   logIndex: number | undefined;
+  /**
+   * The hash of the transaction this event was created from or `undefined` if pending.
+   */
   transactionHash: Hash | undefined;
 };
