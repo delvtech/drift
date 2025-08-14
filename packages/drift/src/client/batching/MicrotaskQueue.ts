@@ -73,30 +73,23 @@ export class MicrotaskQueue<TRequest = unknown, TResponse = unknown> {
       // event loop will add to the queue to be processed in the microtask.
       if (this.pending.length === 1) {
         queueMicrotask(() => {
-          const queued = this.pending.slice();
+          const queue = this.pending;
           this.pending = [];
 
-          if (!this.maxBatchSize) {
-            // Process the entire queue as a single batch.
-            return this.#batchFn(queued).catch((error) => {
-              for (const { reject } of queued) reject(error);
-            });
-          }
-
-          // Split the queue into batches of maxBatchSize.
+          const batchSize = this.maxBatchSize || queue.length;
           const batches = [];
-          for (let i = 0; i < queued.length; i += this.maxBatchSize) {
-            batches.push(queued.slice(i, i + this.maxBatchSize));
+          for (let i = 0; i < queue.length; i += batchSize) {
+            batches.push(queue.slice(i, i + batchSize));
           }
 
-          // Process each batch.
-          Promise.all(
-            batches.flatMap((batch) =>
+          for (const batch of batches)
+            try {
               this.#batchFn(batch).catch((error) => {
                 for (const { reject } of batch) reject(error);
-              }),
-            ),
-          );
+              });
+            } catch (error) {
+              for (const { reject } of batch) reject(error);
+            }
         });
       }
     });

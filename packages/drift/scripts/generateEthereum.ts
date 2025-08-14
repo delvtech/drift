@@ -14,8 +14,8 @@ import manifest from "../package.json";
 
 // Settings //
 
-const branch = "main";
 const repoUrl = "git@github.com:ethereum/execution-apis.git";
+const branch = "main";
 const schemaDoc = "refs-openrpc.json";
 const outDir = "src/ethereum";
 const tsOutFilename = "ethereum.ts";
@@ -46,8 +46,8 @@ console.log(`+
 |
 |  Generating types from Ethereum OpenRPC schema...
 |
-|  Branch:        ${branch}
 |  Repository:    ${repoUrl}
+|  Branch:        ${branch}
 |  Output paths:
 |    - Types:     ${relativeTsOutPath}
 |    - Schema:    ${relativeSchemaOutPath}
