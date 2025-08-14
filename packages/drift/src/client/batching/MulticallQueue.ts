@@ -82,7 +82,7 @@ export class MulticallQueue extends MicrotaskQueue<
     }
 
     // Bucket calls by their stringified options.
-    const CallBuckets = new Map<string, CallBucket>();
+    const callBuckets = new Map<string, CallBucket>();
     for (const { request, resolve, reject } of queue) {
       const { abi, address, fn, args, to, data, ...options } = request;
       const call = {
@@ -94,13 +94,13 @@ export class MulticallQueue extends MicrotaskQueue<
         data,
       } as MulticallCallParams;
       const key = stringifyKey(options);
-      const bucket = CallBuckets.get(key);
+      const bucket = callBuckets.get(key);
 
       if (bucket) {
         bucket.calls.push(call);
         bucket.callbacks.push({ resolve, reject });
       } else {
-        CallBuckets.set(key, {
+        callBuckets.set(key, {
           calls: [call],
           callbacks: [{ resolve, reject }],
           options,
@@ -110,7 +110,7 @@ export class MulticallQueue extends MicrotaskQueue<
 
     // Process buckets.
     return Promise.all(
-      CallBuckets.values().map((bucket) => this.#processBucket(bucket)),
+      callBuckets.values().map((bucket) => this.#processBucket(bucket)),
     );
   }
 
