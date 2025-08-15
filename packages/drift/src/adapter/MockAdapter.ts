@@ -61,6 +61,11 @@ import type {
 export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   stubs = new StubStore<ReadWriteAdapter>();
 
+  /**
+   * Reset the mock, removing all stubbed responses and behaviors.
+   *
+   * @param method - If provided, only reset that method.
+   */
   reset(method?: FunctionKey<ReadWriteAdapter>) {
     return this.stubs.reset(method);
   }

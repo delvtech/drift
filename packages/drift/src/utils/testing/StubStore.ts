@@ -25,6 +25,11 @@ export class StubStore<T> {
     }
   >();
 
+  /**
+   * Reset the store, removing all stubs.
+   *
+   * @param method - If provided, only reset that method.
+   */
   reset(method?: FunctionKey<T>) {
     return method
       ? this.#methodStores.delete(method)

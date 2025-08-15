@@ -68,6 +68,12 @@ export class MockContract<
     return this.client.adapter;
   }
 
+  /**
+   * Reset the underlying mock adapter, removing all stubbed responses and
+   * behaviors.
+   *
+   * @param method - If provided, only reset that method.
+   */
   reset(method?: FunctionKey<ReadWriteAdapter>) {
     return this.adapter.reset(method);
   }
