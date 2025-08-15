@@ -27,63 +27,73 @@ Drift instance that you can use to stub client methods and simulate contract
 interactions. This is useful for unit tests where you want to isolate your
 application logic from the blockchain.
 
-For example, here's how you can test a function that calculates a user's asset
+For example, here's how you can test a function that calculates a accounts's asset
 value from their vault shares:
 
-```ts twoslash
-// @noErrors
+:::code-group
+
+```ts twoslash [getAccountAssetValue.test.ts] filename="getAccountAssetValue.test.ts"
 import assert from "node:assert";
-import test from "node:test";
-import { type Address, type Drift, erc4626 } from "@delvtech/drift";
+import { afterEach, describe, it } from "node:test";
+import { erc4626 } from "@delvtech/drift";
 import { createMockDrift, randomAddress } from "@delvtech/drift/testing";
+import { getAccountAssetValue } from "./getAccountAssetValue";
 
-// Simple function that fetches share balance and converts to assets
-async function getUserAssetValue(
-  drift: Drift,
-  vaultAddress: Address,
-  userAddress: Address,
-) {
-  const vault = drift.contract({ abi: erc4626.abi, address: vaultAddress });
-  const shares = await vault.read("balanceOf", { account: userAddress });
-  return vault.read("convertToAssets", { shares });
-}
+// Create mocks
+const accountAddress = randomAddress();
+const vaultAddress = randomAddress();
+const mockDrift = createMockDrift();
+const mockVault = mockDrift.contract({
+  abi: erc4626.abi,
+  address: vaultAddress,
+});
 
-// Test case for getUserAssetValue function
-test("getUserAssetValue returns user's shares converted to assets", async () => {
-  // Set up mocks
-  const userAddress = randomAddress();
-  const vaultAddress = randomAddress();
-  const mockDrift = createMockDrift();
-  const mockVault = mockDrift.contract({
-    abi: erc4626.abi,
-    address: vaultAddress,
+describe("getAccountAssetValue", () => {
+  // Reset mocks after each test
+  afterEach(() => {
+    mockDrift.reset();
   });
 
-  // Stub the vault's return values using `on*` methods //
+  it("returns an account's shares converted to assets", async () => {
+    // Set up method responses with or without specific parameters
+    mockVault
+      .onRead("balanceOf", { account: accountAddress })
+      .resolves(BigInt(100e18));
+    mockVault
+      .onRead("convertToAssets")
+      .callsFake(
+        async (params) => (params.args.shares * BigInt(1.5e18)) / BigInt(1e18),
+      );
 
-  // Return 100 shares for the user's address
-  mockVault
-    .onRead("balanceOf", { account: userAddress })
-    .resolves(BigInt(100e18));
-
-  // Simulate the conversion logic: 1 share = 1.5 assets
-  mockVault
-    .onRead("convertToAssets")
-    .callsFake(
-      async (params) => (params.args.shares * BigInt(1.5e18)) / BigInt(1e18),
+    // Call the code under test
+    const assetValue = await getAccountAssetValue(
+      mockDrift,
+      vaultAddress,
+      accountAddress,
     );
 
-  // Call the function under test
-  const assetValue = await getUserAssetValue(
-    mockDrift,
-    vaultAddress,
-    userAddress,
-  );
-
-  // Assert the expected result
-  assert.strictEqual(assetValue, BigInt(150e18));
+    // Assert the expected result
+    assert.strictEqual(assetValue, BigInt(150e18));
+  });
 });
 ```
+
+```ts twoslash [getAccountAssetValue.ts] filename="getAccountAssetValue.ts"
+import { type Address, type Drift, erc4626 } from "@delvtech/drift";
+
+// Simple function that fetches share balance and converts to assets
+export async function getAccountAssetValue(
+  drift: Drift,
+  vaultAddress: Address,
+  accountAddress: Address,
+) {
+  const vault = drift.contract({ abi: erc4626.abi, address: vaultAddress });
+  const shares = await vault.read("balanceOf", { account: accountAddress });
+  return vault.read("convertToAssets", { shares });
+}
+```
+
+:::
 
 ### Benefits of Mocking
 
@@ -145,7 +155,7 @@ You can also test write operations and simulations:
 import assert from "node:assert";
 import type { Address, erc4626 } from "@delvtech/drift";
 import type { MockContract } from "@delvtech/drift/testing";
-declare const userAddress: Address;
+declare const accountAddress: Address;
 declare const mockVault: MockContract<typeof erc4626.abi>;
 // ---cut---
 // Stubs
@@ -159,11 +169,11 @@ mockVault.onWrite("deposit").resolves("0x123..."); // Transaction hash
 // Actions
 const expectedShares = await mockVault.simulateWrite("deposit", {
   assets: BigInt(100e18),
-  receiver: userAddress,
+  receiver: accountAddress,
 });
 const txHash = await mockVault.write("deposit", {
   assets: BigInt(100e18),
-  receiver: userAddress,
+  receiver: accountAddress,
 });
 
 // Assertions
