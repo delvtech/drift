@@ -2,4 +2,4 @@
 "@delvtech/drift": patch
 ---
 
-Add doc comments to `EventLog` fields.
+Added doc comments to `EventLog` fields.
