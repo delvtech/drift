@@ -1,8 +1,8 @@
 import {
   type Address,
   type Contract,
-  type Drift,
   createDrift,
+  type Drift,
   erc4626,
 } from "@delvtech/drift";
 import { fixed } from "@gud/math";

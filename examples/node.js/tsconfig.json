@@ -13,10 +13,6 @@
     "allowImportingTsExtensions": true,
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
-    "baseUrl": ".",
-    "paths": {
-      "src/*": ["src/*"]
-    },
 
     // Type Checking
     "skipLibCheck": true,
