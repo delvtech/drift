@@ -1,5 +1,18 @@
 # @delvtech/drift
 
+## 1.0.0
+
+### Minor Changes
+
+- cb23fdb: Modified `stringifyKey` to append "n" to `BigInt` values before converting them to strings and added a `parseKey` util function for reviving them back to their original form.
+
+### Patch Changes
+
+- 8ea6ba0: Added doc comments to `EventLog` fields.
+- dadcde0: Cleaned up internal `MicrotaskQueue`.
+- 4d0d176: Added a doc comment to the `reset` method of mocks.
+- 09d18d4: Added `blockHash` and `logIndex` to `EventLog`.
+
 ## 0.11.1
 
 ### Patch Changes
