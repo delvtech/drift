@@ -1,6 +1,5 @@
 /**
- * A queue of pending requests with their associated resolve and reject
- * callbacks.
+ * A pending request with its associated resolve and reject callbacks.
  * @internal
  */
 export type PendingRequest<TRequest = unknown, TResponse = unknown> = {
@@ -10,7 +9,7 @@ export type PendingRequest<TRequest = unknown, TResponse = unknown> = {
 };
 
 /**
- * A function that processes a batch of requests in a microtask queue.
+ * A function that processes a batch of pending requests in a microtask queue.
  * @internal
  */
 export type BatchFunction<TRequest = unknown, TResponse = unknown> = (
