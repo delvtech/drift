@@ -1,6 +1,7 @@
 import { erc20 } from "@delvtech/drift";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { nightOwl } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { useCopy } from "src/hooks/useCopy";
@@ -50,8 +51,11 @@ function App() {
     refetchOnWindowFocus: false,
   });
 
-  // biome-ignore lint/suspicious/noExplicitAny: debugging
-  (window as any).drift = drift;
+  // Initialize Drift in the global window object so it can be accessed in the
+  // dev tools console.
+  useEffect(() => {
+    (window as any).drift = drift;
+  }, [drift]);
 
   const responseText =
     status === "error"
