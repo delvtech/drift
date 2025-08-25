@@ -78,18 +78,18 @@ export function toHexString<TOptions extends ToHexStringOptions>(
     return `${_prefix}${value.toString(16)}` as ConditionalHexStringType<TOptions>;
   }
 
-  let bytes: Uint8Array;
+  let hexChars = "";
 
   if (typeof value === "string") {
     if (isHexString(value, { prefix })) return value;
-    bytes = getTextEncoder().encode(value);
+    for (let i = 0; i < value.length; i++) {
+      hexChars += value.charCodeAt(i).toString(16).padStart(2, "0");
+    }
   } else {
-    bytes = value;
+    for (const byte of value) {
+      hexChars += byte.toString(16).padStart(2, "0");
+    }
   }
-
-  const hexChars = [...bytes]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
 
   return `${_prefix}${hexChars}` as ConditionalHexStringType<TOptions>;
 }
@@ -110,12 +110,6 @@ export function hexToString(hex: string, options?: IsHexStringOptions): string {
       ?.map((byte) => parseInt(byte, 16)) || [],
   );
   return getTextDecoder().decode(bytes);
-}
-
-let encoder: InstanceType<typeof TextEncoder> | undefined;
-function getTextEncoder() {
-  encoder ||= new TextEncoder();
-  return encoder;
 }
 
 let decoder: InstanceType<typeof TextDecoder> | undefined;
