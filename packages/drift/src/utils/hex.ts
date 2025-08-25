@@ -103,17 +103,12 @@ export function hexToString(hex: string, options?: IsHexStringOptions): string {
   if (!isHexString(hex, options)) {
     throw new Error(`Invalid hex string: ${hex}`);
   }
-  const bytes = new Uint8Array(
-    hex
-      .replace("0x", "")
-      .match(/.{1,2}/g)
-      ?.map((byte) => parseInt(byte, 16)) || [],
-  );
-  return getTextDecoder().decode(bytes);
-}
-
-let decoder: InstanceType<typeof TextDecoder> | undefined;
-function getTextDecoder() {
-  decoder ||= new TextDecoder();
-  return decoder;
+  let utf8 = "";
+  for (let i = 0; i < hex.length; i += 2) {
+    const hexPair = hex.slice(i, 2);
+    if (hexPair === "0x") continue;
+    const charCode = parseInt(hexPair, 16);
+    utf8 += String.fromCharCode(charCode);
+  }
+  return utf8;
 }
