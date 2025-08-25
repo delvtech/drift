@@ -32,10 +32,12 @@ type ConditionalHexStringType<TOptions extends ToHexStringOptions> =
  */
 export function isHexString<TOptions extends IsHexStringOptions>(
   value: unknown,
-  { prefix = true } = {} as TOptions & IsHexStringOptions,
+  options?: IsHexStringOptions,
 ): value is ConditionalHexStringType<TOptions> {
+  const hasPrefix = options?.prefix !== false;
   return (
-    typeof value === "string" && HEX_REGEX.test(prefix ? value : `0x${value}`)
+    typeof value === "string" &&
+    HEX_REGEX.test(hasPrefix ? value : `0x${value}`)
   );
 }
 
@@ -61,6 +63,7 @@ export interface ToHexStringOptions {
  * toHexString("hello"); // '0x68656c6c6f'
  * toHexString(new Uint8Array([104, 101, 108, 108, 111])); // '0x68656c6c6f'
  *
+ * // Omitting the '0x' prefix:
  * toHexString(255, { prefix: false }); // 'ff'
  *
  * // Valid hex strings are returned as-is:
@@ -70,18 +73,15 @@ export interface ToHexStringOptions {
  */
 export function toHexString<TOptions extends ToHexStringOptions>(
   value: string | number | bigint | Uint8Array,
-  { prefix = true } = {} as TOptions & ToHexStringOptions,
+  options?: ToHexStringOptions,
 ): ConditionalHexStringType<TOptions> {
-  const _prefix = prefix === false ? "" : "0x";
-
+  const prefix = options?.prefix === false ? "" : "0x";
   if (typeof value === "number" || typeof value === "bigint") {
-    return `${_prefix}${value.toString(16)}` as ConditionalHexStringType<TOptions>;
+    return `${prefix}${value.toString(16)}` as ConditionalHexStringType<TOptions>;
   }
-
   let hexChars = "";
-
   if (typeof value === "string") {
-    if (isHexString(value, { prefix })) return value;
+    if (isHexString(value, options)) return value;
     for (let i = 0; i < value.length; i++) {
       hexChars += value.charCodeAt(i).toString(16).padStart(2, "0");
     }
@@ -90,8 +90,7 @@ export function toHexString<TOptions extends ToHexStringOptions>(
       hexChars += byte.toString(16).padStart(2, "0");
     }
   }
-
-  return `${_prefix}${hexChars}` as ConditionalHexStringType<TOptions>;
+  return `${prefix}${hexChars}` as ConditionalHexStringType<TOptions>;
 }
 
 /**
