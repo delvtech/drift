@@ -1,5 +1,5 @@
-import { AbiFunction, AbiParameters, Hex } from "ox";
-import type { Abi } from "src/adapter/types/Abi";
+import { AbiFunction, AbiParameters } from "ox";
+import type { Abi, HexString } from "src/adapter/types/Abi";
 import type { DecodeFunctionDataParams } from "src/adapter/types/Adapter";
 import type {
   DecodedFunctionData,
@@ -20,8 +20,8 @@ export function decodeFunctionData<
   TFunctionName
 > {
   try {
-    const sig = Hex.slice(data, 0, 4);
-    const argsData = Hex.slice(data, 4);
+    const sig = data.slice(0, 10) as HexString;
+    const argsData = `0x${data.slice(10)}` as HexString;
     const abiFn = AbiFunction.fromAbi(abi, sig);
     const arrayArgs = AbiParameters.decode(abiFn.inputs, argsData, {
       // Ox can also decode as "Object", but will key unnamed params as `''`, so
