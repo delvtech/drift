@@ -1,7 +1,7 @@
 {
   "name": "@delvtech/drift-viem",
   "description": "Viem adapter for Drift",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "Apache-2.0",
   "author": "Ryan Goree (https://github.com/ryangoree)",
   "repository": {
@@ -38,7 +38,7 @@
     "viem": "^2.33.2"
   },
   "devDependencies": {
-    "@delvtech/drift": "^1.0.0",
+    "@delvtech/drift": "^1.0.1",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2",
