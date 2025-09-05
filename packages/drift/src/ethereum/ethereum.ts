@@ -725,7 +725,7 @@ export namespace Ethereum {
   export type OneOfAny4AwWXjz0AnyABAxY2ULAnyKHp7G2HfAnyQdq2VifRAnyAJpQNBNdAnyAmjdaDn2AnyDF9GWMZpAnyG5FhpaqwAnyGBqgv7J0AnyIT2SFi17AnyIe5JdAN4AnyIudN51DgAnyJEqD45OMAnyMBAECrhdAnyMRNS2WVsAnyP3Wqxkq1AnyPR7OPLmKAnyRLwzZ8OCAnyWLbu46DkLudzICnH = AnyKHp7G2Hf | AnyABAxY2UL | AnyAJpQNBNd | AnyDF9GWMZp | AnyGBqgv7J0 | AnyAmjdaDn2 | AnyMRNS2WVs | AnyP3Wqxkq1 | AnyQdq2VifR | AnyIe5JdAN4 | AnyIT2SFi17 | AnyWLbu46Dk | AnyG5Fhpaqw | AnyPR7OPLmK | AnyIudN51Dg | AnyJEqD45OM | Any4AwWXjz0 | AnyRLwzZ8OC | AnyMBAECrhd;
   /**
    *
-   * The error messages are suggestions and a client might decide to return a different errror message than specified here. However, the error codes are enforced by this specification.
+   * The error messages are suggestions and a client might decide to return a different error message than specified here. However, the error codes are enforced by this specification.
    *
    */
   export interface ResultOfEthSimulateNotBeingValid {
