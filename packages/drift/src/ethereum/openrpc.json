@@ -4763,7 +4763,7 @@
 			},
 			"EthSimulateBlockResultInvalid": {
 				"title": "Result of eth_simulate not being valid",
-				"description": "The error messages are suggestions and a client might decide to return a different errror message than specified here. However, the error codes are enforced by this specification.",
+				"description": "The error messages are suggestions and a client might decide to return a different error message than specified here. However, the error codes are enforced by this specification.",
 				"type": "object",
 				"required": [
 					"error"
