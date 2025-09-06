@@ -6,7 +6,7 @@
 
 - b9804e8: Patched the type params for `MockAdapter` methods `onGetBlock` and `onGetWalletCapabilities`.
 - bbed787: Sped up `toHexString` by about 2.4x.
-- 382712b: Patched a bug in `decodeFunctionData` which caused it to throw and error when the data string contained only a function selector with no args data.
+- 382712b: Patched a bug in `decodeFunctionData` which caused it to throw an error when the data string contained only a function selector with no args data.
 - 01b9bb6: Sped up `hexToString` by about 1.78x.
 
 ## 1.0.0
