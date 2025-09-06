@@ -107,7 +107,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   // getBlock //
 
-  onGetBlock<T extends BlockIdentifier | undefined = undefined>(block?: T) {
+  onGetBlock<T extends BlockIdentifier | undefined>(block?: T) {
     return this.stubs.get<[block?: T], Promise<GetBlockReturn<T>>>({
       method: "getBlock",
       key: this.createKey(block),
@@ -421,7 +421,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   // getWalletCapabilities //
 
-  onGetWalletCapabilities<const TChainIds extends readonly number[] = []>(
+  onGetWalletCapabilities<const TChainIds extends readonly number[]>(
     params?: GetWalletCapabilitiesParams<TChainIds>,
   ) {
     return this.stubs.get<
