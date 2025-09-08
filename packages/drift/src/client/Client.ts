@@ -155,16 +155,16 @@ export function createClient<
     maxBatchSize,
     ...adapterOptions
   } = options;
-  const interceptor = new MethodInterceptor<TAdapter>();
 
   // Handle adapter options.
   const adapter = (maybeAdapter ||
     new DefaultAdapter(adapterOptions)) as TAdapter;
 
   // Handle cache options.
-  const isInstance = storeOrOptions && "clear" in storeOrOptions;
   const store = (
-    isInstance ? storeOrOptions : new LruStore(storeOrOptions)
+    storeOrOptions && "clear" in storeOrOptions
+      ? storeOrOptions
+      : new LruStore(storeOrOptions)
   ) as TStore;
 
   // Create a getter for the chain ID to ensure it's only fetched once.
@@ -181,8 +181,33 @@ export function createClient<
     ? new MulticallQueue({ adapter, cache, getChainId, maxBatchSize })
     : undefined;
 
-  // Prepare client properties.
-  const clientProps: Client<TAdapter, TStore> = {
+  // Create a method interceptor for hooks.
+  const interceptor = new MethodInterceptor<TAdapter>();
+
+  // Extend the adapter prototype to copy over its methods without calling its
+  // constructor. This allows the client to be used as a drop-in replacement for
+  // the adapter.
+
+  function Client() {}
+  Object.defineProperty(Client, "name", {
+    value: `Client<${adapter.constructor.name}>`,
+  });
+
+  const adapterPrototype = Object.getPrototypeOf(adapter);
+  Client.prototype = Object.create(adapterPrototype);
+  Object.defineProperty(Client.prototype, "constructor", {
+    value: Client,
+  });
+  Object.defineProperty(Client.prototype, Symbol.toStringTag, {
+    value: Client.name,
+    writable: true,
+    configurable: true,
+  });
+
+  const client: Client<TAdapter, TStore> = Object.create(Client.prototype);
+
+  // Copy over adapter properties and add client logic.
+  Object.assign(client, {
     ...adapter,
     adapter,
     hooks: interceptor.hooks,
@@ -278,40 +303,7 @@ export function createClient<
         params: { multicallAddress, ...restParams },
       });
     },
-  };
-
-  // Extend the adapter prototype to copy over its methods without calling its
-  // constructor. This allows the client to be used as a drop-in replacement for
-  // the adapter.
-  const adapterPrototype = Object.getPrototypeOf(adapter);
-  function Client() {}
-  Object.defineProperties(Client, {
-    name: {
-      value: `Client<${adapter.constructor.name}>`,
-      enumerable: false,
-      writable: false,
-      configurable: true,
-    },
-  });
-  Client.prototype = Object.create(adapterPrototype, {
-    constructor: {
-      value: Client,
-      enumerable: false,
-      writable: true,
-      configurable: true,
-    },
-    [Symbol.toStringTag]: {
-      value: Client.name,
-      enumerable: false,
-      writable: true,
-      configurable: true,
-    },
-  });
-
-  const client: Client<TAdapter, TStore> = Object.create(
-    Client.prototype,
-    Object.getOwnPropertyDescriptors(clientProps),
-  );
+  } satisfies Client<TAdapter, TStore>);
 
   return interceptor.createProxy(client);
 }

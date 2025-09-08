@@ -157,7 +157,7 @@ describe("DefaultAdapter", () => {
       abi: TestToken.abi,
       address,
       event: "Transfer",
-      fromBlock: currentBlock - 100n,
+      fromBlock: currentBlock - 9n,
     });
     expect(event).toMatchObject({
       args: expect.any(Object),
