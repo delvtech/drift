@@ -103,9 +103,8 @@ npm install @delvtech/drift-ethers-v5
 > [!TIP]
 >
 > Drift can be used without an adapter, however adapters reuse clients from
-> their corresponding web3 library, which can improve performance depending on
-> their configuration. For example, the `publicClient` from Viem can
-> automatically batch requests via Multicall.
+> their corresponding web3 library, which can be useful for sharing connection
+> settings, signers, and other configurations.
 
 ## Start Drifting
 
@@ -155,7 +154,7 @@ const balance = await drift.read({
   args: {
     // Named type-safe arguments improve readability
     // and discoverability through IDE autocompletion
-    account: "0xUserAddress", 
+    account: "0xUserAddress",
   },
 });
 ```
@@ -270,7 +269,7 @@ type VaultAbi = typeof vaultAbi;
 /** A read-only Vault client */
 export class ReadVault {
   contract: ReadContract<VaultAbi>;
-  
+
   constructor(address: Address, drift: Drift = createDrift()) {
     this.contract = drift.contract({
       abi: vaultAbi,
@@ -497,7 +496,9 @@ const fromCache = await contract.read("balanceOf", { account });
 
 // Different parameters will trigger a network request.
 const atBlock = await contract.read("balanceOf", { account }, { block: 123n });
-const otherBalance = await contract.read("balanceOf", { account: "0xOtherAccount" });
+const otherBalance = await contract.read("balanceOf", {
+  account: "0xOtherAccount",
+});
 ```
 
 ### Cache Invalidation
@@ -552,7 +553,7 @@ direct access to the cached data is available via `get*` methods.
 const cachedBalance = await contract.cache.getRead("balanceOf", { account });
 
 // Get a cached transaction receipt
-const cachedReceipt = await drift.cache.getTransactionReceipt({ hash })
+const cachedReceipt = await drift.cache.getTransactionReceipt({ hash });
 ```
 
 The `invalidate*`, `clear*`, `preload*`, and `get*` methods are available on
@@ -635,7 +636,7 @@ drift.hooks.on("before:write", async ({ args: [params] }) => {
 // Run middleware on reads
 drift.hooks.on("before:read", async ({ args: [params], resolve }) => {
   const cachedValue = await drift.cache.getRead(params);
-  const result = await readMiddleware({ drift, params, cachedValue })
+  const result = await readMiddleware({ drift, params, cachedValue });
   resolve(result);
 });
 
