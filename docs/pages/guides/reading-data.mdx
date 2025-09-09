@@ -43,6 +43,66 @@ const balance2 = await token.read("balanceOf", {
 
 :::
 
+## Encoded Calls
+
+For advanced use cases, the `call` method can be used with pre-encoded call
+data:
+
+```ts twoslash
+// [!include ~/snippets/token.ts]
+// ---cut---
+import { encodeFunctionData, decodeFunctionReturn } from "@delvtech/drift";
+
+// Encode call data manually
+const data = encodeFunctionData({
+  abi: erc20.abi,
+  fn: "balanceOf",
+  args: { account: "0x..." },
+});
+
+// Make the call with encoded data
+const result = await drift.call({
+  to: "0x...",
+  data,
+});
+
+// Decode the result
+const balance = decodeFunctionReturn({
+  abi: erc20.abi,
+  fn: "balanceOf",
+  data: result,
+});
+```
+
+## Bytecode (Deployless) Calls
+
+You can call a function directly on contract bytecode without deploying it first
+by passing a `bytecode` to the `call` method instead of a `to` address. This is
+useful for utility contracts that simply read chain state or perform
+calculations without needing to be deployed:
+
+```ts twoslash
+// [!include ~/snippets/token.ts]
+// ---cut---
+import { encodeFunctionData, decodeFunctionReturn } from "@delvtech/drift";
+
+// Call against contract bytecode directly
+const result = await drift.call({
+  bytecode: "0x...", // [!code hl]
+  data: encodeFunctionData({
+    abi: erc20.abi,
+    fn: "name",
+  }),
+});
+
+// Decode the result
+const name = decodeFunctionReturn({
+  abi: erc20.abi,
+  fn: "name",
+  data: result,
+});
+```
+
 ## Multicall
 
 Multicall batches multiple contract calls into a single RPC request using
@@ -67,6 +127,32 @@ const results = await drift.multicall({
 const nameResult = results[0];
 //    ^?
 ```
+
+:::tip
+
+By default, Drift will automatically batch multiple `read` or `call` requests
+made within the same event loop tick into a single multicall request. You can
+control this behavior with the `batch` and `maxBatchSize` options when creating
+the Drift client.
+
+For example:
+
+```ts twoslash
+import { type Address, erc20 } from "@delvtech/drift";
+// [!include ~/snippets/drift.ts]
+declare const tokenA: Address;
+declare const tokenB: Address;
+// ---cut---
+// These will automatically be wrapped into a single multicall request.
+const [name, symbol, totalSupply, balanceOf] = await Promise.all([
+  drift.read({ abi: erc20.abi, address: tokenA, fn: "name" }),
+  drift.read({ abi: erc20.abi, address: tokenA, fn: "symbol" }),
+  drift.read({ abi: erc20.abi, address: tokenB, fn: "name" }),
+  drift.read({ abi: erc20.abi, address: tokenB, fn: "symbol" }),
+]);
+```
+
+:::
 
 ### Direct Values with `allowFailure: false`
 
@@ -107,9 +193,7 @@ const results = await token.multicall({
     { fn: "totalSupply" },
     {
       fn: "balanceOf",
-      args: {
-        account: "0x...",
-      },
+      args: { account: "0x..." },
     },
   ],
 });
@@ -143,94 +227,12 @@ const results = await drift.multicall({
         _tokenId: 1n,
       },
     },
-  ],
-});
-```
-
-## Encoded Calls
-
-For advanced use cases, the `call` method can be used with pre-encoded call
-data:
-
-```ts twoslash
-// [!include ~/snippets/token.ts]
-// ---cut---
-import { encodeFunctionData, decodeFunctionReturn } from "@delvtech/drift";
-
-// Encode call data manually
-const data = encodeFunctionData({
-  abi: erc20.abi,
-  fn: "balanceOf",
-  args: { account: "0x..." },
-});
-
-// Make the call with encoded data
-const result = await drift.call({
-  to: "0x...",
-  data,
-});
-
-// Decode the result
-const balance = decodeFunctionReturn({
-  abi: erc20.abi,
-  fn: "balanceOf",
-  data: result,
-});
-```
-
-### Mixing Encoded and Function Calls
-
-Multicall supports mixing encoded calls with function calls:
-
-```ts twoslash
-// [!include ~/snippets/token.ts]
-import type { Bytes } from "@delvtech/drift";
-declare const calldata: Bytes;
-// ---cut---
-const results = await drift.multicall({
-  calls: [
-    // ABI-based call
-    {
-      abi: erc20.abi,
-      address: "0x...",
-      fn: "name",
-    },
-
     // Raw encoded call
     {
-      to: "0x...",
-      data: calldata,
+      to: "0x...", // [!code hl]
+      data: "0x...",
     },
   ],
-});
-```
-
-## Bytecode (Deployless) Calls
-
-You can call a function directly on contract bytecode without deploying it first
-by passing a `bytecode` to the `call` method instead of a `to` address. This is
-useful for utility contracts that simply read chain state or perform
-calculations without needing to be deployed:
-
-```ts twoslash
-// [!include ~/snippets/token.ts]
-// ---cut---
-import { encodeFunctionData, decodeFunctionReturn } from "@delvtech/drift";
-
-// Call against contract bytecode directly
-const result = await drift.call({
-  bytecode: "0x...", // [!code hl]
-  data: encodeFunctionData({
-    abi: erc20.abi,
-    fn: "name",
-  }),
-});
-
-// Decode the result
-const name = decodeFunctionReturn({
-  abi: erc20.abi,
-  fn: "name",
-  data: result,
 });
 ```
 
@@ -244,18 +246,20 @@ like `earliest`, `safe`, or `pending`.
 // [!include ~/snippets/token.ts]
 // ---cut---
 // Read at a specific block number
-const pastBalance = await token.read(
-  "balanceOf",
-  { account: "0x..." },
-  { block: 100n }, // [!code hl]
-);
+const pastBalance = await drift.read({
+  abi: erc20.abi,
+  address: "0x...",
+  fn: "balanceOf",
+  args: { account: "0x..." },
+  block: 100n, // [!code hl]
+});
 
-// Use block tags
-const latestBalance = await token.read(
-  "balanceOf",
-  { account: "0x..." },
-  { block: "safe" }, // [!code hl]
-);
+// Using block tags
+const returnData = await drift.call({
+  to: "0x...",
+  data: "0x...",
+  block: "safe", // [!code hl]
+});
 
 // Works with multicall too
 const historicalData = await drift.multicall({
@@ -265,11 +269,18 @@ const historicalData = await drift.multicall({
   ],
   block: 100n, // [!code hl]
 });
+
+// Contract instances accept options as the last parameter
+const pastBalance2 = await token.read(
+  "balanceOf",
+  { account: "0x..." },
+  { block: 100n }, // [!code hl]
+);
 ```
 
 ## Performance Tips
 
-### 1. Use Multicall for Multiple Reads
+### 1. Use `Promise.all` or `multicall` for Multiple Reads
 
 ```ts twoslash
 // @filename: individual-reads.ts
@@ -279,6 +290,17 @@ const historicalData = await drift.multicall({
 const name = await token.read("name");
 const symbol = await token.read("symbol");
 const decimals = await token.read("decimals");
+
+// ---cut-start---
+// @filename: promiseAll.ts
+// [!include ~/snippets/token.ts]
+// ---cut-end---
+// ✅ Single network request (via automatic batching)
+const [name, symbol, decimals] = await Promise.all([
+  token.read("name"),
+  token.read("symbol"),
+  token.read("decimals"),
+]);
 
 // ---cut-start---
 // @filename: multicall.ts
@@ -306,4 +328,8 @@ await Promise.all([
 // These calls now return immediately from cache
 const name = await token.read("name"); // No network request
 const symbol = await token.read("symbol"); // No network request
+```
+
+```
+
 ```
