@@ -33,7 +33,7 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(MissingStubError);
     });
 
     it("can be stubbed", async () => {
@@ -52,7 +52,7 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(MissingStubError);
     });
 
     it("can be stubbed", async () => {
@@ -71,7 +71,7 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(MissingStubError);
     });
 
     it("can be stubbed with no args", async () => {
@@ -102,7 +102,7 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(MissingStubError);
     });
 
     it("can be stubbed with specific params", async () => {
@@ -128,6 +128,25 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       adapter.onGetBalance().resolves(123n);
       expect(await adapter.getBalance({ address: "0x" })).toBe(123n);
+    });
+  });
+
+  describe("getGasPrice", () => {
+    it("throws an error by default", async () => {
+      const adapter = new MockAdapter();
+      let error: unknown;
+      try {
+        await adapter.getGasPrice();
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(MissingStubError);
+    });
+
+    it("can be stubbed", async () => {
+      const adapter = new MockAdapter();
+      adapter.onGetGasPrice().resolves(123n);
+      expect(await adapter.getGasPrice()).toBe(123n);
     });
   });
 
@@ -215,7 +234,7 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(MissingStubError);
     });
 
     it("can be stubbed with specific params", async () => {
@@ -246,7 +265,7 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(MissingStubError);
     });
 
     it("can be stubbed with args", async () => {
@@ -337,7 +356,7 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(MissingStubError);
     });
 
     it("can be stubbed with specific params", async () => {
@@ -383,7 +402,7 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(MissingStubError);
     });
 
     it("can be stubbed with args", async () => {
@@ -476,7 +495,7 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(MissingStubError);
     });
 
     it("can be stubbed with args", async () => {
@@ -736,7 +755,7 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(MissingStubError);
     });
 
     it("can be stubbed", async () => {
@@ -755,7 +774,7 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(MissingStubError);
     });
 
     it("can be stubbed with specific params", async () => {
@@ -794,7 +813,7 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(MissingStubError);
     });
 
     it("can be stubbed with no args", async () => {
@@ -858,7 +877,7 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(MissingStubError);
     });
 
     it("can be stubbed with specific args", async () => {
@@ -920,7 +939,7 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(MissingStubError);
     });
 
     it("can be stubbed with specific args", async () => {
@@ -1030,7 +1049,7 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(MissingStubError);
     });
 
     it("can be stubbed with args", async () => {
@@ -1151,7 +1170,7 @@ describe("MockAdapter", () => {
       } catch (e) {
         error = e;
       }
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(MissingStubError);
     });
 
     it("can be stubbed with no args", async () => {

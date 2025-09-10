@@ -98,6 +98,7 @@ export abstract class BaseReadAdapter
     blockId?: T,
   ): Promise<GetBlockReturn<T>>;
   abstract getBalance(params: GetBalanceParams): Promise<bigint>;
+  abstract getGasPrice(): Promise<bigint>;
   abstract getTransaction(
     params: GetTransactionParams,
   ): Promise<Transaction | undefined>;

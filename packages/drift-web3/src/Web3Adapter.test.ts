@@ -57,6 +57,11 @@ describe("Web3Adapter", () => {
     expect(balance).toBeTypeOf("bigint");
   });
 
+  it("fetches the current gas price", async () => {
+    const gasPrice = await adapter.getGasPrice();
+    expect(gasPrice).toBeTypeOf("bigint");
+  });
+
   it("fetches transactions", async () => {
     let block = await web3.eth.getBlock();
     while (block.transactions.length === 0) {

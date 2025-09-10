@@ -66,6 +66,11 @@ describe("DefaultAdapter", () => {
     expect(balance).toBeTypeOf("bigint");
   });
 
+  it("fetches the current gas price", async () => {
+    const gasPrice = await adapter.getGasPrice();
+    expect(gasPrice).toBeTypeOf("bigint");
+  });
+
   it("fetches transactions", async () => {
     let block: Block | undefined = await adapter.getBlock();
     while (block?.transactions.length === 0) {

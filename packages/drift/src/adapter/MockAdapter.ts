@@ -139,6 +139,18 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     })(params);
   }
 
+  // getGasPrice //
+
+  onGetGasPrice() {
+    return this.stubs.get<[], Promise<bigint>>({
+      method: "getGasPrice",
+    });
+  }
+
+  async getGasPrice() {
+    return this.onGetGasPrice()();
+  }
+
   // getTransaction //
 
   onGetTransaction(params?: Partial<GetTransactionParams>) {

@@ -35,6 +35,11 @@ export interface Network {
   getBalance(params: GetBalanceParams): Promise<bigint>;
 
   /**
+   * Returns an estimate of the current price per gas in wei.
+   */
+  getGasPrice(): Promise<bigint>;
+
+  /**
    * Get a transaction from a transaction hash.
    */
   getTransaction(
