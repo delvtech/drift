@@ -6,6 +6,21 @@
 
 - 5bbd2ed: Renamed packages from `@delvtech` to `@gud` scope.
 
+## 2.0.0-next.0
+
+### Major Changes
+
+- a40ae6f: Changed `transactionIndex` field on transactions and transaction receipts from a `bigint` to a `number` to be consistent with event field types.
+
+### Minor Changes
+
+- 191a731: Added `getGasPrice` method.
+
+### Patch Changes
+
+- 3fd4438: Sped up `createClient` (called by `createDrift` and `createMockClient`) by about 1.32x.
+- 24a7ff1: Added `address`, `removed`, `topics`, and `transactionIndex` to event logs (`EventLog`).
+
 ## 1.0.1
 
 ### Patch Changes

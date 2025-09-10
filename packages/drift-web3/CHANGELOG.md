@@ -6,6 +6,25 @@
 
 - 5bbd2ed: Renamed packages from `@delvtech` to `@gud` scope.
 
+## 2.0.0-next.0
+
+### Major Changes
+
+- a40ae6f: Changed `transactionIndex` field on transactions and transaction receipts from a `bigint` to a `number` to be consistent with event field types.
+
+### Minor Changes
+
+- 191a731: Added `getGasPrice` method.
+
+### Patch Changes
+
+- 24a7ff1: Added `address`, `removed`, `topics`, and `transactionIndex` to event logs (`EventLog`).
+- Updated dependencies [3fd4438]
+- Updated dependencies [191a731]
+- Updated dependencies [a40ae6f]
+- Updated dependencies [24a7ff1]
+  - @delvtech/drift@2.0.0-next.0
+
 ## 1.0.1
 
 ## 1.0.0
