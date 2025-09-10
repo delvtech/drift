@@ -88,7 +88,7 @@ describe("DefaultAdapter", () => {
       blockNumber: expect.any(BigInt),
       from: expect.stringMatching(HEX_REGEX),
       transactionHash: expect.stringMatching(HEX_REGEX),
-      transactionIndex: expect.any(BigInt),
+      transactionIndex: expect.any(Number),
       chainId: expect.any(Number),
       to: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
     } satisfies Transaction);
@@ -117,7 +117,7 @@ describe("DefaultAdapter", () => {
       status: expect.stringMatching(/^(success|reverted)$/),
       to: expect.stringMatching(HEX_REGEX),
       transactionHash: expect.stringMatching(HEX_REGEX),
-      transactionIndex: expect.any(BigInt),
+      transactionIndex: expect.any(Number),
       contractAddress: expect.toBeOneOf([
         expect.stringMatching(HEX_REGEX),
         undefined,

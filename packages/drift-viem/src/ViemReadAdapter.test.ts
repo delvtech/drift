@@ -78,7 +78,7 @@ describe("ViemReadAdapter", () => {
       from: expect.stringMatching(HEX_REGEX),
       transactionHash: expect.stringMatching(HEX_REGEX),
       to: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
-      transactionIndex: expect.any(BigInt),
+      transactionIndex: expect.any(Number),
     } satisfies Transaction);
   });
 
@@ -108,7 +108,7 @@ describe("ViemReadAdapter", () => {
       logsBloom: expect.stringMatching(HEX_REGEX),
       status: expect.stringMatching(/^(success|reverted)$/),
       transactionHash: expect.stringMatching(HEX_REGEX),
-      transactionIndex: expect.any(BigInt),
+      transactionIndex: expect.any(Number),
     } satisfies TransactionReceipt);
   });
 

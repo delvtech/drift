@@ -151,7 +151,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
           status: ethersReceipt.status ? "success" : "reverted",
           to: ethersReceipt.to ?? undefined,
           transactionHash: ethersReceipt.transactionHash,
-          transactionIndex: BigInt(ethersReceipt.transactionIndex),
+          transactionIndex: ethersReceipt.transactionIndex,
         }
       : undefined;
     return receipt;

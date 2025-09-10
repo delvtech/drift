@@ -24,7 +24,7 @@ describe("createStubTransaction", () => {
       ]),
       blockNumber: expect.toBeOneOf([expect.any(BigInt), undefined]),
       from: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
-      transactionIndex: expect.toBeOneOf([expect.any(BigInt), undefined]),
+      transactionIndex: expect.toBeOneOf([expect.any(Number), undefined]),
     } satisfies Transaction);
   });
 });

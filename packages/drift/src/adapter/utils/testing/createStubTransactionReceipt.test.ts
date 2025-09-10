@@ -16,7 +16,10 @@ describe("createStubTransactionReceipt", () => {
       ]),
       blockNumber: expect.toBeOneOf([expect.any(BigInt), undefined]),
       from: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
-      transactionIndex: expect.toBeOneOf([expect.any(BigInt), undefined]),
+      transactionIndex: expect.toBeOneOf<number | undefined>([
+        expect.any(Number),
+        undefined,
+      ]),
       cumulativeGasUsed: expect.any(BigInt),
       gasUsed: expect.any(BigInt),
       logsBloom: expect.stringMatching(HEX_REGEX),

@@ -117,7 +117,7 @@ export class ViemReadAdapter<TClient extends AnyClient = PublicClient>
       chainId: tx.chainId,
       transactionHash: tx.hash,
       to: tx.to ?? undefined,
-      transactionIndex: BigInt(tx.transactionIndex),
+      transactionIndex: tx.transactionIndex,
     };
   }
 
@@ -141,7 +141,7 @@ export class ViemReadAdapter<TClient extends AnyClient = PublicClient>
       status: receipt.status,
       to: receipt.to ?? undefined,
       transactionHash: receipt.transactionHash,
-      transactionIndex: BigInt(receipt.transactionIndex),
+      transactionIndex: receipt.transactionIndex,
     };
   }
 

@@ -127,7 +127,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
           input: ethersTx.data,
           nonce: BigInt(ethersTx.nonce),
           to: ethersTx.to ?? undefined,
-          transactionIndex: BigInt(ethersTx.index),
+          transactionIndex: ethersTx.index,
           type: toHexString(ethersTx.type),
           value: ethersTx.value,
         }
@@ -154,7 +154,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
           status: ethersReceipt.status ? "success" : "reverted",
           to: ethersReceipt?.to ?? undefined,
           transactionHash: ethersReceipt.hash,
-          transactionIndex: BigInt(ethersReceipt.index),
+          transactionIndex: ethersReceipt.index,
         }
       : undefined;
     return receipt;

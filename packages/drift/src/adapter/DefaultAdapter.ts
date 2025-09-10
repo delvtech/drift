@@ -145,10 +145,9 @@ export class DefaultReadAdapter extends BaseReadAdapter implements ReadAdapter {
       })
       .then((tx) => {
         if (!tx) return undefined;
-        const { to, transactionIndex, hash, ...rest } = Transaction.fromRpc(tx);
+        const { to, hash, ...rest } = Transaction.fromRpc(tx);
         return {
           to: to || undefined,
-          transactionIndex: BigInt(transactionIndex),
           transactionHash: hash,
           ...rest,
         };
@@ -170,11 +169,10 @@ export class DefaultReadAdapter extends BaseReadAdapter implements ReadAdapter {
             })
             .then((receipt) => {
               if (receipt) {
-                const { to, transactionIndex, contractAddress, ...rest } =
+                const { to, contractAddress, ...rest } =
                   TransactionReceipt.fromRpc(receipt);
                 resolve({
                   to: to || undefined,
-                  transactionIndex: BigInt(transactionIndex),
                   contractAddress: contractAddress || undefined,
                   ...rest,
                 });

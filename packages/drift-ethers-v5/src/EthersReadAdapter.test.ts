@@ -112,7 +112,7 @@ describe("EthersReadAdapter", () => {
       status: expect.stringMatching(/^(success|reverted)$/),
       to: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
       transactionHash: expect.stringMatching(HEX_REGEX),
-      transactionIndex: expect.any(BigInt),
+      transactionIndex: expect.any(Number),
     } satisfies TransactionReceipt);
   });
 

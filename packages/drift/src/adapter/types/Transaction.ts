@@ -20,7 +20,7 @@ export interface TransactionInfo {
   blockNumber?: bigint;
   from?: Address;
   transactionHash?: Hash;
-  transactionIndex?: bigint;
+  transactionIndex?: number;
 }
 
 export interface Transaction extends BaseTransactionProps, TransactionInfo {}

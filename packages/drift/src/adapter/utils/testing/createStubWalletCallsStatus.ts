@@ -26,7 +26,7 @@ export function createStubWalletCallsStatus<
   const blockHash = overrides.receipts?.[0]?.blockHash ?? randomHex(32);
   const transactionHash =
     overrides.receipts?.[0]?.transactionHash ?? randomHex(32);
-  return {
+  const stub: WalletCallsStatus = {
     version: "2.0.0",
     chainId: 1,
     id: randomHex(randomInt(32, 128)),
@@ -47,6 +47,6 @@ export function createStubWalletCallsStatus<
             transactionHash,
           }))
         : undefined),
-    ...overrides,
   };
+  return Object.assign(stub, overrides);
 }

@@ -81,7 +81,7 @@ describe("Web3Adapter", () => {
       from: expect.stringMatching(HEX_REGEX),
       transactionHash: expect.stringMatching(HEX_REGEX),
       to: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
-      transactionIndex: expect.any(BigInt),
+      transactionIndex: expect.any(Number),
     } satisfies Transaction);
   });
 
@@ -107,7 +107,7 @@ describe("Web3Adapter", () => {
       status: expect.stringMatching(/^(success|reverted)$/),
       to: expect.toBeOneOf([expect.stringMatching(HEX_REGEX), undefined]),
       transactionHash: expect.stringMatching(HEX_REGEX),
-      transactionIndex: expect.any(BigInt),
+      transactionIndex: expect.any(Number),
       contractAddress: expect.toBeOneOf([
         expect.stringMatching(HEX_REGEX),
         undefined,

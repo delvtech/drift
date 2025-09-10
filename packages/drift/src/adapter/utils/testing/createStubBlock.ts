@@ -10,7 +10,7 @@ import type { Eval, Replace, Writable } from "src/utils/types";
 export function createStubBlock<const T extends Partial<Block> = Block>(
   overrides: T = {} as T,
 ): Eval<Replace<Block, Writable<T>>> {
-  return {
+  const stub: Block = {
     extraData: "0x",
     gasLimit: 30_000_000n,
     gasUsed: 108_000_000n,
@@ -28,6 +28,6 @@ export function createStubBlock<const T extends Partial<Block> = Block>(
     timestamp: BigInt(Date.now()) / 1000n,
     transactions: [],
     transactionsRoot: randomHex(32),
-    ...overrides,
   };
+  return Object.assign(stub, overrides);
 }

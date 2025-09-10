@@ -59,7 +59,6 @@ declare module "@delvtech/drift" {
      * @see [Ethers.js - TransactionResponse - gasPrice](https://docs.ethers.org/v6/api/providers/#TransactionResponse-gasPrice)
      */
     effectiveGasPrice: bigint;
-    transactionIndex: bigint;
   }
 
   interface ContractCallOptions {

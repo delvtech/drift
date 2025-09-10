@@ -314,7 +314,7 @@ export class EthersReadWriteAdapter<
           status: ethersReceipt.status ? "success" : "reverted",
           to: ethersReceipt.to,
           transactionHash: ethersReceipt.transactionHash,
-          transactionIndex: BigInt(ethersReceipt.transactionIndex),
+          transactionIndex: ethersReceipt.transactionIndex,
         };
         onMined(receipt);
       });

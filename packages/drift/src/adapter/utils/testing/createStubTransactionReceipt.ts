@@ -10,7 +10,7 @@ import type { Eval, Replace, Writable } from "src/utils/types";
 export function createStubTransactionReceipt<
   const T extends Partial<TransactionReceipt> = TransactionReceipt,
 >(overrides: T = {} as T): Eval<Replace<TransactionReceipt, Writable<T>>> {
-  return {
+  const stub: TransactionReceipt = {
     blockHash: randomHex(32),
     blockNumber: 1n,
     contractAddress: randomAddress(),
@@ -22,7 +22,7 @@ export function createStubTransactionReceipt<
     status: "success",
     to: randomAddress(),
     transactionHash: randomHex(32),
-    transactionIndex: 0n,
-    ...overrides,
+    transactionIndex: 0,
   };
+  return Object.assign(stub, overrides);
 }

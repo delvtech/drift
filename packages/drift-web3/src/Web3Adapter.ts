@@ -109,7 +109,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
           to: tx.to ?? undefined,
           transactionIndex:
             typeof tx.transactionIndex !== "undefined"
-              ? BigInt(tx.transactionIndex)
+              ? Number(tx.transactionIndex)
               : undefined,
           type: typeof tx.type === "string" ? tx.type : toHexString(tx.type),
           value: BigInt(tx.value),
@@ -129,9 +129,10 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
             receipt
               ? resolve({
                   ...receipt,
-                  to: receipt.to ?? undefined,
                   effectiveGasPrice: receipt.effectiveGasPrice || 0n,
                   status: receipt.status ? "success" : "reverted",
+                  to: receipt.to ?? undefined,
+                  transactionIndex: Number(receipt.transactionIndex),
                 })
               : setTimeout(
                   getReceipt,
@@ -429,6 +430,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
         req.on("receipt", (receipt) => {
           onMined({
             ...receipt,
+            transactionIndex: Number(receipt.transactionIndex),
             effectiveGasPrice: receipt.effectiveGasPrice ?? 0n,
             status: receipt.status ? "success" : "reverted",
           });
@@ -492,7 +494,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
             gasUsed: BigInt(receipt.gasUsed),
             to: receipt.to,
             transactionHash: toHexString(receipt.transactionHash),
-            transactionIndex: BigInt(receipt.transactionIndex),
+            transactionIndex: Number(receipt.transactionIndex),
           });
         });
       }
@@ -539,6 +541,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
         req.on("receipt", (receipt) => {
           onMined({
             ...receipt,
+            transactionIndex: Number(receipt.transactionIndex),
             effectiveGasPrice: receipt.effectiveGasPrice ?? 0n,
             status: receipt.status ? "success" : "reverted",
           });
