@@ -135,6 +135,13 @@ export class DefaultReadAdapter extends BaseReadAdapter implements ReadAdapter {
       .catch(handleError);
   }
 
+  getGasPrice(): Promise<bigint> {
+    return this.provider
+      .request({ method: "eth_gasPrice" })
+      .then(BigInt)
+      .catch(handleError);
+  }
+
   getTransaction({
     hash,
   }: GetTransactionParams): Promise<TransactionType | undefined> {

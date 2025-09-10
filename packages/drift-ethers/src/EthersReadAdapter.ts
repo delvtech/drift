@@ -110,6 +110,11 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     return this.provider.getBalance(address, block);
   }
 
+  async getGasPrice(): Promise<bigint> {
+    const feeData = await this.provider.getFeeData();
+    return feeData.gasPrice ?? BigInt(0);
+  }
+
   async getTransaction({ hash }: GetTransactionParams) {
     const ethersTx = await this.provider.getTransaction(hash);
     const tx: Transaction | undefined = ethersTx

@@ -56,6 +56,11 @@ describe("EthersReadAdapter", () => {
     expect(balance).toBeTypeOf("bigint");
   });
 
+  it("fetches the gas price", async () => {
+    const gasPrice = await adapter.getGasPrice();
+    expect(gasPrice).toBeTypeOf("bigint");
+  });
+
   it("fetches transactions", async () => {
     let block = await provider.getBlock("latest");
     expect(block).toBeDefined();

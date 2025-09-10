@@ -102,6 +102,10 @@ export class ViemReadAdapter<TClient extends AnyClient = PublicClient>
     } as GetBalanceParameters);
   }
 
+  getGasPrice() {
+    return this.publicClient.getGasPrice();
+  }
+
   async getTransaction({ hash }: GetTransactionParams) {
     const tx = await this.publicClient.getTransaction({ hash });
     return {

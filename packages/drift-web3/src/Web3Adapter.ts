@@ -90,6 +90,10 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     return this.web3.eth.getBalance(address, block);
   }
 
+  getGasPrice() {
+    return this.web3.eth.getGasPrice();
+  }
+
   async getTransaction({ hash }: GetTransactionParams) {
     const tx = await this.web3.eth.getTransaction(hash);
     return tx

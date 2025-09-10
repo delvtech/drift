@@ -54,6 +54,11 @@ describe("ViemReadAdapter", () => {
     expect(balance).toBeTypeOf("bigint");
   });
 
+  it("fetches the current gas price", async () => {
+    const gasPrice = await adapter.getGasPrice();
+    expect(gasPrice).toBeTypeOf("bigint");
+  });
+
   it("fetches transactions", async () => {
     let block = await publicClient.getBlock();
     while (block.transactions.length === 0) {

@@ -4,9 +4,9 @@ import {
   type Chain,
   type Client,
   type PublicClient,
+  publicActions,
   type RpcSchema,
   type Transport,
-  publicActions,
 } from "viem";
 
 /**
@@ -33,6 +33,7 @@ const requiredPublicActions = [
   "getBlockNumber",
   "getChainId",
   "getContractEvents",
+  "getGasPrice",
   "getTransaction",
   "sendRawTransaction",
   "waitForTransactionReceipt",
