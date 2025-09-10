@@ -6,6 +6,7 @@ import {
   type Bytes,
   type CallParams,
   type EventArgs,
+  type EventLog,
   type EventName,
   type GetBalanceParams,
   type GetBlockReturn,
@@ -22,6 +23,7 @@ import {
 } from "src/publicClient";
 import {
   type CallParameters,
+  type ContractEventName,
   decodeEventLog,
   type GetBalanceParameters,
   isHex,
@@ -146,7 +148,7 @@ export class ViemReadAdapter<TClient extends AnyClient = PublicClient>
   async getEvents<TAbi extends Abi, TEventName extends EventName<TAbi>>({
     abi,
     address,
-    event,
+    event: eventName,
     filter,
     fromBlock,
     toBlock,
@@ -154,43 +156,36 @@ export class ViemReadAdapter<TClient extends AnyClient = PublicClient>
     const events = await this.publicClient.getContractEvents({
       address,
       abi: abi as Abi,
-      eventName: event as string,
+      eventName: eventName as string,
       fromBlock,
       toBlock,
       args: filter,
     });
-    return events.map(
-      ({
-        args,
-        blockHash,
-        blockNumber,
-        data,
-        logIndex,
-        transactionHash,
-        topics,
-      }) => {
-        const objectArgs = (
-          Array.isArray(args)
-            ? decodeEventLog({
-                abi,
-                eventName: event as any,
-                data,
-                topics,
-              }).args
-            : args
-        ) as EventArgs<TAbi, TEventName>;
-
-        return {
-          args: objectArgs,
-          blockHash: blockHash ?? undefined,
-          blockNumber: blockNumber ?? undefined,
-          data,
-          eventName: event,
-          logIndex: logIndex ?? undefined,
-          transactionHash: transactionHash ?? undefined,
-        };
-      },
-    );
+    return events.map((event) => {
+      const objectArgs = (
+        Array.isArray(event.args)
+          ? decodeEventLog({
+              abi,
+              eventName: event.eventName as ContractEventName<TAbi>,
+              data: event.data,
+              topics: event.topics,
+            }).args
+          : event.args
+      ) as EventArgs<TAbi, TEventName>;
+      return {
+        address: event.address,
+        args: objectArgs,
+        blockHash: event.blockHash ?? undefined,
+        blockNumber: event.blockNumber ?? undefined,
+        data: event.data,
+        eventName,
+        logIndex: event.logIndex ?? undefined,
+        removed: event.removed,
+        topics: event.topics,
+        transactionHash: event.transactionHash ?? undefined,
+        transactionIndex: event.transactionIndex ?? undefined,
+      } satisfies EventLog<TAbi, TEventName>;
+    });
   }
 
   async call({ block, bytecode, from, nonce, ...rest }: CallParams) {

@@ -241,21 +241,32 @@ describe("EthersReadAdapter", () => {
 
   it("fetches events", async () => {
     const currentBlock = await provider.getBlockNumber();
-    const events = await adapter.getEvents({
-      abi: erc20.abi,
-      address,
-      event: "Transfer",
-      fromBlock: BigInt(currentBlock - 100),
-    });
-    expect(events).toBeInstanceOf(Array);
-    expect(events[0]).toMatchObject({
-      eventName: "Transfer",
+    let event: EventLog<typeof erc20.abi, "Transfer"> | undefined;
+    for (let i = 0; i <= 10 && !event; i++) {
+      await new Promise((r) => setTimeout(r, 2 ** i * 100));
+      const toBlock = BigInt(currentBlock - 9 * i);
+      const events = await adapter.getEvents({
+        abi: erc20.abi,
+        address,
+        event: "Transfer",
+        fromBlock: toBlock - 9n,
+        toBlock,
+      });
+      event = events[0];
+    }
+    assert(event, "No events found in the last 100 blocks");
+    expect(event).toMatchObject({
+      address: expect.stringMatching(HEX_REGEX),
       args: expect.any(Object),
       blockHash: expect.stringMatching(HEX_REGEX),
       blockNumber: expect.any(BigInt),
       data: expect.stringMatching(HEX_REGEX),
+      eventName: "Transfer",
       logIndex: expect.any(Number),
+      removed: expect.any(Boolean),
+      topics: expect.any(Array),
       transactionHash: expect.stringMatching(HEX_REGEX),
+      transactionIndex: expect.any(Number),
     } satisfies EventLog<typeof erc20.abi, "Transfer">);
   });
 

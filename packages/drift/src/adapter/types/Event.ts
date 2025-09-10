@@ -4,6 +4,7 @@ import type {
   AbiObjectType,
   AbiParameters,
   AbiParametersToObject,
+  Address,
   Bytes,
   Hash,
   NamedAbiParameter,
@@ -60,6 +61,10 @@ export type EventLog<
   TEventName extends EventName<TAbi> = EventName<TAbi>,
 > = {
   /**
+   * The address from which this log originated.
+   */
+  address: Address;
+  /**
    * The name of the emitted event.
    */
   eventName: TEventName;
@@ -72,6 +77,10 @@ export type EventLog<
    */
   data: Bytes;
   /**
+   * Array of 0 to 4 32 Bytes of indexed log arguments.
+   */
+  topics: Hash[];
+  /**
    * The hash of the block this log was in or `undefined` if pending.
    */
   blockHash: Hash | undefined;
@@ -80,11 +89,19 @@ export type EventLog<
    */
   blockNumber: bigint | undefined;
   /**
-   * The index of the log in the block or `undefined` if pending.
+   * The index of the log within the block or `undefined` if pending.
    */
   logIndex: number | undefined;
   /**
    * The hash of the transaction this event was created from or `undefined` if pending.
    */
   transactionHash: Hash | undefined;
+  /**
+   * The index of the transaction within the block or `undefined` if pending.
+   */
+  transactionIndex: number | undefined;
+  /**
+   * Whether this log was removed, due to a chain reorganization.
+   */
+  removed: boolean;
 };

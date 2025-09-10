@@ -19,7 +19,7 @@ describe("createStubEvent", () => {
       },
     });
     expect(event).toStrictEqual({
-      eventName: "Transfer",
+      address: expect.stringMatching(HEX_REGEX),
       args: {
         from: "0xBob",
         to: "0xAlice",
@@ -28,8 +28,12 @@ describe("createStubEvent", () => {
       blockHash: expect.stringMatching(HEX_REGEX),
       blockNumber: expect.any(BigInt),
       data: expect.stringMatching(HEX_REGEX),
+      eventName: "Transfer",
       logIndex: expect.any(Number),
+      removed: expect.any(Boolean),
+      topics: expect.any(Array),
       transactionHash: expect.stringMatching(HEX_REGEX),
+      transactionIndex: expect.any(Number),
     } satisfies EventLog<typeof IERC20.abi, "Transfer">);
   });
 });
@@ -58,7 +62,7 @@ describe("createStubEvents", () => {
     });
     expect(events).toStrictEqual([
       {
-        eventName: "Transfer",
+        address: expect.stringMatching(HEX_REGEX),
         args: {
           from: "0xAlice",
           to: "0xBob",
@@ -67,11 +71,15 @@ describe("createStubEvents", () => {
         blockHash: expect.stringMatching(HEX_REGEX),
         blockNumber: expect.any(BigInt),
         data: expect.stringMatching(HEX_REGEX),
+        eventName: "Transfer",
         logIndex: expect.any(Number),
+        removed: expect.any(Boolean),
+        topics: expect.any(Array),
         transactionHash: expect.stringMatching(HEX_REGEX),
+        transactionIndex: expect.any(Number),
       },
       {
-        eventName: "Transfer",
+        address: expect.stringMatching(HEX_REGEX),
         args: {
           from: "0xBob",
           to: "0xAlice",
@@ -80,8 +88,12 @@ describe("createStubEvents", () => {
         blockHash: expect.stringMatching(HEX_REGEX),
         blockNumber: expect.any(BigInt),
         data: expect.stringMatching(HEX_REGEX),
+        eventName: "Transfer",
         logIndex: expect.any(Number),
+        removed: expect.any(Boolean),
+        topics: expect.any(Array),
         transactionHash: expect.stringMatching(HEX_REGEX),
+        transactionIndex: expect.any(Number),
       },
     ] satisfies EventLog<typeof IERC20.abi, "Transfer">[]);
   });

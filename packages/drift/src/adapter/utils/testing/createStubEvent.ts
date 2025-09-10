@@ -1,15 +1,14 @@
 import type { Abi } from "src/adapter/types/Abi";
 import type { EventLog, EventName } from "src/adapter/types/Event";
+import { randomAddress } from "src/utils/testing/randomAddress";
 import { randomHex } from "src/utils/testing/randomHex";
-import type { Eval, PartialBy } from "src/utils/types";
+import { randomInt } from "src/utils/testing/randomInt";
+import type { Eval, RequiredBy } from "src/utils/types";
 
 type PartialEventLog<
   TAbi extends Abi,
   TEventName extends EventName<TAbi>,
-> = PartialBy<
-  EventLog<TAbi, TEventName>,
-  "data" | "transactionHash" | "blockNumber" | "blockHash" | "logIndex"
->;
+> = RequiredBy<Partial<EventLog<TAbi, TEventName>>, "eventName" | "args">;
 
 type CreateStubEventParams<
   TAbi extends Abi = Abi,
@@ -28,13 +27,18 @@ export function createStubEvent<
   TAbi extends Abi,
   TEventName extends EventName<TAbi> = EventName<TAbi>,
 >(params: CreateStubEventParams<TAbi, TEventName>): EventLog<TAbi, TEventName> {
-  const { abi, ...overrides } = params;
+  const { abi: _, ...overrides } = params;
+  const transactionIndex = overrides.transactionIndex ?? randomInt(0, 500);
   return {
+    address: randomAddress(),
     blockHash: randomHex(32),
-    blockNumber: 1n,
+    blockNumber: BigInt(randomInt(0, 50_000_000)),
     data: randomHex(),
-    logIndex: 0,
+    logIndex: randomInt(transactionIndex + 1, transactionIndex * 2),
+    removed: false,
+    topics: [],
     transactionHash: randomHex(32),
+    transactionIndex,
     ...overrides,
   };
 }

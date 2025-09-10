@@ -9,6 +9,7 @@ import {
   type DeployParams,
   DriftError,
   type EventArgs,
+  type EventLog,
   type EventName,
   encodeBytecodeCallData,
   type FunctionName,
@@ -217,6 +218,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
       }
 
       return {
+        address: event.address,
         args: event.returnValues as EventArgs<TAbi, TEventName>,
         blockHash: event.blockHash,
         blockNumber:
@@ -229,8 +231,11 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
           typeof event.logIndex === "undefined"
             ? event.logIndex
             : Number(event.logIndex),
+        removed: false,
+        topics: event.topics,
         transactionHash: event.transactionHash,
-      };
+        transactionIndex: Number(event.transactionIndex),
+      } satisfies EventLog<TAbi, TEventName>;
     });
   }
 

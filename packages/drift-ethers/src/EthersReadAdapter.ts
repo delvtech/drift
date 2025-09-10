@@ -237,6 +237,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
 
     return events.map((ethersEvent) => {
       const event: EventLog<TAbi, TEventName> = {
+        address: ethersEvent.address,
         args: arrayToObject({
           abi: abi,
           kind: "inputs",
@@ -247,12 +248,15 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
             TEventName
           >,
         }),
-        eventName: ethersEvent.eventName as TEventName,
         blockHash: ethersEvent.blockHash,
         blockNumber: BigInt(ethersEvent.blockNumber),
         data: ethersEvent.data,
+        eventName: ethersEvent.eventName as TEventName,
         logIndex: ethersEvent.index,
+        removed: ethersEvent.removed,
+        topics: ethersEvent.topics as Hash[],
         transactionHash: ethersEvent.transactionHash,
+        transactionIndex: ethersEvent.transactionIndex,
       };
       return event;
     });
