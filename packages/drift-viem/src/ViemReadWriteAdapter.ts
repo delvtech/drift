@@ -50,8 +50,13 @@ export class ViemReadWriteAdapter<
   }
 
   async getSignerAddress() {
+    if (this.walletClient.account) {
+      return this.walletClient.account.address;
+    }
     const [address] = await this.walletClient.getAddresses();
-    if (!address) throw new DriftError("No signer address found");
+    if (!address) {
+      throw new DriftError("No signer address found");
+    }
     return address;
   }
 
@@ -242,9 +247,11 @@ export class ViemReadWriteAdapter<
   }
 
   private async _getAccount() {
-    return (
-      this.walletClient.account ?? this.getSignerAddress().catch(() => null)
-    );
+    if (this.walletClient.account) {
+      return this.walletClient.account;
+    }
+    const [address] = await this.walletClient.getAddresses();
+    return address || null;
   }
 }
 
