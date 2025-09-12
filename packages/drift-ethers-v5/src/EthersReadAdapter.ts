@@ -181,9 +181,6 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     if (bytecode && data) {
       data = encodeBytecodeCallData(bytecode, data);
     }
-    if (typeof block === "bigint") {
-      block = await this.getBlockNumber();
-    }
     return this.provider.call(
       {
         accessList: accessList as AccessList,
