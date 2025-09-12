@@ -150,7 +150,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     });
   }
 
-  call({
+  async call({
     accessList,
     block,
     bytecode,
@@ -175,7 +175,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
         accessList: accessList as AccessList,
         chainId,
         data,
-        from,
+        from: from || (await this.getSignerAddress().catch(() => undefined)),
         gas,
         gasPrice,
         maxFeePerGas,
