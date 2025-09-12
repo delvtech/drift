@@ -1,7 +1,9 @@
 import type { Abi, Bytes } from "src/adapter/types/Abi";
 import type {
   CallParams,
+  GetBalanceParams,
   GetEventsParams,
+  GetTransactionParams,
   ReadParams,
 } from "src/adapter/types/Adapter";
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
@@ -11,10 +13,6 @@ import type {
   FunctionName,
   FunctionReturn,
 } from "src/adapter/types/Function";
-import type {
-  GetBalanceParams,
-  GetTransactionParams,
-} from "src/adapter/types/Network";
 import type {
   Transaction,
   TransactionReceipt,

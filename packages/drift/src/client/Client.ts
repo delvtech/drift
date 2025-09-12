@@ -2,9 +2,12 @@ import {
   DefaultAdapter,
   type DefaultAdapterOptions,
 } from "src/adapter/DefaultAdapter";
-import type { Adapter, ReadWriteAdapter } from "src/adapter/types/Adapter";
+import type {
+  Adapter,
+  GetBlockReturn,
+  ReadWriteAdapter,
+} from "src/adapter/types/Adapter";
 import type { Block, BlockIdentifier } from "src/adapter/types/Block";
-import type { GetBlockReturn } from "src/adapter/types/Network";
 import { getMulticallAddress } from "src/adapter/utils/getMulticallAddress";
 import { MulticallQueue } from "src/client/batching/MulticallQueue";
 import { ClientCache } from "src/client/cache/ClientCache";

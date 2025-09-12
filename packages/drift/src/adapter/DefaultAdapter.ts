@@ -23,13 +23,17 @@ import type {
 import type {
   CallParams,
   DeployParams,
+  GetBalanceParams,
+  GetBlockReturn,
   GetEventsParams,
+  GetTransactionParams,
   GetWalletCapabilitiesParams,
   ReadAdapter,
   ReadWriteAdapter,
   SendCallsParams,
   SendCallsReturn,
   SendTransactionParams,
+  WaitForTransactionParams,
   WalletCallsStatus,
   WalletCapabilities,
   WriteParams,
@@ -37,12 +41,6 @@ import type {
 import type { BlockIdentifier, BlockTag } from "src/adapter/types/Block";
 import type { EventArgs, EventLog, EventName } from "src/adapter/types/Event";
 import type { FunctionName } from "src/adapter/types/Function";
-import type {
-  GetBalanceParams,
-  GetBlockReturn,
-  GetTransactionParams,
-  WaitForTransactionParams,
-} from "src/adapter/types/Network";
 import type {
   Eip4844Options,
   TransactionOptions,
@@ -267,12 +265,45 @@ export class DefaultReadAdapter extends BaseReadAdapter implements ReadAdapter {
       })
       .catch(handleError);
   }
+
+  estimateGas({
+    to,
+    data,
+    bytecode,
+    block,
+    ...options
+  }: CallParams): Promise<bigint> {
+    if (bytecode && data) {
+      data = encodeBytecodeCallData(bytecode, data);
+    }
+
+    return this.provider
+      .request({
+        method: "eth_estimateGas",
+        params: [
+          { to, data, ...prepareTransactionOptions(options) },
+          prepareBlockParam(block),
+        ],
+      })
+      .then(BigInt)
+      .catch(handleError);
+  }
 }
 
 export class DefaultAdapter
   extends DefaultReadAdapter
   implements ReadWriteAdapter
 {
+  async call({ from, ...options }: CallParams): Promise<Bytes> {
+    from ??= await this.getSignerAddress().catch(() => undefined);
+    return super.call({ from, ...options });
+  }
+
+  async estimateGas({ from, ...options }: CallParams): Promise<bigint> {
+    from ??= await this.getSignerAddress().catch(() => undefined);
+    return super.estimateGas({ from, ...options });
+  }
+
   getSignerAddress(): Promise<AddressType> {
     return this.provider
       .request({ method: "eth_accounts" })

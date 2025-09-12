@@ -39,7 +39,8 @@ describe("MockAdapter", () => {
     it("can be stubbed", async () => {
       const adapter = new MockAdapter();
       adapter.onGetChainId().resolves(123);
-      expect(await adapter.getChainId()).toBe(123);
+      const result = await adapter.getChainId();
+      expect(result).toBe(123);
     });
   });
 
@@ -58,7 +59,8 @@ describe("MockAdapter", () => {
     it("can be stubbed", async () => {
       const adapter = new MockAdapter();
       adapter.onGetBlockNumber().resolves(123n);
-      expect(await adapter.getBlockNumber()).toBe(123n);
+      const result = await adapter.getBlockNumber();
+      expect(result).toBe(123n);
     });
   });
 
@@ -78,8 +80,10 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       const block = createStubBlock({ number: 1n });
       adapter.onGetBlock().resolves(block);
-      expect(await adapter.getBlock()).toBe(block);
-      expect(await adapter.getBlock(1n)).toBe(block);
+      const result1 = await adapter.getBlock();
+      const result2 = await adapter.getBlock(1n);
+      expect(result1).toBe(block);
+      expect(result2).toBe(block);
     });
 
     it("can be stubbed with specific args", async () => {
@@ -88,8 +92,10 @@ describe("MockAdapter", () => {
       const block2 = createStubBlock({ number: 2n });
       adapter.onGetBlock(1n).resolves(block1);
       adapter.onGetBlock(2n).resolves(block2);
-      expect(await adapter.getBlock(1n)).toBe(block1);
-      expect(await adapter.getBlock(2n)).toBe(block2);
+      const result1 = await adapter.getBlock(1n);
+      const result2 = await adapter.getBlock(2n);
+      expect(result1).toBe(block1);
+      expect(result2).toBe(block2);
     });
   });
 
@@ -109,25 +115,32 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       adapter.onGetBalance({ address: "0xAlice" }).resolves(1n);
       adapter.onGetBalance({ address: "0xBob" }).resolves(2n);
-      expect(await adapter.getBalance({ address: "0xAlice" })).toBe(1n);
-      expect(await adapter.getBalance({ address: "0xBob" })).toBe(2n);
+      const result1 = await adapter.getBalance({ address: "0xAlice" });
+      const result2 = await adapter.getBalance({ address: "0xBob" });
+      expect(result1).toBe(1n);
+      expect(result2).toBe(2n);
     });
 
     it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       adapter.onGetBalance({ address: "0xAlice" }).resolves(1n);
-      expect(
-        await adapter.getBalance({ address: "0xAlice", block: "latest" }),
-      ).toBe(1n);
-      expect(
-        await adapter.getBalance({ address: "0xAlice", block: 123n }),
-      ).toBe(1n);
+      const result1 = await adapter.getBalance({
+        address: "0xAlice",
+        block: "latest",
+      });
+      const result2 = await adapter.getBalance({
+        address: "0xAlice",
+        block: 123n,
+      });
+      expect(result1).toBe(1n);
+      expect(result2).toBe(1n);
     });
 
     it("can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       adapter.onGetBalance().resolves(123n);
-      expect(await adapter.getBalance({ address: "0x" })).toBe(123n);
+      const result = await adapter.getBalance({ address: "0x" });
+      expect(result).toBe(123n);
     });
   });
 
@@ -146,14 +159,48 @@ describe("MockAdapter", () => {
     it("can be stubbed", async () => {
       const adapter = new MockAdapter();
       adapter.onGetGasPrice().resolves(123n);
-      expect(await adapter.getGasPrice()).toBe(123n);
+      const result = await adapter.getGasPrice();
+      expect(result).toBe(123n);
+    });
+  });
+
+  describe("estimateGas", () => {
+    it("rejects with an error by default", async () => {
+      const adapter = new MockAdapter();
+      let error: unknown;
+      try {
+        await adapter.estimateGas({ to: "0x", data: "0x" });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(MissingStubError);
+    });
+
+    it("can be stubbed with specific params", async () => {
+      const adapter = new MockAdapter();
+      const params1: CallParams = { to: "0x1", data: "0x1" };
+      const params2: CallParams = { to: "0x2", data: "0x2" };
+      adapter.onEstimateGas(params1).resolves(123n);
+      adapter.onEstimateGas(params2).resolves(456n);
+      const result1 = await adapter.estimateGas(params1);
+      const result2 = await adapter.estimateGas(params2);
+      expect(result1).toBe(123n);
+      expect(result2).toBe(456n);
+    });
+
+    it("can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      adapter.onEstimateGas({ to: "0x1" }).resolves(123n);
+      const result = await adapter.estimateGas({ to: "0x1", data: "0x2" });
+      expect(result).toBe(123n);
     });
   });
 
   describe("getTransaction", () => {
     it("resolves to undefined by default", async () => {
       const adapter = new MockAdapter();
-      expect(await adapter.getTransaction({ hash: "0x" })).toBeUndefined();
+      const result = await adapter.getTransaction({ hash: "0x" });
+      expect(result).toBeUndefined();
     });
 
     it("can be stubbed with specific params", async () => {
@@ -166,22 +213,26 @@ describe("MockAdapter", () => {
       });
       adapter.onGetTransaction({ hash: "0x1" }).resolves(transaction1);
       adapter.onGetTransaction({ hash: "0x2" }).resolves(transaction2);
-      expect(await adapter.getTransaction({ hash: "0x1" })).toBe(transaction1);
-      expect(await adapter.getTransaction({ hash: "0x2" })).toBe(transaction2);
+      const result1 = await adapter.getTransaction({ hash: "0x1" });
+      const result2 = await adapter.getTransaction({ hash: "0x2" });
+      expect(result1).toBe(transaction1);
+      expect(result2).toBe(transaction2);
     });
 
     it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       const transaction = createStubTransaction();
       adapter.onGetTransaction({}).resolves(transaction);
-      expect(await adapter.getTransaction({ hash: "0x" })).toBe(transaction);
+      const result = await adapter.getTransaction({ hash: "0x" });
+      expect(result).toBe(transaction);
     });
 
     it("can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       const transaction = createStubTransaction();
       adapter.onGetTransaction().resolves(transaction);
-      expect(await adapter.getTransaction({ hash: "0x" })).toBe(transaction);
+      const result = await adapter.getTransaction({ hash: "0x" });
+      expect(result).toBe(transaction);
     });
   });
 
@@ -204,24 +255,29 @@ describe("MockAdapter", () => {
       });
       adapter.onWaitForTransaction({ hash: "0x1" }).resolves(receipt1);
       adapter.onWaitForTransaction({ hash: "0x2" }).resolves(receipt2);
-      expect(await adapter.waitForTransaction({ hash: "0x1" })).toBe(receipt1);
-      expect(await adapter.waitForTransaction({ hash: "0x2" })).toBe(receipt2);
+      const result1 = await adapter.waitForTransaction({ hash: "0x1" });
+      const result2 = await adapter.waitForTransaction({ hash: "0x2" });
+      expect(result1).toBe(receipt1);
+      expect(result2).toBe(receipt2);
     });
 
     it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       const receipt = createStubTransactionReceipt();
       adapter.onWaitForTransaction({ hash: "0x" }).resolves(receipt);
-      expect(
-        await adapter.waitForTransaction({ hash: "0x", timeout: 10_000 }),
-      ).toBe(receipt);
+      const result = await adapter.waitForTransaction({
+        hash: "0x",
+        timeout: 10000,
+      });
+      expect(result).toBe(receipt);
     });
 
     it("can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       const receipt = createStubTransactionReceipt();
       adapter.onWaitForTransaction().resolves(receipt);
-      expect(await adapter.waitForTransaction({ hash: "0x" })).toBe(receipt);
+      const result = await adapter.waitForTransaction({ hash: "0x" });
+      expect(result).toBe(receipt);
     });
   });
 
@@ -241,14 +297,16 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       adapter.onSendRawTransaction("0x1").resolves("0xa");
       adapter.onSendRawTransaction("0x2").resolves("0xb");
-      expect(await adapter.sendRawTransaction("0x1")).toBe("0xa");
+      const result1 = await adapter.sendRawTransaction("0x1");
+      expect(result1).toBe("0xa");
       expect(await adapter.sendRawTransaction("0x2")).toBe("0xb");
     });
 
     it("can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       adapter.onSendRawTransaction().resolves("0xa");
-      expect(await adapter.sendRawTransaction("0x1")).toBe("0xa");
+      const result = await adapter.sendRawTransaction("0x1");
+      expect(result).toBe("0xa");
     });
   });
 
@@ -283,14 +341,13 @@ describe("MockAdapter", () => {
           filter: { from: "0x1" },
         })
         .resolves(events);
-      expect(
-        await adapter.getEvents({
-          abi: TestToken.abi,
-          address: "0x1",
-          event: "Transfer",
-          filter: { from: "0x1" },
-        }),
-      ).toBe(events);
+      const result = await adapter.getEvents({
+        abi: TestToken.abi,
+        address: "0x1",
+        event: "Transfer",
+        filter: { from: "0x1" },
+      });
+      expect(result).toBe(events);
     });
 
     it("can stub different values for different args", async () => {
@@ -317,8 +374,10 @@ describe("MockAdapter", () => {
       });
       adapter.onGetEvents(params1).resolves(events1);
       adapter.onGetEvents(params2).resolves(events2);
-      expect(await adapter.getEvents(params1)).toBe(events1);
-      expect(await adapter.getEvents(params2)).toBe(events2);
+      const result1 = await adapter.getEvents(params1);
+      const result2 = await adapter.getEvents(params2);
+      expect(result1).toBe(events1);
+      expect(result2).toBe(events2);
     });
 
     it("can be stubbed with partial params", async () => {
@@ -334,14 +393,13 @@ describe("MockAdapter", () => {
           event: "Transfer",
         })
         .resolves(events);
-      expect(
-        await adapter.getEvents({
-          abi: TestToken.abi,
-          address: "0x1",
-          event: "Transfer",
-          filter: { from: "0x1" },
-        }),
-      ).toBe(events);
+      const result = await adapter.getEvents({
+        abi: TestToken.abi,
+        address: "0x1",
+        event: "Transfer",
+        filter: { from: "0x1" },
+      });
+      expect(result).toBe(events);
     });
   });
 
@@ -350,9 +408,7 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       let error: unknown;
       try {
-        await adapter.call({
-          to: "0x",
-        });
+        await adapter.call({ to: "0x" });
       } catch (e) {
         error = e;
       }
@@ -361,31 +417,21 @@ describe("MockAdapter", () => {
 
     it("can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
-      const params1: CallParams = {
-        to: "0x1",
-      };
-      const params2: CallParams = {
-        to: "0x2",
-      };
+      const params1: CallParams = { to: "0x1" };
+      const params2: CallParams = { to: "0x2" };
       adapter.onCall(params1).resolves("0xA");
       adapter.onCall(params2).resolves("0xB");
-      expect(await adapter.call(params1)).toBe("0xA");
-      expect(await adapter.call(params2)).toBe("0xB");
+      const result1 = await adapter.call(params1);
+      const result2 = await adapter.call(params2);
+      expect(result1).toBe("0xA");
+      expect(result2).toBe("0xB");
     });
 
     it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
-      adapter
-        .onCall({
-          to: "0x1",
-        })
-        .resolves("0xA");
-      expect(
-        await adapter.call({
-          to: "0x1",
-          data: "0x2",
-        }),
-      ).toBe("0xA");
+      adapter.onCall({ to: "0x1" }).resolves("0xA");
+      const result = await adapter.call({ to: "0x1", data: "0x2" });
+      expect(result).toBe("0xA");
     });
   });
 
@@ -415,14 +461,13 @@ describe("MockAdapter", () => {
           args: { owner: "0x1" },
         })
         .resolves(123n);
-      expect(
-        await adapter.read({
-          abi: TestToken.abi,
-          address: "0x1",
-          fn: "balanceOf",
-          args: { owner: "0x1" },
-        }),
-      ).toBe(123n);
+      const result = await adapter.read({
+        abi: TestToken.abi,
+        address: "0x1",
+        fn: "balanceOf",
+        args: { owner: "0x1" },
+      });
+      expect(result).toBe(123n);
     });
 
     it("can stub different values for different args", async () => {
@@ -439,8 +484,10 @@ describe("MockAdapter", () => {
       };
       adapter.onRead(params1).resolves(1n);
       adapter.onRead(params2).resolves(2n);
-      expect(await adapter.read(params1)).toBe(1n);
-      expect(await adapter.read(params2)).toBe(2n);
+      const result1 = await adapter.read(params1);
+      const result2 = await adapter.read(params2);
+      expect(result1).toBe(1n);
+      expect(result2).toBe(2n);
     });
 
     it("can be stubbed with partial params", async () => {
@@ -451,14 +498,13 @@ describe("MockAdapter", () => {
           fn: "balanceOf",
         })
         .resolves(123n);
-      expect(
-        await adapter.read({
-          abi: TestToken.abi,
-          address: "0x",
-          fn: "balanceOf",
-          args: { owner: "0x" },
-        }),
-      ).toBe(123n);
+      const result = await adapter.read({
+        abi: TestToken.abi,
+        address: "0x",
+        fn: "balanceOf",
+        args: { owner: "0x" },
+      });
+      expect(result).toBe(123n);
     });
 
     it("can be stubbed with partial args", async () => {
@@ -470,14 +516,13 @@ describe("MockAdapter", () => {
           args: { owner: "0x" },
         })
         .resolves(123n);
-      expect(
-        await adapter.read({
-          abi: TestToken.abi,
-          address: "0x",
-          fn: "allowance",
-          args: { owner: "0x", spender: "0x" },
-        }),
-      ).toBe(123n);
+      const result = await adapter.read({
+        abi: TestToken.abi,
+        address: "0x",
+        fn: "allowance",
+        args: { owner: "0x", spender: "0x" },
+      });
+      expect(result).toBe(123n);
     });
   });
 
@@ -508,14 +553,13 @@ describe("MockAdapter", () => {
           args: { to: "0x1", amount: 123n },
         })
         .resolves(true);
-      expect(
-        await adapter.simulateWrite({
-          abi: TestToken.abi,
-          address: "0x1",
-          fn: "transfer",
-          args: { to: "0x1", amount: 123n },
-        }),
-      ).toBe(true);
+      const result = await adapter.simulateWrite({
+        abi: TestToken.abi,
+        address: "0x1",
+        fn: "transfer",
+        args: { to: "0x1", amount: 123n },
+      });
+      expect(result).toBe(true);
     });
 
     it("can stub different values for different args", async () => {
@@ -532,8 +576,10 @@ describe("MockAdapter", () => {
       };
       adapter.onSimulateWrite(params1).resolves(true);
       adapter.onSimulateWrite(params2).resolves(false);
-      expect(await adapter.simulateWrite(params1)).toBe(true);
-      expect(await adapter.simulateWrite(params2)).toBe(false);
+      const result1 = await adapter.simulateWrite(params1);
+      const result2 = await adapter.simulateWrite(params2);
+      expect(result1).toBe(true);
+      expect(result2).toBe(false);
     });
 
     it("can be stubbed with partial params", async () => {
@@ -544,14 +590,13 @@ describe("MockAdapter", () => {
           fn: "transfer",
         })
         .resolves(true);
-      expect(
-        await adapter.simulateWrite({
-          abi: TestToken.abi,
-          address: "0x1",
-          fn: "transfer",
-          args: { to: "0x1", amount: 123n },
-        }),
-      ).toBe(true);
+      const result = await adapter.simulateWrite({
+        abi: TestToken.abi,
+        address: "0x1",
+        fn: "transfer",
+        args: { to: "0x1", amount: 123n },
+      });
+      expect(result).toBe(true);
     });
 
     it("can be stubbed with partial args", async () => {
@@ -563,14 +608,13 @@ describe("MockAdapter", () => {
           args: { to: "0x1" },
         })
         .resolves(true);
-      expect(
-        await adapter.simulateWrite({
-          abi: TestToken.abi,
-          address: "0x1",
-          fn: "transfer",
-          args: { to: "0x1", amount: 123n },
-        }),
-      ).toBe(true);
+      const result = await adapter.simulateWrite({
+        abi: TestToken.abi,
+        address: "0x1",
+        fn: "transfer",
+        args: { to: "0x1", amount: 123n },
+      });
+      expect(result).toBe(true);
     });
   });
 
@@ -606,18 +650,17 @@ describe("MockAdapter", () => {
           ],
         })
         .resolves([{ success: true, value: 123n }]);
-      expect(
-        await adapter.multicall({
-          calls: [
-            {
-              abi: TestToken.abi,
-              address: "0x1",
-              fn: "balanceOf",
-              args: { owner: "0x1" },
-            },
-          ],
-        }),
-      ).toStrictEqual([{ success: true, value: 123n }]);
+      const result = await adapter.multicall({
+        calls: [
+          {
+            abi: TestToken.abi,
+            address: "0x1",
+            fn: "balanceOf",
+            args: { owner: "0x1" },
+          },
+        ],
+      });
+      expect(result).toStrictEqual([{ success: true, value: 123n }]);
     });
 
     it("can stub different values for different args", async () => {
@@ -647,10 +690,10 @@ describe("MockAdapter", () => {
       };
       adapter.onMulticall(params1).resolves([{ success: true, value: 1n }]);
       adapter.onMulticall(params2).resolves([2n]);
-      expect(await adapter.multicall(params1)).toStrictEqual([
-        { success: true, value: 1n },
-      ]);
-      expect(await adapter.multicall(params2)).toStrictEqual([2n]);
+      const result1 = await adapter.multicall(params1);
+      const result2 = await adapter.multicall(params2);
+      expect(result1).toStrictEqual([{ success: true, value: 1n }]);
+      expect(result2).toStrictEqual([2n]);
     });
 
     it("can be stubbed with partial calls", async () => {
@@ -665,18 +708,17 @@ describe("MockAdapter", () => {
           ],
         })
         .resolves([{ success: true, value: 123n }]);
-      expect(
-        await adapter.multicall({
-          calls: [
-            {
-              abi: TestToken.abi,
-              address: "0x",
-              fn: "balanceOf",
-              args: { owner: "0x1" },
-            },
-          ],
-        }),
-      ).toStrictEqual([{ success: true, value: 123n }]);
+      const result = await adapter.multicall({
+        calls: [
+          {
+            abi: TestToken.abi,
+            address: "0x",
+            fn: "balanceOf",
+            args: { owner: "0x1" },
+          },
+        ],
+      });
+      expect(result).toStrictEqual([{ success: true, value: 123n }]);
     });
 
     it("can be stubbed with partial call args", async () => {
@@ -692,18 +734,17 @@ describe("MockAdapter", () => {
           ],
         })
         .resolves([{ success: true, value: 123n }]);
-      expect(
-        await adapter.multicall({
-          calls: [
-            {
-              abi: TestToken.abi,
-              address: "0x",
-              fn: "allowance",
-              args: { owner: "0x1", spender: "0x" },
-            },
-          ],
-        }),
-      ).toStrictEqual([{ success: true, value: 123n }]);
+      const result = await adapter.multicall({
+        calls: [
+          {
+            abi: TestToken.abi,
+            address: "0x",
+            fn: "allowance",
+            args: { owner: "0x1", spender: "0x" },
+          },
+        ],
+      });
+      expect(result).toStrictEqual([{ success: true, value: 123n }]);
     });
 
     it("returns stubbed call, read, and simulateWrite values", async () => {
@@ -728,16 +769,15 @@ describe("MockAdapter", () => {
       adapter.onRead(readParams).resolves("TEST");
       adapter.onSimulateWrite(simulateWriteParams).resolves(true);
 
-      expect(
-        await adapter.multicall({
-          calls: [
-            callParams,
-            readParams,
-            simulateWriteParams,
-            { abi: TestToken.abi, address: "0x1", fn: "name" },
-          ],
-        }),
-      ).toStrictEqual([
+      const result = await adapter.multicall({
+        calls: [
+          callParams,
+          readParams,
+          simulateWriteParams,
+          { abi: TestToken.abi, address: "0x1", fn: "name" },
+        ],
+      });
+      expect(result).toStrictEqual([
         { success: true, value: "0xabc" },
         { success: true, value: "TEST" },
         { success: true, value: true },
@@ -761,7 +801,8 @@ describe("MockAdapter", () => {
     it("can be stubbed", async () => {
       const adapter = new MockAdapter();
       adapter.onGetSignerAddress().resolves("0x123");
-      expect(await adapter.getSignerAddress()).toBe("0x123");
+      const result = await adapter.getSignerAddress();
+      expect(result).toBe("0x123");
     });
   });
 
@@ -780,17 +821,19 @@ describe("MockAdapter", () => {
     it("can be stubbed with specific params", async () => {
       const adapter = new MockAdapter();
       const params1: GetWalletCapabilitiesParams = { chainIds: [1] };
-      const return1: WalletCapabilities = {
+      const capabilities1: WalletCapabilities = {
         1: { atomic: { status: "supported" } },
       };
       const params2: GetWalletCapabilitiesParams = { chainIds: [2] };
-      const return2: WalletCapabilities = {
+      const capabilities2: WalletCapabilities = {
         2: { atomic: { status: "supported" } },
       };
-      adapter.onGetWalletCapabilities(params1).resolves(return1);
-      adapter.onGetWalletCapabilities(params2).resolves(return2);
-      expect(await adapter.getWalletCapabilities(params1)).toBe(return1);
-      expect(await adapter.getWalletCapabilities(params2)).toBe(return2);
+      adapter.onGetWalletCapabilities(params1).resolves(capabilities1);
+      adapter.onGetWalletCapabilities(params2).resolves(capabilities2);
+      const result1 = await adapter.getWalletCapabilities(params1);
+      const result2 = await adapter.getWalletCapabilities(params2);
+      expect(result1).toBe(capabilities1);
+      expect(result2).toBe(capabilities2);
     });
 
     it("can be stubbed with partial params", async () => {
@@ -798,9 +841,11 @@ describe("MockAdapter", () => {
       adapter
         .onGetWalletCapabilities({ address: "0x1" })
         .resolves({ 1: { atomic: { status: "supported" } } });
-      expect(
-        await adapter.getWalletCapabilities({ address: "0x1", chainIds: [1] }),
-      ).toStrictEqual({ 1: { atomic: { status: "supported" } } });
+      const result = await adapter.getWalletCapabilities({
+        address: "0x1",
+        chainIds: [1],
+      });
+      expect(result).toStrictEqual({ 1: { atomic: { status: "supported" } } });
     });
   });
 
@@ -820,7 +865,8 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       const status = createStubWalletCallsStatus({ id: "0x1" });
       adapter.onGetCallsStatus().resolves(status);
-      expect(await adapter.getCallsStatus("0x1")).toBe(status);
+      const result = await adapter.getCallsStatus("0x1");
+      expect(result).toBe(status);
     });
 
     it("can be stubbed with specific args", async () => {
@@ -829,8 +875,10 @@ describe("MockAdapter", () => {
       const status2 = createStubWalletCallsStatus({ id: "0x2" });
       adapter.onGetCallsStatus("0x1").resolves(status1);
       adapter.onGetCallsStatus("0x2").resolves(status2);
-      expect(await adapter.getCallsStatus("0x1")).toBe(status1);
-      expect(await adapter.getCallsStatus("0x2")).toBe(status2);
+      const result1 = await adapter.getCallsStatus("0x1");
+      const result2 = await adapter.getCallsStatus("0x2");
+      expect(result1).toBe(status1);
+      expect(result2).toBe(status2);
     });
   });
 
@@ -884,20 +932,24 @@ describe("MockAdapter", () => {
       const adapter = new MockAdapter();
       adapter.onSendTransaction({ data: "0x1" }).resolves("0xa");
       adapter.onSendTransaction({ data: "0x2" }).resolves("0xb");
-      expect(await adapter.sendTransaction({ data: "0x1" })).toBe("0xa");
-      expect(await adapter.sendTransaction({ data: "0x2" })).toBe("0xb");
+      const result1 = await adapter.sendTransaction({ data: "0x1" });
+      const result2 = await adapter.sendTransaction({ data: "0x2" });
+      expect(result1).toBe("0xa");
+      expect(result2).toBe("0xb");
     });
 
     it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       adapter.onSendTransaction({}).resolves("0x123");
-      expect(await adapter.sendTransaction({ data: "0x" })).toBe("0x123");
+      const result = await adapter.sendTransaction({ data: "0x" });
+      expect(result).toBe("0x123");
     });
 
     it("can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       adapter.onSendTransaction().resolves("0x123");
-      expect(await adapter.sendTransaction({ data: "0x" })).toBe("0x123");
+      const result = await adapter.sendTransaction({ data: "0x" });
+      expect(result).toBe("0x123");
     });
 
     it("calls onMined callbacks with the receipt", async () => {
@@ -961,23 +1013,24 @@ describe("MockAdapter", () => {
       };
       adapter.onDeploy(params1).resolves("0x1");
       adapter.onDeploy(params2).resolves("0x2");
-      expect(await adapter.deploy(params1)).toBe("0x1");
-      expect(await adapter.deploy(params2)).toBe("0x2");
+      const result1 = await adapter.deploy(params1);
+      const result2 = await adapter.deploy(params2);
+      expect(result1).toBe("0x1");
+      expect(result2).toBe("0x2");
     });
 
     it("can be stubbed with partial params", async () => {
       const adapter = new MockAdapter();
       adapter.onDeploy({ abi: TestToken.abi }).resolves("0x123");
-      expect(
-        await adapter.deploy({
-          abi: TestToken.abi,
-          bytecode: "0x",
-          args: {
-            decimals_: 18,
-            initialSupply: 0n,
-          },
-        }),
-      ).toBe("0x123");
+      const result = await adapter.deploy({
+        abi: TestToken.abi,
+        bytecode: "0x",
+        args: {
+          decimals_: 18,
+          initialSupply: 0n,
+        },
+      });
+      expect(result).toBe("0x123");
     });
 
     it("can be stubbed with partial args", async () => {
@@ -985,31 +1038,29 @@ describe("MockAdapter", () => {
       adapter
         .onDeploy({ abi: TestToken.abi, args: { decimals_: 18 } })
         .resolves("0x123");
-      expect(
-        await adapter.deploy({
-          abi: TestToken.abi,
-          bytecode: "0x",
-          args: {
-            decimals_: 18,
-            initialSupply: 0n,
-          },
-        }),
-      ).toBe("0x123");
+      const result = await adapter.deploy({
+        abi: TestToken.abi,
+        bytecode: "0x",
+        args: {
+          decimals_: 18,
+          initialSupply: 0n,
+        },
+      });
+      expect(result).toBe("0x123");
     });
 
     it("can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       adapter.onDeploy().resolves("0x123");
-      expect(
-        await adapter.deploy({
-          abi: TestToken.abi,
-          bytecode: "0x",
-          args: {
-            decimals_: 18,
-            initialSupply: 0n,
-          },
-        }),
-      ).toBe("0x123");
+      const result = await adapter.deploy({
+        abi: TestToken.abi,
+        bytecode: "0x",
+        args: {
+          decimals_: 18,
+          initialSupply: 0n,
+        },
+      });
+      expect(result).toBe("0x123");
     });
 
     it("calls onMined callbacks with the receipt", async () => {
@@ -1062,14 +1113,13 @@ describe("MockAdapter", () => {
           args: { to: "0x", amount: 123n },
         })
         .resolves("0x123");
-      expect(
-        await adapter.write({
-          abi: TestToken.abi,
-          address: "0x",
-          fn: "transfer",
-          args: { to: "0x", amount: 123n },
-        }),
-      ).toBe("0x123");
+      const result = await adapter.write({
+        abi: TestToken.abi,
+        address: "0x",
+        fn: "transfer",
+        args: { to: "0x", amount: 123n },
+      });
+      expect(result).toBe("0x123");
     });
 
     it("can stub different values for different args", async () => {
@@ -1086,8 +1136,10 @@ describe("MockAdapter", () => {
       };
       adapter.onWrite(params1).resolves("0x1");
       adapter.onWrite(params2).resolves("0x2");
-      expect(await adapter.write(params1)).toBe("0x1");
-      expect(await adapter.write(params2)).toBe("0x2");
+      const result1 = await adapter.write(params1);
+      const result2 = await adapter.write(params2);
+      expect(result1).toBe("0x1");
+      expect(result2).toBe("0x2");
     });
 
     it("can be stubbed with partial params", async () => {
@@ -1098,14 +1150,13 @@ describe("MockAdapter", () => {
           fn: "transfer",
         })
         .resolves("0x123");
-      expect(
-        await adapter.write({
-          abi: TestToken.abi,
-          address: "0x",
-          fn: "transfer",
-          args: { to: "0x", amount: 123n },
-        }),
-      ).toBe("0x123");
+      const result = await adapter.write({
+        abi: TestToken.abi,
+        address: "0x",
+        fn: "transfer",
+        args: { to: "0x", amount: 123n },
+      });
+      expect(result).toBe("0x123");
     });
 
     it("can be stubbed with partial args", async () => {
@@ -1117,27 +1168,25 @@ describe("MockAdapter", () => {
           args: { to: "0x" },
         })
         .resolves("0x123");
-      expect(
-        await adapter.write({
-          abi: TestToken.abi,
-          address: "0x",
-          fn: "transfer",
-          args: { to: "0x", amount: 123n },
-        }),
-      ).toBe("0x123");
+      const result = await adapter.write({
+        abi: TestToken.abi,
+        address: "0x",
+        fn: "transfer",
+        args: { to: "0x", amount: 123n },
+      });
+      expect(result).toBe("0x123");
     });
 
     it("can be called with args after being stubbed with no args", async () => {
       const adapter = new MockAdapter();
       adapter.onWrite().resolves("0x123");
-      expect(
-        await adapter.write({
-          abi: TestToken.abi,
-          address: "0x",
-          fn: "transfer",
-          args: { to: "0x", amount: 123n },
-        }),
-      ).toBe("0x123");
+      const result = await adapter.write({
+        abi: TestToken.abi,
+        address: "0x",
+        fn: "transfer",
+        args: { to: "0x", amount: 123n },
+      });
+      expect(result).toBe("0x123");
     });
 
     it("calls onMined callbacks with the receipt", async () => {
@@ -1176,9 +1225,8 @@ describe("MockAdapter", () => {
     it("can be stubbed with no args", async () => {
       const adapter = new MockAdapter();
       adapter.onSendCalls().resolves({ id: "0x1" });
-      expect(await adapter.sendCalls({ calls: [] })).toStrictEqual({
-        id: "0x1",
-      });
+      const result = await adapter.sendCalls({ calls: [] });
+      expect(result).toStrictEqual({ id: "0x1" });
     });
 
     it("can be stubbed with args", async () => {
@@ -1186,9 +1234,10 @@ describe("MockAdapter", () => {
       adapter
         .onSendCalls({ calls: [{ to: "0x1", data: "0x123" }] })
         .resolves({ id: "0x1" });
-      expect(
-        await adapter.sendCalls({ calls: [{ to: "0x1", data: "0x123" }] }),
-      ).toStrictEqual({ id: "0x1" });
+      const result = await adapter.sendCalls({
+        calls: [{ to: "0x1", data: "0x123" }],
+      });
+      expect(result).toStrictEqual({ id: "0x1" });
     });
 
     it("can stub different values for different args", async () => {
@@ -1201,8 +1250,10 @@ describe("MockAdapter", () => {
       };
       adapter.onSendCalls(params1).resolves({ id: "0x1" });
       adapter.onSendCalls(params2).resolves({ id: "0x2" });
-      expect(await adapter.sendCalls(params1)).toStrictEqual({ id: "0x1" });
-      expect(await adapter.sendCalls(params2)).toStrictEqual({ id: "0x2" });
+      const result1 = await adapter.sendCalls(params1);
+      const result2 = await adapter.sendCalls(params2);
+      expect(result1).toStrictEqual({ id: "0x1" });
+      expect(result2).toStrictEqual({ id: "0x2" });
     });
 
     it("can be stubbed with partial calls", async () => {
@@ -1217,18 +1268,17 @@ describe("MockAdapter", () => {
           ],
         })
         .resolves({ id: "0x1" });
-      expect(
-        await adapter.sendCalls({
-          calls: [
-            {
-              abi: TestToken.abi,
-              address: "0x",
-              fn: "approve",
-              args: { spender: "0x1", amount: 123n },
-            },
-          ],
-        }),
-      ).toStrictEqual({ id: "0x1" });
+      const result = await adapter.sendCalls({
+        calls: [
+          {
+            abi: TestToken.abi,
+            address: "0x",
+            fn: "approve",
+            args: { spender: "0x1", amount: 123n },
+          },
+        ],
+      });
+      expect(result).toStrictEqual({ id: "0x1" });
     });
 
     it("can be stubbed with partial call args", async () => {
@@ -1244,18 +1294,17 @@ describe("MockAdapter", () => {
           ],
         })
         .resolves({ id: "0x1" });
-      expect(
-        await adapter.sendCalls({
-          calls: [
-            {
-              abi: TestToken.abi,
-              address: "0x",
-              fn: "approve",
-              args: { spender: "0x1", amount: 123n },
-            },
-          ],
-        }),
-      ).toStrictEqual({ id: "0x1" });
+      const result = await adapter.sendCalls({
+        calls: [
+          {
+            abi: TestToken.abi,
+            address: "0x",
+            fn: "approve",
+            args: { spender: "0x1", amount: 123n },
+          },
+        ],
+      });
+      expect(result).toStrictEqual({ id: "0x1" });
     });
   });
 });
