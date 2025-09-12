@@ -60,6 +60,13 @@ export class ViemReadWriteAdapter<
     return address;
   }
 
+  async call({ from, ...rest }: CallParams) {
+    return super.call({
+      from: from || (await this.getSignerAddress().catch(() => undefined)),
+      ...rest,
+    });
+  }
+
   async estimateGas({ from, ...rest }: CallParams) {
     return super.estimateGas({
       from: from || (await this.getSignerAddress().catch(() => undefined)),
