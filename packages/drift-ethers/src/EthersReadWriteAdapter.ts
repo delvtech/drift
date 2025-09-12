@@ -1,5 +1,6 @@
 import {
   type Abi,
+  type CallParams,
   type DeployParams,
   DriftError,
   type FunctionName,
@@ -60,6 +61,13 @@ export class EthersReadWriteAdapter<
 
   getSignerAddress() {
     return this.signer.getAddress();
+  }
+
+  async estimateGas({ from, ...rest }: CallParams) {
+    return super.estimateGas({
+      from: from || (await this.getSignerAddress().catch(() => undefined)),
+      ...rest,
+    });
   }
 
   /**
