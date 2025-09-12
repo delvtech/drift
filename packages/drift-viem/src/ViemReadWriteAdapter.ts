@@ -23,7 +23,14 @@ import {
   ViemReadAdapter,
   type ViemReadAdapterParams,
 } from "src/ViemReadAdapter";
-import type { Call, PublicClient, WalletClient } from "viem";
+import type {
+  Call,
+  DeployContractParameters,
+  PublicClient,
+  SendTransactionParameters,
+  WalletClient,
+  WriteContractParameters,
+} from "viem";
 
 export interface ViemReadWriteAdapterParams<
   TPublicClient extends AnyClient = AnyClient,
@@ -74,20 +81,23 @@ export class ViemReadWriteAdapter<
     });
   }
 
-  getWalletCapabilities<TChainIds extends readonly number[]>(
-    params?: GetWalletCapabilitiesParams<TChainIds>,
-  ): Promise<WalletCapabilities<TChainIds>> {
-    const chainId =
-      params?.chainId ?? params?.chainIds?.[0] ?? this.walletClient.chain?.id;
+  getWalletCapabilities<TChainIds extends readonly number[]>({
+    address,
+    chainId,
+    chainIds,
+  }: GetWalletCapabilitiesParams<TChainIds> = {}): Promise<
+    WalletCapabilities<TChainIds>
+  > {
+    const _chainId = chainId ?? chainIds?.[0] ?? this.walletClient.chain?.id;
     return this.walletClient
       .getCapabilities({
-        account: params?.address,
-        chainId,
+        account: address,
+        chainId: _chainId,
       })
       .then((capabilities) => {
         return {
           // FIXME:
-          [chainId || 0]: capabilities,
+          [_chainId || 0]: capabilities,
         } as WalletCapabilities<TChainIds>;
       });
   }
@@ -111,78 +121,63 @@ export class ViemReadWriteAdapter<
     return this.walletClient.showCallsStatus({ id: batchId });
   }
 
-  async sendTransaction(params: SendTransactionParams) {
-    const gasPriceOptions =
-      params.gasPrice !== undefined
-        ? {
-            gasPrice: params.gasPrice,
-          }
-        : {
-            maxFeePerGas: params.maxFeePerGas,
-            maxPriorityFeePerGas: params.maxPriorityFeePerGas,
-          };
-
+  async sendTransaction({
+    chainId,
+    from,
+    nonce,
+    onMined,
+    onMinedTimeout,
+    ...rest
+  }: SendTransactionParams) {
     const hash = await this.walletClient.sendTransaction({
-      data: params.data,
-      to: params.to,
-      account: params.from ?? (await this._getAccount()),
-      gas: params.gas,
-      nonce: params.nonce !== undefined ? Number(params.nonce) : undefined,
-      value: params.value,
+      account: from || (await this._getAccount()),
+      nonce: nonce !== undefined ? Number(nonce) : undefined,
       chain: this.walletClient.chain,
-      type: params.type as any,
-      accessList: params.accessList,
-      // TODO:
-      // blobs: params.blobs,
-      // blobVersionedHashes: params.blobVersionedHashes,
-      // maxFeePerBlobGas: params.maxFeePerBlobGas,
-      ...gasPriceOptions,
-    });
+      ...rest,
+    } as SendTransactionParameters);
 
-    if (params.onMined) {
+    if (onMined) {
       this.waitForTransaction({
         hash,
-        timeout: params.onMinedTimeout,
-      }).then(params.onMined);
+        timeout: onMinedTimeout,
+      }).then(onMined);
     }
 
     return hash;
   }
 
-  async deploy<TAbi extends Abi>(params: DeployParams<TAbi>) {
-    const prepared = prepareParams({
-      abi: params.abi,
+  async deploy<TAbi extends Abi>({
+    abi,
+    args,
+    chainId,
+    from,
+    nonce,
+    onMined,
+    onMinedTimeout,
+    ...rest
+  }: DeployParams<TAbi>) {
+    const { params } = prepareParams({
+      abi,
       type: "constructor",
       name: undefined,
       kind: "inputs",
-      value: params.args,
+      value: args,
     });
-
-    const gasPriceOptions =
-      params.gasPrice !== undefined
-        ? {
-            gasPrice: params.gasPrice,
-          }
-        : {
-            maxFeePerGas: params.maxFeePerGas,
-            maxPriorityFeePerGas: params.maxPriorityFeePerGas,
-          };
 
     const hash = await this.walletClient.deployContract({
-      abi: params.abi as Abi,
-      bytecode: params.bytecode,
-      args: prepared.params,
-      account: params.from ?? (await this._getAccount()),
-      gas: params.gas,
-      nonce: params.nonce !== undefined ? Number(params.nonce) : undefined,
-      value: params.value,
+      abi,
+      args: params,
+      account: from || (await this._getAccount()),
+      nonce: nonce !== undefined ? Number(nonce) : undefined,
       chain: this.walletClient.chain,
-      type: params.type as any,
-      ...gasPriceOptions,
-    });
+      ...rest,
+    } as DeployContractParameters);
 
-    if (params.onMined) {
-      this.waitForTransaction({ hash }).then(params.onMined);
+    if (onMined) {
+      this.waitForTransaction({
+        hash,
+        timeout: onMinedTimeout,
+      }).then(onMined);
     }
 
     return hash;
@@ -191,59 +186,58 @@ export class ViemReadWriteAdapter<
   async write<
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>) {
-    const prepared = prepareParams({
-      abi: params.abi,
+  >({
+    abi,
+    args,
+    chainId,
+    fn,
+    from,
+    nonce,
+    onMined,
+    onMinedTimeout,
+    ...rest
+  }: WriteParams<TAbi, TFunctionName>) {
+    const { params } = prepareParams({
+      abi,
       type: "function",
-      name: params.fn,
+      name: fn,
       kind: "inputs",
-      value: params.args,
+      value: args,
     });
-
-    const gasPriceOptions =
-      params.gasPrice !== undefined
-        ? {
-            gasPrice: params.gasPrice,
-          }
-        : {
-            maxFeePerGas: params.maxFeePerGas,
-            maxPriorityFeePerGas: params.maxPriorityFeePerGas,
-          };
 
     const hash = await this.walletClient.writeContract({
-      abi: params.abi as Abi,
-      address: params.address,
-      functionName: params.fn,
-      args: prepared.params,
-      accessList: params.accessList,
-      account: params.from ?? (await this._getAccount()),
-      gas: params.gas,
-      nonce: params.nonce !== undefined ? Number(params.nonce) : undefined,
-      value: params.value,
+      abi: abi as Abi,
+      functionName: fn,
+      args: params,
+      account: from || (await this._getAccount()),
+      nonce: nonce !== undefined ? Number(nonce) : undefined,
       chain: this.walletClient.chain,
-      type: params.type as any,
-      ...gasPriceOptions,
-    });
+      ...rest,
+    } as WriteContractParameters);
 
-    if (params.onMined) {
-      this.waitForTransaction({ hash }).then(params.onMined);
+    if (onMined) {
+      this.waitForTransaction({
+        hash,
+        timeout: onMinedTimeout,
+      }).then(onMined);
     }
 
     return hash;
   }
 
-  async sendCalls<const TCalls extends readonly unknown[] = any[]>(
-    params: SendCallsParams<TCalls>,
-  ): Promise<SendCallsReturn> {
-    const { calls, from, ...options } = params;
+  async sendCalls<const TCalls extends readonly unknown[] = any[]>({
+    calls,
+    from,
+    ...rest
+  }: SendCallsParams<TCalls>): Promise<SendCallsReturn> {
     return this.walletClient
       .sendCalls({
+        account: from ?? (await this._getAccount()),
         calls: calls.map(({ value, capabilities, ...call }) => {
           const { to, data } = prepareCall(call);
           return { to, data, value } as Call;
         }),
-        account: from ?? (await this._getAccount()),
-        ...options,
+        ...rest,
       })
       .then(({ id, capabilities }) => {
         return {
