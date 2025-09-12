@@ -203,6 +203,31 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     );
   }
 
+  async estimateGas({
+    accessList,
+    bytecode,
+    chainId,
+    data,
+    gas,
+    nonce,
+    type,
+    ...rest
+  }: CallParams) {
+    if (bytecode && data) {
+      data = encodeBytecodeCallData(bytecode, data);
+    }
+    const estimate = await this.provider.estimateGas({
+      accessList: accessList as AccessList,
+      chainId: chainId === undefined ? undefined : Number(chainId),
+      data,
+      gasLimit: gas,
+      nonce: nonce === undefined ? undefined : Number(nonce),
+      type: type === undefined ? undefined : Number(type),
+      ...rest,
+    });
+    return estimate.toBigInt();
+  }
+
   async sendRawTransaction(transaction: Bytes) {
     const tx = await this.provider.sendTransaction(transaction);
     return tx.hash;
