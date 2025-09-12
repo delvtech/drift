@@ -189,6 +189,31 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     );
   }
 
+  async estimateGas({
+    accessList,
+    block,
+    bytecode,
+    data,
+    from,
+    to,
+    ...rest
+  }: CallParams) {
+    if (bytecode && data) {
+      data = encodeBytecodeCallData(bytecode, data);
+    }
+
+    return this.web3.eth.estimateGas(
+      {
+        accessList: accessList as AccessList,
+        data,
+        from: from || (await this.getSignerAddress().catch(() => undefined)),
+        to: to as any,
+        ...rest,
+      },
+      block,
+    );
+  }
+
   async sendRawTransaction(transaction: Bytes) {
     const tx = await this.web3.eth.sendSignedTransaction(transaction);
     return toHexString(tx.transactionHash);
