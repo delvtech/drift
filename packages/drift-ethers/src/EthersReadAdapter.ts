@@ -207,6 +207,34 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     });
   }
 
+  async estimateGas({
+    accessList,
+    blobs,
+    blobVersionedHashes,
+    block,
+    bytecode,
+    data,
+    gas,
+    nonce,
+    type,
+    ...rest
+  }: CallParams) {
+    if (bytecode && data) {
+      data = encodeBytecodeCallData(bytecode, data);
+    }
+    return this.provider.estimateGas({
+      accessList: accessList as AccessList,
+      blobs: blobs as Bytes[],
+      blobVersionedHashes: blobVersionedHashes as Hash[],
+      blockTag: block,
+      data,
+      gasLimit: gas,
+      nonce: nonce === undefined ? undefined : Number(nonce),
+      type: type === undefined ? undefined : Number(type),
+      ...rest,
+    });
+  }
+
   async sendRawTransaction(transaction: Bytes) {
     const tx = await this.provider.broadcastTransaction(transaction);
     return tx.hash;
