@@ -7,13 +7,15 @@ import type {
   HexString,
 } from "src/adapter/types/Abi";
 import type {
-  BytecodeCallParams,
   CallParams,
   DeployParams,
   EncodeDeployDataParams,
-  EncodedCallParams,
+  EncodedDeployCallParams,
   FunctionCallParams,
+  GetBalanceParams,
+  GetBlockReturn,
   GetEventsParams,
+  GetTransactionParams,
   GetWalletCapabilitiesParams,
   MulticallOptions,
   MulticallParams,
@@ -25,6 +27,8 @@ import type {
   SendCallsReturn,
   SendTransactionParams,
   SimulateWriteParams,
+  TargetCallParams,
+  WaitForTransactionParams,
   WalletCallOptions,
   WalletCallsStatus,
   WalletCapabilities,
@@ -38,12 +42,6 @@ import type {
   FunctionName,
   FunctionReturn,
 } from "src/adapter/types/Function";
-import type {
-  GetBalanceParams,
-  GetBlockReturn,
-  GetTransactionParams,
-  WaitForTransactionParams,
-} from "src/adapter/types/Network";
 import type {
   Transaction,
   TransactionReceipt,
@@ -149,6 +147,23 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   async getGasPrice() {
     return this.onGetGasPrice()();
+  }
+
+  // estimateGas //
+
+  onEstimateGas(params?: Partial<CallParams>) {
+    return this.stubs.get<[CallParams], Promise<bigint>>({
+      method: "estimateGas",
+      key: this.createKey(params),
+    });
+  }
+
+  async estimateGas(params: CallParams) {
+    return this.stubs.get<[CallParams], Promise<bigint>>({
+      method: "estimateGas",
+      key: this.createKey(params),
+      matchPartial: true,
+    })(params);
   }
 
   // getTransaction //
@@ -637,7 +652,7 @@ export type StubMulticallCallParams<
         args?: Partial<FunctionArgs<TAbi, TFunctionName>>;
       }
     >
-  | Partial<EncodedCallParams>
+  | Partial<TargetCallParams>
 >;
 
 export interface OnMulticallParams<
@@ -701,7 +716,7 @@ export type StubWalletCallParams<
         args?: Partial<ConstructorArgs<TAbi>>;
       }
     >
-  | Partial<OneOf<EncodedCallParams | BytecodeCallParams>>
+  | Partial<OneOf<TargetCallParams | EncodedDeployCallParams>>
 > &
   WalletCallOptions;
 

@@ -185,6 +185,32 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
+    it("calls getGasPrice hooks", async () => {
+      const client = createClient({ adapter });
+      const beforeHandler = vi.fn(async ({ resolve }) => resolve());
+      const afterHandler = vi.fn();
+
+      client.hooks.on("before:getGasPrice", beforeHandler);
+      client.hooks.on("after:getGasPrice", afterHandler);
+      await client.getGasPrice();
+
+      expect(beforeHandler).toHaveBeenCalledTimes(1);
+      expect(afterHandler).toHaveBeenCalledTimes(1);
+    });
+
+    it("calls estimateGas hooks", async () => {
+      const client = createClient({ adapter });
+      const beforeHandler = vi.fn(async ({ resolve }) => resolve());
+      const afterHandler = vi.fn();
+
+      client.hooks.on("before:estimateGas", beforeHandler);
+      client.hooks.on("after:estimateGas", afterHandler);
+      await client.estimateGas({ to: "0x", data: "0x" });
+
+      expect(beforeHandler).toHaveBeenCalledTimes(1);
+      expect(afterHandler).toHaveBeenCalledTimes(1);
+    });
+
     it("calls getTransaction hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());

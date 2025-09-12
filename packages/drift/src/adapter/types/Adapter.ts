@@ -5,7 +5,7 @@ import type {
   Hash,
   HexString,
 } from "src/adapter/types/Abi";
-import type { BlockIdentifier, BlockTag } from "src/adapter/types/Block";
+import type { Block, BlockIdentifier, BlockTag } from "src/adapter/types/Block";
 import type { EventFilter, EventLog, EventName } from "src/adapter/types/Event";
 import type {
   ConstructorArgs,
@@ -14,9 +14,9 @@ import type {
   FunctionName,
   FunctionReturn,
 } from "src/adapter/types/Function";
-import type { Network } from "src/adapter/types/Network";
 import type {
   Eip4844Options,
+  Transaction,
   TransactionOptions,
   TransactionReceipt,
   WalletCallsReceipt,
@@ -29,6 +29,8 @@ import type {
   Replace,
 } from "src/utils/types";
 
+// TODO: Cleanup and reorganize to make it easier to maintain and scale.
+
 /**
  * An interface for interacting with a blockchain network and its contracts,
  * required by all Drift client APIs.
@@ -39,7 +41,60 @@ export interface Adapter extends ReadAdapter, Partial<WriteAdapter> {}
  * A read-only interface for interacting with a blockchain network and its
  * contracts, required by all Drift client APIs.
  */
-export interface ReadAdapter extends Network {
+export interface ReadAdapter {
+  /**
+   * Get the chain ID of the network.
+   */
+  getChainId(): Promise<number>;
+
+  /**
+   * Get the current block number.
+   */
+  getBlockNumber(): Promise<bigint>;
+
+  /**
+   * Get a block from a block tag, number, or hash. If no argument is provided,
+   * the latest block is returned.
+   */
+  getBlock<T extends BlockIdentifier | undefined = undefined>(
+    block?: T,
+  ): Promise<GetBlockReturn<T>>;
+
+  /**
+   * Get the balance of native currency for an account.
+   */
+  getBalance(params: GetBalanceParams): Promise<bigint>;
+
+  /**
+   * Returns an estimate of the current price per gas in wei.
+   */
+  getGasPrice(): Promise<bigint>;
+
+  /**
+   * Generates and returns an estimate of how much gas is necessary to allow the
+   * transaction to complete.
+   *
+   * **Note:** The estimate may be significantly more than the amount of gas
+   * actually used by the transaction, for a variety of reasons including EVM
+   * mechanics and node performance.
+   */
+  estimateGas(transaction: CallParams): Promise<bigint>;
+
+  /**
+   * Get a transaction from a transaction hash.
+   */
+  getTransaction(
+    params: GetTransactionParams,
+  ): Promise<Transaction | undefined>;
+
+  /**
+   * Wait for a transaction to be mined.
+   * @returns The transaction receipt.
+   */
+  waitForTransaction(
+    params: WaitForTransactionParams,
+  ): Promise<TransactionReceipt | undefined>;
+
   /**
    * Submits a raw signed transaction. For
    * [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844) transactions, the raw
@@ -239,26 +294,21 @@ export interface ReadWriteAdapter extends ReadAdapter, WriteAdapter {}
 
 // Method parameter types //
 
-/**
- * Params for a contract instance.
- */
-export interface ContractParams<TAbi extends Abi = Abi> {
-  abi: TAbi;
+// Balance //
+
+export interface GetBalanceParams {
   address: Address;
+  block?: BlockIdentifier;
 }
 
+// Block //
+
 /**
- * Base params for a function call.
+ * The awaited return type of a {@linkcode Network.getBlock} call considering
+ * the provided {@linkcode BlockIdentifier}.
  */
-export type FunctionCallParams<
-  TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
-> = Eval<
-  ContractParams<TAbi> & {
-    fn: TFunctionName;
-  }
-> &
-  DynamicProperty<"args", FunctionArgs<TAbi, TFunctionName>>;
+export type GetBlockReturn<T extends BlockIdentifier | undefined = undefined> =
+  T extends BlockTag | undefined ? Block<T> : Block<T> | undefined;
 
 // Encode/Decode //
 
@@ -305,6 +355,84 @@ export interface DecodeFunctionReturnParams<
   fn: TFunctionName;
 }
 
+// Get transaction //
+
+export interface GetTransactionParams {
+  hash: Hash;
+}
+
+export interface WaitForTransactionParams extends GetTransactionParams {
+  /**
+   * The number of milliseconds to wait for the transaction until rejecting
+   * the promise.
+   */
+  timeout?: number;
+}
+
+// Call //
+
+export interface TargetCallParams extends Eip4844Options {
+  /**
+   * The address to send the call to.
+   */
+  to: Address;
+  /**
+   * The hash of the contract method signature and encoded parameters.
+   */
+  data?: Bytes;
+}
+
+export interface BytecodeCallParams {
+  /**
+   * A contract bytecode to temporarily deploy and call.
+   */
+  bytecode: Bytes;
+  /**
+   * The hash of the contract method signature and encoded parameters.
+   */
+  data?: Bytes;
+}
+
+export interface EncodedDeployCallParams {
+  /**
+   * The contract code and encoded parameters.
+   */
+  data: Bytes;
+}
+
+// https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/eth/execute.yaml#L1
+export interface CallOptions extends TransactionOptions {
+  block?: BlockIdentifier;
+}
+
+export type CallParams = OneOf<
+  TargetCallParams | BytecodeCallParams | EncodedDeployCallParams
+> &
+  CallOptions;
+
+// Functions //
+
+/**
+ * Params for a contract instance.
+ */
+export interface ContractParams<TAbi extends Abi = Abi> {
+  abi: TAbi;
+  address: Address;
+}
+
+/**
+ * Base params for a function call.
+ */
+export type FunctionCallParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
+> = Eval<
+  ContractParams<TAbi> & {
+    fn: TFunctionName;
+  }
+> &
+  DynamicProperty<"args", FunctionArgs<TAbi, TFunctionName>>;
+
 // Events //
 
 /**
@@ -340,41 +468,15 @@ export interface GetEventsParams<
   event: TEventName;
 }
 
-// Call //
-
-export interface EncodedCallParams {
-  /**
-   * The address to send the call to.
-   */
-  to: Address;
-  /**
-   * The hash of the invoked method signature and encoded parameters.
-   */
-  data?: Bytes;
-}
-
-export interface BytecodeCallParams extends Pick<EncodedCallParams, "data"> {
-  /**
-   * A contract bytecode to temporarily deploy and call.
-   */
-  bytecode: Bytes;
-}
-
-// https://github.com/ethereum/execution-apis/blob/7c9772f95c2472ccfc6f6128dc2e1b568284a2da/src/eth/execute.yaml#L1
-export interface CallOptions extends TransactionOptions, Eip4844Options {
-  block?: BlockIdentifier;
-}
-
-export type CallParams = OneOf<EncodedCallParams | BytecodeCallParams> &
-  CallOptions;
-
 // Read //
 
 /**
  * Options for reading contract state.
  */
 // https://github.com/ethereum/execution-apis/blob/main/src/eth/execute.yaml#L1
-export interface ReadOptions extends Pick<CallOptions, "block"> {}
+export interface ReadOptions {
+  block?: BlockIdentifier;
+}
 
 /**
  * Params for calling a contract function.
@@ -390,7 +492,7 @@ export type ReadParams<
 // Multicall //
 
 /**
- * Parameters for a multicall call, which can be a function call or an encoded
+ * Parameters for a multicall call, which can be a function call or a target
  * call.
  */
 export type MulticallCallParams<
@@ -405,8 +507,8 @@ export type MulticallCallParams<
         ? TFunctionName
         : FunctionName<TAbi>
     > &
-      Partial<Record<keyof EncodedCallParams, undefined>>
-  : EncodedCallParams & Partial<Record<keyof FunctionCallParams, undefined>>;
+      Partial<Record<keyof TargetCallParams, undefined>>
+  : TargetCallParams & Partial<Record<keyof FunctionCallParams, undefined>>;
 
 /**
  * @internal
@@ -626,16 +728,16 @@ export interface WalletCallOptions {
 
 /**
  * Parameters for a wallet call, which can be a function call, deploy call, or
- * an encoded call.
+ * a target call.
  */
 export type WalletCallParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 > = OneOf<
+  | TargetCallParams
   | FunctionCallParams<TAbi, TFunctionName>
   | EncodeDeployDataParams<TAbi>
-  | EncodedCallParams
-  | BytecodeCallParams
+  | EncodedDeployCallParams
 > &
   WalletCallOptions;
 
@@ -776,24 +878,7 @@ export type DeployParams<TAbi extends Abi = Abi> =
 // Send transaction //
 
 // https://github.com/ethereum/execution-apis/blob/40088597b8b4f48c45184da002e27ffc3c37641f/src/eth/submit.yaml#L1
-export type SendTransactionParams = {
-  /**
-   * The data to send with the transaction.
-   */
-  data: Bytes;
-} & OneOf<
-  | (Eip4844Options & {
-      /**
-       * The address to send the transaction to.
-       */
-      to: Address;
-    })
-  | {
-      /**
-       * The address to send the transaction to or `undefined` for a contract
-       * creation.
-       */
-      to?: Address;
-    }
+export type SendTransactionParams = OneOf<
+  TargetCallParams | EncodedDeployCallParams
 > &
   WriteOptions;

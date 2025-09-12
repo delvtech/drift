@@ -1,9 +1,9 @@
 import type { Abi, Bytes } from "src/adapter/types/Abi";
 import type {
-  EncodedCallParams,
   FunctionCallParams,
   MulticallCallResult,
   ReadWriteAdapter,
+  TargetCallParams,
 } from "src/adapter/types/Adapter";
 import { MockERC20 } from "src/artifacts/MockERC20";
 import { TestToken } from "src/artifacts/TestToken";
@@ -14,13 +14,12 @@ declare const adapter: ReadWriteAdapter;
 describe("Adapter", () => {
   describe("multicall", () => {
     it("returns the correct type for each read", async () => {
-      const [encodedCallResult, symbolResult, balanceResult] =
+      const [targetCallResult, symbolResult, balanceResult] =
         await adapter.multicall({
           calls: [
-            // Encoded call
+            // Target call
             {
               to: "0x",
-              data: "0x",
             },
             // Function calls
             {
@@ -36,8 +35,8 @@ describe("Adapter", () => {
             },
           ],
         });
-      expectTypeOf(encodedCallResult).toExtend<
-        MulticallCallResult<EncodedCallParams>
+      expectTypeOf(targetCallResult).toExtend<
+        MulticallCallResult<TargetCallParams>
       >();
       expectTypeOf(symbolResult).toExtend<
         MulticallCallResult<FunctionCallParams<typeof TestToken.abi, "symbol">>
@@ -50,13 +49,12 @@ describe("Adapter", () => {
     });
 
     it("returns the values directly when allowFailure is false", async () => {
-      const [encodedCallReturnData, symbol, balance] = await adapter.multicall({
+      const [genericCallReturnData, symbol, balance] = await adapter.multicall({
         allowFailure: false,
         calls: [
-          // Encoded call
+          // Target call
           {
             to: "0x",
-            data: "0x",
           },
           // Function calls
           {
@@ -72,7 +70,7 @@ describe("Adapter", () => {
           },
         ],
       });
-      expectTypeOf(encodedCallReturnData).toEqualTypeOf<Bytes>();
+      expectTypeOf(genericCallReturnData).toEqualTypeOf<Bytes>();
       expectTypeOf(symbol).toEqualTypeOf<string>();
       expectTypeOf(balance).toEqualTypeOf<bigint>();
     });
@@ -96,8 +94,7 @@ describe("Adapter", () => {
         calls: [
           {
             to: "0x",
-            data: "0x",
-            // @ts-expect-error: The absence of `abi` implies an encoded call.
+            // @ts-expect-error: The absence of `abi` implies a target or encoded call.
             address: "0x",
           },
           {
@@ -179,18 +176,12 @@ describe("Adapter", () => {
   });
 
   describe("sendCalls", () => {
-    it("allows a mix of abi function calls, abi deploy calls, and encoded calls", async () => {
+    it("allows a mix of abi function calls, abi deploy calls, and address calls", async () => {
       adapter.sendCalls({
         calls: [
-          // Encoded call
+          // Target call
           {
             to: "0x",
-            data: "0x",
-          },
-          // Bytecode call
-          {
-            bytecode: "0x",
-            data: "0x",
           },
           // Function call
           {
@@ -211,6 +202,10 @@ describe("Adapter", () => {
               initialSupply: 1000n,
             },
           },
+          // Encoded deploy call
+          {
+            data: "0x",
+          },
         ],
       });
     });
@@ -225,21 +220,9 @@ describe("Adapter", () => {
             bytecode: "0x",
           },
           {
-            data: "0x",
-            bytecode: "0x",
-            // @ts-expect-error: Can't have both `bytecode` and `to`.
-            to: "0x",
-          },
-          {
             to: "0x",
             data: "0x",
-            // @ts-expect-error: The absence of `abi` implies an encoded call.
-            address: "0x",
-          },
-          {
-            data: "0x",
-            bytecode: "0x",
-            // @ts-expect-error: The absence of `abi` implies an encoded call.
+            // @ts-expect-error: The absence of `abi` implies a target or encoded call.
             address: "0x",
           },
           {

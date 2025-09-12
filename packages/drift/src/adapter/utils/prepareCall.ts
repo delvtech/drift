@@ -2,8 +2,9 @@ import type { Abi, AbiEntry, Address, Bytes } from "src/adapter/types/Abi";
 import type {
   BytecodeCallParams,
   EncodeDeployDataParams,
-  EncodedCallParams,
+  EncodedDeployCallParams,
   FunctionCallParams,
+  TargetCallParams,
 } from "src/adapter/types/Adapter";
 import type { FunctionName } from "src/adapter/types/Function";
 import { encodeBytecodeCallData } from "src/adapter/utils/encodeBytecodeCallData";
@@ -26,10 +27,11 @@ export type PrepareCallParams<
   TAbi extends Abi = Abi,
   TFunctionName extends FunctionName<TAbi> = FunctionName<TAbi>,
 > = OneOf<
+  | TargetCallParams
+  | BytecodeCallParams
   | FunctionCallParams<TAbi, TFunctionName>
   | EncodeDeployDataParams<TAbi>
-  | EncodedCallParams
-  | BytecodeCallParams
+  | EncodedDeployCallParams
 >;
 
 /**

@@ -16,7 +16,10 @@ import type {
   Adapter,
   CallParams,
   DeployParams,
+  GetBalanceParams,
+  GetBlockReturn,
   GetEventsParams,
+  GetTransactionParams,
   GetWalletCapabilitiesParams,
   MulticallParams,
   MulticallReturn,
@@ -27,6 +30,7 @@ import type {
   SendCallsReturn,
   SendTransactionParams,
   SimulateWriteParams,
+  WaitForTransactionParams,
   WalletCallsStatus,
   WalletCapabilities,
   WriteParams,
@@ -34,12 +38,6 @@ import type {
 import type { BlockIdentifier } from "src/adapter/types/Block";
 import type { EventLog, EventName } from "src/adapter/types/Event";
 import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
-import type {
-  GetBalanceParams,
-  GetBlockReturn,
-  GetTransactionParams,
-  WaitForTransactionParams,
-} from "src/adapter/types/Network";
 import type {
   Transaction,
   TransactionReceipt,
@@ -60,7 +58,7 @@ export interface BaseAdapterOptions {
   pollingTimeout?: number;
   /**
    * The default Multicall3 address to use for the
-   * {@linkcode Adapter.multicall multicall} method.
+   * {@linkcode Adapter.multicall} method.
    * @default "0xcA11bde05977b3631167028862bE2a173976CA11"
    *
    * @see [Multicall3](https://www.multicall3.com)
@@ -110,6 +108,7 @@ export abstract class BaseReadAdapter
     params: GetEventsParams<TAbi, TEventName>,
   ): Promise<EventLog<TAbi, TEventName>[]>;
   abstract call(params: CallParams): Promise<Bytes>;
+  abstract estimateGas(transaction: CallParams): Promise<bigint>;
 
   // Default implementations //
 
