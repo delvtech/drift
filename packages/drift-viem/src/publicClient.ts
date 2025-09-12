@@ -28,6 +28,7 @@ type AnyPublicClient = PublicClient<
 
 const requiredPublicActions = [
   "call",
+  "estimateGas",
   "getBalance",
   "getBlock",
   "getBlockNumber",

@@ -1,5 +1,6 @@
 import {
   type Abi,
+  type CallParams,
   type DeployParams,
   DriftError,
   type FunctionName,
@@ -52,6 +53,13 @@ export class ViemReadWriteAdapter<
     const [address] = await this.walletClient.getAddresses();
     if (!address) throw new DriftError("No signer address found");
     return address;
+  }
+
+  async estimateGas({ from, ...rest }: CallParams) {
+    return super.estimateGas({
+      from: from || (await this.getSignerAddress().catch(() => undefined)),
+      ...rest,
+    });
   }
 
   getWalletCapabilities<TChainIds extends readonly number[]>(
