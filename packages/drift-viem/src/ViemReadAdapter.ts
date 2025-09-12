@@ -195,6 +195,7 @@ export class ViemReadAdapter<TClient extends AnyClient = PublicClient>
   async call({ block, bytecode, from, nonce, ...rest }: CallParams) {
     const { data } = await this.publicClient.call({
       blockNumber: typeof block === "bigint" ? block : undefined,
+      // TODO: Block hash not supported?
       blockTag: typeof block === "string" ? block : undefined,
       code: bytecode,
       account: from,
@@ -202,6 +203,17 @@ export class ViemReadAdapter<TClient extends AnyClient = PublicClient>
       ...rest,
     } as CallParameters);
     return data || "0x";
+  }
+
+  estimateGas({ block, bytecode, from, nonce, ...rest }: CallParams) {
+    return this.publicClient.estimateGas({
+      blockNumber: typeof block === "bigint" ? block : undefined,
+      // TODO: Block hash not supported?
+      blockTag: typeof block === "string" ? block : undefined,
+      account: from,
+      nonce: typeof nonce === "bigint" ? Number(nonce) : nonce,
+      ...rest,
+    } as CallParameters);
   }
 
   sendRawTransaction(serializedTransaction: Bytes) {
