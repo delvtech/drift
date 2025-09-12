@@ -15,7 +15,6 @@ import {
   type SendCallsReturn,
   type SendTransactionParams,
   type SimulateWriteParams,
-  type TransactionReceipt,
   toHexString,
   type WalletCallsReceipt,
   type WalletCallsStatus,
@@ -77,9 +76,12 @@ export class EthersReadWriteAdapter<
    * @throws A {@linkcode NotImplementedError} if the provider is not a
    * {@linkcode providers.JsonRpcProvider JsonRpcProvider}.
    */
-  async getWalletCapabilities<TChainIds extends readonly number[]>(
-    params?: GetWalletCapabilitiesParams<TChainIds>,
-  ): Promise<WalletCapabilities<TChainIds>> {
+  async getWalletCapabilities<TChainIds extends readonly number[]>({
+    address,
+    chainIds,
+  }: GetWalletCapabilitiesParams<TChainIds> = {}): Promise<
+    WalletCapabilities<TChainIds>
+  > {
     if (!(this.signer.provider instanceof providers.JsonRpcProvider)) {
       throw new NotImplementedError({
         method: "getWalletCapabilities",
@@ -89,8 +91,8 @@ export class EthersReadWriteAdapter<
 
     return this.signer.provider
       .send("wallet_getCapabilities", [
-        params?.address || (await this.getSignerAddress()),
-        params?.chainIds?.map((id) => toHexString(id)) || [
+        address || (await this.getSignerAddress()),
+        chainIds?.map((id) => toHexString(id)) || [
           toHexString(await this.getChainId()),
         ],
       ])
@@ -189,54 +191,53 @@ export class EthersReadWriteAdapter<
   >(params: SimulateWriteParams<TAbi, TFunctionName>) {
     return super.simulateWrite({
       ...params,
-      from: params.from ?? (await this.signer.getAddress()),
+      from: params.from || (await this.signer.getAddress()),
     });
   }
 
   async sendTransaction({
-    data,
-    to,
+    accessList,
+    chainId,
     from,
+    gas,
+    nonce,
     onMined,
     onMinedTimeout,
-    ...options
+    type,
+    ...rest
   }: SendTransactionParams) {
-    const tx = await this.signer.sendTransaction({
-      data,
-      to,
-      accessList: options.accessList as AccessList,
-      chainId:
-        typeof options.chainId === "bigint"
-          ? Number(options.chainId)
-          : options.chainId,
-      from: from ?? (await this.signer.getAddress()),
-      gasLimit: options.gas,
-      gasPrice: options.gasPrice,
-      maxFeePerGas: options.maxFeePerGas,
-      maxPriorityFeePerGas: options.maxPriorityFeePerGas,
-      nonce:
-        typeof options.nonce === "bigint" ? Number(options.nonce) : undefined,
-      type: options.type ? Number(options.type) : undefined,
-      value: options.value,
+    const { hash } = await this.signer.sendTransaction({
+      accessList: accessList as AccessList,
+      chainId: chainId === undefined ? undefined : Number(chainId),
+      from: from || (await this.signer.getAddress()),
+      gasLimit: gas,
+      nonce: nonce === undefined ? undefined : Number(nonce),
+      type: type === undefined ? undefined : Number(type),
+      ...rest,
     });
 
     if (onMined) {
       this.waitForTransaction({
-        hash: tx.hash,
+        hash,
         timeout: onMinedTimeout,
       }).then(onMined);
     }
 
-    return tx.hash;
+    return hash;
   }
 
   async deploy<TAbi extends Abi>({
     abi,
     args,
     bytecode,
+    // From address is obtained from the signer
     from,
+    gas,
+    nonce,
     onMined,
-    ...options
+    onMinedTimeout,
+    type,
+    ...rest
   }: DeployParams<TAbi>) {
     const factory = new ContractFactory(
       abi as EthersAbi,
@@ -251,33 +252,24 @@ export class EthersReadWriteAdapter<
       value: args,
     });
     const contract = await factory.deploy(...params, {
-      accessList: options.accessList,
-      chainId: options.chainId,
-      // from: from ?? (await this.signer.getAddress()),
-      gasLimit: options.gas,
-      gasPrice: options.gasPrice,
-      maxFeePerGas: options.maxFeePerGas,
-      maxPriorityFeePerGas: options.maxPriorityFeePerGas,
-      nonce: options.nonce ? Number(options.nonce) : undefined,
-      type: options.type ? Number(options.type) : undefined,
-      value: options.value,
+      gasLimit: gas,
+      nonce: nonce === undefined ? undefined : Number(nonce),
+      type: type === undefined ? undefined : Number(type),
+      ...rest,
     });
-
-    if (onMined) {
-      (async () => {
-        const deployedContract = await contract.waitForDeployment();
-        const hash = deployedContract.deployTransaction?.hash;
-        if (hash) {
-          const minedTransaction = await this.waitForTransaction({ hash });
-          onMined(minedTransaction);
-        }
-      })();
-    }
 
     const hash = contract.deployTransaction?.hash;
     if (!hash) {
       throw new DriftError("Failed to get deployment transaction hash");
     }
+
+    if (onMined) {
+      this.waitForTransaction({
+        hash,
+        timeout: onMinedTimeout,
+      }).then(onMined);
+    }
+
     return hash;
   }
 
@@ -289,9 +281,14 @@ export class EthersReadWriteAdapter<
     address,
     args,
     fn,
+    // From address is obtained from the signer
     from,
+    gas,
+    nonce,
     onMined,
-    ...options
+    onMinedTimeout,
+    type,
+    ...rest
   }: WriteParams<TAbi, TFunctionName>) {
     const contract = new Contract(address, abi as EthersAbi, this.signer);
 
@@ -303,48 +300,35 @@ export class EthersReadWriteAdapter<
       value: args,
     });
 
-    const tx: ContractTransaction = await contract[fn](...params, {
-      accessList: options.accessList,
-      chainId: options.chainId,
-      from: from ?? (await this.signer.getAddress()),
-      gasLimit: options.gas,
-      gasPrice: options.gasPrice,
-      maxFeePerGas: options.maxFeePerGas,
-      maxPriorityFeePerGas: options.maxPriorityFeePerGas,
-      nonce: options.nonce ? Number(options.nonce) : undefined,
-      type: options.type ? Number(options.type) : undefined,
-      value: options.value,
+    const { hash }: ContractTransaction = await contract[fn](...params, {
+      gasLimit: gas,
+      nonce: nonce === undefined ? undefined : Number(nonce),
+      type: type === undefined ? undefined : Number(type),
+      ...rest,
     });
 
     if (onMined) {
-      tx.wait().then((ethersReceipt) => {
-        const receipt: TransactionReceipt = {
-          blockHash: ethersReceipt.blockHash,
-          blockNumber: BigInt(ethersReceipt.blockNumber),
-          cumulativeGasUsed: ethersReceipt.cumulativeGasUsed.toBigInt(),
-          gasUsed: ethersReceipt.gasUsed.toBigInt(),
-          effectiveGasPrice: ethersReceipt.effectiveGasPrice.toBigInt(),
-          from: ethersReceipt.from,
-          logsBloom: ethersReceipt.logsBloom,
-          status: ethersReceipt.status ? "success" : "reverted",
-          to: ethersReceipt.to,
-          transactionHash: ethersReceipt.transactionHash,
-          transactionIndex: ethersReceipt.transactionIndex,
-        };
-        onMined(receipt);
-      });
+      this.waitForTransaction({
+        hash: hash,
+        timeout: onMinedTimeout,
+      }).then(onMined);
     }
 
-    return tx.hash;
+    return hash;
   }
 
   /**
    * @throws A {@linkcode NotImplementedError} if the provider is not a
    * {@linkcode providers.JsonRpcProvider JsonRpcProvider}.
    */
-  async sendCalls<const TCalls extends readonly unknown[] = any[]>(
-    params: SendCallsParams<TCalls>,
-  ): Promise<SendCallsReturn> {
+  async sendCalls<const TCalls extends readonly unknown[] = any[]>({
+    calls,
+    from,
+    chainId,
+    atomic,
+    version,
+    ...rest
+  }: SendCallsParams<TCalls>): Promise<SendCallsReturn> {
     if (!(this.signer.provider instanceof providers.JsonRpcProvider)) {
       throw new NotImplementedError({
         method: "sendCalls",
@@ -355,12 +339,11 @@ export class EthersReadWriteAdapter<
     return this.signer.provider
       .send("wallet_sendCalls", [
         {
-          version: params.version || "2.0.0",
-          id: params.id,
-          chainId: toHexString(params.chainId ?? (await this.getChainId())),
-          from: params.from ?? (await this.getSignerAddress()),
-          atomicRequired: params.atomic ?? true,
-          calls: params.calls.map(({ value, capabilities, ...call }) => {
+          version: version || "2.0.0",
+          chainId: toHexString(chainId ?? (await this.getChainId())),
+          from: from || (await this.getSignerAddress()),
+          atomicRequired: atomic ?? true,
+          calls: calls.map(({ value, capabilities, ...call }) => {
             const { to, data } = prepareCall(call);
             return {
               to,
@@ -369,7 +352,7 @@ export class EthersReadWriteAdapter<
               value: value ? toHexString(value) : undefined,
             };
           }),
-          capabilities: params.capabilities,
+          ...rest,
         },
       ])
       .catch((e) => {

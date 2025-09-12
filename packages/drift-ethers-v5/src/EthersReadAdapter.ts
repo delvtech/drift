@@ -168,15 +168,10 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     bytecode,
     chainId,
     data,
-    from,
     gas,
-    gasPrice,
-    maxFeePerGas,
-    maxPriorityFeePerGas,
     nonce,
-    to,
     type,
-    value,
+    ...rest
   }: CallParams) {
     if (bytecode && data) {
       data = encodeBytecodeCallData(bytecode, data);
@@ -186,15 +181,10 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
         accessList: accessList as AccessList,
         chainId: chainId === undefined ? undefined : Number(chainId),
         data,
-        from,
         gasLimit: gas,
-        gasPrice,
-        maxFeePerGas,
-        maxPriorityFeePerGas,
         nonce: nonce === undefined ? undefined : Number(nonce),
-        to,
         type: type === undefined ? undefined : Number(type),
-        value,
+        ...rest,
       },
       block === undefined ? undefined : blockParam(block),
     );
@@ -257,29 +247,27 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
       blockParam(fromBlock),
       blockParam(toBlock),
     );
-
-    return events.map((ethersEvent) => {
-      const event: EventLog<TAbi, TEventName> = {
-        address: ethersEvent.address,
+    return events.map((event) => {
+      return {
+        address: event.address,
         args: arrayToObject({
           abi: abi,
           kind: "inputs",
           name: eventName,
-          values: ethersEvent.args?.map((arg) =>
-            arg instanceof BigNumber ? arg.toBigInt() : arg,
+          values: event.args?.map((arg) =>
+            BigNumber.isBigNumber(arg) ? arg.toBigInt() : arg,
           ) as any,
         }),
-        blockHash: ethersEvent.blockHash,
-        blockNumber: BigInt(ethersEvent.blockNumber),
-        data: ethersEvent.data,
-        eventName: ethersEvent.event as TEventName,
-        logIndex: ethersEvent.logIndex,
-        removed: ethersEvent.removed,
-        topics: ethersEvent.topics,
-        transactionHash: ethersEvent.transactionHash,
-        transactionIndex: ethersEvent.transactionIndex,
-      };
-      return event;
+        blockHash: event.blockHash,
+        blockNumber: BigInt(event.blockNumber),
+        data: event.data,
+        eventName: event.event as TEventName,
+        logIndex: event.logIndex,
+        removed: event.removed,
+        topics: event.topics,
+        transactionHash: event.transactionHash,
+        transactionIndex: event.transactionIndex,
+      } satisfies EventLog<TAbi, TEventName>;
     });
   }
 }
