@@ -18,7 +18,7 @@
 - Updated dependencies [4d0d176]
 - Updated dependencies [09d18d4]
 - Updated dependencies [cb23fdb]
-  - @gud/drift@1.0.0
+  - @delvtech/drift@1.0.0
 
 ## 0.11.1
 
@@ -39,7 +39,7 @@
 - Updated dependencies [5462088]
 - Updated dependencies [f2ec661]
 - Updated dependencies [f2ec661]
-  - @gud/drift@0.11.0
+  - @delvtech/drift@0.11.0
 
 ## 0.10.1
 
@@ -54,7 +54,7 @@
 - Updated dependencies [fcab0a8]
 - Updated dependencies [e669f49]
 - Updated dependencies [0364ef3]
-  - @gud/drift@0.10.0
+  - @delvtech/drift@0.10.0
 
 ## 0.9.1
 
@@ -79,7 +79,7 @@
 - Updated dependencies [f623fff]
 - Updated dependencies [e5f80a5]
 - Updated dependencies [9a50e41]
-  - @gud/drift@0.9.0
+  - @delvtech/drift@0.9.0
 
 ## 0.8.4
 
@@ -125,7 +125,7 @@
 - Updated dependencies [eb818b8]
 - Updated dependencies [7427bb6]
 - Updated dependencies [bd20749]
-  - @gud/drift@0.8.0-next.2
+  - @delvtech/drift@0.8.0-next.2
 
 ## 0.7.2-next.1
 
@@ -135,7 +135,7 @@
 
 - bb25099: Added `deploy` and `encodeDeployData` methods to `Adapter` and clients.
 - Updated dependencies [bb25099]
-  - @gud/drift@0.7.2-next.0
+  - @delvtech/drift@0.7.2-next.0
 
 ## 0.7.1
 
@@ -150,14 +150,14 @@
 - Updated dependencies [0d20425]
 - Updated dependencies [bf5463d]
 - Updated dependencies [bf5463d]
-  - @gud/drift@0.7.0
+  - @delvtech/drift@0.7.0
 
 ## 0.6.0
 
 ### Patch Changes
 
 - Updated dependencies [c52e3fd]
-  - @gud/drift@0.6.0
+  - @delvtech/drift@0.6.0
 
 ## 0.5.0
 
@@ -169,7 +169,7 @@
 
 - Updated dependencies [94c3c1e]
 - Updated dependencies [94c3c1e]
-  - @gud/drift@0.5.0
+  - @delvtech/drift@0.5.0
 
 ## 0.4.5
 
@@ -190,7 +190,7 @@
 - Updated dependencies [1fcfbda]
 - Updated dependencies [1fcfbda]
 - Updated dependencies [67fa97c]
-  - @gud/drift@0.4.0
+  - @delvtech/drift@0.4.0
 
 ## 0.3.0
 
@@ -199,7 +199,7 @@
 - Updated dependencies [48cbe86]
 - Updated dependencies [6080580]
 - Updated dependencies [6080580]
-  - @gud/drift@0.3.0
+  - @delvtech/drift@0.3.0
 
 ## 0.2.0
 
@@ -214,21 +214,21 @@
 - Updated dependencies [6e91e3b]
 - Updated dependencies [0dc9748]
 - Updated dependencies [100523a]
-  - @gud/drift@0.2.0
+  - @delvtech/drift@0.2.0
 
 ## 0.1.5
 
 ### Patch Changes
 
 - Updated dependencies [035136d]
-  - @gud/drift@0.1.5
+  - @delvtech/drift@0.1.5
 
 ## 0.1.4
 
 ### Patch Changes
 
 - Updated dependencies [23245a5]
-  - @gud/drift@0.1.4
+  - @delvtech/drift@0.1.4
 
 ## 0.1.3
 
@@ -238,7 +238,7 @@
 - Updated dependencies [bf084c6]
 - Updated dependencies [02cdc41]
 - Updated dependencies [1269538]
-  - @gud/drift@0.1.3
+  - @delvtech/drift@0.1.3
 
 ## 0.1.2
 
@@ -246,7 +246,7 @@
 
 - 84b7a6d: Updated all references of the `Abi` type to use the one exported from drift to ensure registery overrides work consistently across the packages.
 - Updated dependencies [84b7a6d]
-  - @gud/drift@0.1.2
+  - @delvtech/drift@0.1.2
 
 ## 0.1.1
 
@@ -254,7 +254,7 @@
 
 - Updated dependencies [85898ae]
 - Updated dependencies [934c84f]
-  - @gud/drift@0.1.1
+  - @delvtech/drift@0.1.1
 
 ## 0.1.0
 
@@ -263,14 +263,14 @@
 - Updated dependencies [e1a0d54]
 - Updated dependencies [d5a0493]
 - Updated dependencies [2743287]
-  - @gud/drift@0.1.0
+  - @delvtech/drift@0.1.0
 
 ## 0.0.4
 
 ### Patch Changes
 
 - Updated dependencies [6d80f97]
-  - @gud/drift@0.0.4
+  - @delvtech/drift@0.0.4
 
 ## 0.0.3
 
@@ -278,7 +278,7 @@
 
 - Updated dependencies [8eebfdf]
 - Updated dependencies [5e0c162]
-  - @gud/drift@0.0.3
+  - @delvtech/drift@0.0.3
 
 ## 0.0.2
 
@@ -287,7 +287,7 @@
 - Updated dependencies [2c59ee0]
 - Updated dependencies [9c13b68]
 - Updated dependencies [0b1f8f0]
-  - @gud/drift@0.0.2
+  - @delvtech/drift@0.0.2
 
 ## 0.0.1
 
@@ -368,7 +368,7 @@
 - Updated dependencies [934d940]
 - Updated dependencies [a8a4f5f]
 - Updated dependencies [81e5362]
-  - @gud/drift@0.0.1
+  - @delvtech/drift@0.0.1
 
 ## 0.0.0-beta.16
 
@@ -376,7 +376,7 @@
 
 - Updated dependencies [be1e986]
 - Updated dependencies [934d940]
-  - @gud/drift@0.0.1-beta.27
+  - @delvtech/drift@0.0.1-beta.27
 
 ## 0.0.0-beta.15
 
@@ -390,14 +390,14 @@
 - Updated dependencies [416952b]
 - Updated dependencies [786cc9f]
 - Updated dependencies [81e5362]
-  - @gud/drift@0.0.1-beta.26
+  - @delvtech/drift@0.0.1-beta.26
 
 ## 0.0.0-beta.14
 
 ### Patch Changes
 
 - Updated dependencies [63ee6d2]
-  - @gud/drift@0.0.1-beta.25
+  - @delvtech/drift@0.0.1-beta.25
 
 ## 0.0.0-beta.13
 
@@ -406,21 +406,21 @@
 - Updated dependencies [3a95c5c]
 - Updated dependencies [c81a29e]
 - Updated dependencies [37e993d]
-  - @gud/drift@0.0.1-beta.24
+  - @delvtech/drift@0.0.1-beta.24
 
 ## 0.0.0-beta.12
 
 ### Patch Changes
 
 - Updated dependencies [f103ab3]
-  - @gud/drift@0.0.1-beta.23
+  - @delvtech/drift@0.0.1-beta.23
 
 ## 0.0.0-beta.11
 
 ### Patch Changes
 
 - Updated dependencies [130ddd6]
-  - @gud/drift@0.0.1-beta.22
+  - @delvtech/drift@0.0.1-beta.22
 
 ## 0.0.0-beta.10
 
@@ -440,14 +440,14 @@
 - Updated dependencies [01a8004]
 - Updated dependencies [01a8004]
 - Updated dependencies [a8a4f5f]
-  - @gud/drift@0.0.1-beta.21
+  - @delvtech/drift@0.0.1-beta.21
 
 ## 0.0.0-beta.9
 
 ### Patch Changes
 
 - Updated dependencies [769e427]
-  - @gud/drift@0.0.1-beta.20
+  - @delvtech/drift@0.0.1-beta.20
 
 ## 0.0.0-beta.8
 
@@ -456,7 +456,7 @@
 - 25f684c: Made the adapter type generic with a type param for the `Web3` context.
 - Updated dependencies [c560a32]
 - Updated dependencies [041ba62]
-  - @gud/drift@0.0.1-beta.19
+  - @delvtech/drift@0.0.1-beta.19
 
 ## 0.0.0-beta.7
 
@@ -464,7 +464,7 @@
 
 - af4bf45: Updated README
 - Updated dependencies [af4bf45]
-  - @gud/drift@0.0.1-beta.18
+  - @delvtech/drift@0.0.1-beta.18
 
 ## 0.0.0-beta.6
 
@@ -472,21 +472,21 @@
 
 - 74eb669: Refactored arrow function properties to methods.
 - Updated dependencies [933fce5]
-  - @gud/drift@0.0.1-beta.17
+  - @delvtech/drift@0.0.1-beta.17
 
 ## 0.0.0-beta.5
 
 ### Patch Changes
 
 - Updated dependencies
-  - @gud/drift@0.0.1-beta.16
+  - @delvtech/drift@0.0.1-beta.16
 
 ## 0.0.0-beta.4
 
 ### Patch Changes
 
 - Updated dependencies [f1cf7b4]
-  - @gud/drift@0.0.1-beta.15
+  - @delvtech/drift@0.0.1-beta.15
 
 ## 0.0.0-beta.3
 
@@ -494,7 +494,7 @@
 
 - 1def3fd: Update package manifests, add `sinon` guidance to README
 - Updated dependencies [1def3fd]
-  - @gud/drift@0.0.1-beta.14
+  - @delvtech/drift@0.0.1-beta.14
 
 ## 0.0.0-beta.2
 
@@ -514,4 +514,4 @@
 - Updated dependencies [a842e69]
 - Updated dependencies [3bb4943]
 - Updated dependencies [b5918c6]
-  - @gud/drift@0.0.1-beta.13
+  - @delvtech/drift@0.0.1-beta.13
