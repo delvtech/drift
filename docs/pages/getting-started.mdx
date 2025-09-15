@@ -11,19 +11,19 @@ First, install the core Drift library.
 :::code-group
 
 ```sh [npm]
-npm install @delvtech/drift
+npm install @gud/drift
 ```
 
 ```sh [yarn]
-yarn add @delvtech/drift
+yarn add @gud/drift
 ```
 
 ```sh [pnpm]
-pnpm add @delvtech/drift
+pnpm add @gud/drift
 ```
 
 ```sh [bun]
-bun add @delvtech/drift
+bun add @gud/drift
 ```
 
 :::
@@ -34,19 +34,19 @@ corresponding adapter:
 :::code-group
 
 ```sh [viem]
-npm install @delvtech/drift-viem
+npm install @gud/drift-viem
 ```
 
 ```sh [ethers]
-npm install @delvtech/drift-ethers
+npm install @gud/drift-ethers
 ```
 
 ```sh [ethers v5]
-npm install @delvtech/drift-ethers-v5
+npm install @gud/drift-ethers-v5
 ```
 
 ```sh [web3.js]
-npm install @delvtech/drift-web3
+npm install @gud/drift-web3
 ```
 
 :::
@@ -60,7 +60,7 @@ existing web3 provider.
 **With an RPC URL:**
 
 ```ts twoslash
-import { createDrift } from "@delvtech/drift";
+import { createDrift } from "@gud/drift";
 
 const drift = createDrift({
   rpcUrl: "YOUR_RPC_URL",
@@ -70,8 +70,8 @@ const drift = createDrift({
 **With a viem adapter:**
 
 ```ts twoslash
-import { createDrift } from "@delvtech/drift";
-import { viemAdapter } from "@delvtech/drift-viem"; // [!code hl]
+import { createDrift } from "@gud/drift";
+import { viemAdapter } from "@gud/drift-viem"; // [!code hl]
 import { createPublicClient, createWalletClient, http } from "viem";
 import { mainnet } from "viem/chains";
 
@@ -99,7 +99,7 @@ Once you have a Drift client, you can interact with your contracts using the
 :::code-group
 
 ```ts twoslash [example.ts] filename="example.ts"
-import { erc20 } from "@delvtech/drift";
+import { erc20 } from "@gud/drift";
 import { drift } from "./drift";
 
 const name = await drift.read({
@@ -170,7 +170,7 @@ You can create `Contract` instances to write your options once and get a
 streamlined, type-safe API to re-use across your application.
 
 ```ts twoslash
-import { erc20 } from "@delvtech/drift";
+import { erc20 } from "@gud/drift";
 // [!include ~/snippets/drift.ts]
 // ---cut---
 const token = drift.contract({

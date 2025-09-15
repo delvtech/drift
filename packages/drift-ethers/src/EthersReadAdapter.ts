@@ -1,38 +1,38 @@
 import {
-  type Abi,
-  type AbiArrayType,
-  arrayToObject,
-  BaseReadAdapter,
-  type Block,
-  type BlockIdentifier,
-  type Bytes,
-  type CallParams,
-  type EventArgs,
-  type EventLog,
-  type EventName,
-  encodeBytecodeCallData,
-  type GetBalanceParams,
-  type GetBlockReturn,
-  type GetEventsParams,
-  type GetTransactionParams,
-  type Hash,
-  prepareParams,
-  type ReadAdapter,
-  type Transaction,
-  type TransactionReceipt,
-  toHexString,
-  type WaitForTransactionParams,
-} from "@delvtech/drift";
+    type Abi,
+    type AbiArrayType,
+    arrayToObject,
+    BaseReadAdapter,
+    type Block,
+    type BlockIdentifier,
+    type Bytes,
+    type CallParams,
+    type EventArgs,
+    type EventLog,
+    type EventName,
+    encodeBytecodeCallData,
+    type GetBalanceParams,
+    type GetBlockReturn,
+    type GetEventsParams,
+    type GetTransactionParams,
+    type Hash,
+    prepareParams,
+    type ReadAdapter,
+    type Transaction,
+    type TransactionReceipt,
+    toHexString,
+    type WaitForTransactionParams,
+} from "@gud/drift";
 import type { AccessList } from "ethers";
 import {
-  BrowserProvider,
-  Contract,
-  type DeferredTopicFilter,
-  type EventLog as EthersEventLog,
-  getDefaultProvider,
-  type InterfaceAbi,
-  JsonRpcProvider,
-  type Provider,
+    BrowserProvider,
+    Contract,
+    type DeferredTopicFilter,
+    type EventLog as EthersEventLog,
+    getDefaultProvider,
+    type InterfaceAbi,
+    JsonRpcProvider,
+    type Provider,
 } from "ethers";
 
 export interface EthersReadAdapterParams<
@@ -259,7 +259,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
   }
 }
 
-declare module "@delvtech/drift" {
+declare module "@gud/drift" {
   interface BlockOverrides<T> {
     /**
      * Unavailable in ethers.js.
@@ -295,7 +295,7 @@ declare module "@delvtech/drift" {
   }
 }
 
-declare module "@delvtech/drift" {
+declare module "@gud/drift" {
   interface BaseTypeOverrides {
     HexString: string;
   }

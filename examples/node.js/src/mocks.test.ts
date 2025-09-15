@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import { afterEach, describe, it } from "node:test";
-import { erc4626 } from "@delvtech/drift";
-import { createMockDrift, randomAddress } from "@delvtech/drift/testing";
+import { erc4626 } from "@gud/drift";
+import { createMockDrift, randomAddress } from "@gud/drift/testing";
 import { ReadVault } from "./sdk_client";
 
 // Create mocks

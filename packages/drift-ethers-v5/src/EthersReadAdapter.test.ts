@@ -1,19 +1,19 @@
 import {
-  type Address,
-  type Block,
-  type DecodedFunctionData,
-  DriftError,
-  type EventLog,
-  erc20,
-  type FunctionArgs,
-  type Hash,
-  HEX_REGEX,
-  type MulticallCallResult,
-  type Transaction,
-  type TransactionReceipt,
-  ZERO_ADDRESS,
-} from "@delvtech/drift";
-import { mockErc20, testToken } from "@delvtech/drift/testing";
+    type Address,
+    type Block,
+    type DecodedFunctionData,
+    DriftError,
+    type EventLog,
+    erc20,
+    type FunctionArgs,
+    type Hash,
+    HEX_REGEX,
+    type MulticallCallResult,
+    type Transaction,
+    type TransactionReceipt,
+    ZERO_ADDRESS,
+} from "@gud/drift";
+import { mockErc20, testToken } from "@gud/drift/testing";
 import { providers } from "ethers";
 import { EthersReadAdapter } from "src/EthersReadAdapter";
 import { assert, beforeAll, describe, expect, it } from "vitest";

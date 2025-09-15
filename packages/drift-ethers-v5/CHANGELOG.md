@@ -1,4 +1,4 @@
-# @delvtech/drift-ethers-v5
+# @gud/drift-ethers-v5
 
 ## 1.0.1
 
@@ -12,7 +12,7 @@
 - Updated dependencies [4d0d176]
 - Updated dependencies [09d18d4]
 - Updated dependencies [cb23fdb]
-  - @delvtech/drift@1.0.0
+  - @gud/drift@1.0.0
 
 ## 0.11.1
 
@@ -33,7 +33,7 @@
 - Updated dependencies [5462088]
 - Updated dependencies [f2ec661]
 - Updated dependencies [f2ec661]
-  - @delvtech/drift@0.11.0
+  - @gud/drift@0.11.0
 
 ## 0.10.1
 
@@ -48,7 +48,7 @@
 - Updated dependencies [fcab0a8]
 - Updated dependencies [e669f49]
 - Updated dependencies [0364ef3]
-  - @delvtech/drift@0.10.0
+  - @gud/drift@0.10.0
 
 ## 0.9.1
 
@@ -73,7 +73,7 @@
 - Updated dependencies [f623fff]
 - Updated dependencies [e5f80a5]
 - Updated dependencies [9a50e41]
-  - @delvtech/drift@0.9.0
+  - @gud/drift@0.9.0
 
 ## 0.8.4
 
@@ -119,7 +119,7 @@
 - Updated dependencies [eb818b8]
 - Updated dependencies [7427bb6]
 - Updated dependencies [bd20749]
-  - @delvtech/drift@0.8.0-next.2
+  - @gud/drift@0.8.0-next.2
 
 ## 0.7.2-next.1
 
@@ -129,7 +129,7 @@
 
 - bb25099: Added `deploy` and `encodeDeployData` methods to `Adapter` and clients.
 - Updated dependencies [bb25099]
-  - @delvtech/drift@0.7.2-next.0
+  - @gud/drift@0.7.2-next.0
 
 ## 0.7.1
 
@@ -144,14 +144,14 @@
 - Updated dependencies [0d20425]
 - Updated dependencies [bf5463d]
 - Updated dependencies [bf5463d]
-  - @delvtech/drift@0.7.0
+  - @gud/drift@0.7.0
 
 ## 0.6.0
 
 ### Patch Changes
 
 - Updated dependencies [c52e3fd]
-  - @delvtech/drift@0.6.0
+  - @gud/drift@0.6.0
 
 ## 0.5.0
 
@@ -163,7 +163,7 @@
 
 - Updated dependencies [94c3c1e]
 - Updated dependencies [94c3c1e]
-  - @delvtech/drift@0.5.0
+  - @gud/drift@0.5.0
 
 ## 0.4.5
 
@@ -184,7 +184,7 @@
 - Updated dependencies [1fcfbda]
 - Updated dependencies [1fcfbda]
 - Updated dependencies [67fa97c]
-  - @delvtech/drift@0.4.0
+  - @gud/drift@0.4.0
 
 ## 0.3.0
 
@@ -193,7 +193,7 @@
 - Updated dependencies [48cbe86]
 - Updated dependencies [6080580]
 - Updated dependencies [6080580]
-  - @delvtech/drift@0.3.0
+  - @gud/drift@0.3.0
 
 ## 0.2.0
 
@@ -208,14 +208,14 @@
 - Updated dependencies [6e91e3b]
 - Updated dependencies [0dc9748]
 - Updated dependencies [100523a]
-  - @delvtech/drift@0.2.0
+  - @gud/drift@0.2.0
 
 ## 0.1.5
 
 ### Patch Changes
 
 - Updated dependencies [035136d]
-  - @delvtech/drift@0.1.5
+  - @gud/drift@0.1.5
 
 ## 0.1.4
 
@@ -223,7 +223,7 @@
 
 - e9ffb14: Patched the return type of `viemAdapter` and `ethersAdapter` to return `ReadAdapter | ReadWriteAdapter` when `walletClient`/`signer` is possibly undefined instead of just returning a `ReadWriteAdapter` any time a `walletClient`/`signer` prop is present.
 - Updated dependencies [23245a5]
-  - @delvtech/drift@0.1.4
+  - @gud/drift@0.1.4
 
 ## 0.1.3
 
@@ -233,7 +233,7 @@
 - Updated dependencies [bf084c6]
 - Updated dependencies [02cdc41]
 - Updated dependencies [1269538]
-  - @delvtech/drift@0.1.3
+  - @gud/drift@0.1.3
 
 ## 0.1.2
 
@@ -241,7 +241,7 @@
 
 - 84b7a6d: Updated all references of the `Abi` type to use the one exported from drift to ensure registery overrides work consistently across the packages.
 - Updated dependencies [84b7a6d]
-  - @delvtech/drift@0.1.2
+  - @gud/drift@0.1.2
 
 ## 0.1.1
 
@@ -249,7 +249,7 @@
 
 - Updated dependencies [85898ae]
 - Updated dependencies [934c84f]
-  - @delvtech/drift@0.1.1
+  - @gud/drift@0.1.1
 
 ## 0.1.0
 
@@ -258,14 +258,14 @@
 - Updated dependencies [e1a0d54]
 - Updated dependencies [d5a0493]
 - Updated dependencies [2743287]
-  - @delvtech/drift@0.1.0
+  - @gud/drift@0.1.0
 
 ## 0.0.4
 
 ### Patch Changes
 
 - Updated dependencies [6d80f97]
-  - @delvtech/drift@0.0.4
+  - @gud/drift@0.0.4
 
 ## 0.0.3
 
@@ -273,7 +273,7 @@
 
 - Updated dependencies [8eebfdf]
 - Updated dependencies [5e0c162]
-  - @delvtech/drift@0.0.3
+  - @gud/drift@0.0.3
 
 ## 0.0.2
 
@@ -282,7 +282,7 @@
 - Updated dependencies [2c59ee0]
 - Updated dependencies [9c13b68]
 - Updated dependencies [0b1f8f0]
-  - @delvtech/drift@0.0.2
+  - @gud/drift@0.0.2
 
 ## 0.0.1
 
@@ -358,7 +358,7 @@
 - Updated dependencies [934d940]
 - Updated dependencies [a8a4f5f]
 - Updated dependencies [81e5362]
-  - @delvtech/drift@0.0.1
+  - @gud/drift@0.0.1
 
 ## 0.0.1-beta.8
 
@@ -366,7 +366,7 @@
 
 - Updated dependencies [be1e986]
 - Updated dependencies [934d940]
-  - @delvtech/drift@0.0.1-beta.27
+  - @gud/drift@0.0.1-beta.27
 
 ## 0.0.1-beta.7
 
@@ -380,14 +380,14 @@
 - Updated dependencies [416952b]
 - Updated dependencies [786cc9f]
 - Updated dependencies [81e5362]
-  - @delvtech/drift@0.0.1-beta.26
+  - @gud/drift@0.0.1-beta.26
 
 ## 0.0.1-beta.6
 
 ### Patch Changes
 
 - Updated dependencies [63ee6d2]
-  - @delvtech/drift@0.0.1-beta.25
+  - @gud/drift@0.0.1-beta.25
 
 ## 0.0.1-beta.5
 
@@ -396,21 +396,21 @@
 - Updated dependencies [3a95c5c]
 - Updated dependencies [c81a29e]
 - Updated dependencies [37e993d]
-  - @delvtech/drift@0.0.1-beta.24
+  - @gud/drift@0.0.1-beta.24
 
 ## 0.0.1-beta.4
 
 ### Patch Changes
 
 - Updated dependencies [f103ab3]
-  - @delvtech/drift@0.0.1-beta.23
+  - @gud/drift@0.0.1-beta.23
 
 ## 0.0.1-beta.3
 
 ### Patch Changes
 
 - Updated dependencies [130ddd6]
-  - @delvtech/drift@0.0.1-beta.22
+  - @gud/drift@0.0.1-beta.22
 
 ## 0.0.1-beta.2
 
@@ -430,14 +430,14 @@
 - Updated dependencies [01a8004]
 - Updated dependencies [01a8004]
 - Updated dependencies [a8a4f5f]
-  - @delvtech/drift@0.0.1-beta.21
+  - @gud/drift@0.0.1-beta.21
 
 ## 0.0.1-beta.1
 
 ### Patch Changes
 
 - Updated dependencies [769e427]
-  - @delvtech/drift@0.0.1-beta.20
+  - @gud/drift@0.0.1-beta.20
 
 ## 0.0.1-beta.0
 
@@ -446,4 +446,4 @@
 - 1743c3d: Initial release 🚀
 - Updated dependencies [c560a32]
 - Updated dependencies [041ba62]
-  - @delvtech/drift@0.0.1-beta.19
+  - @gud/drift@0.0.1-beta.19

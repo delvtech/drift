@@ -15,7 +15,7 @@ The simplest way to read data is using the `read` method:
 :::code-group
 
 ```ts twoslash [example.ts] filename="example.ts"
-import { erc20 } from "@delvtech/drift";
+import { erc20 } from "@gud/drift";
 import { drift } from "./drift";
 
 // Using the client directly
@@ -49,7 +49,7 @@ Multicall batches multiple contract calls into a single RPC request using
 [Multicall3](https://www.multicall3.com/), dramatically improving performance:
 
 ```ts twoslash
-import { type Address, erc20 } from "@delvtech/drift";
+import { type Address, erc20 } from "@gud/drift";
 // [!include ~/snippets/drift.ts]
 declare const tokenA: Address;
 declare const tokenB: Address;
@@ -71,7 +71,7 @@ const nameResult = results[0];
 ### Direct Values with `allowFailure: false`
 
 ```ts twoslash
-import { type Address, erc20 } from "@delvtech/drift";
+import { type Address, erc20 } from "@gud/drift";
 // [!include ~/snippets/drift.ts]
 declare const tokenA: Address;
 declare const tokenB: Address;
@@ -94,7 +94,7 @@ const name = values[0];
 ### Contract Instance Multicall
 
 ```ts twoslash
-import { erc20 } from "@delvtech/drift";
+import { erc20 } from "@gud/drift";
 // [!include ~/snippets/drift.ts]
 // ---cut---
 // Using a contract instance for cleaner syntax
@@ -120,7 +120,7 @@ const results = await token.multicall({
 ```ts twoslash
 // [!include ~/snippets/drift.ts]
 // ---cut---
-import { erc20, erc4626, erc721 } from "@delvtech/drift";
+import { erc20, erc4626, erc721 } from "@gud/drift";
 
 // Call different contracts in one batch
 const results = await drift.multicall({
@@ -155,7 +155,7 @@ data:
 ```ts twoslash
 // [!include ~/snippets/token.ts]
 // ---cut---
-import { encodeFunctionData, decodeFunctionReturn } from "@delvtech/drift";
+import { encodeFunctionData, decodeFunctionReturn } from "@gud/drift";
 
 // Encode call data manually
 const data = encodeFunctionData({
@@ -184,7 +184,7 @@ Multicall supports mixing encoded calls with function calls:
 
 ```ts twoslash
 // [!include ~/snippets/token.ts]
-import type { Bytes } from "@delvtech/drift";
+import type { Bytes } from "@gud/drift";
 declare const calldata: Bytes;
 // ---cut---
 const results = await drift.multicall({
@@ -215,7 +215,7 @@ calculations without needing to be deployed:
 ```ts twoslash
 // [!include ~/snippets/token.ts]
 // ---cut---
-import { encodeFunctionData, decodeFunctionReturn } from "@delvtech/drift";
+import { encodeFunctionData, decodeFunctionReturn } from "@gud/drift";
 
 // Call against contract bytecode directly
 const result = await drift.call({

@@ -1,4 +1,4 @@
-# @delvtech/drift
+# @gud/drift
 
 ## 1.0.1
 
@@ -126,7 +126,7 @@
 
   **Package Configuration**
 
-  - Fixed `@delvtech/drift-web3` package.json fields to point to correct dist files.
+  - Fixed `@gud/drift-web3` package.json fields to point to correct dist files.
   - Updated gitignore files across all packages.
 
   **Type Safety**
@@ -186,7 +186,7 @@
 
 - ce25bb5: Renamed `prepareParamsArray` util to `prepareParams`.
 - d63b416: Renamed `convertType` util to `convert`
-- 9a50e41: Moved `erc20` export from `@delvtech/drift/testing` to `@delvtech/drift`
+- 9a50e41: Moved `erc20` export from `@gud/drift/testing` to `@gud/drift`
 - e104263: Renamed `GetBlockReturnType` to `GetBlockReturn` for consistency.
 
 ### Patch Changes

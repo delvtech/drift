@@ -1,26 +1,26 @@
 import {
-  type Abi,
-  type DeployParams,
-  DriftError,
-  type FunctionName,
-  type GetWalletCapabilitiesParams,
-  getWalletCallsStatusLabel,
-  type HexString,
-  prepareCall,
-  prepareParams,
-  type ReadWriteAdapter,
-  type SendCallsParams,
-  type SendCallsReturn,
-  type SendTransactionParams,
-  toHexString,
-  type WalletCallsStatus,
-  type WalletCapabilities,
-  type WriteParams,
-} from "@delvtech/drift";
+    type Abi,
+    type DeployParams,
+    DriftError,
+    type FunctionName,
+    type GetWalletCapabilitiesParams,
+    getWalletCallsStatusLabel,
+    type HexString,
+    prepareCall,
+    prepareParams,
+    type ReadWriteAdapter,
+    type SendCallsParams,
+    type SendCallsReturn,
+    type SendTransactionParams,
+    toHexString,
+    type WalletCallsStatus,
+    type WalletCapabilities,
+    type WriteParams,
+} from "@gud/drift";
 import type { AnyClient } from "src/publicClient";
 import {
-  ViemReadAdapter,
-  type ViemReadAdapterParams,
+    ViemReadAdapter,
+    type ViemReadAdapterParams,
 } from "src/ViemReadAdapter";
 import type { Call, PublicClient, WalletClient } from "viem";
 
@@ -240,7 +240,7 @@ export class ViemReadWriteAdapter<
   }
 }
 
-declare module "@delvtech/drift" {
+declare module "@gud/drift" {
   interface GetWalletCapabilitiesParams<
     TChainIds extends readonly number[] = number[],
   > {

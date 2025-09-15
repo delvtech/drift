@@ -1,10 +1,10 @@
 import {
-  createDrift,
-  decodeFunctionReturn,
-  encodeDeployData,
-  encodeFunctionData,
-} from "@delvtech/drift";
-import { testToken } from "@delvtech/drift/testing";
+    createDrift,
+    decodeFunctionReturn,
+    encodeDeployData,
+    encodeFunctionData,
+} from "@gud/drift";
+import { testToken } from "@gud/drift/testing";
 
 const rpcUrl = process.env.RPC_URL;
 const drift = createDrift({ rpcUrl });

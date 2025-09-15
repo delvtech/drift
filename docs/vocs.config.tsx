@@ -1,4 +1,4 @@
-import manifest from "@delvtech/drift/package.json" with { type: "json" };
+import manifest from "@gud/drift/package.json" with { type: "json" };
 import { defineConfig } from "vocs";
 
 export default defineConfig({
@@ -18,20 +18,20 @@ export default defineConfig({
     },
   },
   editLink: {
-    pattern: "https://github.com/delvtech/drift/edit/main/docs/pages/:path",
+    pattern: "https://github.com/ryangoree/drift/edit/main/docs/pages/:path",
     text: "Edit this page",
   },
   topNav: [
     {
       text: "Examples",
-      link: "https://github.com/delvtech/drift/tree/main/examples",
+      link: "https://github.com/ryangoree/drift/tree/main/examples",
     },
     {
       text: manifest.version,
       items: [
         {
           text: "Changelog",
-          link: "https://github.com/delvtech/drift/blob/main/packages/drift/CHANGELOG.md",
+          link: "https://github.com/ryangoree/drift/blob/main/packages/drift/CHANGELOG.md",
         },
       ],
     },
@@ -40,7 +40,7 @@ export default defineConfig({
         <a
           key="github-link"
           className="heading-icon-link"
-          href="https://github.com/delvtech/drift"
+          href="https://github.com/ryangoree/drift"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="GitHub"

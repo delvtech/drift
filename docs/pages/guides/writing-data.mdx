@@ -14,7 +14,7 @@ Use the `write` method to send transactions to your contracts:
 :::code-group
 
 ```ts twoslash [example.ts] filename="example.ts"
-import { erc20 } from "@delvtech/drift";
+import { erc20 } from "@gud/drift";
 import { drift } from "./drift";
 
 // Using the client directly
@@ -147,7 +147,7 @@ will wait for 1 minute before timing out and returning `undefined`.
 ```ts twoslash
 // @filename: default.ts
 // [!include ~/snippets/drift.ts]
-import type { Hash } from "@delvtech/drift";
+import type { Hash } from "@gud/drift";
 declare const txHash: Hash;
 // ---cut---
 // Basic wait
@@ -206,7 +206,7 @@ transactions for better UX and gas efficiency:
 
 ```ts twoslash
 // [!include ~/snippets/drift.ts]
-import { type Address, erc20, erc4626 } from "@delvtech/drift";
+import { type Address, erc20, erc4626 } from "@gud/drift";
 declare const tokenAddress: Address;
 declare const vaultAddress: Address;
 declare const userAddress: Address;
@@ -249,7 +249,7 @@ and even bytecode calls or deployments:
 ```ts twoslash
 // [!include ~/snippets/drift.ts]
 // [!include ~/snippets/deployableTokenAbi.ts]
-import type { Address, Bytes } from "@delvtech/drift";
+import type { Address, Bytes } from "@gud/drift";
 declare const calldata: Bytes;
 // ---cut---
 // Mix ABI calls with raw encoded calls
@@ -318,7 +318,7 @@ several methods for cache management:
 
 ```ts twoslash
 // [!include ~/snippets/token.ts]
-import type { Address } from "@delvtech/drift";
+import type { Address } from "@gud/drift";
 declare const from: Address;
 declare const to: Address;
 declare const amount: bigint;
@@ -355,7 +355,7 @@ See [**Caching**](/guides/caching) for more details on cache management.
 An example of a robust error handling pattern for write operations:
 
 ```ts twoslash
-import type { Address, erc20, ReadWriteContract } from "@delvtech/drift";
+import type { Address, erc20, ReadWriteContract } from "@gud/drift";
 
 type Erc20Abi = typeof erc20.abi;
 
@@ -408,7 +408,7 @@ temporary issues like network errors:
 ```ts twoslash [writeWithRetry.ts] filename="writeWithRetry.ts"
 // @filename: writeWithRetry.ts
 // ---cut---
-import type { FunctionName } from "@delvtech/drift";
+import type { FunctionName } from "@gud/drift";
 import type { Erc20Abi, WriteTokenWithRetryParams } from "./types";
 
 // [!code focus:99]
@@ -441,7 +441,7 @@ import type {
   FunctionName,
   ReadWriteContract,
   WriteOptions,
-} from "@delvtech/drift";
+} from "@gud/drift";
 
 export type Erc20Abi = typeof erc20.abi;
 

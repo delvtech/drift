@@ -1,6 +1,6 @@
 # Drift
 
-[![NPM Version](https://img.shields.io/npm/v/%40delvtech%2Fdrift?color=cb3837)](https://npmjs.com/package/@delvtech/drift)
+[![NPM Version](https://img.shields.io/npm/v/%40delvtech%2Fdrift?color=cb3837)](https://npmjs.com/package/@gud/drift)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-23454d)](./LICENSE)
 [![DELV Terms of Service](https://img.shields.io/badge/DELV-Terms%20of%20Service-316f5b)](https://delv-public.s3.us-east-2.amazonaws.com/delv-terms-of-service.pdf)
 
@@ -86,7 +86,7 @@ Building on Ethereum often means dealing with:
 Install Drift:
 
 ```sh
-npm install @delvtech/drift
+npm install @gud/drift
 ```
 
 **Optional:** To use Drift with a specific web3 library, install the
@@ -94,10 +94,10 @@ corresponding adapter:
 
 ```sh
 # Install one (optional)
-npm install @delvtech/drift-viem
-npm install @delvtech/drift-web3
-npm install @delvtech/drift-ethers
-npm install @delvtech/drift-ethers-v5
+npm install @gud/drift-viem
+npm install @gud/drift-web3
+npm install @gud/drift-ethers
+npm install @gud/drift-ethers-v5
 ```
 
 > [!TIP]
@@ -112,7 +112,7 @@ npm install @delvtech/drift-ethers-v5
 ### 1. Create a Drift client
 
 ```ts
-import { createDrift } from "@delvtech/drift";
+import { createDrift } from "@gud/drift";
 
 const drift = createDrift({
   rpcUrl: "[YOUR_RPC_URL]",
@@ -122,8 +122,8 @@ const drift = createDrift({
 **Viem adapter example:**
 
 ```ts
-import { createDrift } from "@delvtech/drift";
-import { viemAdapter } from "@delvtech/drift-viem";
+import { createDrift } from "@gud/drift";
+import { viemAdapter } from "@gud/drift-viem";
 import { createPublicClient, createWalletClient, http } from "viem";
 
 const publicClient = createPublicClient({
@@ -262,7 +262,7 @@ import {
   type ReadWriteAdapter,
   type ReadWriteContract,
   createDrift,
-} from "@delvtech/drift";
+} from "@gud/drift";
 import { vaultAbi } from "./abis/vaultAbi";
 
 type VaultAbi = typeof vaultAbi;
@@ -338,8 +338,8 @@ Using an adapter, you can integrate Drift with your chosen web3 library. Here's
 an example using `viem`:
 
 ```ts
-import { createDrift } from "@delvtech/drift";
-import { viemAdapter } from "@delvtech/drift-viem";
+import { createDrift } from "@gud/drift";
+import { viemAdapter } from "@gud/drift-viem";
 import { createPublicClient, http } from "viem";
 import { ReadVault } from "@foobar/sdk";
 
@@ -398,7 +398,7 @@ method:
 ```ts
 import assert from "node:assert";
 import test from "node:test";
-import { createMockDrift, randomAddress } from "@delvtech/drift/testing";
+import { createMockDrift, randomAddress } from "@gud/drift/testing";
 import { vaultAbi } from "./abis/VaultAbi";
 import { ReadVault } from "./VaultClient";
 
@@ -582,7 +582,7 @@ of their own. See the [`DefaultAdapter`][DefaultAdapter] for an example
 implementation.
 
 ```ts
-import { DefaultAdapter, createDrift } from "@delvtech/drift";
+import { DefaultAdapter, createDrift } from "@gud/drift";
 
 class CustomAdapter extends DefaultAdapter {
   override async getChainId() {
@@ -606,7 +606,7 @@ custom store that uses TTL, localStorage, IndexedDB,
 any other storage mechanism, sync or async.
 
 ```ts
-import { createDrift } from "@delvtech/drift";
+import { createDrift } from "@gud/drift";
 
 class CustomStore extends Map {
   override set(key: string, value: unknown) {

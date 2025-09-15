@@ -1,5 +1,5 @@
-import { HEX_REGEX, type TransactionReceipt } from "@delvtech/drift";
-import { testToken } from "@delvtech/drift/testing";
+import { HEX_REGEX, type TransactionReceipt } from "@gud/drift";
+import { testToken } from "@gud/drift/testing";
 import { providers } from "ethers";
 import { EthersReadWriteAdapter } from "src/EthersReadWriteAdapter";
 import { assert, describe, expect, it } from "vitest";

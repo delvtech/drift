@@ -41,8 +41,8 @@ The Drift Client is the orchestrator that coordinates all
 operations:
 
 ```ts twoslash
-import { createDrift, type Store } from "@delvtech/drift";
-import { viemAdapter } from "@delvtech/drift-viem";
+import { createDrift, type Store } from "@gud/drift";
+import { viemAdapter } from "@gud/drift-viem";
 import type { PublicClient } from "viem";
 declare const publicClient: PublicClient
 declare const customStore: Store;
@@ -73,7 +73,7 @@ Drift provides fully type-safe contract instances from ABIs:
 
 ```ts twoslash
 // [!include ~/snippets/drift.ts]
-import { erc4626 } from "@delvtech/drift";
+import { erc4626 } from "@gud/drift";
 // ---cut---
 const vault = drift.contract({
   abi: erc4626.abi,
@@ -108,10 +108,10 @@ await vault.read("balanceOf", { wrongParam: "0x..." });
 Adapters normalize different web3 libraries into a consistent interface:
 
 ```ts twoslash
-import { createDrift } from "@delvtech/drift";
-import { viemAdapter } from "@delvtech/drift-viem";
-import { ethersAdapter } from "@delvtech/drift-ethers";
-import { Web3Adapter } from "@delvtech/drift-web3";
+import { createDrift } from "@gud/drift";
+import { viemAdapter } from "@gud/drift-viem";
+import { ethersAdapter } from "@gud/drift-ethers";
+import { Web3Adapter } from "@gud/drift-web3";
 import type { PublicClient } from "viem";
 import type { Provider } from "ethers";
 import type { Web3 } from "web3";
@@ -155,7 +155,7 @@ Drift's caching system automatically prevents redundant network requests:
 
 ```ts twoslash
 // [!include ~/snippets/drift.ts]
-import { type Address, erc20 } from "@delvtech/drift";
+import { type Address, erc20 } from "@gud/drift";
 const contract = drift.contract({
   abi: erc20.abi,
   address: "0x...",

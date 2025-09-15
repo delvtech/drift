@@ -1,4 +1,4 @@
-import { createDrift, erc20 } from "@delvtech/drift";
+import { createDrift, erc20 } from "@gud/drift";
 
 export const drift = createDrift({
   rpcUrl: process.env.RPC_URL,

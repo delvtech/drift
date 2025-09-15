@@ -31,7 +31,7 @@ import {
   createDrift,
   type Drift,
   type ReadContract,
-} from "@delvtech/drift";
+} from "@gud/drift";
 import { type VaultAbi, vaultAbi } from "./abi";
 
 /**
@@ -63,7 +63,7 @@ export class ReadVault {
 ```ts twoslash [abi.ts] filename="abi.ts"
 // @filename: abi.ts
 // ---cut---
-import { erc4626 } from "@delvtech/drift";
+import { erc4626 } from "@gud/drift";
 
 export type VaultAbi = typeof erc4626.abi;
 export const vaultAbi = erc4626.abi;
@@ -87,7 +87,7 @@ import {
   type Drift,
   type ReadWriteAdapter,
   type ReadWriteContract,
-} from "@delvtech/drift";
+} from "@gud/drift";
 import type { VaultAbi } from "./abi";
 import { ReadVault } from "./ReadVault";
 
@@ -149,8 +149,8 @@ supported by Drift.
 // [!include ~/snippets/vault-sdk.d.ts]
 // @filename: app.ts
 // ---cut---
-import { createDrift } from "@delvtech/drift";
-import { viemAdapter } from "@delvtech/drift-viem";
+import { createDrift } from "@gud/drift";
+import { viemAdapter } from "@gud/drift-viem";
 import { createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
 import { ReadVault } from "vault-sdk";
@@ -175,8 +175,8 @@ console.log(`Asset value: ${assetValue}`);
 // [!include ~/snippets/vault-sdk.d.ts]
 // @filename: app.ts
 // ---cut---
-import { createDrift } from "@delvtech/drift";
-import { ethersAdapter } from "@delvtech/drift-ethers";
+import { createDrift } from "@gud/drift";
+import { ethersAdapter } from "@gud/drift-ethers";
 import { getDefaultProvider } from "ethers";
 import { ReadVault } from "vault-sdk";
 
@@ -197,8 +197,8 @@ console.log(`Asset value: ${assetValue}`);
 // [!include ~/snippets/vault-sdk.d.ts]
 // @filename: app.ts
 // ---cut---
-import { createDrift } from "@delvtech/drift";
-import { Web3Adapter } from "@delvtech/drift-web3";
+import { createDrift } from "@gud/drift";
+import { Web3Adapter } from "@gud/drift-web3";
 import { ReadVault } from "vault-sdk";
 import { Web3 } from "web3";
 

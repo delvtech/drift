@@ -1,4 +1,4 @@
-import type { OneOf } from "@delvtech/drift";
+import type { OneOf } from "@gud/drift";
 import type { AnyClient } from "src/publicClient";
 import { ViemReadAdapter } from "src/ViemReadAdapter";
 import { ViemReadWriteAdapter } from "src/ViemReadWriteAdapter";

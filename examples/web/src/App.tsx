@@ -1,4 +1,4 @@
-import { erc20 } from "@delvtech/drift";
+import { erc20 } from "@gud/drift";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";

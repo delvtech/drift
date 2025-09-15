@@ -1,4 +1,4 @@
-import type { OneOf } from "@delvtech/drift";
+import type { OneOf } from "@gud/drift";
 import type { Signer } from "ethers";
 import { EthersReadAdapter } from "src/EthersReadAdapter";
 import { EthersReadWriteAdapter } from "src/EthersReadWriteAdapter";

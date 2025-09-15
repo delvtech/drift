@@ -1,10 +1,10 @@
-# @delvtech/drift-viem
+# @gud/drift-viem
 
-[Viem](https://viem.sh) adapter for [Drift](https://github.com/delvtech/drift).
+[Viem](https://viem.sh) adapter for [Drift](https://github.com/ryangoree/drift).
 
 ```ts
-import { createDrift } from "@delvtech/drift";
-import { viemAdapter } from "@delvtech/drift-viem";
+import { createDrift } from "@gud/drift";
+import { viemAdapter } from "@gud/drift-viem";
 import { createPublicClient, http } from "viem";
 
 const publicClient = createPublicClient(/* ... */);

@@ -1,4 +1,4 @@
-import { erc20 } from "@delvtech/drift";
+import { erc20 } from "@gud/drift";
 
 export const tokenAbi = [
   {

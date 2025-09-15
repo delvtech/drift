@@ -1,10 +1,10 @@
 import {
-  type Address,
-  type Contract,
-  createDrift,
-  type Drift,
-  erc4626,
-} from "@delvtech/drift";
+    type Address,
+    type Contract,
+    createDrift,
+    type Drift,
+    erc4626,
+} from "@gud/drift";
 import { fixed } from "@gud/math";
 
 type Erc4626Abi = typeof erc4626.abi;
