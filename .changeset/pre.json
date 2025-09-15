@@ -6,11 +6,11 @@
     "docs": "0.0.0",
     "node.js": "0.0.0",
     "web": "0.0.0",
-    "@delvtech/drift": "1.0.1",
-    "@delvtech/drift-ethers": "1.0.1",
-    "@delvtech/drift-ethers-v5": "1.0.1",
-    "@delvtech/drift-viem": "1.0.1",
-    "@delvtech/drift-web3": "1.0.1"
+    "@gud/drift": "1.0.2",
+    "@gud/drift-ethers": "1.0.2",
+    "@gud/drift-ethers-v5": "1.0.2",
+    "@gud/drift-viem": "1.0.2",
+    "@gud/drift-web3": "1.0.2"
   },
   "changesets": [
     "fair-cities-sort",

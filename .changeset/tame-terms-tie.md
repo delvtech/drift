@@ -1,5 +1,5 @@
 ---
-"@delvtech/drift": patch
+"@gud/drift": patch
 ---
 
 Misc. param types cleanup.

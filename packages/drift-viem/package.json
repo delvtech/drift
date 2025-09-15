@@ -34,11 +34,11 @@
     "typecheck:watch": "tsc --noEmit --watch"
   },
   "peerDependencies": {
-    "@delvtech/drift": "^2.0.0-next.0",
+    "@gud/drift": "^2.0.0-next.0",
     "viem": "^2.33.2"
   },
   "devDependencies": {
-    "@delvtech/drift": "^2.0.0-next.0",
+    "@gud/drift": "^2.0.0-next.0",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2",

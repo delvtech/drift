@@ -1,5 +1,5 @@
 ---
-"@delvtech/drift": patch
+"@gud/drift": patch
 ---
 
 Added an `EncodedDeployCallParams` type.

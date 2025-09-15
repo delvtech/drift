@@ -1,5 +1,5 @@
 ---
-"@delvtech/drift": major
+"@gud/drift": major
 ---
 
 Removed the `Network` type.
