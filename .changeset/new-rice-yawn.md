@@ -6,4 +6,4 @@
 "@delvtech/drift": patch
 ---
 
-Patch the `call` method in read-write adapters to add a default `from` address via `getSignerAddress`.
+Patch the `simulateWrite` method in read-write adapters to add a default `from` address via `getSignerAddress`.
