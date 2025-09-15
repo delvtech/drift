@@ -1,7 +1,7 @@
 {
   "name": "@gud/drift",
   "description": "Effortless ethereum development across Web3 libraries",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "Apache-2.0",
   "author": "Ryan Goree (https://github.com/ryangoree)",
   "repository": {
