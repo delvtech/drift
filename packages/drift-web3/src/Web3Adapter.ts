@@ -446,8 +446,8 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
           to,
           ...rest,
         })
-        .on("error", reject)
-        .on("transactionHash", (hash) => resolve(hash));
+        .on("transactionHash", resolve)
+        .on("error", reject);
     });
 
     if (onMined) {
@@ -499,8 +499,8 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
           value: value?.toString(),
           ...rest,
         })
-        .on("error", reject)
-        .on("transactionHash", (hash) => resolve(toHexString(hash)));
+        .on("transactionHash", (hash) => resolve(toHexString(hash)))
+        .on("error", reject);
     });
 
     if (onMined) {
@@ -535,6 +535,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     fn,
     from,
     onMined,
+    onMinedTimeout,
     ...rest
   }: WriteParams<TAbi, TFunctionName>) {
     const web3 = this.injectedWeb3 || this.web3;
@@ -549,8 +550,8 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     const resolvedFrom = from || (await this.getSignerAddress());
     const data = method(...params).encodeABI();
 
-    return new Promise<Hash>((resolve, reject) => {
-      const req = web3.eth
+    const hash = await new Promise<Hash>((resolve, reject) => {
+      web3.eth
         .sendTransaction({
           accessList: accessList as AccessList,
           data,
@@ -558,20 +559,18 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
           to: address,
           ...rest,
         })
-        .on("error", reject)
-        .on("transactionHash", (hash) => resolve(hash));
-
-      if (onMined) {
-        req.on("receipt", (receipt) => {
-          onMined({
-            ...receipt,
-            transactionIndex: Number(receipt.transactionIndex),
-            effectiveGasPrice: receipt.effectiveGasPrice ?? 0n,
-            status: receipt.status ? "success" : "reverted",
-          });
-        });
-      }
+        .on("transactionHash", resolve)
+        .on("error", reject);
     });
+
+    if (onMined) {
+      this.waitForTransaction({
+        hash,
+        timeout: onMinedTimeout,
+      }).then(onMined);
+    }
+
+    return hash;
   }
 
   #getMethod({
