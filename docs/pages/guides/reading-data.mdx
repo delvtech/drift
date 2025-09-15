@@ -51,7 +51,7 @@ data:
 ```ts twoslash
 // [!include ~/snippets/token.ts]
 // ---cut---
-import { encodeFunctionData, decodeFunctionReturn } from "@delvtech/drift";
+import { encodeFunctionData, decodeFunctionReturn } from "@gud/drift";
 
 // Encode call data manually
 const data = encodeFunctionData({
@@ -84,7 +84,7 @@ calculations without needing to be deployed:
 ```ts twoslash
 // [!include ~/snippets/token.ts]
 // ---cut---
-import { encodeFunctionData, decodeFunctionReturn } from "@delvtech/drift";
+import { encodeFunctionData, decodeFunctionReturn } from "@gud/drift";
 
 // Call against contract bytecode directly
 const result = await drift.call({
@@ -138,7 +138,7 @@ the Drift client.
 For example:
 
 ```ts twoslash
-import { type Address, erc20 } from "@delvtech/drift";
+import { type Address, erc20 } from "@gud/drift";
 // [!include ~/snippets/drift.ts]
 declare const tokenA: Address;
 declare const tokenB: Address;
