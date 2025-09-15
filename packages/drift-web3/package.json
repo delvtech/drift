@@ -1,7 +1,7 @@
 {
   "name": "@gud/drift-web3",
   "description": "Web3.js adapter for Drift",
-  "version": "2.0.0-next.0",
+  "version": "2.0.0-next.1",
   "license": "Apache-2.0",
   "author": "Ryan Goree (https://github.com/ryangoree)",
   "repository": {
@@ -38,7 +38,7 @@
     "web3": "^4.16.0"
   },
   "devDependencies": {
-    "@gud/drift": "^2.0.0-next.0",
+    "@gud/drift": "^2.0.0-next.1",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2",

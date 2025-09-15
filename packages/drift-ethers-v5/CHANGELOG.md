@@ -1,5 +1,13 @@
 # @gud/drift-ethers-v5
 
+## 2.0.0-next.1
+
+### Patch Changes
+
+- 2934ada: Patch the `simulateWrite` method in read-write adapters to add a default `from` address via `getSignerAddress`.
+- 86f27c8: Patch the `call` method in read-write adapters to add a default `from` address via `getSignerAddress`.
+- ad97a93: Patched `deploy` and `write` methods in the viem & ethers adapters to use the `onMinedTimout` option which was ignored previously.
+
 ## 1.0.2
 
 ### Patch Changes

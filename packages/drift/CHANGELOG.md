@@ -1,5 +1,25 @@
 # @gud/drift
 
+## 2.0.0-next.1
+
+### Major Changes
+
+- 86f27c8: Renamed `EncodedCallParams` to `TargetCallParams` since the encoded data is optional.
+- 86f27c8: Removed the bytecode (deployless) call params type from the `sendCalls` method since bytecode calls are meant for reads only.
+- 86f27c8: Removed the `Network` type.
+
+### Minor Changes
+
+- 86f27c8: Added an `estimateGas` method.
+
+### Patch Changes
+
+- 2934ada: Patch the `simulateWrite` method in read-write adapters to add a default `from` address via `getSignerAddress`.
+- 86f27c8: Patch the `call` method in read-write adapters to add a default `from` address via `getSignerAddress`.
+- 86f27c8: Added an `EncodedDeployCallParams` type.
+- 86f27c8: Misc. param types cleanup.
+- dd70966: Patched `sendTransaction`, `deploy`, and `write` methods of `MockAdapter` to use the `onMinedTimeout` option.
+
 ## 1.0.2
 
 ### Patch Changes
