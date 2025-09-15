@@ -58,17 +58,19 @@ export class EthersReadWriteAdapter<
     return this.signer.getAddress();
   }
 
-  async call({ from, ...rest }: CallParams) {
+  async call(params: CallParams) {
     return super.call({
-      from: from || (await this.getSignerAddress().catch(() => undefined)),
-      ...rest,
+      ...params,
+      from:
+        params.from || (await this.getSignerAddress().catch(() => undefined)),
     });
   }
 
-  async estimateGas({ from, ...rest }: CallParams) {
+  async estimateGas(params: CallParams) {
     return super.estimateGas({
-      from: from || (await this.getSignerAddress().catch(() => undefined)),
-      ...rest,
+      ...params,
+      from:
+        params.from || (await this.getSignerAddress().catch(() => undefined)),
     });
   }
 
@@ -185,16 +187,6 @@ export class EthersReadWriteAdapter<
       });
   }
 
-  async simulateWrite<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: SimulateWriteParams<TAbi, TFunctionName>) {
-    return super.simulateWrite({
-      ...params,
-      from: params.from || (await this.signer.getAddress()),
-    });
-  }
-
   async sendTransaction({
     accessList,
     chainId,
@@ -257,12 +249,11 @@ export class EthersReadWriteAdapter<
       type: type === undefined ? undefined : Number(type),
       ...rest,
     });
-
     const hash = contract.deployTransaction?.hash;
+
     if (!hash) {
       throw new DriftError("Failed to get deployment transaction hash");
     }
-
     if (onMined) {
       this.waitForTransaction({
         hash,
@@ -271,6 +262,17 @@ export class EthersReadWriteAdapter<
     }
 
     return hash;
+  }
+
+  async simulateWrite<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(params: SimulateWriteParams<TAbi, TFunctionName>) {
+    return super.simulateWrite({
+      ...params,
+      from:
+        params.from || (await this.signer.getAddress().catch(() => undefined)),
+    });
   }
 
   async write<

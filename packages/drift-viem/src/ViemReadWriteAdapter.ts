@@ -13,6 +13,7 @@ import {
   type SendCallsParams,
   type SendCallsReturn,
   type SendTransactionParams,
+  type SimulateWriteParams,
   toHexString,
   type WalletCallsStatus,
   type WalletCapabilities,
@@ -67,17 +68,19 @@ export class ViemReadWriteAdapter<
     return address;
   }
 
-  async call({ from, ...rest }: CallParams) {
+  async call(params: CallParams) {
     return super.call({
-      from: from || (await this.getSignerAddress().catch(() => undefined)),
-      ...rest,
+      ...params,
+      from:
+        params.from || (await this.getSignerAddress().catch(() => undefined)),
     });
   }
 
-  async estimateGas({ from, ...rest }: CallParams) {
+  async estimateGas(params: CallParams) {
     return super.estimateGas({
-      from: from || (await this.getSignerAddress().catch(() => undefined)),
-      ...rest,
+      ...params,
+      from:
+        params.from || (await this.getSignerAddress().catch(() => undefined)),
     });
   }
 
@@ -181,6 +184,17 @@ export class ViemReadWriteAdapter<
     }
 
     return hash;
+  }
+
+  async simulateWrite<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(params: SimulateWriteParams<TAbi, TFunctionName>) {
+    return super.simulateWrite({
+      from:
+        params.from || (await this.getSignerAddress().catch(() => undefined)),
+      ...params,
+    });
   }
 
   async write<
