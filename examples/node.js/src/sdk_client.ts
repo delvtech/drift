@@ -1,9 +1,9 @@
 import {
-    type Address,
-    type Contract,
-    createDrift,
-    type Drift,
-    erc4626,
+  type Address,
+  type Contract,
+  createDrift,
+  type Drift,
+  erc4626,
 } from "@gud/drift";
 import { fixed } from "@gud/math";
 

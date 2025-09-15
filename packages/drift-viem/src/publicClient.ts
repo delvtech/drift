@@ -1,12 +1,12 @@
 import type { Replace } from "@gud/drift";
 import {
-    type Account,
-    type Chain,
-    type Client,
-    type PublicClient,
-    publicActions,
-    type RpcSchema,
-    type Transport,
+  type Account,
+  type Chain,
+  type Client,
+  type PublicClient,
+  publicActions,
+  type RpcSchema,
+  type Transport,
 } from "viem";
 
 /**

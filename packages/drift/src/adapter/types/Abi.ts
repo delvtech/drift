@@ -1,17 +1,17 @@
 import type {
-    Abi as _Abi,
-    AbiItemType,
-    AbiParameter,
-    AbiParameterKind,
-    AbiParametersToPrimitiveTypes,
-    AbiParameterToPrimitiveType,
-    AbiStateMutability,
+  Abi as _Abi,
+  AbiItemType,
+  AbiParameter,
+  AbiParameterKind,
+  AbiParametersToPrimitiveTypes,
+  AbiParameterToPrimitiveType,
+  AbiStateMutability,
 } from "abitype";
 import type {
-    EmptyObject,
-    Eval,
-    ExtractFiltered,
-    Replace,
+  EmptyObject,
+  Eval,
+  ExtractFiltered,
+  Replace,
 } from "src/utils/types";
 
 // https://docs.soliditylang.org/en/latest/abi-spec.html#json

@@ -1,10 +1,10 @@
 import { createDrift, LruStore, type Store } from "@gud/drift";
 import { viemAdapter } from "@gud/drift-viem";
 import {
-    type GetPublicClientParameters,
-    type GetWalletClientParameters,
-    getPublicClient,
-    getWalletClient,
+  type GetPublicClientParameters,
+  type GetWalletClientParameters,
+  getPublicClient,
+  getWalletClient,
 } from "@wagmi/core";
 import { type WagmiConfig, wagmiConfig } from "src/lib/wagmi";
 

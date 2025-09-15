@@ -2,11 +2,11 @@ import { HEX_REGEX } from "@gud/drift";
 import { testToken } from "@gud/drift/testing";
 import { ViemReadWriteAdapter } from "src/ViemReadWriteAdapter";
 import {
-    type Address,
-    createPublicClient,
-    createWalletClient,
-    getContract,
-    http,
+  type Address,
+  createPublicClient,
+  createWalletClient,
+  getContract,
+  http,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { anvil, mainnet } from "viem/chains";

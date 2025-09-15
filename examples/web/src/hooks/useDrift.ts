@@ -3,10 +3,10 @@ import { viemAdapter } from "@gud/drift-viem";
 import { useMemo } from "react";
 import { driftStore } from "src/lib/drift";
 import {
-    type UsePublicClientParameters,
-    type UseWalletClientParameters,
-    usePublicClient,
-    useWalletClient,
+  type UsePublicClientParameters,
+  type UseWalletClientParameters,
+  usePublicClient,
+  useWalletClient,
 } from "wagmi";
 
 export interface UseDriftViemOptions
