@@ -98,23 +98,19 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     const tx = await this.web3.eth.getTransaction(hash);
     return tx
       ? ({
-          blockHash: tx.blockHash,
+          ...tx,
           blockNumber:
-            typeof tx.blockNumber !== "undefined"
-              ? BigInt(tx.blockNumber)
-              : undefined,
-          chainId: Number(tx.chainId),
-          from: tx.from,
+            tx.blockNumber === undefined ? undefined : BigInt(tx.blockNumber),
+          chainId: tx.chainId === undefined ? undefined : Number(tx.chainId),
           gas: BigInt(tx.gas),
           gasPrice: BigInt(tx.gasPrice),
           transactionHash: tx.hash,
-          input: tx.input,
           nonce: BigInt(tx.nonce),
-          to: tx.to ?? undefined,
+          to: tx.to || undefined,
           transactionIndex:
-            typeof tx.transactionIndex !== "undefined"
-              ? Number(tx.transactionIndex)
-              : undefined,
+            tx.transactionIndex === undefined
+              ? undefined
+              : Number(tx.transactionIndex),
           type: typeof tx.type === "string" ? tx.type : toHexString(tx.type),
           value: BigInt(tx.value),
         } satisfies Transaction)
@@ -133,9 +129,9 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
             receipt
               ? resolve({
                   ...receipt,
-                  effectiveGasPrice: receipt.effectiveGasPrice || 0n,
+                  effectiveGasPrice: receipt.effectiveGasPrice ?? 0n,
                   status: receipt.status ? "success" : "reverted",
-                  to: receipt.to ?? undefined,
+                  to: receipt.to || undefined,
                   transactionIndex: Number(receipt.transactionIndex),
                 })
               : setTimeout(
@@ -154,36 +150,21 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     accessList,
     block,
     bytecode,
-    chainId,
     data,
     from,
-    gas,
-    gasPrice,
-    maxFeePerGas,
-    maxPriorityFeePerGas,
-    nonce,
     to,
-    type,
-    value,
+    ...rest
   }: CallParams) {
     if (bytecode && data) {
       data = encodeBytecodeCallData(bytecode, data);
     }
-
     return this.web3.eth.call(
       {
         accessList: accessList as AccessList,
-        chainId,
         data,
         from: from || (await this.getSignerAddress().catch(() => undefined)),
-        gas,
-        gasPrice,
-        maxFeePerGas,
-        maxPriorityFeePerGas,
-        nonce,
-        to: to as any,
-        type,
-        value,
+        to: to as string,
+        ...rest,
       },
       block,
     );
@@ -201,7 +182,6 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     if (bytecode && data) {
       data = encodeBytecodeCallData(bytecode, data);
     }
-
     return this.web3.eth.estimateGas(
       {
         accessList: accessList as AccessList,
@@ -279,9 +259,12 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   /**
    * @throws A {@linkcode NotImplementedError} if no wallet provider is set.
    */
-  async getWalletCapabilities<TChainIds extends readonly number[]>(
-    params?: GetWalletCapabilitiesParams<TChainIds>,
-  ): Promise<WalletCapabilities<TChainIds>> {
+  async getWalletCapabilities<TChainIds extends readonly number[]>({
+    address,
+    chainIds,
+  }: GetWalletCapabilitiesParams<TChainIds> = {}): Promise<
+    WalletCapabilities<TChainIds>
+  > {
     if (!this.injectedWeb3?.provider) {
       throw new NotImplementedError({
         method: "getWalletCapabilities",
@@ -294,8 +277,8 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
         {
           method: "wallet_getCapabilities",
           params: [
-            params?.address || (await this.getSignerAddress()),
-            (params?.chainIds?.map((id) => toHexString(id)) || [
+            address || (await this.getSignerAddress()),
+            (chainIds?.map((id) => toHexString(id)) || [
               toHexString(await this.getChainId()),
             ]) as HexString[] | undefined,
           ],
@@ -390,9 +373,14 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
   /**
    * @throws A {@linkcode NotImplementedError} if no wallet provider is set.
    */
-  async sendCalls<const TCalls extends readonly unknown[] = any[]>(
-    params: SendCallsParams<TCalls>,
-  ): Promise<SendCallsReturn> {
+  async sendCalls<const TCalls extends readonly unknown[] = any[]>({
+    atomic = true,
+    calls,
+    chainId,
+    from,
+    version = "2.0.0",
+    ...rest
+  }: SendCallsParams<TCalls>): Promise<SendCallsReturn> {
     if (!this.injectedWeb3?.provider) {
       throw new NotImplementedError({
         method: "sendCalls",
@@ -400,72 +388,75 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
       });
     }
 
+    const [resolvedChainId, resolvedFrom] = await Promise.all([
+      chainId ?? (await this.getChainId()),
+      from || (await this.getSignerAddress()),
+    ]);
+    const preparedCalls = calls.map(({ value, capabilities, ...call }) => {
+      const { to, data } = prepareCall(call);
+      return {
+        to,
+        data,
+        capabilities,
+        value: value === undefined ? undefined : toHexString(value),
+      };
+    });
+
     return this.injectedWeb3.provider
-      .request<"wallet_sendCalls", SendCallsReturn>({
+      .request<"wallet_sendCalls">({
         method: "wallet_sendCalls",
         params: [
           {
-            version: params.version || "2.0.0",
-            id: params.id,
-            chainId: toHexString(params.chainId ?? (await this.getChainId())),
-            from: params.from ?? (await this.getSignerAddress()),
-            atomicRequired: params.atomic ?? true,
-            calls: params.calls.map(({ value, capabilities, ...call }) => {
-              const { to, data } = prepareCall(call);
-              return {
-                to,
-                data,
-                capabilities,
-                value: value ? toHexString(value) : undefined,
-              };
-            }),
-            capabilities: params.capabilities,
+            atomicRequired: atomic,
+            calls: preparedCalls,
+            chainId: toHexString(resolvedChainId),
+            from: resolvedFrom,
+            version,
+            ...rest,
           },
         ],
       })
-      .then((res) => res as SendCallsReturn)
       .catch((e) => {
         throw new DriftError({
           message: "Failed to send wallet calls",
           cause: e,
         });
-      });
+      }) as Promise<SendCallsReturn>;
   }
 
   async sendTransaction({
+    accessList,
     data,
-    to,
     from,
     onMined,
-    accessList,
+    onMinedTimeout,
+    to,
     ...rest
   }: SendTransactionParams) {
     const web3 = this.injectedWeb3 || this.web3;
-    from ??= await this.getSignerAddress();
+    const resolvedFrom = from || (await this.getSignerAddress());
 
-    return new Promise<Hash>((resolve, reject) => {
-      const req = web3.eth
+    const txHash = await new Promise<Hash>((resolve, reject) => {
+      web3.eth
         .sendTransaction({
-          ...rest,
           accessList: accessList as AccessList,
-          to,
           data,
-          from,
+          from: resolvedFrom,
+          to,
+          ...rest,
         })
         .on("error", reject)
         .on("transactionHash", (hash) => resolve(hash));
-
-      if (onMined) {
-        req.on("receipt", (receipt) => {
-          onMined({
-            ...receipt,
-            transactionIndex: Number(receipt.transactionIndex),
-            effectiveGasPrice: receipt.effectiveGasPrice ?? 0n,
-            status: receipt.status ? "success" : "reverted",
-          });
-        });
-      }
     });
+
+    if (onMined) {
+      this.waitForTransaction({
+        hash: txHash,
+        timeout: onMinedTimeout,
+      }).then(onMined);
+    }
+
+    return txHash;
   }
 
   async deploy<TAbi extends Abi>({
@@ -478,9 +469,10 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     maxFeePerGas,
     maxPriorityFeePerGas,
     nonce,
-    type,
     value,
     onMined,
+    onMinedTimeout,
+    ...rest
   }: DeployParams<TAbi>) {
     const web3 = this.injectedWeb3 || this.web3;
     const contract = new web3.eth.Contract(abi as readonly AbiFragment[]);
@@ -491,43 +483,33 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
       kind: "inputs",
       value: args,
     });
-    from ??= await this.getSignerAddress();
+    const resolvedFrom = from || (await this.getSignerAddress());
 
-    return new Promise<Hash>((resolve, reject) => {
-      const req = contract
+    const txHash = await new Promise<Hash>((resolve, reject) => {
+      contract
         .deploy({ arguments: params, data: bytecode })
         .send({
-          from,
+          from: resolvedFrom,
           gas: gas?.toString(),
           gasPrice: gasPrice?.toString(),
           maxFeePerGas: maxFeePerGas?.toString(),
           maxPriorityFeePerGas: maxPriorityFeePerGas?.toString(),
           nonce: nonce?.toString(),
-          type,
           value: value?.toString(),
+          ...rest,
         })
         .on("error", reject)
         .on("transactionHash", (hash) => resolve(toHexString(hash)));
-
-      if (onMined) {
-        req.on("receipt", (receipt) => {
-          onMined({
-            blockHash: toHexString(receipt.blockHash),
-            contractAddress: receipt.contractAddress,
-            cumulativeGasUsed: BigInt(receipt.cumulativeGasUsed),
-            effectiveGasPrice: BigInt(receipt.effectiveGasPrice ?? 0n),
-            blockNumber: BigInt(receipt.blockNumber),
-            from: receipt.from,
-            logsBloom: toHexString(receipt.logsBloom),
-            status: receipt.status ? "success" : "reverted",
-            gasUsed: BigInt(receipt.gasUsed),
-            to: receipt.to,
-            transactionHash: toHexString(receipt.transactionHash),
-            transactionIndex: Number(receipt.transactionIndex),
-          });
-        });
-      }
     });
+
+    if (onMined) {
+      this.waitForTransaction({
+        hash: txHash,
+        timeout: onMinedTimeout,
+      }).then(onMined);
+    }
+
+    return txHash;
   }
 
   async write<
@@ -552,16 +534,17 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
       value: args,
     });
     const { method } = this.#getMethod({ abi, fn, address });
-    from ??= await this.getSignerAddress();
+    const resolvedFrom = from || (await this.getSignerAddress());
+    const data = method(...params).encodeABI();
 
     return new Promise<Hash>((resolve, reject) => {
       const req = web3.eth
         .sendTransaction({
-          ...rest,
-          data: method(...params).encodeABI(),
-          to: address,
-          from,
           accessList: accessList as AccessList,
+          data,
+          from: resolvedFrom,
+          to: address,
+          ...rest,
         })
         .on("error", reject)
         .on("transactionHash", (hash) => resolve(hash));
