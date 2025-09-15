@@ -15,7 +15,7 @@ The simplest way to read data is using the `read` method:
 :::code-group
 
 ```ts twoslash [example.ts] filename="example.ts"
-import { erc20 } from "@delvtech/drift";
+import { erc20 } from "@gud/drift";
 import { drift } from "./drift";
 
 // Using the client directly
@@ -109,7 +109,7 @@ Multicall batches multiple contract calls into a single RPC request using
 [Multicall3](https://www.multicall3.com/), dramatically improving performance:
 
 ```ts twoslash
-import { type Address, erc20 } from "@delvtech/drift";
+import { type Address, erc20 } from "@gud/drift";
 // [!include ~/snippets/drift.ts]
 declare const tokenA: Address;
 declare const tokenB: Address;
@@ -157,7 +157,7 @@ const [name, symbol, totalSupply, balanceOf] = await Promise.all([
 ### Direct Values with `allowFailure: false`
 
 ```ts twoslash
-import { type Address, erc20 } from "@delvtech/drift";
+import { type Address, erc20 } from "@gud/drift";
 // [!include ~/snippets/drift.ts]
 declare const tokenA: Address;
 declare const tokenB: Address;
@@ -180,7 +180,7 @@ const name = values[0];
 ### Contract Instance Multicall
 
 ```ts twoslash
-import { erc20 } from "@delvtech/drift";
+import { erc20 } from "@gud/drift";
 // [!include ~/snippets/drift.ts]
 // ---cut---
 // Using a contract instance for cleaner syntax
@@ -204,7 +204,7 @@ const results = await token.multicall({
 ```ts twoslash
 // [!include ~/snippets/drift.ts]
 // ---cut---
-import { erc20, erc4626, erc721 } from "@delvtech/drift";
+import { erc20, erc4626, erc721 } from "@gud/drift";
 
 // Call different contracts in one batch
 const results = await drift.multicall({

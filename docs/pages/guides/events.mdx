@@ -14,7 +14,7 @@ Query events using the `getEvents` method on contract instances:
 :::code-group
 
 ```ts twoslash [example.ts] filename="example.ts"
-import { erc20 } from "@delvtech/drift";
+import { erc20 } from "@gud/drift";
 import { drift } from "./drift";
 
 // Using the client directly
@@ -172,7 +172,7 @@ import type {
   erc20,
   Hash,
   ReadWriteContract,
-} from "@delvtech/drift";
+} from "@gud/drift";
 
 type Erc20Abi = typeof erc20.abi;
 
@@ -203,7 +203,7 @@ export async function getTransactionEvents( // [!code focus:99]
 ### Event-Based State Reconstruction
 
 ```ts twoslash
-import type { Address, Contract, erc20 } from "@delvtech/drift";
+import type { Address, Contract, erc20 } from "@gud/drift";
 
 type Erc20Abi = typeof erc20.abi;
 
@@ -299,7 +299,7 @@ contract's deployment block.
 ```ts twoslash
 // @filename: without-epoch.ts
 // [!include ~/snippets/drift.ts]
-import { erc20 } from "@delvtech/drift";
+import { erc20 } from "@gud/drift";
 // ---cut---
 // ⚠️ Without epochBlock
 const token = drift.contract({
@@ -313,7 +313,7 @@ const transfers = await token.getEvents("Transfer");
 // ---cut-start---
 // @filename: with-epoch.ts
 // [!include ~/snippets/drift.ts]
-import { erc20 } from "@delvtech/drift";
+import { erc20 } from "@gud/drift";
 // ---cut-end---
 // ✅ With epochBlock - automatic protection
 const token = drift.contract({

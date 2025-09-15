@@ -4,11 +4,11 @@
   "commit": false,
   "fixed": [
     [
-      "@delvtech/drift",
-      "@delvtech/drift-viem",
-      "@delvtech/drift-ethers",
-      "@delvtech/drift-ethers-v5",
-      "@delvtech/drift-web3"
+      "@gud/drift",
+      "@gud/drift-viem",
+      "@gud/drift-ethers",
+      "@gud/drift-ethers-v5",
+      "@gud/drift-web3"
     ]
   ],
   "linked": [],

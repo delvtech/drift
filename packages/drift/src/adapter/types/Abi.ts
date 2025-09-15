@@ -32,7 +32,7 @@ import type {
  *
  * @example
  * ```ts
- * declare module "@delvtech/drift" {
+ * declare module "@gud/drift" {
  *   export interface BaseTypeOverrides {
  *     HexString: string;
  *   }

@@ -1,4 +1,10 @@
-# @delvtech/drift-ethers
+# @gud/drift-ethers
+
+## 1.0.2
+
+### Patch Changes
+
+- 5bbd2ed: Renamed packages from `@delvtech` to `@gud` scope.
 
 ## 1.0.1
 

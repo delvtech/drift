@@ -1,10 +1,10 @@
-# @delvtech/drift-web3
+# @gud/drift-web3
 
-[Web3.js](https://web3js.org) adapter for [Drift](https://github.com/delvtech/drift).
+[Web3.js](https://web3js.org) adapter for [Drift](https://github.com/ryangoree/drift).
 
 ```ts
-import { createDrift } from "@delvtech/drift";
-import { Web3Adapter } from "@delvtech/drift-web3";
+import { createDrift } from "@gud/drift";
+import { Web3Adapter } from "@gud/drift-web3";
 import Web3 from "web3";
 
 const web3 = new Web3(/* ... */);

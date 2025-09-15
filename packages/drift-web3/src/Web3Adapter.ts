@@ -36,7 +36,7 @@ import {
   type WalletCallsStatus,
   type WalletCapabilities,
   type WriteParams,
-} from "@delvtech/drift";
+} from "@gud/drift";
 import { type AbiFragment, type AccessList, default as Web3 } from "web3";
 
 export class Web3Adapter<TWeb3 extends Web3 = Web3>
@@ -591,7 +591,7 @@ interface WalletGetCallsStatusReturn {
   version: string;
 }
 
-declare module "@delvtech/drift" {
+declare module "@gud/drift" {
   interface BaseTypeOverrides {
     HexString: string;
   }

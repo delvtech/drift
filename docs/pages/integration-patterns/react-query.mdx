@@ -66,7 +66,7 @@ export function useAssetBalance(account: string, vault: string) {
 #### Option 2: Make direct calls, losing cache benefits
 
 ```ts twoslash
-import { erc4626 } from "@delvtech/drift";
+import { erc4626 } from "@gud/drift";
 import { useQuery } from "@tanstack/react-query";
 import type { Provider } from "ethers";
 import { Contract } from "ethers";
@@ -93,7 +93,7 @@ export function useAssetBalance(account: string, vault: string) {
 #### Option 3: Complex manual cache management
 
 ```ts twoslash
-import { erc4626 } from "@delvtech/drift";
+import { erc4626 } from "@gud/drift";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Provider } from "ethers";
 import { Contract } from "ethers";
@@ -134,9 +134,9 @@ worrying about redundant network requests or complex state management.
 ### Clean Composition with Automatic Caching
 
 ```ts twoslash
-import { erc4626 } from "@delvtech/drift";
+import { erc4626 } from "@gud/drift";
 import { useQuery } from "@tanstack/react-query";
-import type { Address, Drift } from "@delvtech/drift";
+import type { Address, Drift } from "@gud/drift";
 declare const drift: Drift;
 // ---cut---
 export function useAssetBalance(account: Address, vault: Address) {

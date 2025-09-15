@@ -20,7 +20,7 @@ import {
   type TransactionReceipt,
   toHexString,
   type WaitForTransactionParams,
-} from "@delvtech/drift";
+} from "@gud/drift";
 import {
   BigNumber,
   Contract,

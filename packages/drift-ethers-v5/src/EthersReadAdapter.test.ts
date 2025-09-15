@@ -12,8 +12,8 @@ import {
   type Transaction,
   type TransactionReceipt,
   ZERO_ADDRESS,
-} from "@delvtech/drift";
-import { mockErc20, testToken } from "@delvtech/drift/testing";
+} from "@gud/drift";
+import { mockErc20, testToken } from "@gud/drift/testing";
 import { providers } from "ethers";
 import { EthersReadAdapter } from "src/EthersReadAdapter";
 import { assert, beforeAll, describe, expect, it } from "vitest";

@@ -16,7 +16,7 @@ import {
   type WalletCallsStatus,
   type WalletCapabilities,
   type WriteParams,
-} from "@delvtech/drift";
+} from "@gud/drift";
 import type { AnyClient } from "src/publicClient";
 import {
   ViemReadAdapter,
@@ -240,7 +240,7 @@ export class ViemReadWriteAdapter<
   }
 }
 
-declare module "@delvtech/drift" {
+declare module "@gud/drift" {
   interface GetWalletCapabilitiesParams<
     TChainIds extends readonly number[] = number[],
   > {

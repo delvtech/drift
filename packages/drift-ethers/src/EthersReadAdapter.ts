@@ -22,7 +22,7 @@ import {
   type TransactionReceipt,
   toHexString,
   type WaitForTransactionParams,
-} from "@delvtech/drift";
+} from "@gud/drift";
 import type { AccessList } from "ethers";
 import {
   BrowserProvider,
@@ -263,7 +263,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
   }
 }
 
-declare module "@delvtech/drift" {
+declare module "@gud/drift" {
   interface BlockOverrides<T> {
     /**
      * Unavailable in ethers.js.
@@ -299,7 +299,7 @@ declare module "@delvtech/drift" {
   }
 }
 
-declare module "@delvtech/drift" {
+declare module "@gud/drift" {
   interface BaseTypeOverrides {
     HexString: string;
   }

@@ -1,5 +1,5 @@
-import { createDrift, LruStore, type Store } from "@delvtech/drift";
-import { viemAdapter } from "@delvtech/drift-viem";
+import { createDrift, LruStore, type Store } from "@gud/drift";
+import { viemAdapter } from "@gud/drift-viem";
 import {
   type GetPublicClientParameters,
   type GetWalletClientParameters,

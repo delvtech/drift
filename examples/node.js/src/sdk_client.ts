@@ -4,7 +4,7 @@ import {
   createDrift,
   type Drift,
   erc4626,
-} from "@delvtech/drift";
+} from "@gud/drift";
 import { fixed } from "@gud/math";
 
 type Erc4626Abi = typeof erc4626.abi;

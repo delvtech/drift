@@ -1,13 +1,13 @@
 export {
-  type EthersReadAdapterParams,
   EthersReadAdapter,
+  type EthersReadAdapterParams,
 } from "./EthersReadAdapter";
 export {
-  type EthersReadWriteAdapterParams,
   EthersReadWriteAdapter,
+  type EthersReadWriteAdapterParams,
 } from "./EthersReadWriteAdapter";
 export {
-  ethersAdapter,
   type EthersAdapter,
   type EthersAdapterParams,
+  ethersAdapter,
 } from "./ethersAdapter";

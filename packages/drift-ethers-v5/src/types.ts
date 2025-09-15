@@ -4,7 +4,7 @@ import type { Interface } from "ethers/lib/utils";
 export type Provider = providers.Provider;
 export type EthersAbi = Exclude<ContractInterface, Interface>;
 
-declare module "@delvtech/drift" {
+declare module "@gud/drift" {
   interface BaseTypeOverrides {
     HexString: string;
   }

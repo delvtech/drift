@@ -18,7 +18,7 @@ import {
   type WalletCallsStatus,
   type WalletCapabilities,
   type WriteParams,
-} from "@delvtech/drift";
+} from "@gud/drift";
 import {
   type AccessList,
   BrowserProvider,

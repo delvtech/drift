@@ -8,8 +8,8 @@ import {
   type MulticallCallResult,
   type Transaction,
   type TransactionReceipt,
-} from "@delvtech/drift";
-import { mockErc20, testToken } from "@delvtech/drift/testing";
+} from "@gud/drift";
+import { mockErc20, testToken } from "@gud/drift/testing";
 import { ViemReadAdapter } from "src/ViemReadAdapter";
 import {
   type Address,

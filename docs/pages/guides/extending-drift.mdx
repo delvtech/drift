@@ -18,11 +18,11 @@ provider.
 Drift `Clients`, including `Drift`, extend the prototype of the adapter they're
 provided, inheriting all of it's properties and methods, extending some, and
 adding some of their own. See the
-[`DefaultAdapter`](https://github.com/delvtech/drift/blob/main/packages/drift/src/adapter/DefaultAdapter.ts)
+[`DefaultAdapter`](https://github.com/ryangoree/drift/blob/main/packages/drift/src/adapter/DefaultAdapter.ts)
 for an example implementation.
 
 ```ts twoslash
-import { DefaultAdapter, createDrift } from "@delvtech/drift";
+import { DefaultAdapter, createDrift } from "@gud/drift";
 
 class CustomAdapter extends DefaultAdapter {
   override async getChainId() {
@@ -41,8 +41,8 @@ const drift = await createDrift({
 ```
 
 If interested in contributing a new adapter to the Drift repo, open an
-[issue](https://github.com/delvtech/drift/issues) or start a
-[discussion](https://github.com/delvtech/drift/discussions) to discuss the
+[issue](https://github.com/ryangoree/drift/issues) or start a
+[discussion](https://github.com/ryangoree/drift/discussions) to discuss the
 implementation.
 
 ## Building Custom Stores
@@ -60,7 +60,7 @@ Here's a simplified example of a `localStorage` store:
 ```ts twoslash [LocalStorageStore.ts]
 // @filename: LocalStorageStore.ts
 // ---cut---
-import { createDrift, type Store } from "@delvtech/drift";
+import { createDrift, type Store } from "@gud/drift";
 import { parse, stringify } from "./serde";
 
 class LocalStorageStore implements Store {
@@ -270,7 +270,7 @@ already defined in the Drift API.
 
 ```ts twoslash
 // @noErrors
-import { type Address, createDrift, DefaultAdapter } from "@delvtech/drift";
+import { type Address, createDrift, DefaultAdapter } from "@gud/drift";
 
 class CustomAdapter extends DefaultAdapter {
   async customMethod(

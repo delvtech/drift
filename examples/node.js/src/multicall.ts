@@ -1,4 +1,4 @@
-import { createDrift, erc20 } from "@delvtech/drift";
+import { createDrift, erc20 } from "@gud/drift";
 
 const address = "0x6B175474E89094C44Da98b954EedeAC495271d0F"; // Ethereum mainnet DAI
 const account = "0xA9D1e08C7793af67e9d92fe308d5697FB81d3E43"; // Coinbase 10

@@ -1,4 +1,4 @@
-import { Wallet, providers } from "ethers";
+import { providers, Wallet } from "ethers";
 import { EthersReadAdapter } from "src/EthersReadAdapter";
 import { EthersReadWriteAdapter } from "src/EthersReadWriteAdapter";
 import { ethersAdapter } from "src/ethersAdapter";

@@ -22,7 +22,7 @@ npm install --save-dev sinon
 
 ## Mocking with `createMockDrift`
 
-The `createMockDrift` function from `@delvtech/drift/testing` creates a mocked
+The `createMockDrift` function from `@gud/drift/testing` creates a mocked
 Drift instance that you can use to stub client methods and simulate contract
 interactions. This is useful for unit tests where you want to isolate your
 application logic from the blockchain.
@@ -35,8 +35,8 @@ value from their vault shares:
 ```ts twoslash [getAccountAssetValue.test.ts] filename="getAccountAssetValue.test.ts"
 import assert from "node:assert";
 import { afterEach, describe, it } from "node:test";
-import { erc4626 } from "@delvtech/drift";
-import { createMockDrift, randomAddress } from "@delvtech/drift/testing";
+import { erc4626 } from "@gud/drift";
+import { createMockDrift, randomAddress } from "@gud/drift/testing";
 import { getAccountAssetValue } from "./getAccountAssetValue";
 
 // Create mocks
@@ -79,7 +79,7 @@ describe("getAccountAssetValue", () => {
 ```
 
 ```ts twoslash [getAccountAssetValue.ts] filename="getAccountAssetValue.ts"
-import { type Address, type Drift, erc4626 } from "@delvtech/drift";
+import { type Address, type Drift, erc4626 } from "@gud/drift";
 
 // Simple function that fetches share balance and converts to assets
 export async function getAccountAssetValue(
@@ -116,8 +116,8 @@ first when a multicall is made. This allows you to efficiently test multiple
 data points without needing to set up a full multicall stub.
 
 ```ts twoslash
-import { type Address, erc4626 } from "@delvtech/drift";
-import type { MockDrift } from "@delvtech/drift/testing";
+import { type Address, erc4626 } from "@gud/drift";
+import type { MockDrift } from "@gud/drift/testing";
 declare const vaultAddress: Address;
 declare const mockDrift: MockDrift;
 // ---cut---
@@ -153,8 +153,8 @@ You can also test write operations and simulations:
 
 ```ts twoslash
 import assert from "node:assert";
-import type { Address, erc4626 } from "@delvtech/drift";
-import type { MockContract } from "@delvtech/drift/testing";
+import type { Address, erc4626 } from "@gud/drift";
+import type { MockContract } from "@gud/drift/testing";
 declare const accountAddress: Address;
 declare const mockVault: MockContract<typeof erc4626.abi>;
 // ---cut---
@@ -193,8 +193,8 @@ import type {
   erc20,
   ReadWriteContract,
   TransactionReceipt,
-} from "@delvtech/drift";
-import type { MockContract } from "@delvtech/drift/testing";
+} from "@gud/drift";
+import type { MockContract } from "@gud/drift/testing";
 declare function send(
   token: ReadWriteContract<typeof erc20.abi>,
   to: Address,
@@ -225,8 +225,8 @@ specifying every parameter:
 ```ts twoslash
 // @noErrors
 import assert from "node:assert";
-import { type Address, erc20.abi } from "@delvtech/drift";
-import type { MockDrift } from "@delvtech/drift/testing";
+import { type Address, erc20.abi } from "@gud/drift";
+import type { MockDrift } from "@gud/drift/testing";
 declare const mockDrift: MockDrift;
 // ---cut---
 // Stub any call to balanceOf, regardless of the account

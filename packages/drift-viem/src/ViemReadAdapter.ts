@@ -15,7 +15,7 @@ import {
   type ReadAdapter,
   type TransactionReceipt,
   type WaitForTransactionParams,
-} from "@delvtech/drift";
+} from "@gud/drift";
 import {
   type AnyClient,
   type CoercedPublicClient,

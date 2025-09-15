@@ -20,7 +20,7 @@ import {
   type WalletCallsStatus,
   type WalletCapabilities,
   type WriteParams,
-} from "@delvtech/drift";
+} from "@gud/drift";
 import type { ContractTransaction, Signer } from "ethers";
 import { Contract, ContractFactory, providers } from "ethers";
 import type { AccessList } from "ethers/lib/utils";

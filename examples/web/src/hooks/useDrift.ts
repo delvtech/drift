@@ -1,5 +1,5 @@
-import { createDrift, type Store } from "@delvtech/drift";
-import { viemAdapter } from "@delvtech/drift-viem";
+import { createDrift, type Store } from "@gud/drift";
+import { viemAdapter } from "@gud/drift-viem";
 import { useMemo } from "react";
 import { driftStore } from "src/lib/drift";
 import {

@@ -103,7 +103,7 @@ The most common pattern is to invalidate cache in transaction callbacks:
 
 ```ts twoslash
 // [!include ~/snippets/token.ts]
-import type { Address } from "@delvtech/drift";
+import type { Address } from "@gud/drift";
 declare const recipientAddress: Address;
 declare const senderAddress: Address;
 // ---cut---
@@ -168,7 +168,7 @@ const decimals = await token.read("decimals");
 
 ```ts twoslash
 // [!include ~/snippets/token.ts]
-import type { Address } from "@delvtech/drift";
+import type { Address } from "@gud/drift";
 type TokenList = {
   name: string;
   logoURI: string;
@@ -291,7 +291,7 @@ performed on the `Drift` client or any of its contract instances will
 automatically apply to all other instances created from that client.
 
 ```ts twoslash filename="shared-cache.ts"
-import { createDrift, erc20 } from "@delvtech/drift";
+import { createDrift, erc20 } from "@gud/drift";
 // ---cut---
 const drift = createDrift();
 const tokenA = drift.contract({ abi: erc20.abi, address: "0xa..." });

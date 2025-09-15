@@ -1,15 +1,15 @@
 {
-  "name": "@delvtech/drift",
+  "name": "@gud/drift",
   "description": "Effortless ethereum development across Web3 libraries",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "Apache-2.0",
   "author": "Ryan Goree (https://github.com/ryangoree)",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/delvtech/drift.git"
+    "url": "git+https://github.com/ryangoree/drift.git"
   },
-  "homepage": "https://delvtech.github.io/drift",
-  "bugs": "https://github.com/delvtech/drift/issues",
+  "homepage": "https://ryangoree.github.io/drift",
+  "bugs": "https://github.com/ryangoree/drift/issues",
   "type": "module",
   "sideEffects": false,
   "exports": {

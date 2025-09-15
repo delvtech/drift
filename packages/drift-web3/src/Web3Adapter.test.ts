@@ -12,8 +12,8 @@ import {
   type Transaction,
   type TransactionReceipt,
   ZERO_ADDRESS,
-} from "@delvtech/drift";
-import { mockErc20, testToken } from "@delvtech/drift/testing";
+} from "@gud/drift";
+import { mockErc20, testToken } from "@gud/drift/testing";
 import { Web3Adapter } from "src/Web3Adapter";
 import { assert, beforeAll, describe, expect, it } from "vitest";
 import Web3 from "web3";

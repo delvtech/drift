@@ -1,4 +1,4 @@
-import { type Address, createDrift, erc20 } from "@delvtech/drift";
+import { type Address, createDrift, erc20 } from "@gud/drift";
 import { fixed } from "@gud/math";
 
 // Create a Drift client.
