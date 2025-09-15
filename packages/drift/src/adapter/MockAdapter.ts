@@ -525,7 +525,10 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     })(params);
 
     if (params.onMined) {
-      this.waitForTransaction({ hash }).then(params.onMined);
+      this.waitForTransaction({
+        hash,
+        timeout: params.onMinedTimeout,
+      }).then(params.onMined);
     }
 
     return hash;
@@ -550,7 +553,10 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     );
 
     if (params.onMined) {
-      this.waitForTransaction({ hash }).then(params.onMined);
+      this.waitForTransaction({
+        hash,
+        timeout: params.onMinedTimeout,
+      }).then(params.onMined);
     }
 
     return hash;
@@ -582,7 +588,10 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     })(params);
 
     if (params.onMined) {
-      this.waitForTransaction({ hash }).then(params.onMined);
+      this.waitForTransaction({
+        hash,
+        timeout: params.onMinedTimeout,
+      }).then(params.onMined);
     }
 
     return hash;
