@@ -121,9 +121,9 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
       ? {
           blockHash: ethersTx.blockHash ?? undefined,
           blockNumber:
-            ethersTx.blockNumber === null
-              ? undefined
-              : BigInt(ethersTx.blockNumber),
+            ethersTx.blockNumber !== null
+              ? BigInt(ethersTx.blockNumber)
+              : undefined,
           chainId: Number(ethersTx.chainId),
           from: ethersTx.from,
           gas: ethersTx.gasLimit,
@@ -187,8 +187,8 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
       blockTag: block,
       data,
       gasLimit: gas,
-      nonce: nonce === undefined ? undefined : Number(nonce),
-      type: type === undefined ? undefined : Number(type),
+      nonce: nonce !== undefined ? Number(nonce) : undefined,
+      type: type !== undefined ? Number(type) : undefined,
       ...rest,
     });
   }
@@ -215,8 +215,8 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
       blockTag: block,
       data,
       gasLimit: gas,
-      nonce: nonce === undefined ? undefined : Number(nonce),
-      type: type === undefined ? undefined : Number(type),
+      nonce: nonce !== undefined ? Number(nonce) : undefined,
+      type: type !== undefined ? Number(type) : undefined,
       ...rest,
     });
   }

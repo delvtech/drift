@@ -200,11 +200,11 @@ export class EthersReadWriteAdapter<
   }: SendTransactionParams) {
     const { hash } = await this.signer.sendTransaction({
       accessList: accessList as AccessList,
-      chainId: chainId === undefined ? undefined : Number(chainId),
+      chainId: chainId !== undefined ? Number(chainId) : undefined,
       from: from || (await this.signer.getAddress()),
       gasLimit: gas,
-      nonce: nonce === undefined ? undefined : Number(nonce),
-      type: type === undefined ? undefined : Number(type),
+      nonce: nonce !== undefined ? Number(nonce) : undefined,
+      type: type !== undefined ? Number(type) : undefined,
       ...rest,
     });
 
@@ -245,8 +245,8 @@ export class EthersReadWriteAdapter<
     });
     const contract = await factory.deploy(...params, {
       gasLimit: gas,
-      nonce: nonce === undefined ? undefined : Number(nonce),
-      type: type === undefined ? undefined : Number(type),
+      nonce: nonce !== undefined ? Number(nonce) : undefined,
+      type: type !== undefined ? Number(type) : undefined,
       ...rest,
     });
     const hash = contract.deployTransaction?.hash;
@@ -304,8 +304,8 @@ export class EthersReadWriteAdapter<
 
     const { hash }: ContractTransaction = await contract[fn](...params, {
       gasLimit: gas,
-      nonce: nonce === undefined ? undefined : Number(nonce),
-      type: type === undefined ? undefined : Number(type),
+      nonce: nonce !== undefined ? Number(nonce) : undefined,
+      type: type !== undefined ? Number(type) : undefined,
       ...rest,
     });
 
@@ -351,7 +351,7 @@ export class EthersReadWriteAdapter<
               to,
               data,
               capabilities,
-              value: value ? toHexString(value) : undefined,
+              value: value !== undefined ? toHexString(value) : undefined,
             };
           }),
           ...rest,

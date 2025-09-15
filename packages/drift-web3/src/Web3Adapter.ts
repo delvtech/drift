@@ -101,17 +101,17 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
       ? ({
           ...tx,
           blockNumber:
-            tx.blockNumber === undefined ? undefined : BigInt(tx.blockNumber),
-          chainId: tx.chainId === undefined ? undefined : Number(tx.chainId),
+            tx.blockNumber !== undefined ? BigInt(tx.blockNumber) : undefined,
+          chainId: tx.chainId !== undefined ? Number(tx.chainId) : undefined,
           gas: BigInt(tx.gas),
           gasPrice: BigInt(tx.gasPrice),
           transactionHash: tx.hash,
           nonce: BigInt(tx.nonce),
           to: tx.to || undefined,
           transactionIndex:
-            tx.transactionIndex === undefined
-              ? undefined
-              : Number(tx.transactionIndex),
+            tx.transactionIndex !== undefined
+              ? Number(tx.transactionIndex)
+              : undefined,
           type: typeof tx.type === "string" ? tx.type : toHexString(tx.type),
           value: BigInt(tx.value),
         } satisfies Transaction)
@@ -399,7 +399,7 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
         to,
         data,
         capabilities,
-        value: value === undefined ? undefined : toHexString(value),
+        value: value !== undefined ? toHexString(value) : undefined,
       };
     });
 
