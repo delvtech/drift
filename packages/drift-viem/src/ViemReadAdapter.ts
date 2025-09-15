@@ -79,7 +79,7 @@ export class ViemReadAdapter<TClient extends AnyClient = PublicClient>
       logsBloom: viemBlock.logsBloom ?? undefined,
       miner: viemBlock.miner,
       mixHash: viemBlock.mixHash,
-      nonce: viemBlock.nonce === null ? undefined : BigInt(viemBlock.nonce),
+      nonce: viemBlock.nonce !== null ? BigInt(viemBlock.nonce) : undefined,
       number: viemBlock.number ?? undefined,
       parentHash: viemBlock.parentHash,
       receiptsRoot: viemBlock.receiptsRoot,

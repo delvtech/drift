@@ -118,7 +118,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
       ? {
           blockHash: ethersTx.blockHash,
           blockNumber:
-            typeof ethersTx.blockNumber !== "undefined"
+            ethersTx.blockNumber !== undefined
               ? BigInt(ethersTx.blockNumber)
               : undefined,
           chainId: Number(ethersTx.chainId),
@@ -130,7 +130,10 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
           nonce: BigInt(ethersTx.nonce),
           to: ethersTx.to ?? undefined,
           transactionIndex: undefined,
-          type: ethersTx.type ? toHexString(ethersTx.type) : undefined,
+          type:
+            ethersTx.type !== undefined && ethersTx.type !== null
+              ? toHexString(ethersTx.type)
+              : undefined,
           value: ethersTx.value.toBigInt(),
         }
       : undefined;
@@ -179,14 +182,14 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     return this.provider.call(
       {
         accessList: accessList as AccessList,
-        chainId: chainId === undefined ? undefined : Number(chainId),
+        chainId: chainId !== undefined ? Number(chainId) : undefined,
         data,
         gasLimit: gas,
-        nonce: nonce === undefined ? undefined : Number(nonce),
-        type: type === undefined ? undefined : Number(type),
+        nonce: nonce !== undefined ? Number(nonce) : undefined,
+        type: type !== undefined ? Number(type) : undefined,
         ...rest,
       },
-      block === undefined ? undefined : blockParam(block),
+      block !== undefined ? blockParam(block) : undefined,
     );
   }
 
@@ -205,11 +208,11 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     }
     const estimate = await this.provider.estimateGas({
       accessList: accessList as AccessList,
-      chainId: chainId === undefined ? undefined : Number(chainId),
+      chainId: chainId !== undefined ? Number(chainId) : undefined,
       data,
       gasLimit: gas,
-      nonce: nonce === undefined ? undefined : Number(nonce),
-      type: type === undefined ? undefined : Number(type),
+      nonce: nonce !== undefined ? Number(nonce) : undefined,
+      type: type !== undefined ? Number(type) : undefined,
       ...rest,
     });
     return estimate.toBigInt();

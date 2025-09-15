@@ -226,8 +226,8 @@ export class EthersReadWriteAdapter<
       gasLimit: gas,
       blobs: blobs as string[],
       blobVersionedHashes: blobVersionedHashes as string[],
-      nonce: nonce ? Number(nonce) : undefined,
-      type: type ? Number(type) : undefined,
+      nonce: nonce !== undefined ? Number(nonce) : undefined,
+      type: type !== undefined ? Number(type) : undefined,
       ...rest,
     });
 
@@ -268,8 +268,8 @@ export class EthersReadWriteAdapter<
     const contract = await factory.deploy(...params, {
       from: from || (await this.signer.getAddress()),
       gasLimit: gas,
-      nonce: nonce ? Number(nonce) : undefined,
-      type: type ? Number(type) : undefined,
+      nonce: nonce !== undefined ? Number(nonce) : undefined,
+      type: type !== undefined ? Number(type) : undefined,
       ...rest,
     });
     const hash = contract.deploymentTransaction()?.hash;
@@ -327,8 +327,8 @@ export class EthersReadWriteAdapter<
     const { hash } = await contract.getFunction(fn)(...params, {
       from: from || (await this.signer.getAddress()),
       gasLimit: gas,
-      nonce: nonce ? Number(nonce) : undefined,
-      type: type ? Number(type) : undefined,
+      nonce: nonce !== undefined ? Number(nonce) : undefined,
+      type: type !== undefined ? Number(type) : undefined,
       ...rest,
     });
 
@@ -379,7 +379,7 @@ export class EthersReadWriteAdapter<
               to,
               data,
               capabilities,
-              value: value ? toHexString(value) : undefined,
+              value: value !== undefined ? toHexString(value) : undefined,
             };
           }),
           ...rest,

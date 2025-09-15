@@ -241,9 +241,10 @@ export class DefaultReadAdapter extends BaseReadAdapter implements ReadAdapter {
             removed: log.removed,
             topics: log.topics,
             transactionHash: log.transactionHash,
-            transactionIndex: log.transactionIndex
-              ? Number(log.transactionIndex)
-              : undefined,
+            transactionIndex:
+              log.transactionIndex !== undefined
+                ? Number(log.transactionIndex)
+                : undefined,
           };
         }),
       )
@@ -445,7 +446,7 @@ export class DefaultAdapter
                 to,
                 data,
                 capabilities,
-                value: value ? toHexString(value) : undefined,
+                value: value !== undefined ? toHexString(value) : undefined,
               };
             }),
             capabilities: params.capabilities,
