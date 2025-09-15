@@ -14,6 +14,7 @@ import {
   type SendCallsParams,
   type SendCallsReturn,
   type SendTransactionParams,
+  type SimulateWriteParams,
   toHexString,
   type WalletCallsReceipt,
   type WalletCallsStatus,
@@ -63,17 +64,19 @@ export class EthersReadWriteAdapter<
     return this.signer.getAddress();
   }
 
-  async call({ from, ...rest }: CallParams) {
+  async call(params: CallParams) {
     return super.call({
-      from: from || (await this.getSignerAddress().catch(() => undefined)),
-      ...rest,
+      ...params,
+      from:
+        params.from || (await this.getSignerAddress().catch(() => undefined)),
     });
   }
 
-  async estimateGas({ from, ...rest }: CallParams) {
+  async estimateGas(params: CallParams) {
     return super.estimateGas({
-      from: from || (await this.getSignerAddress().catch(() => undefined)),
-      ...rest,
+      ...params,
+      from:
+        params.from || (await this.getSignerAddress().catch(() => undefined)),
     });
   }
 
@@ -269,27 +272,30 @@ export class EthersReadWriteAdapter<
       type: type ? Number(type) : undefined,
       ...rest,
     });
-
-    if (onMined) {
-      (async () => {
-        const deployedContract = await contract.waitForDeployment();
-        const transaction = deployedContract.deploymentTransaction();
-        const hash = transaction?.hash;
-        if (hash) {
-          const minedTransaction = await this.waitForTransaction({
-            hash,
-            timeout: onMinedTimeout,
-          });
-          onMined(minedTransaction);
-        }
-      })();
-    }
-
     const hash = contract.deploymentTransaction()?.hash;
+
     if (!hash) {
       throw new DriftError("Failed to get deployment transaction hash");
     }
+    if (onMined) {
+      this.waitForTransaction({
+        hash,
+        timeout: onMinedTimeout,
+      }).then(onMined);
+    }
+
     return hash;
+  }
+
+  async simulateWrite<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(params: SimulateWriteParams<TAbi, TFunctionName>) {
+    return super.simulateWrite({
+      ...params,
+      from:
+        params.from || (await this.getSignerAddress().catch(() => undefined)),
+    });
   }
 
   async write<

@@ -28,6 +28,7 @@ import {
   type SendCallsParams,
   type SendCallsReturn,
   type SendTransactionParams,
+  type SimulateWriteParams,
   type Transaction,
   type TransactionReceipt,
   toHexString,
@@ -510,6 +511,17 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     }
 
     return txHash;
+  }
+
+  async simulateWrite<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi>,
+  >(params: SimulateWriteParams<TAbi, TFunctionName>) {
+    return super.simulateWrite({
+      ...params,
+      from:
+        params.from || (await this.getSignerAddress().catch(() => undefined)),
+    });
   }
 
   async write<

@@ -71,16 +71,6 @@ export interface ReadAdapter {
   getGasPrice(): Promise<bigint>;
 
   /**
-   * Generates and returns an estimate of how much gas is necessary to allow the
-   * transaction to complete.
-   *
-   * **Note:** The estimate may be significantly more than the amount of gas
-   * actually used by the transaction, for a variety of reasons including EVM
-   * mechanics and node performance.
-   */
-  estimateGas(transaction: CallParams): Promise<bigint>;
-
-  /**
    * Get a transaction from a transaction hash.
    */
   getTransaction(
@@ -194,6 +184,16 @@ export interface ReadAdapter {
    * ```
    */
   call(params: CallParams): Promise<Bytes>;
+
+  /**
+   * Generates and returns an estimate of how much gas is necessary to allow the
+   * transaction to complete.
+   *
+   * **Note:** The estimate may be significantly more than the amount of gas
+   * actually used by the transaction, for a variety of reasons including EVM
+   * mechanics and node performance.
+   */
+  estimateGas(transaction: CallParams): Promise<bigint>;
 
   /**
    * Calls a `pure` or `view` function on a contract.

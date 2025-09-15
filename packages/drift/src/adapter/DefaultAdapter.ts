@@ -294,16 +294,6 @@ export class DefaultAdapter
   extends DefaultReadAdapter
   implements ReadWriteAdapter
 {
-  async call({ from, ...options }: CallParams): Promise<Bytes> {
-    from ??= await this.getSignerAddress().catch(() => undefined);
-    return super.call({ from, ...options });
-  }
-
-  async estimateGas({ from, ...options }: CallParams): Promise<bigint> {
-    from ??= await this.getSignerAddress().catch(() => undefined);
-    return super.estimateGas({ from, ...options });
-  }
-
   getSignerAddress(): Promise<AddressType> {
     return this.provider
       .request({ method: "eth_accounts" })
@@ -312,6 +302,22 @@ export class DefaultAdapter
         return Address.checksum(address);
       })
       .catch(handleError);
+  }
+
+  async call(params: CallParams): Promise<Bytes> {
+    return super.call({
+      from:
+        params.from || (await this.getSignerAddress().catch(() => undefined)),
+      ...params,
+    });
+  }
+
+  async estimateGas(params: CallParams): Promise<bigint> {
+    return super.estimateGas({
+      from:
+        params.from || (await this.getSignerAddress().catch(() => undefined)),
+      ...params,
+    });
   }
 
   async getWalletCapabilities<TChainIds extends readonly number[]>(
@@ -385,11 +391,17 @@ export class DefaultAdapter
     onMinedTimeout,
     ...options
   }: SendTransactionParams): Promise<Hash> {
-    from ??= await this.getSignerAddress().catch(handleError);
     return this.provider
       .request({
         method: "eth_sendTransaction",
-        params: [{ data, to, from, ...prepareTransactionOptions(options) }],
+        params: [
+          {
+            data,
+            to,
+            from: from || (await this.getSignerAddress().catch(handleError)),
+            ...prepareTransactionOptions(options),
+          },
+        ],
       })
       .then((hash) => {
         if (onMined) {
@@ -425,7 +437,7 @@ export class DefaultAdapter
             version: params.version || "2.0.0",
             id: params.id,
             chainId: toHexString(params.chainId ?? (await this.getChainId())),
-            from: params.from ?? (await this.getSignerAddress()),
+            from: params.from || (await this.getSignerAddress()),
             atomicRequired: params.atomic ?? true,
             calls: params.calls.map(({ capabilities, value, ...call }) => {
               const { to, data } = prepareCall(call);

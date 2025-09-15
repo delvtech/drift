@@ -166,6 +166,19 @@ export abstract class BaseReadWriteAdapter
 
   // Default method implementations //
 
+  async simulateWrite<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(
+    params: SimulateWriteParams<TAbi, TFunctionName>,
+  ): Promise<FunctionReturn<TAbi, TFunctionName>> {
+    return simulateWrite(this, {
+      ...params,
+      from:
+        params.from || (await this.getSignerAddress().catch(() => undefined)),
+    });
+  }
+
   deploy<TAbi extends Abi>(params: DeployParams<TAbi>): Promise<Hash> {
     return deploy(this, params);
   }
