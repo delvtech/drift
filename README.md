@@ -1,8 +1,8 @@
 # Drift
 
-[![NPM Version](https://img.shields.io/npm/v/%40delvtech%2Fdrift?color=cb3837)](https://npmjs.com/package/@gud/drift)
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-23454d)](./LICENSE)
-[![DELV Terms of Service](https://img.shields.io/badge/DELV-Terms%20of%20Service-316f5b)](https://delv-public.s3.us-east-2.amazonaws.com/delv-terms-of-service.pdf)
+[![NPM Version](https://img.shields.io/npm/v/%40gud%2Fdrift?color=cb3837)](https://npmjs.com/package/@gud/drift)
+[![License:Apache-2.0](https://img.shields.io/badge/Apache%202.0-23454d?logo=apache)](./LICENSE)
+[![GitHub](https://img.shields.io/badge/ryangoree%2Fdrift-151b23?logo=github)](https://github.com/ryangoree/drift)
 
 **Effortless Ethereum Development Across Web3 Libraries**
 
