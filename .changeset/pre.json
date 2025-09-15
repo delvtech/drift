@@ -13,9 +13,21 @@
     "@delvtech/drift-web3": "1.0.1"
   },
   "changesets": [
+    "clear-eggs-run",
+    "dull-papers-sing",
     "fair-cities-sort",
+    "famous-crews-enter",
     "fancy-ravens-argue",
+    "new-rice-yawn",
+    "plain-singers-change",
+    "plenty-peas-kneel",
+    "smart-rocks-crash",
     "solid-spiders-tan",
+    "strong-bobcats-mate",
+    "tame-terms-tie",
+    "ten-days-write",
+    "three-rabbits-return",
+    "warm-cats-relate",
     "warm-eels-help"
   ]
 }
