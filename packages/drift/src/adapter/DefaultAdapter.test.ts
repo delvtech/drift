@@ -71,17 +71,6 @@ describe("DefaultAdapter", () => {
     expect(gasPrice).toBeTypeOf("bigint");
   });
 
-  it("estimates gas", async () => {
-    const gas = await adapter.estimateGas({
-      data: adapter.encodeDeployData({
-        abi: TestToken.abi,
-        bytecode: TestToken.bytecode,
-        args: { decimals_: 18, initialSupply: 123n },
-      }),
-    });
-    expect(gas).toEqual(expect.any(BigInt));
-  });
-
   it("fetches transactions", async () => {
     let block: Block | undefined = await adapter.getBlock();
     while (block?.transactions.length === 0) {
@@ -139,6 +128,17 @@ describe("DefaultAdapter", () => {
         undefined,
       ]),
     } satisfies TransactionReceipt);
+  });
+
+  it("estimates gas", async () => {
+    const gas = await adapter.estimateGas({
+      data: adapter.encodeDeployData({
+        abi: TestToken.abi,
+        bytecode: TestToken.bytecode,
+        args: { decimals_: 18, initialSupply: 123n },
+      }),
+    });
+    expect(gas).toEqual(expect.any(BigInt));
   });
 
   describe("call", () => {

@@ -121,6 +121,20 @@ describe("EthersReadAdapter", () => {
     } satisfies TransactionReceipt);
   });
 
+  it("estimates gas", async () => {
+    const gas = await adapter.estimateGas({
+      data: adapter.encodeDeployData({
+        abi: testToken.abi,
+        bytecode: testToken.bytecode,
+        args: {
+          decimals_: 18,
+          initialSupply: 123n,
+        },
+      }),
+    });
+    expect(gas).toEqual(expect.any(BigInt));
+  });
+
   describe("call", () => {
     it("reads from deployed contracts", async () => {
       const data = adapter.encodeFunctionData({
