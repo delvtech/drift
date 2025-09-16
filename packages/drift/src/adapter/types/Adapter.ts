@@ -371,7 +371,7 @@ export interface WaitForTransactionParams extends GetTransactionParams {
 
 // Call //
 
-export interface TargetCallParams extends Eip4844Options {
+export interface TargetCallParams {
   /**
    * The address to send the call to.
    */
@@ -406,7 +406,9 @@ export interface CallOptions extends TransactionOptions {
 }
 
 export type CallParams = OneOf<
-  TargetCallParams | BytecodeCallParams | EncodedDeployCallParams
+  | (TargetCallParams & Eip4844Options)
+  | BytecodeCallParams
+  | EncodedDeployCallParams
 > &
   CallOptions;
 
@@ -879,6 +881,6 @@ export type DeployParams<TAbi extends Abi = Abi> =
 
 // https://github.com/ethereum/execution-apis/blob/40088597b8b4f48c45184da002e27ffc3c37641f/src/eth/submit.yaml#L1
 export type SendTransactionParams = OneOf<
-  TargetCallParams | EncodedDeployCallParams
+  (TargetCallParams & Eip4844Options) | EncodedDeployCallParams
 > &
   WriteOptions;
