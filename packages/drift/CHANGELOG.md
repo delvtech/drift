@@ -1,5 +1,11 @@
 # @gud/drift
 
+## 2.0.0-next.3
+
+### Patch Changes
+
+- f1bd90c: Add `ReadFunctionName` and `WriteFunctionName` types.
+
 ## 2.0.0-next.2
 
 ### Major Changes
