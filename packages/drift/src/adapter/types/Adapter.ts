@@ -13,6 +13,8 @@ import type {
   FunctionArgs,
   FunctionName,
   FunctionReturn,
+  ReadFunctionName,
+  WriteFunctionName,
 } from "src/adapter/types/Function";
 import type {
   Eip4844Options,
@@ -193,19 +195,15 @@ export interface ReadAdapter {
    * actually used by the transaction, for a variety of reasons including EVM
    * mechanics and node performance.
    */
-  estimateGas<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(transaction: EstimateGasParams<TAbi, TFunctionName>): Promise<bigint>;
+  estimateGas<TAbi extends Abi, TFunctionName extends WriteFunctionName<TAbi>>(
+    transaction: EstimateGasParams<TAbi, TFunctionName>,
+  ): Promise<bigint>;
 
   /**
    * Calls a `pure` or `view` function on a contract.
    * @returns The decoded return value of the function.
    */
-  read<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(
+  read<TAbi extends Abi, TFunctionName extends ReadFunctionName<TAbi>>(
     params: ReadParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>>;
 
@@ -215,7 +213,7 @@ export interface ReadAdapter {
    */
   simulateWrite<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+    TFunctionName extends WriteFunctionName<TAbi>,
   >(
     params: SimulateWriteParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>>;
@@ -276,10 +274,9 @@ export interface WriteAdapter {
    * function.
    * @returns The transaction hash of the submitted transaction.
    */
-  write<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>): Promise<Hash>;
+  write<TAbi extends Abi, TFunctionName extends WriteFunctionName<TAbi>>(
+    params: WriteParams<TAbi, TFunctionName>,
+  ): Promise<Hash>;
 
   /**
    * Requests that a wallet submits a batch of calls.
@@ -488,10 +485,7 @@ export interface ReadOptions {
  */
 export type ReadParams<
   TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi, "pure" | "view"> = FunctionName<
-    TAbi,
-    "pure" | "view"
-  >,
+  TFunctionName extends ReadFunctionName<TAbi> = ReadFunctionName<TAbi>,
 > = FunctionCallParams<TAbi, TFunctionName> & ReadOptions;
 
 // Multicall //
@@ -842,10 +836,7 @@ export interface SimulateWriteOptions extends ReadOptions, TransactionOptions {}
 
 export type SimulateWriteParams<
   TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<
-    TAbi,
-    "nonpayable" | "payable"
-  > = FunctionName<TAbi, "nonpayable" | "payable">,
+  TFunctionName extends WriteFunctionName<TAbi> = WriteFunctionName<TAbi>,
 > = FunctionCallParams<TAbi, TFunctionName> & SimulateWriteOptions;
 
 /**
@@ -869,10 +860,7 @@ export interface WriteOptions extends TransactionOptions {
 
 export type WriteParams<
   TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<
-    TAbi,
-    "nonpayable" | "payable"
-  > = FunctionName<TAbi, "nonpayable" | "payable">,
+  TFunctionName extends WriteFunctionName<TAbi> = WriteFunctionName<TAbi>,
 > = FunctionCallParams<TAbi, TFunctionName> & WriteOptions;
 
 // Deploy //
@@ -884,10 +872,7 @@ export type DeployParams<TAbi extends Abi = Abi> =
 
 export type EstimateGasParams<
   TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<
-    TAbi,
-    "nonpayable" | "payable"
-  > = FunctionName<TAbi, "nonpayable" | "payable">,
+  TFunctionName extends WriteFunctionName<TAbi> = WriteFunctionName<TAbi>,
 > = OneOf<
   | (TargetCallParams & Eip4844Options)
   | FunctionCallParams<TAbi, TFunctionName>

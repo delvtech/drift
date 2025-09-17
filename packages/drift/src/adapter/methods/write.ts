@@ -1,10 +1,13 @@
 import type { Abi, Hash } from "src/adapter/types/Abi";
 import type { ReadWriteAdapter, WriteParams } from "src/adapter/types/Adapter";
-import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
+import type {
+  FunctionArgs,
+  WriteFunctionName,
+} from "src/adapter/types/Function";
 
 export function write<
   TAbi extends Abi,
-  TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  TFunctionName extends WriteFunctionName<TAbi>,
 >(
   adapter: ReadWriteAdapter,
   {

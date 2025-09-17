@@ -2,8 +2,8 @@ import type { Abi } from "src/adapter/types/Abi";
 import type { Adapter, SimulateWriteParams } from "src/adapter/types/Adapter";
 import type {
   FunctionArgs,
-  FunctionName,
   FunctionReturn,
+  WriteFunctionName,
 } from "src/adapter/types/Function";
 import { prepareFunctionData } from "src/adapter/utils/encodeFunctionData";
 
@@ -13,7 +13,7 @@ import { prepareFunctionData } from "src/adapter/utils/encodeFunctionData";
  */
 export async function simulateWrite<
   TAbi extends Abi,
-  TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  TFunctionName extends WriteFunctionName<TAbi>,
 >(
   adapter: Adapter,
   {

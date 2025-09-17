@@ -15,6 +15,22 @@ export type FunctionName<
 > = AbiEntryName<TAbi, "function", TStateMutability>;
 
 /**
+ * Get a union of function names from an abi that are "pure" or "view".
+ */
+export type ReadFunctionName<TAbi extends Abi> = FunctionName<
+  TAbi,
+  "pure" | "view"
+>;
+
+/**
+ * Get a union of function names from an abi that are "payable" or "nonpayable".
+ */
+export type WriteFunctionName<TAbi extends Abi> = FunctionName<
+  TAbi,
+  "payable" | "nonpayable"
+>;
+
+/**
  * Get an object type for an abi function's arguments.
  */
 export type FunctionArgs<

@@ -18,6 +18,8 @@ import type {
   FunctionArgs,
   FunctionName,
   FunctionReturn,
+  ReadFunctionName,
+  WriteFunctionName,
 } from "src/adapter/types/Function";
 import type { TransactionOptions } from "src/adapter/types/Transaction";
 import {
@@ -232,7 +234,7 @@ export class ReadContract<
   /**
    * Reads a specified function from the contract.
    */
-  read<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
+  read<TFunctionName extends ReadFunctionName<TAbi>>(
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
     return this.client.read({
@@ -247,9 +249,7 @@ export class ReadContract<
   /**
    * Simulates a write operation on a specified function of the contract.
    */
-  simulateWrite<
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(
+  simulateWrite<TFunctionName extends WriteFunctionName<TAbi>>(
     ...[fn, args, options]: ContractSimulateWriteArgs<TAbi, TFunctionName>
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
     return this.client.simulateWrite({
@@ -308,7 +308,7 @@ export class ReadWriteContract<
   /**
    * @returns The transaction hash of the submitted transaction.
    */
-  write<TFunctionName extends FunctionName<TAbi, "payable" | "nonpayable">>(
+  write<TFunctionName extends WriteFunctionName<TAbi>>(
     ...[fn, args, options]: ContractWriteArgs<TAbi, TFunctionName>
   ): Promise<Hash> {
     return this.client.write({
@@ -380,10 +380,7 @@ export type ContractEncodeFunctionDataArgs<
 
 export type ContractReadArgs<
   TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi, "pure" | "view"> = FunctionName<
-    TAbi,
-    "pure" | "view"
-  >,
+  TFunctionName extends ReadFunctionName<TAbi> = ReadFunctionName<TAbi>,
 > = EmptyObject extends FunctionArgs<TAbi, TFunctionName>
   ? [
       functionName: TFunctionName,
@@ -398,10 +395,7 @@ export type ContractReadArgs<
 
 export type ContractSimulateWriteArgs<
   TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<
-    TAbi,
-    "nonpayable" | "payable"
-  > = FunctionName<TAbi, "nonpayable" | "payable">,
+  TFunctionName extends WriteFunctionName<TAbi> = WriteFunctionName<TAbi>,
 > = EmptyObject extends FunctionArgs<TAbi, TFunctionName>
   ? [
       functionName: TFunctionName,
@@ -416,10 +410,7 @@ export type ContractSimulateWriteArgs<
 
 export type ContractWriteArgs<
   TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<
-    TAbi,
-    "nonpayable" | "payable"
-  > = FunctionName<TAbi, "nonpayable" | "payable">,
+  TFunctionName extends WriteFunctionName<TAbi> = WriteFunctionName<TAbi>,
 > = EmptyObject extends FunctionArgs<TAbi, TFunctionName>
   ? [
       functionName: TFunctionName,

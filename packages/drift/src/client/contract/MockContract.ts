@@ -13,7 +13,12 @@ import type {
   WriteOptions,
 } from "src/adapter/types/Adapter";
 import type { EventName } from "src/adapter/types/Event";
-import type { FunctionArgs, FunctionName } from "src/adapter/types/Function";
+import type {
+  FunctionArgs,
+  FunctionName,
+  ReadFunctionName,
+  WriteFunctionName,
+} from "src/adapter/types/Function";
 import type { TransactionOptions } from "src/adapter/types/Transaction";
 import {
   type ContractBaseOptions,
@@ -110,7 +115,7 @@ export class MockContract<
     });
   }
 
-  onRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
+  onRead<TFunctionName extends ReadFunctionName<TAbi>>(
     fn: TFunctionName,
     args?: Partial<FunctionArgs<TAbi, TFunctionName>>,
     options?: ReadOptions,
@@ -124,9 +129,7 @@ export class MockContract<
     } as OnReadParams<TAbi, TFunctionName>);
   }
 
-  onSimulateWrite<
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(
+  onSimulateWrite<TFunctionName extends WriteFunctionName<TAbi>>(
     fn: TFunctionName,
     args?: Partial<FunctionArgs<TAbi, TFunctionName>>,
     options?: TransactionOptions,
@@ -144,7 +147,7 @@ export class MockContract<
     return this.adapter.onGetSignerAddress();
   }
 
-  onWrite<TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">>(
+  onWrite<TFunctionName extends WriteFunctionName<TAbi>>(
     fn?: TFunctionName,
     args?: Partial<FunctionArgs<TAbi, TFunctionName>>,
     options?: WriteOptions,

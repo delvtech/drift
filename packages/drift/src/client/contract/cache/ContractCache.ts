@@ -9,8 +9,8 @@ import type {
 import type { EventLog, EventName } from "src/adapter/types/Event";
 import type {
   FunctionArgs,
-  FunctionName,
   FunctionReturn,
+  ReadFunctionName,
 } from "src/adapter/types/Function";
 import {
   ClientCache,
@@ -126,7 +126,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
   /**
    * Get the key used to store a read result.
    */
-  readKey<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
+  readKey<TFunctionName extends ReadFunctionName<TAbi>>(
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ) {
     return this.#clientCache.readKey({
@@ -141,7 +141,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
   /**
    * Add a read result to the cache.
    */
-  preloadRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
+  preloadRead<TFunctionName extends ReadFunctionName<TAbi>>(
     params: Omit<
       ReadParams<TAbi, TFunctionName>,
       keyof ContractParams<TAbi>
@@ -159,7 +159,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
   /**
    * Get a cached read result.
    */
-  getRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
+  getRead<TFunctionName extends ReadFunctionName<TAbi>>(
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ) {
     return this.#clientCache.getRead({
@@ -175,7 +175,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
    * Delete a read result in the cache to ensure {@linkcode Contract.read}
    * re-fetches it when called.
    */
-  invalidateRead<TFunctionName extends FunctionName<TAbi, "pure" | "view">>(
+  invalidateRead<TFunctionName extends ReadFunctionName<TAbi>>(
     ...[fn, args, options]: ContractReadArgs<TAbi, TFunctionName>
   ) {
     return this.#clientCache.invalidateRead({
@@ -192,9 +192,7 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
    * params to ensure {@linkcode Client.read} re-fetches matching reads when
    * called.
    */
-  invalidateReadsMatching<
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(
+  invalidateReadsMatching<TFunctionName extends ReadFunctionName<TAbi>>(
     fn?: TFunctionName,
     args?: Partial<FunctionArgs<TAbi, TFunctionName>>,
     options?: ReadOptions,

@@ -10,8 +10,8 @@ import type { Block, BlockIdentifier } from "src/adapter/types/Block";
 import type { EventLog, EventName } from "src/adapter/types/Event";
 import type {
   FunctionArgs,
-  FunctionName,
   FunctionReturn,
+  ReadFunctionName,
 } from "src/adapter/types/Function";
 import type {
   Transaction,
@@ -409,7 +409,7 @@ export class ClientCache<T extends Store = Store> {
 
   #partialReadKey<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
+    TFunctionName extends ReadFunctionName<TAbi>,
   >(
     {
       address,
@@ -432,10 +432,9 @@ export class ClientCache<T extends Store = Store> {
   /**
    * Get the key used to store a read result.
    */
-  async readKey<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(params: ReadParams<TAbi, TFunctionName>): Promise<string> {
+  async readKey<TAbi extends Abi, TFunctionName extends ReadFunctionName<TAbi>>(
+    params: ReadParams<TAbi, TFunctionName>,
+  ): Promise<string> {
     return this.#partialReadKey(params);
   }
 
@@ -444,7 +443,7 @@ export class ClientCache<T extends Store = Store> {
    */
   async preloadRead<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
+    TFunctionName extends ReadFunctionName<TAbi>,
   >({
     value,
     ...params
@@ -458,10 +457,7 @@ export class ClientCache<T extends Store = Store> {
   /**
    * Get a cached read result.
    */
-  async getRead<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(
+  async getRead<TAbi extends Abi, TFunctionName extends ReadFunctionName<TAbi>>(
     params: ReadParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName> | undefined> {
     const key = await this.readKey(params);
@@ -474,7 +470,7 @@ export class ClientCache<T extends Store = Store> {
    */
   async invalidateRead<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
+    TFunctionName extends ReadFunctionName<TAbi>,
   >(params: ReadParams<TAbi, TFunctionName>): Promise<void> {
     const key = await this.readKey(params);
     return this.store.delete(key);
@@ -486,7 +482,7 @@ export class ClientCache<T extends Store = Store> {
    */
   async invalidateReadsMatching<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
+    TFunctionName extends ReadFunctionName<TAbi>,
   >(
     params?: Replace<
       Partial<ReadParams<TAbi, TFunctionName>>,

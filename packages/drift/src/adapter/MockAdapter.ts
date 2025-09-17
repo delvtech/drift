@@ -42,6 +42,8 @@ import type {
   FunctionArgs,
   FunctionName,
   FunctionReturn,
+  ReadFunctionName,
+  WriteFunctionName,
 } from "src/adapter/types/Function";
 import type {
   Transaction,
@@ -154,7 +156,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   onEstimateGas<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+    TFunctionName extends WriteFunctionName<TAbi>,
   >(params?: Partial<EstimateGasParams<TAbi, TFunctionName>>) {
     return this.stubs.get<
       [EstimateGasParams<TAbi, TFunctionName>],
@@ -167,7 +169,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   async estimateGas<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+    TFunctionName extends WriteFunctionName<TAbi>,
   >(params: EstimateGasParams<TAbi, TFunctionName>) {
     return this.stubs.get<
       [EstimateGasParams<TAbi, TFunctionName>],
@@ -292,10 +294,9 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   // read //
 
-  onRead<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(params?: OnReadParams<TAbi, TFunctionName>) {
+  onRead<TAbi extends Abi, TFunctionName extends ReadFunctionName<TAbi>>(
+    params?: OnReadParams<TAbi, TFunctionName>,
+  ) {
     return this.stubs.get<
       [ReadParams<TAbi, TFunctionName>],
       Promise<FunctionReturn<TAbi, TFunctionName>>
@@ -305,10 +306,9 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
     });
   }
 
-  async read<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(params: ReadParams<TAbi, TFunctionName>) {
+  async read<TAbi extends Abi, TFunctionName extends ReadFunctionName<TAbi>>(
+    params: ReadParams<TAbi, TFunctionName>,
+  ) {
     return this.stubs.get<
       [ReadParams<TAbi, TFunctionName>],
       Promise<FunctionReturn<TAbi, TFunctionName>>
@@ -323,7 +323,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   onSimulateWrite<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+    TFunctionName extends WriteFunctionName<TAbi>,
   >(params?: OnSimulateWriteParams<TAbi, TFunctionName>) {
     return this.stubs.get<
       [SimulateWriteParams<TAbi, TFunctionName>],
@@ -336,7 +336,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   async simulateWrite<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+    TFunctionName extends WriteFunctionName<TAbi>,
   >(params: SimulateWriteParams<TAbi, TFunctionName>) {
     return this.stubs.get<
       [SimulateWriteParams<TAbi, TFunctionName>],
@@ -577,20 +577,18 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   // write //
 
-  onWrite<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params?: OnWriteParams<TAbi, TFunctionName>) {
+  onWrite<TAbi extends Abi, TFunctionName extends WriteFunctionName<TAbi>>(
+    params?: OnWriteParams<TAbi, TFunctionName>,
+  ) {
     return this.stubs.get<[WriteParams<TAbi, TFunctionName>], Promise<Hash>>({
       method: "write",
       key: this.createKey(params),
     });
   }
 
-  async write<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>) {
+  async write<TAbi extends Abi, TFunctionName extends WriteFunctionName<TAbi>>(
+    params: WriteParams<TAbi, TFunctionName>,
+  ) {
     const hash = await this.stubs.get<
       [WriteParams<TAbi, TFunctionName>],
       Promise<Hash>
@@ -636,10 +634,7 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
 export type OnReadParams<
   TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<TAbi, "pure" | "view"> = FunctionName<
-    TAbi,
-    "pure" | "view"
-  >,
+  TFunctionName extends ReadFunctionName<TAbi> = ReadFunctionName<TAbi>,
 > = Replace<
   Partial<ReadParams<TAbi, TFunctionName>>,
   {
@@ -651,10 +646,7 @@ export type OnReadParams<
 
 export type OnSimulateWriteParams<
   TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<
-    TAbi,
-    "nonpayable" | "payable"
-  > = FunctionName<TAbi, "nonpayable" | "payable">,
+  TFunctionName extends WriteFunctionName<TAbi> = WriteFunctionName<TAbi>,
 > = Replace<
   Partial<SimulateWriteParams<TAbi, TFunctionName>>,
   {
@@ -700,10 +692,7 @@ export interface OnMulticallParams<
 
 export type OnWriteParams<
   TAbi extends Abi = Abi,
-  TFunctionName extends FunctionName<
-    TAbi,
-    "nonpayable" | "payable"
-  > = FunctionName<TAbi, "nonpayable" | "payable">,
+  TFunctionName extends WriteFunctionName<TAbi> = WriteFunctionName<TAbi>,
 > = Replace<
   Partial<WriteParams<TAbi, TFunctionName>>,
   {

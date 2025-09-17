@@ -41,7 +41,7 @@ import type {
 } from "src/adapter/types/Adapter";
 import type { BlockIdentifier, BlockTag } from "src/adapter/types/Block";
 import type { EventArgs, EventLog, EventName } from "src/adapter/types/Event";
-import type { FunctionName } from "src/adapter/types/Function";
+import type { WriteFunctionName } from "src/adapter/types/Function";
 import type {
   Eip4844Options,
   TransactionOptions,
@@ -268,10 +268,9 @@ export class DefaultReadAdapter extends BaseReadAdapter implements ReadAdapter {
       .catch(handleError);
   }
 
-  estimateGas<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: EstimateGasParams<TAbi, TFunctionName>): Promise<bigint> {
+  estimateGas<TAbi extends Abi, TFunctionName extends WriteFunctionName<TAbi>>(
+    params: EstimateGasParams<TAbi, TFunctionName>,
+  ): Promise<bigint> {
     const { to, data } = prepareCall(params);
     const { block, ...rest } = params;
 
@@ -312,7 +311,7 @@ export class DefaultAdapter
 
   async estimateGas<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+    TFunctionName extends WriteFunctionName<TAbi>,
   >(params: EstimateGasParams<TAbi, TFunctionName>): Promise<bigint> {
     return super.estimateGas({
       from:
@@ -420,10 +419,9 @@ export class DefaultAdapter
     return deploy(this, params);
   }
 
-  write<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>): Promise<Hash> {
+  write<TAbi extends Abi, TFunctionName extends WriteFunctionName<TAbi>>(
+    params: WriteParams<TAbi, TFunctionName>,
+  ): Promise<Hash> {
     return write(this, params);
   }
 

@@ -38,7 +38,11 @@ import type {
 } from "src/adapter/types/Adapter";
 import type { BlockIdentifier } from "src/adapter/types/Block";
 import type { EventLog, EventName } from "src/adapter/types/Event";
-import type { FunctionName, FunctionReturn } from "src/adapter/types/Function";
+import type {
+  FunctionReturn,
+  ReadFunctionName,
+  WriteFunctionName,
+} from "src/adapter/types/Function";
 import type {
   Transaction,
   TransactionReceipt,
@@ -111,15 +115,12 @@ export abstract class BaseReadAdapter
   abstract call(params: CallParams): Promise<Bytes>;
   abstract estimateGas<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+    TFunctionName extends WriteFunctionName<TAbi>,
   >(transaction: EstimateGasParams<TAbi, TFunctionName>): Promise<bigint>;
 
   // Default implementations //
 
-  read<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "pure" | "view">,
-  >(
+  read<TAbi extends Abi, TFunctionName extends ReadFunctionName<TAbi>>(
     params: ReadParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
     return read(this, params);
@@ -127,7 +128,7 @@ export abstract class BaseReadAdapter
 
   simulateWrite<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+    TFunctionName extends WriteFunctionName<TAbi>,
   >(
     params: SimulateWriteParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
@@ -172,7 +173,7 @@ export abstract class BaseReadWriteAdapter
 
   async simulateWrite<
     TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+    TFunctionName extends WriteFunctionName<TAbi>,
   >(
     params: SimulateWriteParams<TAbi, TFunctionName>,
   ): Promise<FunctionReturn<TAbi, TFunctionName>> {
@@ -187,10 +188,9 @@ export abstract class BaseReadWriteAdapter
     return deploy(this, params);
   }
 
-  async write<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: WriteParams<TAbi, TFunctionName>): Promise<Hash> {
+  async write<TAbi extends Abi, TFunctionName extends WriteFunctionName<TAbi>>(
+    params: WriteParams<TAbi, TFunctionName>,
+  ): Promise<Hash> {
     return write(this, params);
   }
 }

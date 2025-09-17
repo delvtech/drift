@@ -108,6 +108,8 @@ export type {
   FunctionArgs,
   FunctionName,
   FunctionReturn,
+  ReadFunctionName,
+  WriteFunctionName,
 } from "src/adapter/types/Function";
 export type {
   Eip4844Options,
@@ -234,7 +236,7 @@ export {
   type ToHexStringOptions,
   toHexString,
 } from "src/utils/hex";
-export { parseKey, stringifyKey as stringifyKey } from "src/utils/keys";
+export { parseKey, stringifyKey } from "src/utils/keys";
 export type {
   AnyFunction,
   AnyObject,
