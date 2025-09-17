@@ -40,7 +40,12 @@ import {
   type WalletCapabilities,
   type WriteParams,
 } from "@gud/drift";
-import { type AbiFragment, type AccessList, default as Web3 } from "web3";
+import {
+  type AbiFragment,
+  type AccessList,
+  TransactionNotFound,
+  default as Web3,
+} from "web3";
 
 export class Web3Adapter<TWeb3 extends Web3 = Web3>
   extends BaseReadWriteAdapter
@@ -146,7 +151,16 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
                   this.web3.transactionReceiptPollingInterval,
                 ),
           )
-          .catch(reject);
+          .catch((e) => {
+            if (e instanceof TransactionNotFound) {
+              setTimeout(
+                getReceipt,
+                this.web3.transactionReceiptPollingInterval,
+              );
+              return;
+            }
+            reject(e);
+          });
       };
       getReceipt();
       setTimeout(() => resolve(undefined), timeout);
