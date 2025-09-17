@@ -176,11 +176,9 @@ export type UnionKey<T> = T extends T ? keyof T : never;
 export type OneOf<T extends AnyObject> = UnionKey<T> extends infer K extends
   PropertyKey
   ? T extends T
-    ? Eval<
-        T & {
-          [_ in Exclude<K, keyof T>]?: never;
-        }
-      >
+    ? T & {
+        [_ in Exclude<K, keyof T>]?: never;
+      }
     : never
   : never;
 
