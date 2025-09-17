@@ -17,11 +17,11 @@
   },
   "dependencies": {
     "@gud/drift": "^2.0.0-next.5",
-    "@gud/math": "^1.0.0"
+    "@gud/math": "^1.0.1"
   },
   "devDependencies": {
-    "@types/node": "^24.1.0",
-    "tsx": "^4.20.3",
+    "@types/node": "^24.5.1",
+    "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   }
 }
