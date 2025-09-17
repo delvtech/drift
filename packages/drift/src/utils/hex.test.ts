@@ -1,4 +1,10 @@
-import { hexToString, isHexString, toHexString } from "src/utils/hex";
+import {
+  hexToBytes,
+  hexToString,
+  InvalidHexStringError,
+  isHexString,
+  toHexString,
+} from "src/utils/hex";
 import { describe, expect, it } from "vitest";
 
 const HELLO_HEX = "68656c6c6f";
@@ -57,9 +63,13 @@ describe("hexToString", () => {
   });
 
   it("throws for invalid hex", () => {
-    expect(() => hexToString("0xyz")).toThrow();
-    expect(() => hexToString("123")).toThrow();
-    expect(() => hexToString("0x123", { prefix: false })).toThrow();
+    expect(() => hexToString("0xyz")).toThrow(InvalidHexStringError);
+    expect(() => hexToString("123" as `0x${string}`)).toThrow(
+      InvalidHexStringError,
+    );
+    expect(() => hexToString("0x123", { prefix: false })).toThrow(
+      InvalidHexStringError,
+    );
   });
 
   it("handles odd-length hex strings", () => {
@@ -68,5 +78,37 @@ describe("hexToString", () => {
 
   it("handles hex with no prefix when specified", () => {
     expect(hexToString(HELLO_HEX, { prefix: false })).toBe("hello");
+  });
+});
+
+describe("hexToBytes", () => {
+  const HELLO_BYTES = new TextEncoder().encode("hello");
+
+  it("converts valid hex to string", () => {
+    expect(hexToBytes(`0x${HELLO_HEX}`)).toStrictEqual(HELLO_BYTES);
+  });
+
+  it("returns empty string for 0x", () => {
+    expect(hexToBytes("0x")).toStrictEqual(new Uint8Array([]));
+  });
+
+  it("throws for invalid hex", () => {
+    expect(() => hexToBytes("0xyz")).toThrow(InvalidHexStringError);
+    expect(() => hexToBytes("123" as `0x${string}`)).toThrow(
+      InvalidHexStringError,
+    );
+    expect(() => hexToBytes("0x123", { prefix: false })).toThrow(
+      InvalidHexStringError,
+    );
+  });
+
+  it("handles odd-length hex strings", () => {
+    expect(hexToBytes(`0x${HELLO_HEX}2`)).toStrictEqual(
+      new Uint8Array([...HELLO_BYTES, 2]),
+    );
+  });
+
+  it("handles hex with no prefix when specified", () => {
+    expect(hexToBytes(HELLO_HEX, { prefix: false })).toStrictEqual(HELLO_BYTES);
   });
 });

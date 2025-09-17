@@ -1,4 +1,12 @@
+import { DriftError } from "src/error/DriftError";
+
 export const HEX_REGEX = /^0x[0-9a-fA-F]*$/;
+
+export class InvalidHexStringError extends DriftError {
+  constructor(value: unknown) {
+    super(`Invalid hex string: ${value}`);
+  }
+}
 
 export interface IsHexStringOptions {
   /**
@@ -97,10 +105,15 @@ export function toHexString<TOptions extends ToHexStringOptions>(
  * Converts a hexadecimal string to a UTF-8 string.
  * @param hex - The hexadecimal string to convert.
  * @param options - Options to control the validation of the hex string.
+ * @throws An {@linkcode InvalidHexStringError} if the input is not a valid hex
+ * string.
  */
-export function hexToString(hex: string, options?: IsHexStringOptions): string {
+export function hexToString<TOptions extends IsHexStringOptions>(
+  hex: ConditionalHexStringType<TOptions>,
+  options?: TOptions,
+): string {
   if (!isHexString(hex, options)) {
-    throw new Error(`Invalid hex string: ${hex}`);
+    throw new InvalidHexStringError(hex);
   }
   let utf8 = "";
   for (let i = 0; i < hex.length; i += 2) {
@@ -110,4 +123,28 @@ export function hexToString(hex: string, options?: IsHexStringOptions): string {
     utf8 += String.fromCharCode(charCode);
   }
   return utf8;
+}
+
+/**
+ * Converts a hexadecimal string to a byte array.
+ * @param hex - The hexadecimal string to convert.
+ * @param options - Options to control the validation of the hex string.
+ * @throws An {@linkcode InvalidHexStringError} if the input is not a valid hex
+ * string.
+ */
+export function hexToBytes<TOptions extends IsHexStringOptions>(
+  hex: ConditionalHexStringType<TOptions>,
+  options?: TOptions,
+): Uint8Array {
+  if (!isHexString(hex, options)) {
+    throw new InvalidHexStringError(hex);
+  }
+  const trimmedHex = hex.startsWith("0x") ? hex.slice(2) : hex;
+  const byteLength = Math.ceil(trimmedHex.length / 2);
+  const bytes = new Uint8Array(byteLength);
+  for (let i = 0; i < trimmedHex.length; i += 2) {
+    const hexPair = trimmedHex.slice(i, i + 2);
+    bytes[i / 2] = parseInt(hexPair, 16);
+  }
+  return bytes;
 }
