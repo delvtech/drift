@@ -132,8 +132,8 @@ describe("ClientCache", () => {
       const key2 = await cache2.blockKey(123n);
 
       expect(key1).not.toBe(key2);
-      expect(JSON.stringify(key1)).toContain("ns1");
-      expect(JSON.stringify(key2)).toContain("ns2");
+      expect(key1).toContain("ns1");
+      expect(key2).toContain("ns2");
     });
 
     it("preloads values", async () => {
@@ -219,8 +219,8 @@ describe("ClientCache", () => {
       const key2 = await cache2.transactionKey({ hash: "0x123" });
 
       expect(key1).not.toBe(key2);
-      expect(JSON.stringify(key1)).toContain("ns1");
-      expect(JSON.stringify(key2)).toContain("ns2");
+      expect(key1).toContain("ns1");
+      expect(key2).toContain("ns2");
     });
 
     it("preloads values", async () => {
@@ -306,8 +306,8 @@ describe("ClientCache", () => {
       const key2 = await cache2.transactionReceiptKey({ hash: "0x123" });
 
       expect(key1).not.toBe(key2);
-      expect(JSON.stringify(key1)).toContain("ns1");
-      expect(JSON.stringify(key2)).toContain("ns2");
+      expect(key1).toContain("ns1");
+      expect(key2).toContain("ns2");
     });
 
     it("preloads values", async () => {
@@ -332,8 +332,8 @@ describe("ClientCache", () => {
       const key2 = await cache2.callKey(params);
 
       expect(key1).not.toBe(key2);
-      expect(JSON.stringify(key1)).toContain("ns1");
-      expect(JSON.stringify(key2)).toContain("ns2");
+      expect(key1).toContain("ns1");
+      expect(key2).toContain("ns2");
     });
 
     it("preloads values", async () => {
@@ -458,8 +458,8 @@ describe("ClientCache", () => {
       const key2 = await cache2.eventsKey(params);
 
       expect(key1).not.toBe(key2);
-      expect(JSON.stringify(key1)).toContain("ns1");
-      expect(JSON.stringify(key2)).toContain("ns2");
+      expect(key1).toContain("ns1");
+      expect(key2).toContain("ns2");
     });
 
     it("preloads values", async () => {
@@ -507,8 +507,8 @@ describe("ClientCache", () => {
       const key2 = await cache2.readKey(params);
 
       expect(key1).not.toBe(key2);
-      expect(JSON.stringify(key1)).toContain("ns1");
-      expect(JSON.stringify(key2)).toContain("ns2");
+      expect(key1).toContain("ns1");
+      expect(key2).toContain("ns2");
     });
 
     it("preloads values", async () => {

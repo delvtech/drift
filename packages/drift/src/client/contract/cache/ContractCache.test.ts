@@ -64,8 +64,8 @@ describe("ContractCache", () => {
       const key2 = await cache2.eventsKey("Approval");
 
       expect(key1).not.toBe(key2);
-      expect(JSON.stringify(key1)).toContain("ns1");
-      expect(JSON.stringify(key2)).toContain("ns2");
+      expect(key1).toContain("ns1");
+      expect(key2).toContain("ns2");
     });
 
     it("preloads values", async () => {
@@ -113,8 +113,8 @@ describe("ContractCache", () => {
       const key2 = await cache2.readKey(...readArgs);
 
       expect(key1).not.toBe(key2);
-      expect(JSON.stringify(key1)).toContain("ns1");
-      expect(JSON.stringify(key2)).toContain("ns2");
+      expect(key1).toContain("ns1");
+      expect(key2).toContain("ns2");
     });
 
     it("preloads values", async () => {
