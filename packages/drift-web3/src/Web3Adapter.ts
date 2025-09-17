@@ -195,13 +195,12 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     TAbi extends Abi,
     TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
   >(params: EstimateGasParams<TAbi, TFunctionName>) {
-    const { block, from, ...rest } = params;
+    const { block, ...rest } = params;
     const { to, data } = prepareCall(params);
     return this.web3.eth.estimateGas(
       {
         ...rest,
         data,
-        from: from || (await this.getSignerAddress().catch(() => undefined)),
         to,
       },
       block,

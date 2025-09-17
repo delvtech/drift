@@ -3,7 +3,6 @@ import {
   type CallParams,
   type DeployParams,
   DriftError,
-  type EstimateGasParams,
   type FunctionName,
   type GetWalletCapabilitiesParams,
   getWalletCallsStatusLabel,
@@ -61,17 +60,6 @@ export class EthersReadWriteAdapter<
 
   async call(params: CallParams) {
     return super.call({
-      ...params,
-      from:
-        params.from || (await this.getSignerAddress().catch(() => undefined)),
-    });
-  }
-
-  async estimateGas<
-    TAbi extends Abi,
-    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
-  >(params: EstimateGasParams<TAbi, TFunctionName>) {
-    return super.estimateGas({
       ...params,
       from:
         params.from || (await this.getSignerAddress().catch(() => undefined)),

@@ -30,14 +30,15 @@ import type {
   GetEventsParams,
   GetTransactionParams,
   GetWalletCapabilitiesParams,
-  ReadAdapter, ReadWriteAdapter,
+  ReadAdapter,
+  ReadWriteAdapter,
   SendCallsParams,
   SendCallsReturn,
   SendTransactionParams,
   WaitForTransactionParams,
   WalletCallsStatus,
   WalletCapabilities,
-  WriteParams
+  WriteParams,
 } from "src/adapter/types/Adapter";
 import type { BlockIdentifier, BlockTag } from "src/adapter/types/Block";
 import type { EventArgs, EventLog, EventName } from "src/adapter/types/Event";
@@ -316,17 +317,6 @@ export class DefaultAdapter
 
   async call(params: CallParams): Promise<Bytes> {
     return super.call({
-      from:
-        params.from || (await this.getSignerAddress().catch(() => undefined)),
-      ...params,
-    });
-  }
-
-  async estimateGas<
-    TAbi extends Abi,
-    TFunctionName extends WriteFunctionName<TAbi>,
-  >(params: EstimateGasParams<TAbi, TFunctionName>): Promise<bigint> {
-    return super.estimateGas({
       from:
         params.from || (await this.getSignerAddress().catch(() => undefined)),
       ...params,
