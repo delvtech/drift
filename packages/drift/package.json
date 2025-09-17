@@ -48,10 +48,14 @@
     "typecheck:watch": "tsc --noEmit --p tsconfig.typecheck.json --watch"
   },
   "peerDependencies": {
-    "sinon": "^21.0.0"
+    "sinon": "^21.0.0",
+    "@types/sinon": "^17.0.4"
   },
   "peerDependenciesMeta": {
     "sinon": {
+      "optional": true
+    },
+    "@types/sinon": {
       "optional": true
     }
   },

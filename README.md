@@ -382,7 +382,7 @@ responses and focus on testing your application logic.
 > using the mocks.
 >
 > ```sh
-> npm install --save-dev sinon
+> npm install --save-dev sinon @types/sinon
 > ```
 
 #### Example: Testing Client Methods with Multiple RPC Calls
