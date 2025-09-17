@@ -1,5 +1,11 @@
 # @gud/drift-web3
 
+## 2.0.0-next.4
+
+### Patch Changes
+
+- 6a9650f: Patched `waitForTransaction` to handle `TransactionNotFound` errors thrown while polling.
+
 ## 2.0.0-next.3
 
 ## 2.0.0-next.2
