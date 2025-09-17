@@ -1,5 +1,11 @@
 # @gud/drift
 
+## 2.0.0-next.4
+
+### Patch Changes
+
+- 11f6b69: Added a `getBytecode` method.
+
 ## 2.0.0-next.3
 
 ### Patch Changes
