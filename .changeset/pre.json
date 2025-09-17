@@ -13,6 +13,7 @@
     "@gud/drift-web3": "1.0.2"
   },
   "changesets": [
+    "bright-bananas-run",
     "calm-ghosts-obey",
     "clear-eggs-run",
     "cuddly-snakes-sin",
@@ -20,9 +21,12 @@
     "fair-cities-sort",
     "famous-crews-enter",
     "fancy-ravens-argue",
+    "gentle-rats-look",
+    "lucky-keys-lick",
     "new-rice-yawn",
     "plain-singers-change",
     "plenty-peas-kneel",
+    "red-coins-serve",
     "smart-rocks-crash",
     "smooth-chefs-report",
     "solid-spiders-tan",

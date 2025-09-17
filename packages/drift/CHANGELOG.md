@@ -1,5 +1,14 @@
 # @gud/drift
 
+## 2.0.0-next.7
+
+### Patch Changes
+
+- 8cf1204: Add a `hexToBytes` util.
+- 4a0acbd: Patched a bug in `hexToString`.
+- 8cf1204: Changed the type of the hex argument in `hexToString` and `hexToBytes` to enforce the `0x` prefix unless the `prefix` option is set to `false`.
+- 8cf1204: Added an `InvalidHexStringError` for hex utils that validate the hex string they're given (`hexToString`, `hexToBytes`).
+
 ## 2.0.0-next.6
 
 ### Patch Changes
