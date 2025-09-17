@@ -1,5 +1,15 @@
 # @gud/drift
 
+## 2.0.0-next.2
+
+### Major Changes
+
+- a87b4cb: Changed the param type for `estimateGas` to `EstimateGasParams` and added support for function and deploy calls with an abi.
+
+### Patch Changes
+
+- 8ce7f13: Improved `prepareCall` signature for cleaner inference.
+
 ## 2.0.0-next.1
 
 ### Major Changes
