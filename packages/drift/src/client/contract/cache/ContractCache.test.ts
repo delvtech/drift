@@ -12,6 +12,38 @@ const abi = IERC20.abi;
 type Erc20Abi = typeof IERC20.abi;
 
 describe("ContractCache", () => {
+  describe("bytecodes", () => {
+    it("namespaces keys", async () => {
+      const store = new LruStore();
+      const cache1 = new ContractCache({
+        abi,
+        address,
+        store,
+        namespace: "ns1",
+      });
+      const cache2 = new ContractCache({
+        abi,
+        address,
+        store,
+        namespace: "ns2",
+      });
+
+      const key1 = await cache1.bytecodeKey();
+      const key2 = await cache2.bytecodeKey();
+
+      expect(key1).not.toBe(key2);
+      expect(key1).toContain("ns1");
+      expect(key2).toContain("ns2");
+    });
+
+    it("preloads values", async () => {
+      const cache = new ContractCache({ abi, address, namespace: "test" });
+      await cache.preloadBytecode({ value: "0x123" });
+      const value = await cache.getBytecode();
+      expect(value).toStrictEqual("0x123");
+    });
+  });
+
   describe("events", () => {
     it("namespaces keys", async () => {
       const store = new LruStore();

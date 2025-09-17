@@ -26,18 +26,18 @@ import type {
   EstimateGasParams,
   GetBalanceParams,
   GetBlockReturn,
+  GetBytecodeParams,
   GetEventsParams,
   GetTransactionParams,
   GetWalletCapabilitiesParams,
-  ReadAdapter,
-  ReadWriteAdapter,
+  ReadAdapter, ReadWriteAdapter,
   SendCallsParams,
   SendCallsReturn,
   SendTransactionParams,
   WaitForTransactionParams,
   WalletCallsStatus,
   WalletCapabilities,
-  WriteParams,
+  WriteParams
 } from "src/adapter/types/Adapter";
 import type { BlockIdentifier, BlockTag } from "src/adapter/types/Block";
 import type { EventArgs, EventLog, EventName } from "src/adapter/types/Event";
@@ -124,13 +124,26 @@ export class DefaultReadAdapter extends BaseReadAdapter implements ReadAdapter {
       .catch(handleError) as Promise<GetBlockReturn<T>>;
   }
 
-  getBalance(params: GetBalanceParams): Promise<bigint> {
+  getBalance({ address, block }: GetBalanceParams): Promise<bigint> {
     return this.provider
       .request({
         method: "eth_getBalance",
-        params: [params.address, prepareBlockParam(params.block)],
+        params: [address, prepareBlockParam(block)],
       })
       .then(BigInt)
+      .catch(handleError);
+  }
+
+  getBytecode({
+    address,
+    block,
+  }: GetBytecodeParams): Promise<Bytes | undefined> {
+    return this.provider
+      .request({
+        method: "eth_getCode",
+        params: [address, prepareBlockParam(block)],
+      })
+      .then((code) => (code === "0x" ? undefined : code))
       .catch(handleError);
   }
 

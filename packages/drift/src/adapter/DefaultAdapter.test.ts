@@ -66,6 +66,11 @@ describe("DefaultAdapter", () => {
     expect(balance).toBeTypeOf("bigint");
   });
 
+  it("fetches compiled bytecodes", async () => {
+    const bytecode = await adapter.getBytecode({ address });
+    expect(bytecode).toMatch(HEX_REGEX || undefined);
+  });
+
   it("fetches the current gas price", async () => {
     const gasPrice = await adapter.getGasPrice();
     expect(gasPrice).toBeTypeOf("bigint");

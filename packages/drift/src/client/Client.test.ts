@@ -185,6 +185,19 @@ describe("Client", () => {
       expect(afterHandler).toHaveBeenCalledTimes(1);
     });
 
+    it("calls getBytecode hooks", async () => {
+      const client = createClient({ adapter });
+      const beforeHandler = vi.fn(async ({ resolve }) => resolve());
+      const afterHandler = vi.fn();
+
+      client.hooks.on("before:getBytecode", beforeHandler);
+      client.hooks.on("after:getBytecode", afterHandler);
+      await client.getBytecode({ address: ALICE });
+
+      expect(beforeHandler).toHaveBeenCalledTimes(1);
+      expect(afterHandler).toHaveBeenCalledTimes(1);
+    });
+
     it("calls getGasPrice hooks", async () => {
       const client = createClient({ adapter });
       const beforeHandler = vi.fn(async ({ resolve }) => resolve());

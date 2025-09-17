@@ -15,6 +15,7 @@ import type {
   FunctionCallParams,
   GetBalanceParams,
   GetBlockReturn,
+  GetBytecodeParams,
   GetEventsParams,
   GetTransactionParams,
   GetWalletCapabilitiesParams,
@@ -135,6 +136,23 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
   async getBalance(params: GetBalanceParams) {
     return this.stubs.get<[GetBalanceParams], Promise<bigint>>({
       method: "getBalance",
+      key: this.createKey(params),
+      matchPartial: true,
+    })(params);
+  }
+
+  // getBytecode //
+
+  onGetBytecode(params?: Partial<GetBytecodeParams>) {
+    return this.stubs.get<[GetBytecodeParams], Promise<Bytes | undefined>>({
+      method: "getBytecode",
+      key: this.createKey(params),
+    });
+  }
+
+  async getBytecode(params: GetBytecodeParams) {
+    return this.stubs.get<[GetBytecodeParams], Promise<Bytes | undefined>>({
+      method: "getBytecode",
       key: this.createKey(params),
       matchPartial: true,
     })(params);

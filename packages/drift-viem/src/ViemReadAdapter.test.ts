@@ -54,6 +54,11 @@ describe("ViemReadAdapter", () => {
     expect(balance).toBeTypeOf("bigint");
   });
 
+  it("fetches compiled bytecodes", async () => {
+    const balance = await adapter.getBytecode({ address });
+    expect(balance).toMatch(HEX_REGEX);
+  });
+
   it("fetches the current gas price", async () => {
     const gasPrice = await adapter.getGasPrice();
     expect(gasPrice).toBeTypeOf("bigint");

@@ -19,6 +19,7 @@ import type {
   EstimateGasParams,
   GetBalanceParams,
   GetBlockReturn,
+  GetBytecodeParams,
   GetEventsParams,
   GetTransactionParams,
   GetWalletCapabilitiesParams,
@@ -101,6 +102,7 @@ export abstract class BaseReadAdapter
     blockId?: T,
   ): Promise<GetBlockReturn<T>>;
   abstract getBalance(params: GetBalanceParams): Promise<bigint>;
+  abstract getBytecode(params: GetBytecodeParams): Promise<Bytes | undefined>;
   abstract getGasPrice(): Promise<bigint>;
   abstract getTransaction(
     params: GetTransactionParams,

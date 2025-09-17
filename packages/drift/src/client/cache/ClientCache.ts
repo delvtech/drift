@@ -2,6 +2,7 @@ import type { Abi, Bytes } from "src/adapter/types/Abi";
 import type {
   CallParams,
   GetBalanceParams,
+  GetBytecodeParams,
   GetEventsParams,
   GetTransactionParams,
   ReadParams,
@@ -177,6 +178,36 @@ export class ClientCache<T extends Store = Store> {
       store: this.store,
       matchKey: this.#partialBalanceKey(),
     });
+  }
+
+  // Bytecode //
+
+  /**
+   * Get the key used to store a contract's compiled bytecode.
+   */
+  async bytecodeKey({ address, block }: GetBytecodeParams): Promise<string> {
+    return this.#createKey("bytecode", { address, block });
+  }
+
+  /**
+   * Add a contract's compiled bytecode to the cache.
+   */
+  async preloadBytecode({
+    value,
+    ...params
+  }: {
+    value: Bytes;
+  } & GetBytecodeParams): Promise<void> {
+    const key = await this.bytecodeKey(params);
+    return this.store.set(key, value);
+  }
+
+  /**
+   * Get the cached compiled bytecode for a contract.
+   */
+  async getBytecode(params: GetBytecodeParams): Promise<Bytes | undefined> {
+    const key = await this.bytecodeKey(params);
+    return this.store.get(key);
   }
 
   // Transaction //

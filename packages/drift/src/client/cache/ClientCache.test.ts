@@ -28,8 +28,8 @@ describe("ClientCache", () => {
       const key2 = await cache2.balanceKey({ address: ALICE });
 
       expect(key1).not.toBe(key2);
-      expect(JSON.stringify(key1)).toContain("ns1");
-      expect(JSON.stringify(key2)).toContain("ns2");
+      expect(key1).toContain("ns1");
+      expect(key2).toContain("ns2");
     });
 
     it("preloads values", async () => {
@@ -97,6 +97,28 @@ describe("ClientCache", () => {
         ]);
         expect(values).toStrictEqual([undefined, block]);
       });
+    });
+  });
+
+  describe("bytecodes", () => {
+    it("namespaces keys", async () => {
+      const store = new LruStore();
+      const cache1 = new ClientCache({ store, namespace: "ns1" });
+      const cache2 = new ClientCache({ store, namespace: "ns2" });
+
+      const key1 = await cache1.bytecodeKey({ address: ALICE });
+      const key2 = await cache2.bytecodeKey({ address: ALICE });
+
+      expect(key1).not.toBe(key2);
+      expect(key1).toContain("ns1");
+      expect(key2).toContain("ns2");
+    });
+
+    it("preloads values", async () => {
+      const cache = new ClientCache({ namespace: "test" });
+      await cache.preloadBytecode({ address: ALICE, value: "0x123" });
+      const value = await cache.getBytecode({ address: ALICE });
+      expect(value).toBe("0x123");
     });
   });
 

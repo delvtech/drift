@@ -33,6 +33,7 @@ const requiredPublicActions = [
   "getBlock",
   "getBlockNumber",
   "getChainId",
+  "getCode",
   "getContractEvents",
   "getGasPrice",
   "getTransaction",

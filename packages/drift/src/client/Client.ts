@@ -248,6 +248,14 @@ export function createClient<
       });
     },
 
+    getBytecode(params) {
+      return getOrSet({
+        store: this.cache.store,
+        key: this.cache.bytecodeKey(params),
+        fn: () => this.adapter.getBytecode(params),
+      });
+    },
+
     getTransaction(params) {
       return getOrSet({
         store: this.cache.store,

@@ -15,6 +15,7 @@ import {
   type FunctionName,
   type GetBalanceParams,
   type GetBlockReturn,
+  type GetBytecodeParams,
   type GetEventsParams,
   type GetTransactionParams,
   type Hash,
@@ -111,6 +112,10 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
 
   getBalance({ address, block }: GetBalanceParams) {
     return this.provider.getBalance(address, block);
+  }
+
+  getBytecode({ address, block }: GetBytecodeParams) {
+    return this.provider.getCode(address, block);
   }
 
   async getGasPrice(): Promise<bigint> {

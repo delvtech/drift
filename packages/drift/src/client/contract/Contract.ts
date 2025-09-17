@@ -1,16 +1,16 @@
 import type { Abi, Address, Bytes, Hash } from "src/adapter/types/Abi";
 import type {
   Adapter,
-  ContractParams,
-  GetEventsOptions,
+  ContractParams, GetEventsOptions,
   MulticallCalls,
   MulticallOptions,
   MulticallReturn,
   ReadAdapter,
   ReadOptions,
   ReadWriteAdapter,
-  WriteOptions,
+  WriteOptions
 } from "src/adapter/types/Adapter";
+import type { BlockIdentifier } from "src/adapter/types/Block";
 import type { EventLog, EventName } from "src/adapter/types/Event";
 import type {
   ConstructorArgs,
@@ -139,6 +139,10 @@ export class ReadContract<
     props: T & Partial<this> & ThisType<T & this>,
   ): T & this {
     return Object.assign(this, props);
+  }
+
+  getBytecode(block?: BlockIdentifier): Promise<Bytes | undefined> {
+    return this.client.getBytecode({ address: this.address, block });
   }
 
   /**

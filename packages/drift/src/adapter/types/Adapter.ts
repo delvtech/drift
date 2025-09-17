@@ -68,6 +68,11 @@ export interface ReadAdapter {
   getBalance(params: GetBalanceParams): Promise<bigint>;
 
   /**
+   * Get the compiled bytecode of a contract at an address.
+   */
+  getBytecode(params: GetBytecodeParams): Promise<Bytes | undefined>;
+
+  /**
    * Returns an estimate of the current price per gas in wei.
    */
   getGasPrice(): Promise<bigint>;
@@ -297,6 +302,13 @@ export interface ReadWriteAdapter extends ReadAdapter, WriteAdapter {}
 // Balance //
 
 export interface GetBalanceParams {
+  address: Address;
+  block?: BlockIdentifier;
+}
+
+// Bytecode //
+
+export interface GetBytecodeParams {
   address: Address;
   block?: BlockIdentifier;
 }

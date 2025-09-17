@@ -16,6 +16,7 @@ import {
   type FunctionName,
   type GetBalanceParams,
   type GetBlockReturn,
+  type GetBytecodeParams,
   type GetEventsParams,
   type GetTransactionParams,
   type GetWalletCapabilitiesParams,
@@ -90,6 +91,10 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
 
   getBalance({ address, block }: GetBalanceParams) {
     return this.web3.eth.getBalance(address, block);
+  }
+
+  getBytecode({ address, block }: GetBytecodeParams) {
+    return this.web3.eth.getCode(address, block);
   }
 
   getGasPrice() {

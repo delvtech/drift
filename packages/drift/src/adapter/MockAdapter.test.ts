@@ -144,6 +144,51 @@ describe("MockAdapter", () => {
     });
   });
 
+  describe("getBytecode", () => {
+    it("throws an error by default", async () => {
+      const adapter = new MockAdapter();
+      let error: unknown;
+      try {
+        await adapter.getBytecode({ address: "0x" });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(MissingStubError);
+    });
+
+    it("can be stubbed with specific params", async () => {
+      const adapter = new MockAdapter();
+      adapter.onGetBytecode({ address: "0xAlice" }).resolves("0x1");
+      adapter.onGetBytecode({ address: "0xBob" }).resolves("0x2");
+      const result1 = await adapter.getBytecode({ address: "0xAlice" });
+      const result2 = await adapter.getBytecode({ address: "0xBob" });
+      expect(result1).toBe("0x1");
+      expect(result2).toBe("0x2");
+    });
+
+    it("can be stubbed with partial params", async () => {
+      const adapter = new MockAdapter();
+      adapter.onGetBytecode({ address: "0xAlice" }).resolves("0x1");
+      const result1 = await adapter.getBytecode({
+        address: "0xAlice",
+        block: "latest",
+      });
+      const result2 = await adapter.getBytecode({
+        address: "0xAlice",
+        block: 123n,
+      });
+      expect(result1).toBe("0x1");
+      expect(result2).toBe("0x1");
+    });
+
+    it("can be called with args after being stubbed with no args", async () => {
+      const adapter = new MockAdapter();
+      adapter.onGetBytecode().resolves("0x1");
+      const result = await adapter.getBytecode({ address: "0x" });
+      expect(result).toBe("0x1");
+    });
+  });
+
   describe("getGasPrice", () => {
     it("throws an error by default", async () => {
       const adapter = new MockAdapter();

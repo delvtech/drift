@@ -12,6 +12,7 @@ import {
   type FunctionName,
   type GetBalanceParams,
   type GetBlockReturn,
+  type GetBytecodeParams,
   type GetEventsParams,
   type GetTransactionParams,
   prepareCall,
@@ -29,6 +30,7 @@ import {
   type ContractEventName,
   decodeEventLog,
   type GetBalanceParameters,
+  type GetCodeParameters,
   isHex,
   type PublicClient,
   rpcTransactionType,
@@ -103,6 +105,14 @@ export class ViemReadAdapter<TClient extends AnyClient = PublicClient>
       blockNumber: typeof block === "bigint" ? block : undefined,
       blockTag: typeof block === "string" ? block : undefined,
     } as GetBalanceParameters);
+  }
+
+  getBytecode({ address, block }: GetBytecodeParams) {
+    return this.publicClient.getCode({
+      address,
+      blockNumber: typeof block === "bigint" ? block : undefined,
+      blockTag: typeof block === "string" ? block : undefined,
+    } as GetCodeParameters);
   }
 
   getGasPrice() {

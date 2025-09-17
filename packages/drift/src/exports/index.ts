@@ -53,6 +53,7 @@ export type {
   FunctionCallParams,
   GetBalanceParams,
   GetBlockReturn,
+  GetBytecodeParams,
   GetEventsOptions,
   GetEventsParams,
   GetTransactionParams,

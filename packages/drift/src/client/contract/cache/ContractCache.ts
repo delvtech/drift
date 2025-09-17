@@ -1,4 +1,4 @@
-import type { Abi, Address } from "src/adapter/types/Abi";
+import type { Abi, Address, Bytes } from "src/adapter/types/Abi";
 import type {
   ContractParams,
   GetEventsOptions,
@@ -6,6 +6,7 @@ import type {
   ReadOptions,
   ReadParams,
 } from "src/adapter/types/Adapter";
+import type { BlockIdentifier } from "src/adapter/types/Block";
 import type { EventLog, EventName } from "src/adapter/types/Event";
 import type {
   FunctionArgs,
@@ -69,6 +70,35 @@ export class ContractCache<TAbi extends Abi, TStore extends Store = Store> {
    */
   clear() {
     return this.#clientCache.clear();
+  }
+
+  // Bytecode //
+
+  /**
+   * Get the key used to store the contract's compiled bytecode.
+   */
+  bytecodeKey(block?: BlockIdentifier) {
+    return this.#clientCache.bytecodeKey({ address: this.#address, block });
+  }
+
+  /**
+   * Add the contract's compiled bytecode to the cache.
+   */
+  preloadBytecode(params: { value: Bytes; block?: BlockIdentifier }) {
+    return this.#clientCache.preloadBytecode({
+      address: this.#address,
+      ...params,
+    });
+  }
+
+  /**
+   * Get the cached compiled bytecode for the contract.
+   */
+  getBytecode(block?: BlockIdentifier) {
+    return this.#clientCache.getBytecode({
+      address: this.#address,
+      block,
+    });
   }
 
   // Events //
