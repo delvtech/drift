@@ -1,5 +1,12 @@
 # @gud/drift
 
+## 2.0.0-next.6
+
+### Patch Changes
+
+- 946c12f: Bumped dependencies.
+- 96d81f2: Added `@types/sinon` to the optional peer dependencies.
+
 ## 2.0.0-next.5
 
 ### Patch Changes
