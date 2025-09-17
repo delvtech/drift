@@ -104,7 +104,7 @@ export function hexToString(hex: string, options?: IsHexStringOptions): string {
   }
   let utf8 = "";
   for (let i = 0; i < hex.length; i += 2) {
-    const hexPair = hex.slice(i, 2);
+    const hexPair = hex.slice(i, i + 2);
     if (hexPair === "0x") continue;
     const charCode = parseInt(hexPair, 16);
     utf8 += String.fromCharCode(charCode);
