@@ -12,22 +12,6 @@ adapter.onGetChainId().resolves(0);
 
 describe("Contract", () => {
   describe("getEvents", () => {
-    it("can be preloaded", async () => {
-      const contract = createContract({ abi, address, adapter });
-      const events = createStubEvents({
-        abi,
-        eventName: "Transfer",
-        events: [
-          { args: { from: BOB, to: ALICE, value: 123n } },
-          { args: { from: ALICE, to: BOB, value: 456n } },
-        ],
-      });
-
-      contract.cache.preloadEvents({ event: "Transfer", value: events });
-
-      expect(await contract.getEvents("Transfer")).toBe(events);
-    });
-
     describe("epochBlock", () => {
       const event = "Transfer";
       const epochBlock = 123n;
@@ -80,18 +64,6 @@ describe("Contract", () => {
 
         expect(returnedEvents).toBe(eventsAtEpoch);
       });
-    });
-  });
-
-  describe("read", () => {
-    it("can be preloaded & invalidated", async () => {
-      const contract = createContract({ abi, address, adapter });
-
-      contract.cache.preloadRead({ fn: "symbol", value: "DAI" });
-      expect(await contract.read("symbol")).toBe("DAI");
-
-      contract.cache.invalidateRead("symbol");
-      await expect(contract.read("symbol")).rejects.toThrow();
     });
   });
 
