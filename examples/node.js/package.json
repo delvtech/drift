@@ -16,7 +16,7 @@
     "sdk_client": "yarn execute src/sdk_client.ts"
   },
   "dependencies": {
-    "@gud/drift": "^2.0.0-next.1",
+    "@gud/drift": "^2.0.0-next.2",
     "@gud/math": "^1.0.0"
   },
   "devDependencies": {

@@ -1,7 +1,7 @@
 {
   "name": "@gud/drift-ethers",
   "description": "Ethers.js adapter for Drift",
-  "version": "2.0.0-next.1",
+  "version": "2.0.0-next.2",
   "license": "Apache-2.0",
   "author": "Ryan Goree (https://github.com/ryangoree)",
   "repository": {
@@ -38,7 +38,7 @@
     "ethers": "^6.15.0"
   },
   "devDependencies": {
-    "@gud/drift": "^2.0.0-next.1",
+    "@gud/drift": "^2.0.0-next.2",
     "ethers": "^6.15.0",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.5.0",
