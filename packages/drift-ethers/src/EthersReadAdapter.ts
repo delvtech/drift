@@ -7,15 +7,18 @@ import {
   type BlockIdentifier,
   type Bytes,
   type CallParams,
+  type EstimateGasParams,
   type EventArgs,
   type EventLog,
   type EventName,
   encodeBytecodeCallData,
+  type FunctionName,
   type GetBalanceParams,
   type GetBlockReturn,
   type GetEventsParams,
   type GetTransactionParams,
   type Hash,
+  prepareCall,
   prepareParams,
   type ReadAdapter,
   type Transaction,
@@ -181,6 +184,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
       data = encodeBytecodeCallData(bytecode, data);
     }
     return this.provider.call({
+      ...rest,
       accessList: accessList as AccessList,
       blobs: blobs as Bytes[],
       blobVersionedHashes: blobVersionedHashes as Hash[],
@@ -189,35 +193,23 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
       gasLimit: gas,
       nonce: nonce !== undefined ? Number(nonce) : undefined,
       type: type !== undefined ? Number(type) : undefined,
-      ...rest,
     });
   }
 
-  async estimateGas({
-    accessList,
-    blobs,
-    blobVersionedHashes,
-    block,
-    bytecode,
-    data,
-    gas,
-    nonce,
-    type,
-    ...rest
-  }: CallParams) {
-    if (bytecode && data) {
-      data = encodeBytecodeCallData(bytecode, data);
-    }
+  async estimateGas<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(params: EstimateGasParams<TAbi, TFunctionName>) {
+    const { block, gas, nonce, type, ...rest } = params;
+    const { to, data } = prepareCall(params);
     return this.provider.estimateGas({
-      accessList: accessList as AccessList,
-      blobs: blobs as Bytes[],
-      blobVersionedHashes: blobVersionedHashes as Hash[],
+      ...rest,
       blockTag: block,
       data,
       gasLimit: gas,
       nonce: nonce !== undefined ? Number(nonce) : undefined,
+      to,
       type: type !== undefined ? Number(type) : undefined,
-      ...rest,
     });
   }
 

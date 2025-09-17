@@ -8,6 +8,7 @@ import {
   type CallParams,
   type DeployParams,
   DriftError,
+  type EstimateGasParams,
   type EventArgs,
   type EventLog,
   type EventName,
@@ -171,25 +172,18 @@ export class Web3Adapter<TWeb3 extends Web3 = Web3>
     );
   }
 
-  async estimateGas({
-    accessList,
-    block,
-    bytecode,
-    data,
-    from,
-    to,
-    ...rest
-  }: CallParams) {
-    if (bytecode && data) {
-      data = encodeBytecodeCallData(bytecode, data);
-    }
+  async estimateGas<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(params: EstimateGasParams<TAbi, TFunctionName>) {
+    const { block, from, ...rest } = params;
+    const { to, data } = prepareCall(params);
     return this.web3.eth.estimateGas(
       {
-        accessList: accessList as AccessList,
+        ...rest,
         data,
         from: from || (await this.getSignerAddress().catch(() => undefined)),
-        to: to as any,
-        ...rest,
+        to,
       },
       block,
     );

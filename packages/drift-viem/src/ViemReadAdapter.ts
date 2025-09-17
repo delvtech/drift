@@ -5,13 +5,16 @@ import {
   type BlockIdentifier,
   type Bytes,
   type CallParams,
+  type EstimateGasParams,
   type EventArgs,
   type EventLog,
   type EventName,
+  type FunctionName,
   type GetBalanceParams,
   type GetBlockReturn,
   type GetEventsParams,
   type GetTransactionParams,
+  prepareCall,
   type ReadAdapter,
   type TransactionReceipt,
   type WaitForTransactionParams,
@@ -205,14 +208,21 @@ export class ViemReadAdapter<TClient extends AnyClient = PublicClient>
     return data || "0x";
   }
 
-  estimateGas({ block, bytecode, from, nonce, ...rest }: CallParams) {
+  estimateGas<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(params: EstimateGasParams<TAbi, TFunctionName>) {
+    const { to, data } = prepareCall(params);
+    const { block, from, nonce, ...rest } = params;
     return this.publicClient.estimateGas({
+      ...rest,
+      account: from,
       blockNumber: typeof block === "bigint" ? block : undefined,
       // TODO: Block hash not supported?
       blockTag: typeof block === "string" ? block : undefined,
-      account: from,
+      data,
       nonce: typeof nonce === "bigint" ? Number(nonce) : nonce,
-      ...rest,
+      to,
     } as CallParameters);
   }
 

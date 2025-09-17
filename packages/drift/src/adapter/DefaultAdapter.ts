@@ -23,6 +23,7 @@ import type {
 import type {
   CallParams,
   DeployParams,
+  EstimateGasParams,
   GetBalanceParams,
   GetBlockReturn,
   GetEventsParams,
@@ -260,29 +261,25 @@ export class DefaultReadAdapter extends BaseReadAdapter implements ReadAdapter {
       .request({
         method: "eth_call",
         params: [
-          { to, data, ...prepareTransactionOptions(options) },
+          { ...prepareTransactionOptions(options), to, data },
           prepareBlockParam(block),
         ],
       })
       .catch(handleError);
   }
 
-  estimateGas({
-    to,
-    data,
-    bytecode,
-    block,
-    ...options
-  }: CallParams): Promise<bigint> {
-    if (bytecode && data) {
-      data = encodeBytecodeCallData(bytecode, data);
-    }
+  estimateGas<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(params: EstimateGasParams<TAbi, TFunctionName>): Promise<bigint> {
+    const { to, data } = prepareCall(params);
+    const { block, ...rest } = params;
 
     return this.provider
       .request({
         method: "eth_estimateGas",
         params: [
-          { to, data, ...prepareTransactionOptions(options) },
+          { ...prepareTransactionOptions(rest), data, to },
           prepareBlockParam(block),
         ],
       })
@@ -313,7 +310,10 @@ export class DefaultAdapter
     });
   }
 
-  async estimateGas(params: CallParams): Promise<bigint> {
+  async estimateGas<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(params: EstimateGasParams<TAbi, TFunctionName>): Promise<bigint> {
     return super.estimateGas({
       from:
         params.from || (await this.getSignerAddress().catch(() => undefined)),
@@ -397,10 +397,10 @@ export class DefaultAdapter
         method: "eth_sendTransaction",
         params: [
           {
+            ...prepareTransactionOptions(options),
             data,
             to,
             from: from || (await this.getSignerAddress().catch(handleError)),
-            ...prepareTransactionOptions(options),
           },
         ],
       })
@@ -463,11 +463,39 @@ function prepareBlockParam(block?: BlockIdentifier): HexString | BlockTag {
   return block;
 }
 
-function prepareTransactionOptions(
-  options: TransactionOptions & Eip4844Options,
-) {
+function prepareTransactionOptions({
+  // Whitelist fields to avoid extra properties
+  accessList,
+  blobs,
+  blobVersionedHashes,
+  chainId,
+  from,
+  gas,
+  gasPrice,
+  maxFeePerBlobGas,
+  maxFeePerGas,
+  maxPriorityFeePerGas,
+  nonce,
+  type,
+  value,
+}: TransactionOptions & Eip4844Options) {
   return convert(
-    options,
+    {
+      accessList,
+      blobs,
+      blobVersionedHashes,
+      chainId,
+      from,
+      gas,
+      gasPrice,
+      maxFeePerBlobGas,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      nonce,
+      type,
+      value,
+      // Ensure no fields from the type are omitted
+    } satisfies Record<keyof (TransactionOptions & Eip4844Options), any>,
     (value) => typeof value === "bigint" || typeof value === "number",
     (value): HexString => toHexString(value),
   );

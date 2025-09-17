@@ -1,5 +1,5 @@
 import { DefaultAdapter } from "src/adapter/DefaultAdapter";
-import type { Address } from "src/adapter/types/Abi";
+import type { Address, Hash } from "src/adapter/types/Abi";
 import type { MulticallCallResult } from "src/adapter/types/Adapter";
 import type { Block } from "src/adapter/types/Block";
 import type { EventLog } from "src/adapter/types/Event";
@@ -130,15 +130,54 @@ describe("DefaultAdapter", () => {
     } satisfies TransactionReceipt);
   });
 
-  it("estimates gas", async () => {
-    const gas = await adapter.estimateGas({
-      data: adapter.encodeDeployData({
+  describe("estimateGas", () => {
+    it("estimates gas for target calls", async () => {
+      const gas = await adapter.estimateGas({
+        to: ZERO_ADDRESS,
+        value: 0n,
+      });
+      expect(gas).toEqual(expect.any(BigInt));
+    });
+
+    it("estimates gas for function and encoded function calls", async () => {
+      const gas = await adapter.estimateGas({
+        abi: TestToken.abi,
+        address,
+        fn: "approve",
+        args: { amount: 123n, spender: address },
+      });
+      const gas2 = await adapter.estimateGas({
+        to: address,
+        data: adapter.encodeFunctionData({
+          abi: TestToken.abi,
+          fn: "approve",
+          args: { amount: 123n, spender: address },
+        }),
+      });
+
+      expect(gas).toEqual(expect.any(BigInt));
+      expect(gas2).toEqual(expect.any(BigInt));
+      assert(gas === gas2, `Gas estimates do not match: ${gas} !== ${gas2}`);
+    });
+
+    it("estimates gas for deploy and encoded deploy calls", async () => {
+      const gas = await adapter.estimateGas({
         abi: TestToken.abi,
         bytecode: TestToken.bytecode,
         args: { decimals_: 18, initialSupply: 123n },
-      }),
+      });
+      const gas2 = await adapter.estimateGas({
+        data: adapter.encodeDeployData({
+          abi: TestToken.abi,
+          bytecode: TestToken.bytecode,
+          args: { decimals_: 18, initialSupply: 123n },
+        }),
+      });
+
+      expect(gas).toEqual(expect.any(BigInt));
+      expect(gas2).toEqual(expect.any(BigInt));
+      assert(gas === gas2, `Gas estimates do not match: ${gas} !== ${gas2}`);
     });
-    expect(gas).toEqual(expect.any(BigInt));
   });
 
   describe("call", () => {
@@ -430,12 +469,18 @@ describe("DefaultAdapter", () => {
   });
 
   describe("overloaded functions", async () => {
-    const hash = await adapter.deploy({
-      abi: Overloaded.abi,
-      bytecode: Overloaded.bytecode,
+    let hash: Hash;
+    let receipt: TransactionReceipt | undefined;
+    let address: Address;
+
+    beforeAll(async () => {
+      hash = await adapter.deploy({
+        abi: Overloaded.abi,
+        bytecode: Overloaded.bytecode,
+      });
+      receipt = await adapter.waitForTransaction({ hash });
+      address = receipt?.contractAddress!;
     });
-    const receipt = await adapter.waitForTransaction({ hash });
-    const address = receipt?.contractAddress!;
 
     describe("multicall", () => {
       it("returns the correct value for overloaded functions with different args", async () => {

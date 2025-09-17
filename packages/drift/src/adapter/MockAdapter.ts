@@ -11,6 +11,7 @@ import type {
   DeployParams,
   EncodeDeployDataParams,
   EncodedDeployCallParams,
+  EstimateGasParams,
   FunctionCallParams,
   GetBalanceParams,
   GetBlockReturn,
@@ -151,15 +152,27 @@ export class MockAdapter extends AbiEncoder implements ReadWriteAdapter {
 
   // estimateGas //
 
-  onEstimateGas(params?: Partial<CallParams>) {
-    return this.stubs.get<[CallParams], Promise<bigint>>({
+  onEstimateGas<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(params?: Partial<EstimateGasParams<TAbi, TFunctionName>>) {
+    return this.stubs.get<
+      [EstimateGasParams<TAbi, TFunctionName>],
+      Promise<bigint>
+    >({
       method: "estimateGas",
       key: this.createKey(params),
     });
   }
 
-  async estimateGas(params: CallParams) {
-    return this.stubs.get<[CallParams], Promise<bigint>>({
+  async estimateGas<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(params: EstimateGasParams<TAbi, TFunctionName>) {
+    return this.stubs.get<
+      [EstimateGasParams<TAbi, TFunctionName>],
+      Promise<bigint>
+    >({
       method: "estimateGas",
       key: this.createKey(params),
       matchPartial: true,

@@ -193,7 +193,10 @@ export interface ReadAdapter {
    * actually used by the transaction, for a variety of reasons including EVM
    * mechanics and node performance.
    */
-  estimateGas(transaction: CallParams): Promise<bigint>;
+  estimateGas<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(transaction: EstimateGasParams<TAbi, TFunctionName>): Promise<bigint>;
 
   /**
    * Calls a `pure` or `view` function on a contract.
@@ -390,7 +393,7 @@ export interface BytecodeCallParams {
   /**
    * The hash of the contract method signature and encoded parameters.
    */
-  data?: Bytes;
+  data: Bytes;
 }
 
 export interface EncodedDeployCallParams {
@@ -876,6 +879,22 @@ export type WriteParams<
 
 export type DeployParams<TAbi extends Abi = Abi> =
   EncodeDeployDataParams<TAbi> & WriteOptions;
+
+// Estimate gas //
+
+export type EstimateGasParams<
+  TAbi extends Abi = Abi,
+  TFunctionName extends FunctionName<
+    TAbi,
+    "nonpayable" | "payable"
+  > = FunctionName<TAbi, "nonpayable" | "payable">,
+> = OneOf<
+  | (TargetCallParams & Eip4844Options)
+  | FunctionCallParams<TAbi, TFunctionName>
+  | EncodeDeployDataParams<TAbi>
+  | EncodedDeployCallParams
+> &
+  CallOptions;
 
 // Send transaction //
 

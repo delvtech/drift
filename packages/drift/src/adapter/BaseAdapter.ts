@@ -16,6 +16,7 @@ import type {
   Adapter,
   CallParams,
   DeployParams,
+  EstimateGasParams,
   GetBalanceParams,
   GetBlockReturn,
   GetEventsParams,
@@ -108,7 +109,10 @@ export abstract class BaseReadAdapter
     params: GetEventsParams<TAbi, TEventName>,
   ): Promise<EventLog<TAbi, TEventName>[]>;
   abstract call(params: CallParams): Promise<Bytes>;
-  abstract estimateGas(transaction: CallParams): Promise<bigint>;
+  abstract estimateGas<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(transaction: EstimateGasParams<TAbi, TFunctionName>): Promise<bigint>;
 
   // Default implementations //
 

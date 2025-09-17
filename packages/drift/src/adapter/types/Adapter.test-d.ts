@@ -12,6 +12,132 @@ import { describe, expectTypeOf, it } from "vitest";
 declare const adapter: ReadWriteAdapter;
 
 describe("Adapter", () => {
+  describe("estimateGas", () => {
+    it("accepts target calls", async () => {
+      adapter.estimateGas({ to: "0x" });
+    });
+
+    it("accepts abi function calls", async () => {
+      adapter.estimateGas({
+        abi: TestToken.abi,
+        address: "0x",
+        fn: "approve",
+        args: {
+          spender: "0x",
+          amount: 100n,
+        },
+      });
+    });
+
+    it("accepts abi deploy calls", async () => {
+      adapter.estimateGas({
+        abi: TestToken.abi,
+        bytecode: "0x",
+        args: {
+          decimals_: 18,
+          initialSupply: 1000n,
+        },
+      });
+    });
+
+    it("accepts encoded deploy calls", async () => {
+      adapter.estimateGas({ data: "0x" });
+    });
+
+    it("Throws on mixed call type props", async () => {
+      adapter.estimateGas({
+        to: "0x",
+        data: "0x",
+        // @ts-expect-error: Can't have both `to` and `bytecode`.
+        bytecode: "0x",
+      });
+
+      adapter.estimateGas({
+        to: "0x",
+        data: "0x",
+        // @ts-expect-error: Can't have both `to` and `address`.
+        address: "0x",
+      });
+
+      adapter.estimateGas({
+        abi: TestToken.abi,
+        address: "0x",
+        fn: "approve",
+        // @ts-expect-error: the presence of `abi` and `fn` implies a function
+        // call. Therefore, `to` is not allowed.
+        to: "0x",
+      });
+
+      adapter.estimateGas({
+        abi: TestToken.abi,
+        address: "0x",
+        fn: "approve",
+        // @ts-expect-error: the presence of `abi` and `fn` implies a function
+        // call. Therefore, `bytecode` is not allowed.
+        bytecode: "0x",
+      });
+
+      adapter.estimateGas({
+        abi: TestToken.abi,
+        bytecode: "0x",
+        args: {
+          decimals_: 18,
+          initialSupply: 1000n,
+        },
+        // @ts-expect-error: the presence of `abi` and `bytecode` implies a deploy
+        // call. Therefore, `fn` is not allowed.
+        fn: "approve",
+      });
+    });
+
+    it("throws on invalid fn", async () => {
+      adapter.estimateGas({
+        abi: TestToken.abi,
+        address: "0x",
+        // @ts-expect-error
+        fn: "",
+      });
+    });
+
+    it("throws on invalid arg value", async () => {
+      adapter.estimateGas({
+        abi: TestToken.abi,
+        address: "0x",
+        fn: "approve",
+        args: {
+          // @ts-expect-error
+          amount: "invalid",
+        },
+      });
+
+      adapter.estimateGas({
+        abi: TestToken.abi,
+        bytecode: "0x",
+        args: {
+          // @ts-expect-error
+          decimals_: "invalid",
+        },
+      });
+    });
+
+    it("throws on missing args", async () => {
+      adapter.estimateGas({
+        abi: TestToken.abi,
+        address: "0x",
+        fn: "approve",
+        // @ts-expect-error
+        args: {},
+      });
+
+      adapter.estimateGas({
+        abi: TestToken.abi,
+        bytecode: "0x",
+        // @ts-expect-error
+        args: {},
+      });
+    });
+  });
+
   describe("multicall", () => {
     it("returns the correct type for each read", async () => {
       const [targetCallResult, symbolResult, balanceResult] =
@@ -94,14 +220,15 @@ describe("Adapter", () => {
         calls: [
           {
             to: "0x",
-            // @ts-expect-error: The absence of `abi` implies a target or encoded call.
+            // @ts-expect-error: Can't have both `to` and `address`.
             address: "0x",
           },
           {
             abi: TestToken.abi,
             address: "0x",
             fn: "decimals",
-            // @ts-expect-error: The presence of `abi` implies a function call.
+            // @ts-expect-error: the presence of `abi` implies a function call.
+            // Therefore, `to` is not allowed.
             to: "0x",
           },
         ],
@@ -176,7 +303,7 @@ describe("Adapter", () => {
   });
 
   describe("sendCalls", () => {
-    it("allows a mix of abi function calls, abi deploy calls, and address calls", async () => {
+    it("allows a mix of abi function calls, abi deploy calls, and target calls", async () => {
       adapter.sendCalls({
         calls: [
           // Target call
@@ -222,17 +349,23 @@ describe("Adapter", () => {
           {
             to: "0x",
             data: "0x",
-            // @ts-expect-error: The absence of `abi` implies a target or encoded call.
+            // @ts-expect-error: Can't have both `to` and `address`.
             address: "0x",
           },
           {
             abi: TestToken.abi,
             address: "0x",
             fn: "decimals",
-            // @ts-expect-error: The presence of `abi` implies a function or
-            // deploy call.
+            // @ts-expect-error: the presence of `abi` and `fn` implies a function
+            // call. Therefore, `to` is not allowed.
             to: "0x",
-            // @ts-expect-error: The presence of `fn` implies a function call.
+          },
+          {
+            abi: TestToken.abi,
+            address: "0x",
+            fn: "decimals",
+            // @ts-expect-error: the presence of `abi` and `fn` implies a function
+            // call. Therefore, `bytecode` is not allowed.
             bytecode: "0x",
           },
           {
@@ -242,8 +375,8 @@ describe("Adapter", () => {
               decimals_: 18,
               initialSupply: 1000n,
             },
-            // @ts-expect-error: the presence of `abi` and `bytecode` implies a
-            // deploy call.
+            // @ts-expect-error: the presence of `abi` and `bytecode` implies a deploy
+            // call. Therefore, `fn` is not allowed.
             fn: "approve",
           },
         ],

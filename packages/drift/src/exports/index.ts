@@ -49,6 +49,7 @@ export type {
   EncodedDeployCallParams,
   EncodeFunctionDataParams,
   EncodeFunctionReturnParams,
+  EstimateGasParams,
   FunctionCallParams,
   GetBalanceParams,
   GetBlockReturn,

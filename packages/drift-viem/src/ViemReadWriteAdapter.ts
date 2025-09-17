@@ -3,6 +3,7 @@ import {
   type CallParams,
   type DeployParams,
   DriftError,
+  type EstimateGasParams,
   type FunctionName,
   type GetWalletCapabilitiesParams,
   getWalletCallsStatusLabel,
@@ -76,7 +77,10 @@ export class ViemReadWriteAdapter<
     });
   }
 
-  async estimateGas(params: CallParams) {
+  async estimateGas<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(params: EstimateGasParams<TAbi, TFunctionName>) {
     return super.estimateGas({
       ...params,
       from:

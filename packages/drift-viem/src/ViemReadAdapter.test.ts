@@ -117,18 +117,54 @@ describe("ViemReadAdapter", () => {
     } satisfies TransactionReceipt);
   });
 
-  it("estimates gas", async () => {
-    const gas = await adapter.estimateGas({
-      data: adapter.encodeDeployData({
+  describe("estimateGas", () => {
+    it("estimates gas for target calls", async () => {
+      const gas = await adapter.estimateGas({
+        to: zeroAddress,
+        value: 0n,
+      });
+      expect(gas).toEqual(expect.any(BigInt));
+    });
+
+    it("estimates gas for function and encoded function calls", async () => {
+      const gas = await adapter.estimateGas({
+        abi: erc20Abi,
+        address,
+        fn: "approve",
+        args: { amount: 123n, spender: address },
+      });
+      const gas2 = await adapter.estimateGas({
+        to: address,
+        data: adapter.encodeFunctionData({
+          abi: erc20Abi,
+          fn: "approve",
+          args: { amount: 123n, spender: address },
+        }),
+      });
+
+      expect(gas).toEqual(expect.any(BigInt));
+      expect(gas2).toEqual(expect.any(BigInt));
+      assert(gas === gas2, `Gas estimates do not match: ${gas} !== ${gas2}`);
+    });
+
+    it("estimates gas for deploy and encoded deploy calls", async () => {
+      const gas = await adapter.estimateGas({
         abi: testToken.abi,
         bytecode: testToken.bytecode,
-        args: {
-          decimals_: 18,
-          initialSupply: 123n,
-        },
-      }),
+        args: { decimals_: 18, initialSupply: 123n },
+      });
+      const gas2 = await adapter.estimateGas({
+        data: adapter.encodeDeployData({
+          abi: testToken.abi,
+          bytecode: testToken.bytecode,
+          args: { decimals_: 18, initialSupply: 123n },
+        }),
+      });
+
+      expect(gas).toEqual(expect.any(BigInt));
+      expect(gas2).toEqual(expect.any(BigInt));
+      assert(gas === gas2, `Gas estimates do not match: ${gas} !== ${gas2}`);
     });
-    expect(gas).toEqual(expect.any(BigInt));
   });
 
   describe("call", () => {

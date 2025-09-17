@@ -6,14 +6,17 @@ import {
   type BlockIdentifier,
   type Bytes,
   type CallParams,
+  type EstimateGasParams,
   type EventArgs,
   type EventLog,
   type EventName,
   encodeBytecodeCallData,
+  type FunctionName,
   type GetBalanceParams,
   type GetBlockReturn,
   type GetEventsParams,
   type GetTransactionParams,
+  prepareCall,
   prepareParams,
   type ReadAdapter,
   type Transaction,
@@ -62,7 +65,7 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
 
   async getChainId() {
     const { chainId } = await this.provider.getNetwork();
-    return Number(chainId);
+    return chainId;
   }
 
   async getBlockNumber() {
@@ -182,7 +185,6 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     return this.provider.call(
       {
         accessList: accessList as AccessList,
-        chainId: chainId !== undefined ? Number(chainId) : undefined,
         data,
         gasLimit: gas,
         nonce: nonce !== undefined ? Number(nonce) : undefined,
@@ -193,27 +195,19 @@ export class EthersReadAdapter<TProvider extends Provider = Provider>
     );
   }
 
-  async estimateGas({
-    accessList,
-    bytecode,
-    chainId,
-    data,
-    gas,
-    nonce,
-    type,
-    ...rest
-  }: CallParams) {
-    if (bytecode && data) {
-      data = encodeBytecodeCallData(bytecode, data);
-    }
+  async estimateGas<
+    TAbi extends Abi,
+    TFunctionName extends FunctionName<TAbi, "nonpayable" | "payable">,
+  >(params: EstimateGasParams<TAbi, TFunctionName>) {
+    const { gas, nonce, type, ...rest } = params;
+    const { to, data } = prepareCall(params);
     const estimate = await this.provider.estimateGas({
-      accessList: accessList as AccessList,
-      chainId: chainId !== undefined ? Number(chainId) : undefined,
+      ...rest,
       data,
       gasLimit: gas,
       nonce: nonce !== undefined ? Number(nonce) : undefined,
+      to,
       type: type !== undefined ? Number(type) : undefined,
-      ...rest,
     });
     return estimate.toBigInt();
   }
