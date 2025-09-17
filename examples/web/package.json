@@ -12,8 +12,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@gud/drift": "^2.0.0-next.2",
-    "@gud/drift-viem": "^2.0.0-next.2",
+    "@gud/drift": "^2.0.0-next.3",
+    "@gud/drift-viem": "^2.0.0-next.3",
     "@gud/math": "^1.0.0",
     "@rainbow-me/rainbowkit": "^2.2.8",
     "@tanstack/react-query": "^5.84.0",
