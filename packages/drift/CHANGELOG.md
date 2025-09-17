@@ -1,5 +1,11 @@
 # @gud/drift
 
+## 2.0.0-next.5
+
+### Patch Changes
+
+- e62a20b: Removed the default `from` address from `estimateGas`.
+
 ## 2.0.0-next.4
 
 ### Patch Changes

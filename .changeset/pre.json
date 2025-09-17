@@ -13,6 +13,7 @@
     "@gud/drift-web3": "1.0.2"
   },
   "changesets": [
+    "calm-ghosts-obey",
     "clear-eggs-run",
     "cuddly-snakes-sin",
     "dull-papers-sing",
